@@ -1,0 +1,184 @@
+<module>
+	<code>IMAT3423
+	<title>Systems Building: Methods
+	<credits>15
+	<term>TERM_1
+	<course>Computer Science
+	<compulsory>true
+	<course>Software Engineering
+	<compulsory>true
+</module>
+
+<module>
+	<code>CTEC3451
+	<title>Development Project
+	<credits>30
+	<term>YEAR_LONG
+	<course>Computer Science
+	<compulsory>true
+	<course>Software Engineering
+	<compulsory>true
+</module>
+
+<module>
+	<code>CTEC3902
+	<title>Rigorous Systems
+	<credits>15
+	<term>TERM_2
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>true
+</module>
+
+<module>
+	<code>CTEC3605
+	<title>Multi-service Networks 1
+	<credits>15
+	<term>TERM_1
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>CTEC3606
+	<title>Multi-service Networks 2
+	<credits>15
+	<term>TERM_2
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>CTEC3110
+	<title>Secure Web Application Development
+	<credits>15
+	<term>TERM_1
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>CTEC3410
+	<title>Web Application Penetration Testing
+	<credits>15
+	<term>TERM_2
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>CTEC3904
+	<title>Functional Software Development
+	<credits>15
+	<term>TERM_2
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>CTEC3905
+	<title>Front-End Web Development
+	<credits>15
+	<term>TERM_2
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>CTEC3906
+	<title>Interaction Design
+	<credits>15
+	<term>TERM_1
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>CTEC3911
+	<title>Mobile Application Development
+	<credits>15
+	<term>TERM_1
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>IMAT3104
+	<title>Database Management and Programming
+	<credits>15
+	<term>TERM_2
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>IMAT3611
+	<title>Computer Ethics and Privacy
+	<credits>15
+	<term>TERM_1
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>IMAT3406
+	<title>Fuzzy Logic & Knowledge Based Systems
+	<credits>15
+	<term>TERM_1
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>IMAT3613
+	<title>Data Mining
+	<credits>15
+	<term>TERM_1
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>IMAT3614
+	<title>Big Data & Business Models
+	<credits>15
+	<term>TERM_2
+	<course>Computer Science
+	<compulsory>false
+	<course>Software Engineering
+	<compulsory>false
+</module>
+
+<module>
+	<code>IMAT3428
+	<title>Information Technology Services Practice
+	<credits>15
+	<term>TERM_2
+	<course>Computer Science
+	<compulsory>false
+</module>
