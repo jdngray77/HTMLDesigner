@@ -1,7 +1,8 @@
 package com.jdngray77.htmldesigner.html.dom
 
-import com.jdngray77.htmldesigner.AssertEndsWith
 import com.jdngray77.htmldesigner.Warning
+import com.jdngray77.htmldesigner.html.style.Style
+import com.jdngray77.htmldesigner.html.style.StyleArray
 import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist
 
@@ -302,7 +303,7 @@ open class Tag : SerializableHTML {
      *
      * i.e `<example style="background: blue;"></example>`
      */
-    var styles = StringArray()
+    var styles = StyleArray()
 
     /**
      * The [Tag] that this tag is a child of.
@@ -396,9 +397,9 @@ open class Tag : SerializableHTML {
      *
      * Removes duplicates
      */
-    fun style(vararg style: String) = this.apply {
+    fun styles(vararg style: Style) = this.apply {
         styles.addAll(style)
-        styles = StringArray(styles.distinct())
+        styles = StyleArray(styles.distinct())
     }
 
 
@@ -524,7 +525,7 @@ open class Tag : SerializableHTML {
 
     fun serializeStyles() =
         if (styles.isEmpty()) "" else
-            " style=\"${styles.joinToString("") { it.AssertEndsWith(";") + " " }}\""
+            " style=\"${styles.joinToString("") { it.toString() + " " }}\""
 
 
     fun serializeClasses() = if (cssClasses.isEmpty()) "" else
@@ -539,9 +540,9 @@ open class Tag : SerializableHTML {
 
 
 
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                      Named Idiom DOM Mutation API
-    //region                                                SERIALIZATION
+    //endregion                                             SERIALIZATION
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 
@@ -562,15 +563,22 @@ open class Tag : SerializableHTML {
             html("This is my document!").children(
                 body()  .ID("MainContent")
                         .classes("myStyle")
-                        .style("color: blue", "background: pink")
+                        .styles(
+                            Style("color", "blue"),
+                            Style("background", "pink")
+                        )
                         .children(
                             h1().content("Hello!")
-                                .style("text-decoration: underline"),
+                                .styles(
+                                    Style("text-decoration", "underline")
+                                ),
                             hr(),
                             raw("So who's responsible for this shitshow, anyway?"),
                             br(),
                             a() .ID("Link")
-                                .style("color: yellow;")
+                                .styles(
+                                    Style("color", "yellow")
+                                )
                                 .classes("yeet")
                                 .config("href=\"https://jordantgray.uk\"")
                                 .content("ME!")

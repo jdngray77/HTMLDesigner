@@ -14,7 +14,4 @@ class DOM (
 
     override fun toString(): String = serialize()
 
-
-
-
 }

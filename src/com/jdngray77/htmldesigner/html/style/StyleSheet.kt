@@ -1,12 +1,15 @@
 package com.jdngray77.htmldesigner.html.style
 
 
+typealias StyleArray = ArrayList<Style>
+
+
 class Style(val property: String, val value: String) {
     override fun toString() = property + ": " + value + ";"
 }
 
 
-class StyleClass(val selectors: ArrayList<String>) : ArrayList<Style>() {
+class StyleClass(val selectors: ArrayList<String>) : StyleArray() {
     constructor(vararg selectors : String) : this(arrayListOf(*selectors))
 
     override fun toString(): String =
