@@ -1,0 +1,39 @@
+package com.jdngray77.htmldesigner.project
+
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.Test
+
+
+class PreferencesTest {
+
+    val preference: Preferences = Preferences()
+
+    @Test
+    @Order(1)
+    fun InitialisationAndRead() {
+        preference.apply {
+            PREFERENCE.values().forEach { // For every PREFERENCE key,
+                try {
+                    assertTrue(get(it)!!::class.simpleName!! == typeOf(it)) // Try to read it, and check that the type recieved matches the type in the key.
+                    println("Read $it")
+                } catch (e: NullPointerException) {
+                    fail("Preference key was not initialised (i'm pretty sure) : $it")
+                } catch (e: IllegalStateException) {
+                    fail(e.message) // Data does not match name.
+                }
+            }
+        }
+    }
+
+
+    @Test
+    fun flush() {
+        TODO()
+    }
+
+    @Test
+    fun reloadFromProject() {
+        TODO()
+    }
+}

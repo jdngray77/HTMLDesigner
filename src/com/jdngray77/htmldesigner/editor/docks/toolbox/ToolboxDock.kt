@@ -1,8 +1,8 @@
-package com.jdngray77.htmldesigner.docks.toolbox
+package com.jdngray77.htmldesigner.editor.docks.toolbox
 
-import com.jdngray77.htmldesigner.FXMLUtility
 import com.jdngray77.htmldesigner.html.dom.ALLTAGS
 import com.jdngray77.htmldesigner.html.dom.Tag
+import com.jdngray77.htmldesigner.loadFXMLComponent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.VBox
 
@@ -13,7 +13,7 @@ class ToolboxDock : VBox() {
 
     private fun <T : Tag> addItem(t : T) {
         children.add(
-            FXMLUtility.loadFXMLComponent<AnchorPane>("docks/toolbox/ToolBoxItem.fxml").let {
+            loadFXMLComponent<AnchorPane>("docks/toolbox/ToolBoxItem.fxml").let {
                 ToolBoxItem(it.first).also { item -> item.initialize(t, it.second as ToolBoxItemController) }.pane
             }
         )

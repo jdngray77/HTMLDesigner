@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.docks.toolbox
+package com.jdngray77.htmldesigner.editor.docks.toolbox
 
 import com.jdngray77.htmldesigner.html.dom.Tag
 import javafx.fxml.FXML

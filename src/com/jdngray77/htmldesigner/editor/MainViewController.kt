@@ -1,6 +1,6 @@
-package com.jdngray77.htmldesigner
+package com.jdngray77.htmldesigner.editor
 
-import com.jdngray77.htmldesigner.docks.toolbox.ToolboxDock
+import com.jdngray77.htmldesigner.editor.docks.toolbox.ToolboxDock
 import com.jdngray77.htmldesigner.html.dom.Tag
 import javafx.fxml.FXML
 import javafx.scene.layout.AnchorPane

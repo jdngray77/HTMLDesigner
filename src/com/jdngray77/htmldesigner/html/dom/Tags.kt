@@ -1,19 +1,22 @@
 package com.jdngray77.htmldesigner.html.dom
 
+import com.jdngray77.htmldesigner.RemoveDuplicates
 import com.jdngray77.htmldesigner.Warning
 import com.jdngray77.htmldesigner.html.style.Style
 import com.jdngray77.htmldesigner.html.style.StyleArray
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
 
 typealias StringArray = ArrayList<String>
 
 /**
- * The most crucial document.
+ * Outlines all the possible tags.
  *
  * Defines the tags available, and how
  * they are created and then converted to text.
  *
+ * @author [Jordan T. Gray](https://www.jordantgray.uk) on 9/6/2022
  */
 
 
@@ -248,12 +251,13 @@ class _var : Tag()
 class video : Tag()
 class wbr : Tag()
 
-
+/**
+ * An object in the tree with no tag,
+ * just plain raw text to inject into the model.
+ */
 class raw(val value: String) : Tag() {
     override fun serialize(): String = value
-
     override fun serializeOpen(): String = ""
-
     override fun serializeEnd(): String  = ""
 }
 
@@ -267,365 +271,6 @@ class raw(val value: String) : Tag() {
 
 
 /**
- * The generic behaviour of a tag in our DOM,
- * including the normal serialization behaviour.
- */
-open class Tag : SerializableHTML {
-
-    // TODO Tag variation configurations
-    //      I.e some tags don't need a closing tag (like br)
-    //      And some tags are better ended on the same line, whilst others are best ended on the next.
-    //      -- OR -- Skip that shite and validate and format it using jsoup?
-
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //region                                                   Properties
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
-
-    /**
-     * Other tags that will be injected within
-     * this one.
-     */
-    val children = ArrayList<Tag>()
-
-    /**
-     * CSS classes applied to this tag.
-     *
-     * i.e `<example class="bright"></example>`
-     */
-    var cssClasses = StringArray()
-
-    /**
-     * Unique CSS styles applied to this element only.
-     *
-     * i.e `<example style="background: blue;"></example>`
-     */
-    var styles = StyleArray()
-
-    /**
-     * The [Tag] that this tag is a child of.
-     */
-    var parent: Tag? = null
-
-    /**
-     * Optional custom content to inject into the opening tag.
-     *
-     * Classes, ID and styles are handled, but there may be reason to add
-     * other things into the opening tag.
-     */
-    @Deprecated("Use only if you have to. Styles, ID or classes should not be here.")
-    var config: String? = null
-
-    /**
-     * Optional content that is injected after the open tag,
-     * and before any [children]
-     */
-    @Deprecated("Ensure this is only used for direct tag content, not child tags.")
-    var content: String? = null
-
-    /**
-     * Optional javascript reference to this tag.
-     */
-    var ID : String? = null
-
-
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                                Properties
-    //region                                            Named Idiom CREATION API
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-    fun ID(name : String) : Tag =
-        this.apply { ID = name }
-
-
-
-
-    /**
-     * Adds children to this tag.
-     *
-     * Also set the parent of [it] to this.
-     *
-     * @return this.
-     */
-    fun children(vararg it : Tag) : Tag =
-        this.apply { it.map{ children.add(it) ; it.parent = this} }
-
-    /**
-     * Adds one or many children to this tag.
-     *
-     * Alias for `children()`
-     *
-     * @return this.
-     */
-    fun addChild(vararg it : Tag) : Tag = children(*it)
-
-    //TODO unit test
-    /**
-     * Removes a child from this element,
-     * and clear's it's parent only if it was actually
-     * a child of this.
-     *
-     * If not a child of this, has no effect.
-     *
-     * @return this.
-     */
-    fun removeChild(that: Tag) : Tag {
-        if (children.remove(that))
-            that.parent = null
-
-        return this
-    }
-
-
-    /**
-     * Adds css classes to this tag.
-     *
-     * Removes duplicates. Does not validate if the tags exist.
-     */
-    fun classes(vararg clazz: String) = this.apply {
-        cssClasses.addAll(clazz)
-        cssClasses = StringArray(cssClasses.distinct())
-    }
-
-    /**
-     * Adds a css style directly into the tag.
-     *
-     * Removes duplicates
-     */
-    fun styles(vararg style: Style) = this.apply {
-        styles.addAll(style)
-        styles = StyleArray(styles.distinct())
-    }
-
-
-
-
-    //TODO missing named idiom methods
-
-    /**
-     * Adds inner raw content to this tag.
-     *
-     * @return this.
-     */
-    @Deprecated("Ensure this is only used for direct tag content, not child tags.")
-    fun content(content : String) : Tag =
-        this.also { this.content = content }
-
-    /**
-     * Adds inner raw content to this tag.
-     *
-     * @return this.
-     */
-    @Deprecated("Use only if you have to. Styles, ID or classes should not be here.")
-    fun config(content : String) : Tag =
-        this.also { config = content }
-
-
-
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                         Named Idiom CREATION API
-    //region                                          Named Idiom DOM Mutation API
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
-
-    // TODO unit test
-    /**
-     * Wraps this tag with another.
-     *
-     * @return this.
-     */
-    fun wrap(with: Tag) = this.apply {
-        parent?.children(with)
-        parent?.removeChild(this)
-    }
-
-
-    /**
-     * COMPLETELY REMOVES THIS TAG AND ALL INNER
-     * CONTENT FROM THE DOM!
-     *
-     * Remove this tag, and replace it with [that].
-     *
-     * @return [that] . NB - RETURNS THE ***NEW*** TAG
-     */
-    fun completelyReplaceWith(that: Tag) {
-        TODO()
-    }
-
-    /**
-     * Removes this tag and replaces it with [that].
-     *
-     * This tag's properties are cleared, and [that]
-     * inherits everything that this tag had.
-     */
-    fun changeTo(that: Tag) {
-        TODO()
-    }
-
-
-
-
-
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                      Named Idiom DOM Mutation API
-    //region                                                SERIALIZATION
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
-
-    /**
-     * Converts this tag to text, in the format :
-     *
-     * <[name] ID="[ID]" [config] class="[cssClasses]" style="[styles]">
-     *
-     * [content]
-     *
-     * [children]
-     *
-     * </[name]>
-     *
-     */ 
-    override fun serialize() : String
-        = "${serializeOpen()}${notNullString(content)}${serializeChildren()}${serializeEnd()}"
-
-    /**
-     * Generates the opening tag, formatted as such :
-     *
-     * <[name] ID="[ID]" [config] class="[cssClasses]" style="[styles]">
-     *
-     * Note that the optional properties only exist in the tag if they
-     * have been populated.
-     */
-    open fun serializeOpen() : String =
-        "\n<${name()}${serializeID()}${notNullString(config)}${serializeClasses()}${serializeStyles()}>"
-
-    /**
-     * Generates the closing tag
-     *
-     * </[name]>
-     */
-    open fun serializeEnd() : String = "</${name()}>"
-
-    /**
-     * Returns a string representation of all children after being [serialize]d.
-     */
-    fun serializeChildren() : String =
-        children.joinToString("") { it.serialize() }
-
-
-    fun serializeStyles() =
-        if (styles.isEmpty()) "" else
-            " style=\"${styles.joinToString("") { it.toString() + " " }}\""
-
-
-    fun serializeClasses() = if (cssClasses.isEmpty()) "" else
-            " class=\"${cssClasses.joinToString("") { "$it " }}\""
-
-    fun serializeID() = if (ID.isNullOrBlank()) "" else " ID=\"$ID\""
-
-    /**
-     * Shorthand for [serialize]. When a tag is used in a string, it'll be serialized.
-     */
-    override fun toString(): String = serialize()
-
-
-
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                             SERIALIZATION
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-    /**
-     * Fetches the name of this tag
-     *
-     * (Tags name is the name of the class.)
-     */
-    fun name() = this::class.simpleName
-
-
-    companion object {
-
-        /**
-         * An example piece of data.
-         */
-        val testDOM = DOM(
-            html("This is my document!").children(
-                body()  .ID("MainContent")
-                        .classes("myStyle")
-                        .styles(
-                            Style("color", "blue"),
-                            Style("background", "pink")
-                        )
-                        .children(
-                            h1().content("Hello!")
-                                .styles(
-                                    Style("text-decoration", "underline")
-                                ),
-                            hr(),
-                            raw("So who's responsible for this shitshow, anyway?"),
-                            br(),
-                            a() .ID("Link")
-                                .styles(
-                                    Style("color", "yellow")
-                                )
-                                .classes("yeet")
-                                .config("href=\"https://jordantgray.uk\"")
-                                .content("ME!")
-                    )
-            )
-
-
-//                html("This is my document!").children(
-//                    body().config("style=\"background: rgb(43,43,43); color: white;\"")
-//                        .children(
-//                            h1().content("Welcome!"),
-//                            hr(),
-//                            raw("So who's responsible for this shitshow, anyway?"),
-//                            br(),
-//                            a().config("href=\"https://jordantgray.uk\"") .content("ME!")
-//
-//                        )
-
-                 as html
-        )
-
-        /**
-         * Prints some objects to the console.
-         */
-        @JvmStatic
-        fun test () {
-//            println(div())
-//
-//            println(head())
-//
-//            println(body())
-
-            println(
-                testDOM
-            )
-        }
-
-        /**
-         * Returns the toString of the object, with a space before it.
-         *
-         * However, if the object is null the string is empty.
-         */
-        fun notNullString(it : Any?) : String = if (it == null) "" else " $it"
-    }
-}
-
-/**
  * The HTML tag.
  *
  * Root to all other tags.
@@ -634,12 +279,34 @@ open class Tag : SerializableHTML {
  */
 class html(val title: String) : Tag() {
 
+    /**
+     * The latest [Jsoup] [Document] representation of this
+     * tag model.
+     */
+    @Transient var builtDOMCache: Document? = null
+
+    /**
+     * Serializes the entire document.
+     *
+     * Overrides [serializeOpen] and [serializeEnd] to inject
+     * the HMTL:5 boilerplate.
+     *
+     * Validates and formats the generated HTML document using Jsoup.
+     *
+     * Jsoup generated [Document] will be cached in [builtDOMCache]
+     * at runtime, but it will not be saved to the disk if this [Tag]
+     * model is saved in the project, but since the editor will likely
+     * regularly re-build the [Tag] model, this shouldn't matter.
+     */
     override fun serialize(): String =
         super.serialize().let {
             if (Jsoup.isValid(it, Safelist.relaxed()))
-                Warning("Generated HTML is not entirely valid!")
+                Warning("Jsoup is telling me that the generated HTML is not 100% valid!")
 
-            Jsoup.parse(it).toString()
+            Jsoup.parse(it).let {
+                builtDOMCache = it
+                toString()
+            }
         }
 
     override fun serializeOpen(): String =

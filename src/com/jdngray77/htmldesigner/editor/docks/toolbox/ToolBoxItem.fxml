@@ -3,7 +3,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="58.0" prefWidth="194.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.docks.toolbox.ToolBoxItemController">
+<AnchorPane prefHeight="58.0" prefWidth="194.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.editor.docks.toolbox.ToolBoxItemController">
    <children>
       <Label fx:id="name" layoutX="14.0" layoutY="21.0" text="name" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="21.0" />
       <Label fx:id="tag" layoutX="146.0" layoutY="21.0" text="&lt;tag&gt;" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="21.0" />
