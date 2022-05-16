@@ -6,6 +6,7 @@ import javafx.scene.Scene
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import java.awt.Toolkit
+import kotlin.reflect.KProperty1
 
 /**
  * Container for generic utility methods to aid you in
@@ -26,6 +27,17 @@ fun ArrayList<*>.RemoveDuplicates() {
     this.removeAll((this - this.distinct().toSet()).toSet())
 }
 
+/**
+ * Converts a camel cased string to a sentence,
+ * with spaces between capitlized words and
+ * capitalizations on the first character.
+ */
+fun String.CamelToSentence() : String =
+    this
+        .map { if (it.isUpperCase()) " " + it.lowercase() else it }
+        .joinToString("")
+        .capitalize()
+
 
 
 
@@ -38,13 +50,16 @@ fun ArrayList<*>.RemoveDuplicates() {
 //                                                        Logging
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+fun DeveloperWarning(string: String) {
+    System.err.println(string)
+}
 
-fun Warning(string: String) {
+fun UserWarning(string: String) {
     System.err.println(string)
     //TODO show in-editor
 }
 
-fun Message(string: String) {
+fun UserMessage(string: String) {
     // TODO show in-editor
     println(string)
 }
@@ -89,3 +104,4 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
             Pair<T, Any>(it, loader.getController())
         }
     }
+

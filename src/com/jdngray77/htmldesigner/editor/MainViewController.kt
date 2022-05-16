@@ -1,10 +1,11 @@
 package com.jdngray77.htmldesigner.editor
 
-import com.jdngray77.htmldesigner.editor.docks.toolbox.ToolboxDock
+import com.jdngray77.htmldesigner.editor.docks.ExampleAutoDock
 import com.jdngray77.htmldesigner.html.dom.Tag
 import javafx.fxml.FXML
 import javafx.scene.layout.AnchorPane
 import javafx.scene.web.WebView
+
 
 /**
  * UI Controller for the main window.
@@ -26,8 +27,10 @@ class MainViewController {
     }
 
     private fun addDocks() {
-        dockleft.children.add(ToolboxDock())
+        dockleft.children.add(ExampleAutoDock())
     }
 
 
 }
+
+
