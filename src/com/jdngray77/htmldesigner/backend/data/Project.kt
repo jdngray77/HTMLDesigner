@@ -1,6 +1,6 @@
-package com.jdngray77.htmldesigner.project
+package com.jdngray77.htmldesigner.backend.data
 
-import com.jdngray77.htmldesigner.html.dom.Document
+import com.jdngray77.htmldesigner.backend.html.dom.Document
 import java.io.File
 
 /**

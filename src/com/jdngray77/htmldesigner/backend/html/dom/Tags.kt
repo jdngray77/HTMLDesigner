@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.html.dom
+package com.jdngray77.htmldesigner.backend.html.dom
 
 import com.jdngray77.htmldesigner.UserWarning
 import org.jsoup.Jsoup

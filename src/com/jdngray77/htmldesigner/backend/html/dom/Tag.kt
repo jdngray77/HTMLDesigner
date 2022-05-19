@@ -1,8 +1,8 @@
-package com.jdngray77.htmldesigner.html.dom
+package com.jdngray77.htmldesigner.backend.html.dom
 
 import com.jdngray77.htmldesigner.RemoveDuplicates
-import com.jdngray77.htmldesigner.html.style.Style
-import com.jdngray77.htmldesigner.html.style.StyleArray
+import com.jdngray77.htmldesigner.backend.html.style.Style
+import com.jdngray77.htmldesigner.backend.html.style.StyleArray
 
 
 /**
@@ -185,7 +185,12 @@ abstract class Tag : SerializableHTML {
         this.also { this.content = content }
 
 
-
+    /**
+     * Populates this tag from HTML.
+     */
+    fun fromHTML() {
+        TODO()
+    }
 
 
 
@@ -196,7 +201,6 @@ abstract class Tag : SerializableHTML {
     //endregion                                         Named Idiom CREATION API
     //region                                          Named Idiom DOM Mutation API
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
 
 
 
@@ -339,6 +343,24 @@ abstract class Tag : SerializableHTML {
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                      Named Idiom DOM Mutation API
+    //region                                       Named Idiom DOM Non Mutative API
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    fun findTagsByName() {
+        TODO()
+    }
+
+    fun findTagByID() {
+        TODO()
+    }
+
+    fun <T : Tag> findTagsByType() {
+        TODO()
+    }
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                    Named Idiom DOM Non Mutative API
     //region                                                SERIALIZATION
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 

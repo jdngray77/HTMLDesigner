@@ -1,8 +1,6 @@
 package com.jdngray77.htmldesigner
 
-import com.jdngray77.htmldesigner.html.style.StyleSheet
-import com.jdngray77.htmldesigner.html.dom.Tag.Companion.test
-import com.jdngray77.htmldesigner.project.Project
+import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import javafx.application.Application
 import javafx.stage.Stage
 

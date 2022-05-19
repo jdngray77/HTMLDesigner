@@ -41,7 +41,7 @@
 <?import javafx.scene.text.*?>
 <?import javafx.scene.web.*?>
 
-<VBox prefHeight="1108.0" prefWidth="1606.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.editor.MainViewController">
+<VBox prefHeight="1108.0" prefWidth="1606.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.MainViewController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>

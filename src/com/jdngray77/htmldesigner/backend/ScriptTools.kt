@@ -6,11 +6,11 @@ import javafx.scene.Scene
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import java.awt.Toolkit
-import kotlin.reflect.KProperty1
+import kotlin.reflect.KProperty
+import kotlin.reflect.KMutableProperty1
 
 /**
- * Container for generic utility methods to aid you in
- * doing whatever it is you do.
+ * # Container for generic utility methods to aid you in doing whatever it is you do.
  */
 
 
@@ -105,3 +105,14 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
         }
     }
 
+
+
+
+
+//░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+//                                                    REFLECTION
+//░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+fun <R, T> changeProperty(prop : KProperty<*    >, rec: R, value: T) {
+    (prop as KMutableProperty1<R,T>).set(rec, value)
+}

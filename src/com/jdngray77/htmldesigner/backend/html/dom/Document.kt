@@ -1,6 +1,6 @@
-package com.jdngray77.htmldesigner.html.dom
+package com.jdngray77.htmldesigner.backend.html.dom
 
-import com.jdngray77.htmldesigner.html.style.StyleSheet
+import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 
 /**
  * Representation of an entire HTML document and it's stylesheets.
