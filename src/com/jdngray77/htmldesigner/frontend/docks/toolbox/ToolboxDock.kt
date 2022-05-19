@@ -1,7 +1,7 @@
-package com.jdngray77.htmldesigner.editor.docks.toolbox
+package com.jdngray77.htmldesigner.frontend.docks.toolbox
 
-import com.jdngray77.htmldesigner.html.dom.ALLTAGS
-import com.jdngray77.htmldesigner.html.dom.Tag
+import com.jdngray77.htmldesigner.backend.html.dom.ALLTAGS
+import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import com.jdngray77.htmldesigner.loadFXMLComponent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.VBox

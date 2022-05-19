@@ -1,8 +1,6 @@
 package com.jdngray77.htmldesigner
 
-import com.jdngray77.htmldesigner.html.style.StyleSheet
-import com.jdngray77.htmldesigner.html.dom.Tag.Companion.test
-import com.jdngray77.htmldesigner.project.Project
+import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import javafx.application.Application
 import javafx.stage.Stage
 
@@ -28,7 +26,7 @@ class HTMLDesigner : Application() {
 
         // Load the main view from FXML.
         // It's controller will take over from here.
-        val scene = loadFXMLScene("MainView.fxml")
+        val scene = loadFXMLScene("editor/MainView.fxml")
 
         // Fullscreen the window, and show it.
         stage.isFullScreen = true
@@ -37,7 +35,7 @@ class HTMLDesigner : Application() {
 
         // Run some test methods.
         // TODO use a proper JUnit, for fucks sake broskie
-        test()
+        //test()
         StyleSheet.test()
     }
 }

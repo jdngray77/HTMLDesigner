@@ -1,5 +1,7 @@
 package com.jdngray77.htmldesigner.project
 
+import com.jdngray77.htmldesigner.backend.data.PREFERENCE
+import com.jdngray77.htmldesigner.backend.data.Preferences
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test

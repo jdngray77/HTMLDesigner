@@ -1,7 +1,7 @@
-package com.jdngray77.htmldesigner.html.style
+package com.jdngray77.htmldesigner.backend.html.style
 
 import com.jdngray77.htmldesigner.RemoveDuplicates
-import com.jdngray77.htmldesigner.html.dom.SerializableHTML
+import com.jdngray77.htmldesigner.backend.html.dom.SerializableHTML
 
 /**
  * An array of styles.

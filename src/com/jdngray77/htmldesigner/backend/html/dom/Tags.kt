@@ -1,9 +1,6 @@
-package com.jdngray77.htmldesigner.html.dom
+package com.jdngray77.htmldesigner.backend.html.dom
 
-import com.jdngray77.htmldesigner.RemoveDuplicates
-import com.jdngray77.htmldesigner.Warning
-import com.jdngray77.htmldesigner.html.style.Style
-import com.jdngray77.htmldesigner.html.style.StyleArray
+import com.jdngray77.htmldesigner.UserWarning
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
@@ -301,11 +298,11 @@ class html(val title: String) : Tag() {
     override fun serialize(): String =
         super.serialize().let {
             if (Jsoup.isValid(it, Safelist.relaxed()))
-                Warning("Jsoup is telling me that the generated HTML is not 100% valid!")
+                UserWarning("Jsoup is telling me that the generated HTML is not 100% valid!")
 
             Jsoup.parse(it).let {
                 builtDOMCache = it
-                toString()
+                super.serialize()
             }
         }
 
