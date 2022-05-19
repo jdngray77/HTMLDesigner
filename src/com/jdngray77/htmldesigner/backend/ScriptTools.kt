@@ -1,5 +1,6 @@
 package com.jdngray77.htmldesigner
 
+import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
@@ -77,19 +78,27 @@ fun UserMessage(string: String) {
 
 /**
  * @param urlFromSrcRoot The url to the FXML relative to the root of the
- *        project sources.
+ *        frontend package.
+ *
+ * @return Pair<Scene, Controller>
  */
-fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Scene =
+fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Pair<Scene, Any> =
     Toolkit.getDefaultToolkit().screenSize.let {
-        Scene(
-            loadFXMLComponent<Parent>(urlFromSrcRoot).first,
-            it.width.toDouble(),
-            it.height.toDouble()
-        ).also {
-            val jMetro = JMetro(Style.DARK)
-            jMetro.scene = it
+        val component = loadFXMLComponent<Parent>(urlFromSrcRoot)
 
-        }
+        Pair<Scene, Any>(
+            Scene(
+                component.first,
+                it.width.toDouble(),
+                it.height.toDouble()
+            ).also {
+                val jMetro = JMetro(Style.DARK)
+                jMetro.scene = it
+
+            }
+            ,
+            component.second
+        )
 
     }
 
@@ -99,7 +108,7 @@ fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Scene =
  * i.e something that goes inside of the editor like a custom list item or dock.
  */
 fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
-    FXMLLoader(HTMLDesigner::class.java.getResource(urlFromSrcRoot)).let { loader ->
+    FXMLLoader(Editor::class.java.getResource(urlFromSrcRoot)).let { loader ->
         loader.load<T>().let {
             Pair<T, Any>(it, loader.getController())
         }

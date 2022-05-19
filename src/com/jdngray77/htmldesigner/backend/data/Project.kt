@@ -1,6 +1,7 @@
 package com.jdngray77.htmldesigner.backend.data
 
 import com.jdngray77.htmldesigner.backend.html.dom.Document
+import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import java.io.File
 
 /**
@@ -51,6 +52,9 @@ class Project(
      */
     val pages = ArrayList<Document>()
 
+    init {
+        pages.add(Tag.testDOM)
+    }
 
 
 

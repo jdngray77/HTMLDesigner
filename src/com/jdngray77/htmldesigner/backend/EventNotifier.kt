@@ -10,7 +10,10 @@ enum class EventType {
     AUTO_SAVE,
 
     PROJECT_HTML_CHANGED,
-    PROJECT_PREFERENCES_CHANGED
+    PROJECT_PREFERENCES_CHANGED,
+
+    EDITOR_DOCUMENT_SWITCH, // The editor has switched to show a new document.
+    EDITOR_OPEN_DOCUMENT_CHANGED // The editor has made a change to the open document.
 }
 
 /**
@@ -37,7 +40,7 @@ object EventNotifier {
      * Notify the rest of the system that an event has occoured.
      */
     fun notifyEvent(e: EventType) {
-        TODO()
+
     }
 
 }
