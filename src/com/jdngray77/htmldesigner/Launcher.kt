@@ -9,5 +9,4 @@ import java.io.File
 // TODO Create a project manager / launcher thing.
 fun main() {
     Application.launch(Editor::class.java)
-    EDITOR.start(Project(File ("")))
 }
