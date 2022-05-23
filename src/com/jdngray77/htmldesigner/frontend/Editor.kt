@@ -41,10 +41,6 @@ class Editor : Application() {
         stage.isFullScreen = true
         stage.scene = scene.first
         stage.show()
-        start(Project.loadOrCreate("./testproject/"))
-    }
-
-    fun start(project: Project) {
-        mvc = MVC(project, scene.second)
+        mvc = MVC(Project.loadOrCreate("./testproject/"), scene.second)
     }
 }
