@@ -13,7 +13,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
-    <orderEntry type="library" name="jfxtras.jmetro" level="application" />
+    <orderEntry type="library" name="jfxtras.jmetro" level="project" />
     <orderEntry type="library" name="jsoup" level="project" />
     <orderEntry type="library" name="jetbrains.kotlin.serialization" level="project" />
     <orderEntry type="module-library" scope="TEST">
@@ -32,5 +32,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="antlr.antlr4" level="project" />
   </component>
 </module>

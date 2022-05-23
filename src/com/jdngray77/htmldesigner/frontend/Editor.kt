@@ -6,6 +6,7 @@ import com.jdngray77.htmldesigner.loadFXMLScene
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage
+import java.io.File
 
 
 /**
@@ -31,6 +32,7 @@ class Editor : Application() {
     override fun start(stage: Stage) {
         EDITOR = this
 
+
         // Load the main view from FXML.
         // It's controller will take over from here.
         scene = loadFXMLScene("MainView.fxml") as Pair<Scene, MainViewController>
@@ -39,6 +41,7 @@ class Editor : Application() {
         stage.isFullScreen = true
         stage.scene = scene.first
         stage.show()
+        start(Project(File ("")))
     }
 
     fun start(project: Project) {

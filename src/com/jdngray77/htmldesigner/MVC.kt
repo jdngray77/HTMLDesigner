@@ -3,8 +3,8 @@ package com.jdngray77.htmldesigner
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.backend.html.dom.Document
 import com.jdngray77.htmldesigner.frontend.MainViewController
+import org.jsoup.nodes.Document
 
 /**
  * Model View Controller.
