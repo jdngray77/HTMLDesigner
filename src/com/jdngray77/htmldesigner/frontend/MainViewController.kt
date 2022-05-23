@@ -6,6 +6,7 @@ import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import com.jdngray77.htmldesigner.frontend.docks.Hierarchy
 import com.jdngray77.htmldesigner.frontend.docks.ExampleAutoDock
+import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
 import com.jdngray77.htmldesigner.frontend.docks.TestDock
 import com.jdngray77.htmldesigner.loadFXMLComponent
 import javafx.fxml.FXML
@@ -67,6 +68,7 @@ class MainViewController {
         htmlEditor.setOnKeyReleased {
 //            EDITOR.mvc
 //            renderer_Open(htmlEditor.htmlText)
+            EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
         }
 
         addDocks()
@@ -76,16 +78,23 @@ class MainViewController {
      * Adds dock windows to the dock tabs.
      */
     private fun addDocks() {
-        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
+//        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
         dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.CamelToSentence(), TestDock()))
 
         dockLeftBottom.tabs.add(Tab(Hierarchy::class.simpleName!!.CamelToSentence(), Hierarchy()))
+        dockLeftBottom.tabs.add(Tab(ProjectDock::class.simpleName!!.CamelToSentence(), ProjectDock()))
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                Setup
     //region                                                  MCV API
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    fun currentDocument() =
+        currentEditor().document
+
+    fun currentEditor() =
+        findDocumentFor(dockEditors.selectionModel.selectedItem)
 
     fun openDocument(document: Document) {
         loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
@@ -107,8 +116,11 @@ class MainViewController {
     /**
      * Updates the UI to display a new document.
      */
-    fun switchToEditor(editor: DocumentEditor) =
+    fun switchToEditor(editor: DocumentEditor) {
         dockEditors.selectionModel.select(editor.tab)
+//        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH) TODO put this back once events are threaded.
+    }
+
 
     /**
      *
@@ -153,6 +165,11 @@ class MainViewController {
 
         return null
     }
+
+    fun findDocumentFor(tab: Tab) = openEditors.first {
+            it.tab == tab
+    }
+
 
 }
 
