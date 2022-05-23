@@ -8,12 +8,34 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
+import java.time.Instant
+import java.util.*
+import kotlin.collections.ArrayList
+
+/*
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ *      TRY TO AVOID CHANGING THE SCHEMA OF THIS CLASS IF POSSIBLE.
+ *
+ *      IT IMPACTS BACKWARDS COMPATABILITY WITH PROJECT LOADING.
+ *
+ *      CHANGES TO THE SCHEMA OF THIS CLASS WILL MAKE IT IMPOSSIBLE
+ *      FOR THE EDITOR TO LOAD PROJECTS CREATED BEFORE THE CHANGE.
+ *
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ */
+
+
+
+
+
 
 /**
  * A HTML Designer project.
  *
  * A midpoint between the files on the disk
  * and the data.
+ *
  */
 class Project(
 
@@ -48,9 +70,22 @@ class Project(
      * | | | dog.jpg
      * ```
      */
-    val locationOnDisk: File
+    val locationOnDisk: File,
+
+    _author: String? = null
 
 ) : java.io.Serializable {
+
+    var author: String? = _author
+        set(value) {
+            field = value
+            saveMeta()
+        }
+
+    /**
+     * The date this project was created.
+     */
+    val createdOn = Date.from(Instant.now())
 
     /**
      * The pages in this project.
@@ -67,6 +102,7 @@ class Project(
         checkPath()
         createSkeleton()
         createNewDocument("index.html")
+        UserMessage("Created new project '${locationOnDisk.name}'")
     }
 
 
@@ -155,9 +191,21 @@ class Project(
     private fun checkProjectDocument(f: String) =
         checkProjectDocument(File(subFile(PROJECT_PATH_HTML + f)))
 
+    /**
+     * The name of this project, as inherited by
+     * the project's directory name.
+     */
+    fun projectName() =
+        locationOnDisk.name
+
+    fun renameProject(newName: String) {
+//        TODO()
+    }
+
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                             Project Creation
+    //region                                                  Save / Load
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     /**
@@ -235,6 +283,10 @@ class Project(
         EventNotifier.notifyEvent(EventType.PROJECT_BACKEDUP)
     }
 
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                             Save / Load
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
     companion object {
         /**
          * The location of the project meta data, relative to the project root.
@@ -268,7 +320,8 @@ class Project(
         fun loadOrCreate(path: String): Project {
             File("$path/$PROJECT_PATH_META").apply {
                 return if (exists())
-                        loadObjectFromDisk(this) as Project
+                        (loadObjectFromDisk(this) as Project)
+                            .also { UserMessage("Loaded Existing Project '${it.locationOnDisk.name}'") }
                     else Project(File(path))
             }
         }
