@@ -57,7 +57,7 @@ class MainViewController {
      */
     @FXML
     fun initialize() {
-        openDocument(Tag.testDOM)
+
 
 
         htmlEditor.setOnContextMenuRequested {

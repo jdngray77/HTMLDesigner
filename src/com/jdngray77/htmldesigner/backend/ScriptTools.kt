@@ -6,7 +6,9 @@ import javafx.scene.Parent
 import javafx.scene.Scene
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
+import org.jsoup.nodes.Element
 import java.awt.Toolkit
+import java.io.*
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty1
 
@@ -38,6 +40,51 @@ fun String.CamelToSentence() : String =
         .map { if (it.isUpperCase()) " " + it.lowercase() else it }
         .joinToString("")
         .capitalize()
+
+fun File.hasFile(_name : String) =
+    this.listFiles { _, name -> name == _name }?.isNotEmpty() == true
+
+fun File.assertExists() {
+    if (isDirectory)
+        mkdirs()
+
+    if (isFile && !exists())
+        createNewFile()
+}
+
+
+fun java.io.Serializable.saveObjectToDisk(f: String) =
+    saveObjectToDisk(File(f))
+
+fun java.io.Serializable.saveObjectToDisk(f: File) {
+    f.createNewFile()
+
+    val fos = FileOutputStream(f)
+    val os = ObjectOutputStream(fos)
+
+    os.writeObject(this)
+
+    os.close()
+    fos.close()
+}
+
+fun java.io.Serializable.loadObjectFromDisk(f: File): Any? {
+    val fos = FileInputStream(f)
+    val os = ObjectInputStream(fos)
+
+    val x = os.readObject()
+
+    os.close()
+    fos.close()
+
+    return x
+}
+
+
+fun Element.saveToDisk(f: File) {
+    f.assertExists()
+    f.writeText(toString())
+}
 
 
 
@@ -94,7 +141,6 @@ fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Pair<Sce
             ).also {
                 val jMetro = JMetro(Style.DARK)
                 jMetro.scene = it
-
             }
             ,
             component.second

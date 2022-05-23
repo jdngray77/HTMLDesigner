@@ -41,7 +41,7 @@ class Editor : Application() {
         stage.isFullScreen = true
         stage.scene = scene.first
         stage.show()
-        start(Project(File ("")))
+        start(Project.loadOrCreate("./testproject/"))
     }
 
     fun start(project: Project) {

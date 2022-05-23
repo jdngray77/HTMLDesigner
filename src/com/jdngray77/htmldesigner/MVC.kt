@@ -23,13 +23,6 @@ class MVC (
 
 ) : Subscriber {
 
-    /**
-     * The document that the editor is currently
-     * manipulating
-     */
-    lateinit var openDocument: Document
-        private set
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                                   Undo / Redo
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -54,11 +47,15 @@ class MVC (
     //region                                                   UpdateDisplay
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    init {
+        MainView.openDocument(Project.loadDocument(Project.pagePaths.first()))
+    }
+
     override fun notify(e: EventType) {
-        when (e) {
-            EventType.EDITOR_OPEN_DOCUMENT_CHANGED ->
-                MainView.updateDisplay(openDocument)
-        }
+//        when (e) {
+//            EventType.EDITOR_OPEN_DOCUMENT_CHANGED ->
+//                MainView.updateDisplay()
+//        }
     }
 
 }
