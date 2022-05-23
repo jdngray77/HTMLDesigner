@@ -4,6 +4,7 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
+import java.awt.Desktop
 
 /**
  * An example of an automatically populated utility window.
@@ -28,6 +29,12 @@ class ProjectDock() : AutoDock(), Subscriber {
 //    @Title("Meta Data")
 //    @Inspectable(20)
 //    var CreatedOn: Date
+
+
+    @Inspectable(20)
+    fun ShowInSystem() {
+        Desktop.getDesktop().open(EDITOR.mvc.Project.locationOnDisk);
+    }
 
     @Inspectable(10000)
     fun CloseProject() {
