@@ -10,7 +10,6 @@ import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberProperties
 import com.jdngray77.htmldesigner.DeveloperWarning
 import com.jdngray77.htmldesigner.changeProperty
-import com.jdngray77.htmldesigner.backend.html.dom.Document
 import javafx.scene.Parent
 import javafx.scene.control.Button
 import javafx.scene.control.CheckBox
@@ -18,11 +17,11 @@ import javafx.scene.control.ColorPicker
 import javafx.scene.control.DatePicker
 import javafx.scene.control.Separator
 import javafx.scene.control.TextField
-import javafx.scene.layout.GridPane
 import javafx.scene.paint.Color
 import javafx.scene.web.WebView
 import javafx.scene.control.Pagination
 import javafx.scene.control.ComboBox
+import org.jsoup.nodes.Document
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
@@ -404,7 +403,7 @@ open class AutoDock : Dock() {
 
             Document::class.simpleName!!.lowercase() -> {
                 WebView().also {
-                    it.engine.loadContent((value as Document).serialize())
+                    it.engine.loadContent((value as Document).toString())
                 }
             }
 

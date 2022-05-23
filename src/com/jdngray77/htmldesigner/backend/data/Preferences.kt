@@ -1,7 +1,7 @@
 package com.jdngray77.htmldesigner.backend.data
 
-import com.jdngray77.htmldesigner.backend.html.dom.Document
 import com.jdngray77.htmldesigner.backend.html.dom.html
+import org.jsoup.nodes.Document
 
 // Format :
 // EPIC_NOUN_PROPERTY_DATATYPE

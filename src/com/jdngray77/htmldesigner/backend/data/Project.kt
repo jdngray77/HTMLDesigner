@@ -1,7 +1,7 @@
 package com.jdngray77.htmldesigner.backend.data
 
-import com.jdngray77.htmldesigner.backend.html.dom.Document
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
+import org.jsoup.nodes.Document
 import java.io.File
 
 /**
@@ -41,7 +41,6 @@ class Project(
      * ```
      */
     val locationOnDisk: File
-
 
 ) : java.io.Serializable {
 

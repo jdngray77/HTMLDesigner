@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.backend.html.dom
 import com.jdngray77.htmldesigner.RemoveDuplicates
 import com.jdngray77.htmldesigner.backend.html.style.Style
 import com.jdngray77.htmldesigner.backend.html.style.StyleArray
+import org.jsoup.nodes.Element
 
 
 /**
@@ -63,6 +64,12 @@ abstract class Tag : SerializableHTML {
      */
     @Deprecated("Use only if you have to. Styles, ID or classes should not be here.")
     var config: String? = null
+        get() {
+            if (field == null)
+                field = ""
+
+            return field
+        }
 
     /**
      * Optional content that is injected after the open tag,
@@ -131,6 +138,9 @@ abstract class Tag : SerializableHTML {
     @Deprecated("Use only if you have to. Styles, ID or classes should not be here. Special elements /should/ be handled in the corresponding tag class.")
     fun config(content : String) : Tag =
         this.also { config = content }
+
+    fun addConfig(content: String) : Tag =
+        this.also { config += " $content" }
 
 
 
@@ -453,46 +463,29 @@ abstract class Tag : SerializableHTML {
         /**
          * An example piece of data.
          */
-        val testDOM = Document(
-            html("This is my document!").children(
-                body()  .ID("MainContent")
-                    .classes("myStyle")
-                    .styles(
-                        Style("color", "blue"),
-                        Style("background", "pink")
-                    )
-                    .children(
-                        h1().content("Hello!")
-                            .styles(
-                                Style("text-decoration", "underline")
-                            ),
-                        hr(),
-                        raw("So who's responsible for this shitshow, anyway?"),
-                        br(),
-                        a() .ID("Link")
-                            .styles(
-                                Style("color", "yellow")
-                            )
-                            .classes("yeet")
-                            .config("href=\"https://jordantgray.uk\"")
-                            .content("ME!")
-                    )
-            )
-
-
-//                html("This is my document!").children(
-//                    body().config("style=\"background: rgb(43,43,43); color: white;\"")
-//                        .children(
-//                            h1().content("Welcome!"),
-//                            hr(),
-//                            raw("So who's responsible for this shitshow, anyway?"),
-//                            br(),
-//                            a().config("href=\"https://jordantgray.uk\"") .content("ME!")
-//
-//                        )
-
-                    as html
-        )
+        val testDOM = org.jsoup.nodes.Document("").also {
+            it.title("Dummy HTML")
+            it.body()
+                .id("MainContent")
+                .addClass("myStyle")
+                .attr("style", "background: pink; color: blue;")
+                .insertChildren(
+                    0,
+                    Element("h1")
+                        .appendText("Hello!")
+                        .attr("style", "text-decoration: underline;"),
+                    Element("hr"),
+                    Element("p")
+                        .appendText("So who's responsible for this shitshow, anyway?"),
+                    Element("br"),
+                    Element("a")
+                        .id("Link")
+                        .addClass("yeet")
+                        .attr("href", "https://jordantgray.uk")
+                        .attr("style", "color: yellow;")
+                        .appendText("ME!"),
+                )
+        }
 
         /**
          * Prints some objects to the console.
