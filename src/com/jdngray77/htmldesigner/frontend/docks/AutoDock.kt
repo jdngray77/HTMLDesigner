@@ -202,6 +202,15 @@ open class AutoDock : Dock() {
     }
 
 
+    // TODO this is shit.
+    fun update() {
+        children.clear()
+        index = 0
+        create()
+    }
+
+
+
     /**
      * Adds an appropriate UI control to this pane for the given
      * variable.
