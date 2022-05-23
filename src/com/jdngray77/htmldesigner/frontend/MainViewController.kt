@@ -3,15 +3,19 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.CamelToSentence
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.html.dom.Document
+import com.jdngray77.htmldesigner.backend.html.dom.Tag
+import com.jdngray77.htmldesigner.frontend.docks.Hierarchy
 import com.jdngray77.htmldesigner.frontend.docks.ExampleAutoDock
 import com.jdngray77.htmldesigner.frontend.docks.TestDock
+import com.jdngray77.htmldesigner.loadFXMLComponent
 import javafx.fxml.FXML
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.layout.AnchorPane
+import javafx.scene.layout.BorderPane
 import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
+import org.jsoup.nodes.Document
 import java.net.URI
 
 
@@ -29,11 +33,18 @@ class MainViewController {
     //region                                                   UI References.
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    @FXML lateinit var contentRenderer : WebView
-    @FXML lateinit var dockleft : TabPane
-    @FXML lateinit var dockright : TabPane
-    @FXML lateinit var dockbottom : AnchorPane
+    @FXML lateinit var dockEditors : TabPane
+
+    @FXML lateinit var dockLeftTop : TabPane
+    @FXML lateinit var dockLeftBottom : TabPane
+
+    @FXML lateinit var dockRight : TabPane
+    @FXML lateinit var dockBottom : TabPane
+
     @FXML lateinit var htmlEditor : HTMLEditor
+
+
+    private val openEditors = ArrayList<DocumentEditor>()
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -46,9 +57,16 @@ class MainViewController {
      */
     @FXML
     fun initialize() {
+        openDocument(Tag.testDOM)
+
+
+        htmlEditor.setOnContextMenuRequested {
+            textEditor_Open(Tag.testDOM.toString())
+        }
+
         htmlEditor.setOnKeyReleased {
 //            EDITOR.mvc
-            renderer_Open(htmlEditor.htmlText)
+//            renderer_Open(htmlEditor.htmlText)
         }
 
         addDocks()
@@ -58,8 +76,10 @@ class MainViewController {
      * Adds dock windows to the dock tabs.
      */
     private fun addDocks() {
-        dockleft.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
-        dockleft.tabs.add(Tab(TestDock::class.simpleName!!.CamelToSentence(), TestDock()))
+        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
+        dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.CamelToSentence(), TestDock()))
+
+        dockLeftBottom.tabs.add(Tab(Hierarchy::class.simpleName!!.CamelToSentence(), Hierarchy()))
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -67,14 +87,36 @@ class MainViewController {
     //region                                                  MCV API
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    fun openDocument(document: Document) {
+        loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
+            Tab(document.title(), first).let {
+                dockEditors.tabs.add(it)
+
+                first.prefWidthProperty().bind(dockEditors.widthProperty())
+                first.prefHeightProperty().bind(dockEditors.heightProperty())
+
+                (second as DocumentEditor).apply {
+                    setDocument(document, it)
+                    openEditors.add(this)
+                    switchToEditor(this)
+                }
+            }
+        }
+    }
 
     /**
      * Updates the UI to display a new document.
      */
-    fun switchToDocument(document: Document) {
-        updateDisplay(document)
-        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
-    }
+    fun switchToEditor(editor: DocumentEditor) =
+        dockEditors.selectionModel.select(editor.tab)
+
+    /**
+     *
+     */
+    fun switchToDocument(document: Document) =
+        findEditorFor(document)?.apply { switchToEditor(this) }
+            ?: run { openDocument(document) }
+
 
     /**
      * Updates the GUI to represent
@@ -84,16 +126,14 @@ class MainViewController {
      * display the changes.
      */
     fun updateDisplay(document: Document) {
-        renderer_Open(document)
         textEditor_Open(document)
     }
 
 
 
-
     fun textEditor_Read() = htmlEditor.htmlText
 
-    fun textEditor_Open(doc: Document) = textEditor_Open(doc.serialize())
+    fun textEditor_Open(doc: Document) = textEditor_Open(doc.toString())
 
     fun textEditor_Open(rawHTML: String) {
         htmlEditor.htmlText = rawHTML
@@ -101,16 +141,18 @@ class MainViewController {
 
 
 
-    private fun renderer_Open(document: Document) =
-        renderer_Open(document.serialize())
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               MCV API
+    //region                                          Private Utility Methods
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    fun renderer_Open(rawHTML: String) =
-        contentRenderer.engine.loadContent(rawHTML)
+    fun findEditorFor(document: Document) : DocumentEditor? {
+        openEditors.forEach {
+            if (it.document == document) return it
+        }
 
-    fun renderer_Open(URL: URI) =
-        contentRenderer.engine.load(URL.toString())
-
-
+        return null
+    }
 
 }
 
