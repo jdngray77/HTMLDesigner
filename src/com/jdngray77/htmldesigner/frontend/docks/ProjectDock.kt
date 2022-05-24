@@ -5,6 +5,7 @@ import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import java.awt.Desktop
+import kotlin.system.exitProcess
 
 /**
  * An example of an automatically populated utility window.
@@ -16,7 +17,7 @@ class ProjectDock() : AutoDock(), Subscriber {
     var ProjectName = ""
         set(value) {
             field = value
-            EDITOR.mvc.Project.renameProject(ProjectName)
+//            EDITOR.mvc.Project.renameOrMoveProject(ProjectName)
         }
 
     @Inspectable(10)
@@ -38,7 +39,7 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     @Inspectable(10000)
     fun CloseProject() {
-        System.exit(69)
+        exitProcess(69)
     }
 
     init {

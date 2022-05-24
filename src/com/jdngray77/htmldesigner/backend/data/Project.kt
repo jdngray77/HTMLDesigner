@@ -4,13 +4,14 @@ import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
+import com.jdngray77.htmldesigner.backend.html.style.Style
+import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
 import java.time.Instant
 import java.util.*
-import kotlin.collections.ArrayList
 
 /*
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -36,6 +37,12 @@ import kotlin.collections.ArrayList
  * A midpoint between the files on the disk
  * and the data.
  *
+ * Stores paths to files which *should* exist on the disk,
+ * and fetches them when requested.
+ *
+ * This object is serialized to disk as `project.designer`.
+ *
+ * @see locationOnDisk for project file structure.
  */
 class Project(
 
@@ -76,6 +83,12 @@ class Project(
 
 ) : java.io.Serializable {
 
+    /**
+     * Name of the person or organisation
+     * that created this project.
+     *
+     * Save
+     */
     var author: String? = _author
         set(value) {
             field = value
@@ -88,20 +101,35 @@ class Project(
     val createdOn = Date.from(Instant.now())
 
     /**
-     * The pages in this project.
-     *
-     * Represented by paths relative to
-     * the project's [locationOnDisk].
-     *
-     * DO NOT MODIFY.
-     * TODO hide this so it can't be altered.
+     * The project's HTML directory
      */
-    val pagePaths = ArrayList<String>()
+    val HTML = File(subFile(PROJECT_PATH_HTML))
+
+    /**
+     * The project's javascript directory
+     */
+    val JS = File(subFile(PROJECT_PATH_JS))
+
+    /**
+     * The project's CSS directory
+     */
+    val CSS = File(subFile(PROJECT_PATH_CSS))
+
+    /**
+     * The project's MEDIA directory
+     */
+    val MEDIA = File(subFile(PROJECT_PATH_MEDIA))
+
+    /**
+     * The project's backup directory
+     */
+    val BACKUP = File(subFile(PROJECT_PATH_BACKUP))
 
     init {
         checkPath()
         createSkeleton()
-        createNewDocument("index.html")
+        createDocument("index.html")
+        validate()
         UserMessage("Created new project '${locationOnDisk.name}'")
     }
 
@@ -109,6 +137,27 @@ class Project(
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                                IO
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+    /**
+     * Checks the folder structure,
+     */
+    fun validate() {
+        with (locationOnDisk) {
+            if (
+                !hasChild(PROJECT_PATH_HTML)    ||
+                !hasChild(PROJECT_PATH_CSS)     ||
+                !hasChild(PROJECT_PATH_MEDIA)   ||
+                !hasChild(PROJECT_PATH_BACKUP)  ||
+                !hasChild(PROJECT_PATH_JS)
+            ) throw IllegalStateException("A project folder has gone missing") // TODO create it or prompt to restore backup
+
+//            pagePaths.forEach {
+//                if (!File(it).exists())
+//                    throw IllegalStateException("$it has gone missing!")
+//            }
+        }
+    }
 
 
     /**
@@ -148,6 +197,8 @@ class Project(
             creatSubDirectory(PROJECT_PATH_BACKUP)
             creatSubDirectory(PROJECT_PATH_CSS)
             creatSubDirectory(PROJECT_PATH_HTML)
+            creatSubDirectory(PROJECT_PATH_JS)
+            creatSubDirectory(PROJECT_PATH_MEDIA)
         }
     }
 
@@ -174,8 +225,6 @@ class Project(
      * @throws NoSuchFileException if it does not exist, but is supposed to.
      */
     private fun checkProjectDocument(f: File): File {
-        // TODO check f is in pages.
-
         if (!f.exists())
             throw NoSuchFileException(f, reason = "project document is missing!")
 
@@ -198,9 +247,15 @@ class Project(
     fun projectName() =
         locationOnDisk.name
 
-    fun renameProject(newName: String) {
-//        TODO()
+    /**
+     * renames [locationOnDisk]
+     */
+    @Deprecated("Incomplete and untested. This will likely break the ability to locate files.")
+    fun renameOrMoveProject(destination: File) {
+        locationOnDisk.renameTo(destination)
     }
+
+
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -217,6 +272,7 @@ class Project(
      *
      * Notifies [EventType.PROJECT_SAVED]
      */
+    @Synchronized
     fun saveMeta() {
         backup()
 
@@ -233,30 +289,34 @@ class Project(
      *
      * [saveMeta] is called after making the change.
      *
+     * Notifies [EventType.PROJECT_NEW_DOCUMENT_CREATED]
+     *
      * @return the new document.
      */
-    fun createNewDocument(subpath: String) : Document {
+    fun createDocument(subpath: String) : Document {
         val doc = Tag.testDOM.clone()
 
-        subFile(PROJECT_PATH_HTML + subpath).apply {
-            pagePaths.add(this)
-            File(this).apply {
-                createNewFile()
-                doc.title(name)
-            }
+        File(subFile(PROJECT_PATH_HTML + subpath)).apply {
+            createNewFile()
+            doc.title(name)
         }
 
         saveDocument(doc, subpath)
         saveMeta()
 
+        EventNotifier.notifyEvent(EventType.PROJECT_NEW_DOCUMENT_CREATED)
         return doc
     }
 
     /**
      * Overwrites a project document with [d].
+     *
+     * Notifies [EventType.PROJECT_SAVED]
      */
-    fun saveDocument(d: Document, path: String) =
+    fun saveDocument(d: Document, path: String) {
         checkProjectDocument(path).writeText(d.toString())
+        EventNotifier.notifyEvent(EventType.PROJECT_SAVED)
+    }
 
     /**
      * Fetches an existing document from the disk
@@ -264,19 +324,39 @@ class Project(
      * @param path the location, must be from [pagePaths]
      * @return the document
      */
-    fun loadDocument(path: String): Document {
-        // TODO REVISIT
-        if (!pagePaths.contains(path))
-            throw IllegalArgumentException("Tried to load a document which does not exist in this project!")
-
-        with(File(path)) {
+    fun loadDocument(file: File): Document {
+        with(file) {
             checkProjectDocument(this)
             return Jsoup.parse(readText())
         }
     }
 
     /**
+     * Creates a new stylesheet
+     */
+    fun createStylesheet(subpath: String) : StyleSheet {
+        File(subFile(subpath)).apply {
+            createNewFile()
+            return StyleSheet().also {  }
+        }
+    }
+
+    /**
+     * Saves a stylesheet to [file]
+     */
+    fun saveStylesheet(styleSheet: StyleSheet, file: File) =
+        styleSheet.saveObjectToDisk(this.toString())
+
+    /**
+     * Loads a stylesheet from [file]
+     */
+    fun loadStylesheet(file: File) =
+        loadObjectFromDisk(file) as StyleSheet
+
+    /**
      * Takes a copy of the HTML files and the meta into [PROJECT_PATH_BACKUP].
+     *
+     * Notifies [EventType.PROJECT_BACKEDUP]
      */
     fun backup() {
 //        TODO()
@@ -286,6 +366,30 @@ class Project(
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                             Save / Load
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    /**
+     * Returns an array of [File]s containing [HTML] documents
+     * in the project.
+     */
+    fun documents() = HTML.listTree()
+
+    /**
+     * Returns an array of [File]s containing [CSS] documents
+     * in the project.
+     */
+    fun stylesheets() = CSS.listTree()
+
+    /**
+     * Returns an array of [File]s containing [JS] documents
+     * in the project.
+     */
+    fun javascripts() = JS.listTree()
+
+    /**
+     * Returns an array of [File]s containing [MEDIA] documents
+     * in the project.
+     */
+    fun media() = MEDIA.listTree()
 
     companion object {
         /**
@@ -303,11 +407,23 @@ class Project(
          */
         const val PROJECT_PATH_CSS: String = "CSS/"
 
-
         /**
          * The location of the project HTML, relative to the project root.
          */
         const val PROJECT_PATH_HTML: String = "HTML/"
+
+        /**
+         * The location of the project javascript, relative to the project root.
+         */
+        const val PROJECT_PATH_JS: String = "JS/"
+
+        /**
+         * The location of the project media, relative to the project root.
+         */
+        const val PROJECT_PATH_MEDIA: String = "MEDIA/"
+
+
+
 
         /**
          * Attempts to load a project from disk, if it exists.
@@ -321,7 +437,10 @@ class Project(
             File("$path/$PROJECT_PATH_META").apply {
                 return if (exists())
                         (loadObjectFromDisk(this) as Project)
-                            .also { UserMessage("Loaded Existing Project '${it.locationOnDisk.name}'") }
+                            .also {
+                                it.validate()
+                                UserMessage("Loaded Existing Project '${it.locationOnDisk.name}'")
+                            }
                     else Project(File(path))
             }
         }

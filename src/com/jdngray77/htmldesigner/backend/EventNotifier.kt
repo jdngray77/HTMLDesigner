@@ -16,9 +16,12 @@ enum class EventType {
     PROJECT_SAVED,
     PROJECT_EXPORTED,
     PROJECT_BACKEDUP,
+    PROJECT_NEW_DOCUMENT_CREATED,
 
     EDITOR_DOCUMENT_SWITCH, // The editor has switched to show a different document.
     EDITOR_DOCUMENT_EDITED  // The editor has made a change to the open document.
+
+
 }
 
 /**

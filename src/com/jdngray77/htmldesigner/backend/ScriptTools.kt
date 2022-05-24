@@ -9,6 +9,8 @@ import jfxtras.styles.jmetro.Style
 import org.jsoup.nodes.Element
 import java.awt.Toolkit
 import java.io.*
+import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty1
 
@@ -51,6 +53,20 @@ fun File.assertExists() {
     if (isFile && !exists())
         createNewFile()
 }
+
+fun File.hasChild(path: String) =
+    this.isDirectory && File(this.toPath().toString() + "/" + path).exists()
+
+fun File.listTree(): ArrayList<File> {
+    val x = ArrayList<File>()
+
+    Files.walk(this.toPath())
+        .filter(Files::isRegularFile)
+        .forEach{ x.add(it.toFile()) }
+
+    return x
+}
+
 
 
 fun java.io.Serializable.saveObjectToDisk(f: String) =
