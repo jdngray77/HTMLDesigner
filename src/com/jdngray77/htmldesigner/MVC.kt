@@ -48,7 +48,7 @@ class MVC (
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     init {
-        MainView.openDocument(Project.loadDocument(Project.pagePaths.first()))
+        MainView.openDocument(Project.loadDocument(Project.documents().first()))
     }
 
     override fun notify(e: EventType) {

@@ -22,6 +22,10 @@ class Editor : Application() {
          * A static reference to the application instance
          */
         lateinit var EDITOR : Editor
+
+        fun mvc() = EDITOR.mvc
+        fun project() = EDITOR.mvc.Project
+        fun maingui() = EDITOR.mvc.MainView
     }
 
     lateinit var mvc : MVC
