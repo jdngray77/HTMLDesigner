@@ -58,7 +58,7 @@ class StyleClass(val selectors: ArrayList<String>) : StyleArray(), SerializableH
  *
  * @author [Jordan T. Gray](https://www.jordantgray.uk) on 9/6/2022
  */
-class StyleSheet : ArrayList<StyleClass>(), SerializableHTML {
+class StyleSheet(val name: String) : ArrayList<StyleClass>(), SerializableHTML {
     override fun toString(): String = serialize()
     override fun serialize(): String =
         joinToString("\n\n") { it.toString() }
@@ -74,7 +74,7 @@ class StyleSheet : ArrayList<StyleClass>(), SerializableHTML {
     companion object {
         fun test() {
             println(
-                StyleSheet().classes(
+                StyleSheet("test").classes(
                     StyleClass("button").styles(
                         Style("background", "blue"),
                         Style("color", "yellow")
