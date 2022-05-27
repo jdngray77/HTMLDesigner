@@ -4,20 +4,17 @@ import com.jdngray77.htmldesigner.CamelToSentence
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
-import com.jdngray77.htmldesigner.frontend.docks.Hierarchy
-import com.jdngray77.htmldesigner.frontend.docks.ExampleAutoDock
+import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
+import com.jdngray77.htmldesigner.frontend.docks.Pages
 import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
-import com.jdngray77.htmldesigner.frontend.docks.TestDock
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
 import com.jdngray77.htmldesigner.loadFXMLComponent
 import javafx.fxml.FXML
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
-import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.BorderPane
 import javafx.scene.web.HTMLEditor
-import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
-import java.net.URI
 
 
 /**
@@ -62,7 +59,7 @@ class MainViewController {
 
 
         htmlEditor.setOnContextMenuRequested {
-            textEditor_Open(Tag.testDOM.toString())
+            textEditor_Open(currentDocument().html())
         }
 
         htmlEditor.setOnKeyReleased {
@@ -81,7 +78,8 @@ class MainViewController {
 //        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
         dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.CamelToSentence(), TestDock()))
 
-        dockLeftBottom.tabs.add(Tab(Hierarchy::class.simpleName!!.CamelToSentence(), Hierarchy()))
+        dockLeftBottom.tabs.add(Tab(Pages::class.simpleName!!.CamelToSentence(), Pages()))
+        dockLeftBottom.tabs.add(Tab(TagHierarchy::class.simpleName!!.CamelToSentence(), TagHierarchy()))
         dockLeftBottom.tabs.add(Tab(ProjectDock::class.simpleName!!.CamelToSentence(), ProjectDock()))
     }
 
@@ -118,7 +116,7 @@ class MainViewController {
      */
     fun switchToEditor(editor: DocumentEditor) {
         dockEditors.selectionModel.select(editor.tab)
-//        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH) TODO put this back once events are threaded.
+        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
     }
 
 
@@ -128,7 +126,6 @@ class MainViewController {
     fun switchToDocument(document: Document) =
         findEditorFor(document)?.apply { switchToEditor(this) }
             ?: run { openDocument(document) }
-
 
     /**
      * Updates the GUI to represent
@@ -160,7 +157,7 @@ class MainViewController {
 
     fun findEditorFor(document: Document) : DocumentEditor? {
         openEditors.forEach {
-            if (it.document == document) return it
+            if (it.document.toString().equals(document.toString())) return it
         }
 
         return null

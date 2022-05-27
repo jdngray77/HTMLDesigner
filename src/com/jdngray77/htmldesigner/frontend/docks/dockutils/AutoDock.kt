@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.frontend.docks
+package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
 import com.jdngray77.htmldesigner.CamelToSentence
 import javafx.scene.text.Text
@@ -21,6 +21,7 @@ import javafx.scene.paint.Color
 import javafx.scene.web.WebView
 import javafx.scene.control.Pagination
 import javafx.scene.control.ComboBox
+import javafx.scene.layout.GridPane
 import org.jsoup.nodes.Document
 import java.time.Instant
 import java.time.ZoneId
@@ -185,9 +186,11 @@ open class AutoDock : Dock() {
      */
     var index = 0
 
+    val grid = GridPane()
+
     init {
-        vgap = 20.0
-        hgap = 5.0
+        grid.vgap = 20.0
+        grid.hgap = 5.0
     }
 
     /**
@@ -231,8 +234,8 @@ open class AutoDock : Dock() {
 
         // Now we can add the GUI.
         this.children.let {
-            add(Text(prop.name.CamelToSentence()), 0, index)
-            add(gui, 1, index)
+            grid.add(Text(prop.name.CamelToSentence()), 0, index)
+            grid.add(gui, 1, index)
         }
 
         index++
@@ -260,8 +263,8 @@ open class AutoDock : Dock() {
      */
     private fun checkTitle(prop: KProperty<*>) {
         prop.findAnnotation<Title>()?.apply {
-            add(Text(title), 0, index)
-            add(Separator(), 1, index)
+            grid.add(Text(title), 0, index)
+            grid.add(Separator(), 1, index)
             index++
         }
     }
@@ -272,7 +275,7 @@ open class AutoDock : Dock() {
      */
     private fun addFunction(function: KFunction<*>) {
         if (function.parameters.size != 1) throw InspectableException("${loggableClassName()} ${function.name} has parameters, so it can't be @Inspectable because I wouldn't know what to put in the parameters!")
-        add(Button(function.name.CamelToSentence()).also { it.setOnMouseClicked { function.call(this) } }, 1, index)
+        grid.add(Button(function.name.CamelToSentence()).also { it.setOnMouseClicked { function.call(this) } }, 1, index)
         index++
     }
 

@@ -4,13 +4,13 @@ import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.control.TreeItem
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import org.jsoup.nodes.Element
 import java.awt.Toolkit
 import java.io.*
 import java.nio.file.Files
-import java.nio.file.Paths
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty1
 
@@ -187,3 +187,15 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
 fun <R, T> changeProperty(prop : KProperty<*    >, rec: R, value: T) {
     (prop as KMutableProperty1<R,T>).set(rec, value)
 }
+
+
+
+
+
+/**
+ * A tree item which can display one thing, but store something else
+ * for later retrieval.
+ *
+ * I.e it can store the underlying data of a tree item, but display a different string to the user.
+ */
+class StoringTreeItem <T> (val data : T?, titler : (T?) -> String) : TreeItem<String>(titler(data))

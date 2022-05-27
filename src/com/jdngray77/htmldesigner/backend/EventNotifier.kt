@@ -20,6 +20,9 @@ enum class EventType {
 
     EDITOR_DOCUMENT_SWITCH, // The editor has switched to show a different document.
     EDITOR_DOCUMENT_EDITED  // The editor has made a change to the open document.
+    ,
+    PROJECT_PAGE_DELETED,
+    PROJECT_PAGE_CREATED
 
 
 }
@@ -67,6 +70,7 @@ object EventNotifier {
         tempList.map {
             it.notify(e)
         }
+        println("Notified $e to ${tempList.size} Subscribers ($tempList)")
     }
 
 }

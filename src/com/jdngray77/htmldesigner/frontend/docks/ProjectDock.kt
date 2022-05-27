@@ -4,6 +4,9 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.AutoDock
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.Inspectable
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.Title
 import java.awt.Desktop
 import kotlin.system.exitProcess
 

@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.frontend.docks
+package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
 import com.jdngray77.htmldesigner.UserWarning
 import java.time.Instant
