@@ -4,7 +4,6 @@ import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
-import com.jdngray77.htmldesigner.backend.html.style.Style
 import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -334,10 +333,12 @@ class Project(
     /**
      * Creates a new stylesheet
      */
-    fun createStylesheet(subpath: String) : StyleSheet {
-        File(subFile(subpath)).apply {
+    fun createStylesheet(name: String) : StyleSheet {
+        File(subFile("$PROJECT_PATH_CSS$name.stylesheet")).apply {
             createNewFile()
-            return StyleSheet().also {  }
+            return StyleSheet(name).also {
+                saveStylesheet(it, this)
+            }
         }
     }
 
@@ -345,7 +346,7 @@ class Project(
      * Saves a stylesheet to [file]
      */
     fun saveStylesheet(styleSheet: StyleSheet, file: File) =
-        styleSheet.saveObjectToDisk(this.toString())
+        styleSheet.saveObjectToDisk(file.toString())
 
     /**
      * Loads a stylesheet from [file]
