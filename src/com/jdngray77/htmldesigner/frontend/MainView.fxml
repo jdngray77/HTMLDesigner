@@ -45,20 +45,29 @@
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
-        <Menu mnemonicParsing="false" text="File">
+            <Menu mnemonicParsing="false" text="HTML Designer">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Settings" />
+                  <MenuItem mnemonicParsing="false" text="Exit" />
+              </items>
+            </Menu>
+        <Menu mnemonicParsing="false" text="Project">
           <items>
-            <MenuItem mnemonicParsing="false" text="New" />
-            <MenuItem mnemonicParsing="false" text="Open…" />
+                  <MenuItem mnemonicParsing="false" text="Save Project" />
+            <MenuItem mnemonicParsing="false" text="Create a new project" />
+            <MenuItem mnemonicParsing="false" text="Load a project" />
+                  <MenuItem mnemonicParsing="false" text="Close Project" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <Menu mnemonicParsing="false" text="Backups">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Backup now" />
+                      <MenuItem mnemonicParsing="false" text="Restore backup..." />
+                        <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
+                    </items>
+                  </Menu>
             <Menu mnemonicParsing="false" text="Open Recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Close" />
-            <MenuItem mnemonicParsing="false" text="Save" />
-            <MenuItem mnemonicParsing="false" text="Save As…" />
-            <MenuItem mnemonicParsing="false" text="Revert" />
-            <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="Preferences…" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Quit" />
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
@@ -75,9 +84,26 @@
             <MenuItem mnemonicParsing="false" text="Unselect All" />
           </items>
         </Menu>
+            <Menu mnemonicParsing="false" text="Tools">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="View in browser" />
+                  <MenuItem mnemonicParsing="false" text="Open in VSCode" />
+                  <MenuItem mnemonicParsing="false" text="Debug in Chrome Dev Tools" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Git">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Publish changes..." />
+                  <MenuItem mnemonicParsing="false" text="Update project..." />
+                  <MenuItem mnemonicParsing="false" text="Branches..." />
+                  <MenuItem mnemonicParsing="false" text="Delete changes..." />
+               </items>
+            </Menu>
         <Menu mnemonicParsing="false" text="Help">
           <items>
-            <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
+                  <MenuItem mnemonicParsing="false" text="Read the wiki" />
+                  <MenuItem mnemonicParsing="false" text="Visit the repository" />
+                  <MenuItem mnemonicParsing="false" text="About" />
           </items>
         </Menu>
       </menus>
@@ -132,11 +158,6 @@
                                                 <HTMLEditor fx:id="htmlEditor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" prefWidth="506.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                              </children>
                                           </AnchorPane>
-                                    </content>
-                                  </Tab>
-                                  <Tab text="Stylesheet Editor">
-                                    <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                                     </content>
                                   </Tab>
                                 </tabs>
@@ -225,11 +246,6 @@
                                     </VBox>
                                  </children>
                               </AnchorPane>
-                        </content>
-                      </Tab>
-                      <Tab text="Properties">
-                        <content>
-                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         </content>
                       </Tab>
                     </tabs>
