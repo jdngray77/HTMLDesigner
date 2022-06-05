@@ -191,6 +191,7 @@ open class AutoDock : Dock() {
     init {
         grid.vgap = 20.0
         grid.hgap = 5.0
+        center = grid
     }
 
     /**

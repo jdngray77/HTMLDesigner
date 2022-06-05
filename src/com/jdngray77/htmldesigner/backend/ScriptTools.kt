@@ -84,7 +84,7 @@ fun java.io.Serializable.saveObjectToDisk(f: File) {
     fos.close()
 }
 
-fun java.io.Serializable.loadObjectFromDisk(f: File): Any? {
+fun loadObjectFromDisk(f: File): Any? {
     val fos = FileInputStream(f)
     val os = ObjectInputStream(fos)
 
@@ -101,6 +101,7 @@ fun Element.saveToDisk(f: File) {
     f.assertExists()
     f.writeText(toString())
 }
+
 
 
 
@@ -198,4 +199,5 @@ fun <R, T> changeProperty(prop : KProperty<*    >, rec: R, value: T) {
  *
  * I.e it can store the underlying data of a tree item, but display a different string to the user.
  */
-class StoringTreeItem <T> (val data : T?, titler : (T?) -> String) : TreeItem<String>(titler(data))
+class StoringTreeItem <T> (val data
+: T?, titler : (T?) -> String) : TreeItem<String>(titler(data))
