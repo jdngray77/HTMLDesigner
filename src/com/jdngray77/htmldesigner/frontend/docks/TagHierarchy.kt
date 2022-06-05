@@ -5,6 +5,7 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -25,7 +26,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
 
         tree.setOnMouseClicked {
             tree.selectionModel.selectedItem?.apply {
-                EDITOR.mvc.MainView.textEditor_Open((this as StoringTreeItem<Element>).data.toString())
+                mvc().MainView.textEditor_Open((this as StoringTreeItem<Element>).data.toString())
             }
         }
     }
@@ -42,7 +43,9 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
     }
 
     override fun notify(e: EventType) {
-        showDocument(EDITOR.mvc.MainView.currentDocument())
+        //TODO remove this once notifier is completed
+        if (e == EventType.EDITOR_DOCUMENT_SWITCH || e == EventType.EDITOR_DOCUMENT_EDITED)
+            showDocument(mvc().MainView.currentDocument())
     }
 
     override fun getChildrenFor(el: Element): Iterable<Element> = el.children()

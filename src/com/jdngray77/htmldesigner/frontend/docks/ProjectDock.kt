@@ -4,6 +4,7 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.AutoDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Inspectable
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Title
@@ -27,7 +28,7 @@ class ProjectDock() : AutoDock(), Subscriber {
     var Author = ""
         set(value) {
             field = value
-            EDITOR.mvc.Project.author = field
+            mvc().Project.author = field
         }
 
 //    @Title("Meta Data")
@@ -37,7 +38,7 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     @Inspectable(20)
     fun ShowInSystem() {
-        Desktop.getDesktop().open(EDITOR.mvc.Project.locationOnDisk);
+        Desktop.getDesktop().open(mvc().Project.locationOnDisk);
     }
 
     @Inspectable(10000)
@@ -47,12 +48,14 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     init {
         create()
-        EventNotifier.subscribe(this, EventType.EDITOR_DOCUMENT_EDITED)
+        EventNotifier.subscribe(this, EventType.EDITOR_DOCUMENT_EDITED, EventType.EDITOR_LOADED)
     }
 
     override fun notify(e: EventType) {
-        if (e != EventType.EDITOR_DOCUMENT_EDITED) return
-        EDITOR.mvc.Project.apply {
+        // TODO remove guard once notifier is complete
+        if (e != EventType.EDITOR_DOCUMENT_EDITED && e != EventType.EDITOR_LOADED) return
+
+        mvc().Project.apply {
             ProjectName = projectName()
             author?.let { Author = it }
         }
