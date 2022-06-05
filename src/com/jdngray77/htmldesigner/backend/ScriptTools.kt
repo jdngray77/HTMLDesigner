@@ -1,6 +1,8 @@
 package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
@@ -115,17 +117,21 @@ fun Element.saveToDisk(f: File) {
 //                                                        Logging
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+
+
 fun DeveloperWarning(string: String) {
     System.err.println(string)
 }
 
 fun UserWarning(string: String) {
     System.err.println(string)
-    //TODO show in-editor
+    mvcIfAvail()?.MainView?.setStatus(string)
 }
 
+fun log(string: String) = UserMessage(string)
+
 fun UserMessage(string: String) {
-    // TODO show in-editor
+    mvcIfAvail()?.MainView?.setStatus(string)
     println(string)
 }
 

@@ -10,6 +10,7 @@ import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
 import com.jdngray77.htmldesigner.loadFXMLComponent
 import javafx.fxml.FXML
+import javafx.scene.control.Label
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.layout.BorderPane
@@ -40,6 +41,8 @@ class MainViewController {
     @FXML lateinit var dockBottom : TabPane
 
     @FXML lateinit var htmlEditor : HTMLEditor
+
+    @FXML lateinit var lblLeftStatus : Label
 
 
     private val openEditors = ArrayList<DocumentEditor>()
@@ -183,6 +186,11 @@ class MainViewController {
      */
     fun textEditor_Open(rawHTML: String) {
         htmlEditor.htmlText = rawHTML
+    }
+
+
+    fun setStatus(string: String) {
+        lblLeftStatus.text = string
     }
 
 
