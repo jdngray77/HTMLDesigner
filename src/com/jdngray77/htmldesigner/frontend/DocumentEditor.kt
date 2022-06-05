@@ -25,7 +25,6 @@ class DocumentEditor {
 
     fun reRender() {
         contentRenderer.engine.loadContent(document.toString())
-        println(Editor.mvc().Project.CSS.toString())
         tab.text = document.title()
     }
 
