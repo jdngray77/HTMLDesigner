@@ -88,12 +88,25 @@ class MainViewController {
     //region                                                  MCV API
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    /**
+     * It returns the document of the current editor
+     */
     fun currentDocument() =
         currentEditor().document
 
+    /**
+     * It returns the current editor
+     */
     fun currentEditor() =
         findDocumentFor(dockEditors.selectionModel.selectedItem)
 
+    /**
+     * Create a new document editor, set the document,
+     * add the editor to the list of open editors, and switch to the
+     * new editor
+     *
+     * @param document Document - The document to open
+     */
     fun openDocument(document: Document) {
         loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
             Tab(document.title(), first).let {
@@ -111,8 +124,11 @@ class MainViewController {
         }
     }
 
+
     /**
-     * Updates the UI to display a new document.
+     * This function switches to the editor tab that is passed in as a parameter
+     *
+     * @param editor DocumentEditor - The editor to switch to
      */
     fun switchToEditor(editor: DocumentEditor) {
         dockEditors.selectionModel.select(editor.tab)
@@ -121,7 +137,14 @@ class MainViewController {
 
 
     /**
+     * "If there's an editor for the given document, switch to it, otherwise create a new editor."
      *
+     * The first line of the function is a call to the function findEditorFor, which returns an Editor?. If it's not null,
+     * the apply function is called on it. The apply function takes a lambda as its argument, and the lambda is executed
+     * with the Editor as its receiver. The lambda in this case is a call to the function switchToEditor, which takes an
+     * Editor as its argument
+     *
+     * @param document The document to switch to.
      */
     fun switchToDocument(document: Document) =
         findEditorFor(document)?.apply { switchToEditor(this) }
@@ -140,10 +163,24 @@ class MainViewController {
 
 
 
+    /**
+     * It returns the text from the htmlEditor.
+     */
     fun textEditor_Read() = htmlEditor.htmlText
 
+    /**
+     * `textEditor_Open` opens a document in the text editor
+     *
+     * @param doc The document to open.
+     */
     fun textEditor_Open(doc: Document) = textEditor_Open(doc.toString())
 
+    /**
+     * A function that takes a string as an argument and sets the htmlText property
+     * of the htmlEditor object to the value of the string
+     *
+     * @param rawHTML The raw HTML to be loaded into the editor.
+     */
     fun textEditor_Open(rawHTML: String) {
         htmlEditor.htmlText = rawHTML
     }
