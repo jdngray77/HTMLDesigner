@@ -208,7 +208,7 @@ open class AutoDock : Dock() {
 
     // TODO this is shit.
     fun update() {
-        children.clear()
+        grid.children.clear()
         index = 0
         create()
     }
