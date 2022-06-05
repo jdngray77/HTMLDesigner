@@ -1,6 +1,8 @@
 package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
+import com.jdngray77.htmldesigner.log
 
 /**
  * Some examples of types of events.
@@ -22,7 +24,8 @@ enum class EventType {
     EDITOR_DOCUMENT_EDITED  // The editor has made a change to the open document.
     ,
     PROJECT_PAGE_DELETED,
-    PROJECT_PAGE_CREATED
+    PROJECT_PAGE_CREATED,
+    EDITOR_LOADED
 
 
 }
@@ -55,6 +58,7 @@ object EventNotifier {
      * Notify the rest of the system that an event has occoured.
      */
     fun notifyEvent(e: EventType) {
+        if (!mvcIsAvail()) return
 
         // TODO remove this once threading is in place. Just don't start the threading until well after the
         //      editor has initialised.
@@ -70,7 +74,8 @@ object EventNotifier {
         tempList.map {
             it.notify(e)
         }
-        println("Notified $e to ${tempList.size} Subscribers ($tempList)")
+
+        log("Notified $e to ${tempList.size} Subscribers ($tempList)")
     }
 
 }
