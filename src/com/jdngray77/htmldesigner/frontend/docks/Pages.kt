@@ -5,6 +5,7 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import java.io.File
 
@@ -17,8 +18,11 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
 
         tree.setOnMouseClicked {
             tree.selectionModel.selectedItem?.apply {
-                Editor.mvc().let {
-                    it.MainView.switchToDocument(it.Project.loadDocument((this as StoringTreeItem<File>).data!!))
+                    (this as StoringTreeItem<File>).data!!.apply{
+                        if (this.isDirectory)
+                            return@setOnMouseClicked
+
+                        mvc().openDocument(this)
                 }
             }
         }
