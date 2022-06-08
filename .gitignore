@@ -26,3 +26,4 @@ out/
 
 testproject/
 .DS_Store
+.idea/
