@@ -4,10 +4,14 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import com.jdngray77.htmldesigner.frontend.MainViewController
+import javafx.scene.control.Alert
+import javafx.scene.control.Alert.AlertType
+import javafx.scene.control.ButtonType
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import java.io.File
+
 
 /**
  * Model View Controller.
@@ -49,5 +53,15 @@ class MVC (
         // TODO this loads the file from disk each time. Can we check to see if it's already loaded?
         MainView.switchToDocument(Project.loadDocument(document))
     }
+
+    /**
+     * Deletes [tag] after confirming with the user.
+     */
+    fun deleteTag(tag: Element) {
+        if (userConfirm("Delete " + tag.tagName() + " ?"))
+                tag.remove()
+
+    }
+
 
 }
