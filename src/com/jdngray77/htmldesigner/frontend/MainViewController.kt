@@ -43,6 +43,8 @@ class MainViewController {
     @FXML lateinit var htmlEditor : HTMLEditor
 
     @FXML lateinit var lblLeftStatus : Label
+    @FXML lateinit var lblRightStatus : Label
+
 
 
     private val openEditors = ArrayList<DocumentEditor>()
@@ -193,6 +195,10 @@ class MainViewController {
         lblLeftStatus.text = string
     }
 
+    fun setAction(string: String) {
+        lblRightStatus.text = string
+    }
+
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -200,13 +206,8 @@ class MainViewController {
     //region                                          Private Utility Methods
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    fun findEditorFor(document: Document) : DocumentEditor? {
-        openEditors.forEach {
-            if (it.document.toString().equals(document.toString())) return it
-        }
-
-        return null
-    }
+    fun findEditorFor(document: Document)  =
+        openEditors.find { it.document == document }
 
     fun findDocumentFor(tab: Tab) = openEditors.first {
             it.tab == tab
