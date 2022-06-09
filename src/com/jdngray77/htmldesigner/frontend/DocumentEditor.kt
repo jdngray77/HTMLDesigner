@@ -20,12 +20,24 @@ class DocumentEditor {
         this.document = document
         this.tab = tab
 
+        clean()
         reRender()
     }
 
     fun reRender() {
         contentRenderer.engine.loadContent(document.toString())
+    }
+
+    fun dirty() {
+        if (!tab.text.endsWith(UNSAVED_SUFFIX))
+            tab.text += UNSAVED_SUFFIX
+    }
+
+    fun clean() {
         tab.text = document.title()
     }
 
+    companion object {
+        private const val UNSAVED_SUFFIX = " *"
+    }
 }

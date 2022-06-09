@@ -1,12 +1,20 @@
 package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.control.Alert
+import javafx.scene.control.ButtonType
+import javafx.scene.control.TreeItem
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
+import org.jsoup.nodes.Element
 import java.awt.Toolkit
+import java.io.*
+import java.nio.file.Files
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty1
 
@@ -39,6 +47,66 @@ fun String.CamelToSentence() : String =
         .joinToString("")
         .capitalize()
 
+fun File.hasFile(_name : String) =
+    this.listFiles { _, name -> name == _name }?.isNotEmpty() == true
+
+fun File.assertExists() {
+    if (isDirectory)
+        mkdirs()
+
+    if (isFile && !exists())
+        createNewFile()
+}
+
+fun File.hasChild(path: String) =
+    this.isDirectory && File(this.toPath().toString() + "/" + path).exists()
+
+fun File.listTree(): ArrayList<File> {
+    val x = ArrayList<File>()
+
+    Files.walk(this.toPath())
+        .filter(Files::isRegularFile)
+        .forEach{ x.add(it.toFile()) }
+
+    return x
+}
+
+
+
+fun java.io.Serializable.saveObjectToDisk(f: String) =
+    saveObjectToDisk(File(f))
+
+fun java.io.Serializable.saveObjectToDisk(f: File) {
+    f.createNewFile()
+
+    val fos = FileOutputStream(f)
+    val os = ObjectOutputStream(fos)
+
+    os.writeObject(this)
+
+    os.close()
+    fos.close()
+}
+
+fun loadObjectFromDisk(f: File): Any? {
+    val fos = FileInputStream(f)
+    val os = ObjectInputStream(fos)
+
+    val x = os.readObject()
+
+    os.close()
+    fos.close()
+
+    return x
+}
+
+
+fun Element.saveToDisk(f: File) {
+    f.assertExists()
+    f.writeText(toString())
+}
+
+
 
 
 
@@ -51,17 +119,21 @@ fun String.CamelToSentence() : String =
 //                                                        Logging
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+
+
 fun DeveloperWarning(string: String) {
     System.err.println(string)
 }
 
 fun UserWarning(string: String) {
     System.err.println(string)
-    //TODO show in-editor
+    mvcIfAvail()?.MainView?.setStatus(string)
 }
 
+fun log(string: String) = UserMessage(string)
+
 fun UserMessage(string: String) {
-    // TODO show in-editor
+    mvcIfAvail()?.MainView?.setStatus(string)
     println(string)
 }
 
@@ -94,7 +166,6 @@ fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Pair<Sce
             ).also {
                 val jMetro = JMetro(Style.DARK)
                 jMetro.scene = it
-
             }
             ,
             component.second
@@ -114,6 +185,21 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
         }
     }
 
+/**
+ * Display a confirmation dialog to confirm or deny an action.
+ *
+ * Returns true if user confirms action, else false.
+ */
+fun userConfirm(message : String) = Alert(
+        Alert.AlertType.CONFIRMATION,
+        message,
+        ButtonType.YES,
+        ButtonType.NO
+    ).let {
+        it.showAndWait()
+        it.result == ButtonType.YES
+    }
+
 
 
 
@@ -125,3 +211,16 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
 fun <R, T> changeProperty(prop : KProperty<*    >, rec: R, value: T) {
     (prop as KMutableProperty1<R,T>).set(rec, value)
 }
+
+
+
+
+
+/**
+ * A tree item which can display one thing, but store something else
+ * for later retrieval.
+ *
+ * I.e it can store the underlying data of a tree item, but display a different string to the user.
+ */
+class StoringTreeItem <T> (val data
+: T?, titler : (T?) -> String) : TreeItem<String>(titler(data))
