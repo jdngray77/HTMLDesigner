@@ -11,6 +11,7 @@ import java.io.File
 import java.io.IOException
 import java.time.Instant
 import java.util.*
+import kotlin.collections.HashMap
 
 /*
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -124,6 +125,14 @@ class Project(
      */
     val BACKUP = File(subFile(PROJECT_PATH_BACKUP))
 
+    /**
+     * Storage of any document file after load.
+     *
+     * TODO cache JS, media, etc.
+     */
+    @Transient
+    private lateinit var CACHE : HashMap<String, Any>
+
     init {
         checkPath()
         createSkeleton()
@@ -156,6 +165,9 @@ class Project(
 //                    throw IllegalStateException("$it has gone missing!")
 //            }
         }
+
+        if (!this::CACHE.isInitialized)
+            CACHE = HashMap()
     }
 
 
@@ -262,6 +274,19 @@ class Project(
     //region                                                  Save / Load
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    private fun <T> getCached(path: File) =
+        getCached<T>(path.path)
+
+    private fun <T> getCached(path: String) : T?{
+        try {
+            return CACHE[path]?.let {
+                it  as T
+            }
+        } catch (e: ClassCastException) {
+            throw ClassCastException("The loaded file for `$path` was not the expected file type.")
+        }
+    }
+
     /**
      * Saves the 'project.designer' file containing meta data about the project.
      *
@@ -320,13 +345,22 @@ class Project(
     /**
      * Fetches an existing document from the disk
      *
+     * If has been loaded previously, the existing object is
+     * returned.
+     *
      * @param path the location, must be from [pagePaths]
      * @return the document
      */
     fun loadDocument(file: File): Document {
+        getCached<Document>(file)?.apply {
+            return this
+        }
+
         with(file) {
             checkProjectDocument(this)
-            return Jsoup.parse(readText())
+            return Jsoup.parse(readText()).also {
+                CACHE[file.path] = it
+            }
         }
     }
 
@@ -346,13 +380,22 @@ class Project(
      * Saves a stylesheet to [file]
      */
     fun saveStylesheet(styleSheet: StyleSheet, file: File) =
-        styleSheet.saveObjectToDisk(file.toString())
+        styleSheet.saveObjectToDisk(file.toString()).also {
+            CACHE[file.path] = it
+        }
 
     /**
      * Loads a stylesheet from [file]
      */
-    fun loadStylesheet(file: File) =
-        loadObjectFromDisk(file) as StyleSheet
+    fun loadStylesheet(file: File) : StyleSheet {
+        getCached<StyleSheet>(file)?.apply {
+            return this
+        }
+
+        return (loadObjectFromDisk(file) as StyleSheet).also {
+            CACHE[file.path] = it
+        }
+    }
 
     /**
      * Takes a copy of the HTML files and the meta into [PROJECT_PATH_BACKUP].
