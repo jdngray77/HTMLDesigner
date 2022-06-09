@@ -195,7 +195,10 @@ fun userConfirm(message : String) = Alert(
         message,
         ButtonType.YES,
         ButtonType.NO
-    ).let { it.result == ButtonType.YES }
+    ).let {
+        it.showAndWait()
+        it.result == ButtonType.YES
+    }
 
 
 
