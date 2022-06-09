@@ -1,10 +1,13 @@
 package com.jdngray77.htmldesigner
 
+import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import org.jsoup.nodes.Document
+import java.io.File
 
 /**
  * Model View Controller.
@@ -23,42 +26,28 @@ class MVC (
 
 ) : Subscriber {
 
-    /**
-     * The document that the editor is currently
-     * manipulating
-     */
-    lateinit var openDocument: Document
-        private set
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //region                                                   Undo / Redo
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-    // TODO
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                                Undo / Redo
-    //region                                                   Mutate Data
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-    // TODO
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                                Mutate data
-    //region                                                   Update Display
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-    // TODO
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //region                                                   UpdateDisplay
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    init {
+        EventNotifier.subscribe(this, EventType.EDITOR_LOADED)
+    }
 
     override fun notify(e: EventType) {
-        when (e) {
-            EventType.EDITOR_OPEN_DOCUMENT_CHANGED ->
-                MainView.updateDisplay(openDocument)
-        }
+        if (e == EventType.EDITOR_LOADED)
+            MainView.openDocument(Project.loadDocument(Project.documents().first()))
+
+
+//        when (e) {
+//            EventType.EDITOR_OPEN_DOCUMENT_CHANGED ->
+//                MainView.updateDisplay()
+//        }
+    }
+
+    fun document() = MainView.currentDocument()
+
+    fun newStylesheet(name: String) = Project.createStylesheet(name)
+
+    fun openDocument(document: File) {
+        // TODO this loads the file from disk each time. Can we check to see if it's already loaded?
+        MainView.switchToDocument(Project.loadDocument(document))
     }
 
 }
