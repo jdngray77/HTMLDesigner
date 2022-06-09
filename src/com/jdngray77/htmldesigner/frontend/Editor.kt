@@ -105,7 +105,10 @@ class Editor : Application() {
         scene = loadFXMLScene("MainView.fxml") as Pair<Scene, MainViewController>
 
         // Fullscreen the window, and show it.
-        stage.isFullScreen = true
+        if (!System.getProperty("os.name").contains("Mac"))
+            stage.isFullScreen = true
+
+
         stage.scene = scene.first
         stage.show()
         mvc = MVC(Project.loadOrCreate("./testproject/"), scene.second)
