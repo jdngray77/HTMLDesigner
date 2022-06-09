@@ -6,6 +6,8 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.control.Alert
+import javafx.scene.control.ButtonType
 import javafx.scene.control.TreeItem
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
@@ -182,6 +184,18 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
             Pair<T, Any>(it, loader.getController())
         }
     }
+
+/**
+ * Display a confirmation dialog to confirm or deny an action.
+ *
+ * Returns true if user confirms action, else false.
+ */
+fun userConfirm(message : String) = Alert(
+        Alert.AlertType.CONFIRMATION,
+        message,
+        ButtonType.YES,
+        ButtonType.NO
+    ).let { it.result == ButtonType.YES }
 
 
 
