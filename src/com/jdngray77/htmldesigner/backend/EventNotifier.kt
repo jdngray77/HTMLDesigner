@@ -2,7 +2,6 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
-import com.jdngray77.htmldesigner.log
 
 /**
  * Some examples of types of events.
@@ -25,7 +24,8 @@ enum class EventType {
     ,
     PROJECT_PAGE_DELETED,
     PROJECT_PAGE_CREATED,
-    EDITOR_LOADED
+    EDITOR_LOADED,
+    EDITOR_SELECTED_TAG_CHANGED
 
 
 }

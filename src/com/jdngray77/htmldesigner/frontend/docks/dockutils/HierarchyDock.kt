@@ -1,8 +1,10 @@
 package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
-import com.jdngray77.htmldesigner.StoringTreeItem
+import com.jdngray77.htmldesigner.backend.StoringTreeItem
 import com.jdngray77.htmldesigner.backend.EventType
-import javafx.scene.control.TreeView
+import com.jdngray77.htmldesigner.backend.pack
+import javafx.scene.control.TreeTableView
+import javafx.scene.layout.HBox
 
 /**
  * A dock which can display the hierarchy of anything.
@@ -14,9 +16,15 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
     /**
      * The tree element displayed in this tab.
      */
-    protected val tree = TreeView<String>()
+    protected val tree = TreeTableView<T>()
+
+    /**
+     * A row of buttons to perform actions.
+     */
+    val buttons = HBox()
 
     init {
+        top = buttons
         center = tree
         tree.isEditable = false
     }
@@ -30,6 +38,7 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
     fun setRoot(root: T) = setRoot(StoringTreeItem(root, titler), root).apply {
         tree.root = this
         tree.root.isExpanded = true
+        tree.pack()
     }
 
     /**

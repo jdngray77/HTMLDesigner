@@ -1,8 +1,7 @@
 package com.jdngray77.htmldesigner.backend.data
 
 import com.jdngray77.htmldesigner.*
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import org.jsoup.Jsoup
@@ -355,7 +354,7 @@ class Project(
 
 
     fun saveDocument(d: Document, path: String) {
-        subFile(path).apply {
+        File(path).apply {
             assertExists()
             writeText(d.toString())
         }

@@ -1,6 +1,6 @@
 package com.jdngray77.htmldesigner.backend.html.dom
 
-import com.jdngray77.htmldesigner.RemoveDuplicates
+import com.jdngray77.htmldesigner.backend.RemoveDuplicates
 import com.jdngray77.htmldesigner.backend.html.style.Style
 import com.jdngray77.htmldesigner.backend.html.style.StyleArray
 import org.jsoup.nodes.Element

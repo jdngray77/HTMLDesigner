@@ -1,6 +1,6 @@
 package com.jdngray77.htmldesigner.backend.html.dom
 
-import com.jdngray77.htmldesigner.UserWarning
+import com.jdngray77.htmldesigner.backend.UserWarning
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist

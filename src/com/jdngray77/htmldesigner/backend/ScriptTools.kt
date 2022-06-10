@@ -1,22 +1,25 @@
-package com.jdngray77.htmldesigner
+package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.frontend.Editor
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
+import com.sun.javafx.scene.control.skin.TableViewSkin
+import com.sun.javafx.scene.control.skin.TreeTableViewSkin
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
-import javafx.scene.control.Alert
-import javafx.scene.control.ButtonType
-import javafx.scene.control.TreeItem
+import javafx.scene.control.*
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
+import org.controlsfx.control.Notifications
+import org.controlsfx.control.PropertySheet.Item
 import org.jsoup.nodes.Element
 import java.awt.Toolkit
 import java.io.*
 import java.nio.file.Files
+import java.util.function.Consumer
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.declaredMembers
 
 /**
  * # Container for generic utility methods to aid you in doing whatever it is you do.
@@ -120,12 +123,27 @@ fun Element.saveToDisk(f: File) {
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 fun WarnError(e: Throwable) {
-    Alert(
-        Alert.AlertType.ERROR,
-        "An internal problem has occurred. \n ${if (e.message == null) "" else e.message}",
-        ButtonType.OK
-    ).show()
-    e.message?.let { DeveloperWarning(it) }
+
+    Notifications.create()
+        .title("An error has occurred with the editor.")
+        .text("${e::class.simpleName} \n ${
+                if (e.message != null)
+                    e.message 
+                else if (e.cause?.message != null)
+                    e.cause!!.message
+                else    
+                    "No further explanation has been provided."
+                    }")
+        .onAction {
+            mvcIfAvail()?.MainView?.textEditor_Open(
+                StringWriter().let {
+                    e.printStackTrace(PrintWriter(it))
+                    it.toString()
+                }
+
+            )
+        }
+        .showWarning()
 }
 
 
@@ -210,6 +228,32 @@ fun userConfirm(message : String, vararg buttonType: ButtonType) = Alert(
 }
 
 
+fun <T> TreeItem<T>.applyToAll(e: Consumer<TreeItem<T>>) {
+    this.children.forEach {
+        it.applyToAll(e)
+    }
+    e.accept(this)
+}
+
+
+fun TreeTableView<*>.pack() {
+    columns.forEach {
+        it.pack(this)
+    }
+}
+
+fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
+    table.skin?.let {
+        TreeTableViewSkin::class.java.getDeclaredMethod(
+            "resizeColumnToFitContent",
+            TreeTableColumn::class.java,
+            Int::class.java
+        ).apply {
+            isAccessible = true
+            invoke(it, this@pack, -1)
+        }
+    }
+}
 
 
 
@@ -232,4 +276,4 @@ fun <R, T> changeProperty(prop : KProperty<*    >, rec: R, value: T) {
  * I.e it can store the underlying data of a tree item, but display a different string to the user.
  */
 class StoringTreeItem <T> (val data
-: T?, titler : (T?) -> String) : TreeItem<String>(titler(data))
+: T?, titler : (T?) -> String) : TreeItem<T>(data)

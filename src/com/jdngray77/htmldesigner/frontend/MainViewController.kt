@@ -1,17 +1,16 @@
 package com.jdngray77.htmldesigner.frontend
 
-import com.jdngray77.htmldesigner.CamelToSentence
+import com.jdngray77.htmldesigner.backend.CamelToSentence
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.ExceptionListener
-import com.jdngray77.htmldesigner.backend.html.dom.Tag
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
 import com.jdngray77.htmldesigner.frontend.docks.Pages
 import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
-import com.jdngray77.htmldesigner.loadFXMLComponent
-import com.jdngray77.htmldesigner.userConfirm
+import com.jdngray77.htmldesigner.backend.loadFXMLComponent
+import com.jdngray77.htmldesigner.backend.userConfirm
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.docks.TagProperties
 import javafx.fxml.FXML
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Label
@@ -51,7 +50,7 @@ class MainViewController {
 
 
 
-    private val openEditors = ArrayList<DocumentEditor>()
+
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -65,10 +64,8 @@ class MainViewController {
     @FXML
     fun initialize() {
 
-
-
         htmlEditor.setOnContextMenuRequested {
-            textEditor_Open(currentDocument().html())
+            textEditor_Open(mvc().currentDocument().html())
         }
 
         htmlEditor.setOnKeyReleased {
@@ -90,90 +87,14 @@ class MainViewController {
         dockLeftBottom.tabs.add(Tab(Pages::class.simpleName!!.CamelToSentence(), Pages()))
         dockLeftBottom.tabs.add(Tab(TagHierarchy::class.simpleName!!.CamelToSentence(), TagHierarchy()))
         dockLeftBottom.tabs.add(Tab(ProjectDock::class.simpleName!!.CamelToSentence(), ProjectDock()))
+
+        dockRight.tabs.add(Tab(TagProperties::class.simpleName!!.CamelToSentence(), TagProperties()))
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                Setup
     //region                                                  MCV API
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-    /**
-     * It returns the document of the current editor
-     */
-    fun currentDocument() =
-        currentEditor().document
-
-    /**
-     * It returns the current editor
-     */
-    fun currentEditor() =
-        findDocumentFor(dockEditors.selectionModel.selectedItem)
-
-    /**
-     * Create a new document editor, set the document,
-     * add the editor to the list of open editors, and switch to the
-     * new editor
-     *
-     * @param document Document - The document to open
-     */
-    fun openDocument(document: Document) {
-        loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
-            Tab(document.title(), first).let {
-                dockEditors.tabs.add(it)
-
-                first.prefWidthProperty().bind(dockEditors.widthProperty())
-                first.prefHeightProperty().bind(dockEditors.heightProperty())
-
-                (second as DocumentEditor).apply {
-                    setDocument(document, it)
-                    openEditors.add(this)
-                    switchToEditor(this)
-
-                    it.setOnCloseRequest {
-                        if (isDirty) {
-                            if (userConfirm("${document.title()} has not been saved. Save?", ButtonType.YES, ButtonType.CANCEL) == ButtonType.YES) {
-                                save()
-                            } else
-                                it.consume()
-                        }
-                    }
-                }
-
-
-
-                it.setOnClosed {
-                    openEditors.remove(second)
-                }
-            }
-        }
-    }
-
-
-    /**
-     * This function switches to the editor tab that is passed in as a parameter
-     *
-     * @param editor DocumentEditor - The editor to switch to
-     */
-    fun switchToEditor(editor: DocumentEditor) {
-        dockEditors.selectionModel.select(editor.tab)
-        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
-    }
-
-
-    /**
-     * "If there's an editor for the given document, switch to it, otherwise create a new editor."
-     *
-     * The first line of the function is a call to the function findEditorFor, which returns an Editor?. If it's not null,
-     * the apply function is called on it. The apply function takes a lambda as its argument, and the lambda is executed
-     * with the Editor as its receiver. The lambda in this case is a call to the function switchToEditor, which takes an
-     * Editor as its argument
-     *
-     * @param document The document to switch to.
-     */
-    fun switchToDocument(document: Document) =
-        findEditorFor(document)?.apply { switchToEditor(this) }
-            ?: run { openDocument(document) }
-
     /**
      * Updates the GUI to represent
      * the [openDocument].
@@ -219,21 +140,25 @@ class MainViewController {
     }
 
 
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                               MCV API
+    //region                                                    Menu
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    fun menu_debug_err() {
+        throw Exception("This is a test error, not a real problem.")
+    }
+
+    fun menu_debug_dirty() {
+        mvc().currentEditor().documentChanged()
+    }
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                                 Menu
     //region                                          Private Utility Methods
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    fun findEditorFor(document: Document)  =
-        openEditors.find { it.document == document }
 
-    fun findEditorFor(tab: Tab)  =
-        openEditors.find { it.tab == tab }
-
-    fun findDocumentFor(tab: Tab) = openEditors.first {
-            it.tab == tab
-    }
 
 
 }
