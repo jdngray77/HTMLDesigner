@@ -3,13 +3,17 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.CamelToSentence
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.ExceptionListener
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
 import com.jdngray77.htmldesigner.frontend.docks.Pages
 import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
 import com.jdngray77.htmldesigner.loadFXMLComponent
+import com.jdngray77.htmldesigner.userConfirm
 import javafx.fxml.FXML
+import javafx.scene.control.ButtonType
 import javafx.scene.control.Label
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
@@ -223,6 +227,9 @@ class MainViewController {
 
     fun findEditorFor(document: Document)  =
         openEditors.find { it.document == document }
+
+    fun findEditorFor(tab: Tab)  =
+        openEditors.find { it.tab == tab }
 
     fun findDocumentFor(tab: Tab) = openEditors.first {
             it.tab == tab
