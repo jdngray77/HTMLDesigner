@@ -4,6 +4,7 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -59,6 +60,7 @@ class MVC (
      * (i.e it's already been deleted) it will be ignored.
      */
     fun deleteTag(vararg tag: Element) {
+        if (tag.isEmpty()) return
 
         if (!
             if (tag.size > 1)
