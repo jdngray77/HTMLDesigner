@@ -1,5 +1,6 @@
 package com.jdngray77.htmldesigner.backend
 
+import com.jdngray77.htmldesigner.backend.html.dom.thread
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit
  */
 object BackgroundTask : Subscriber {
 
-    private val threadPool = Executors.newCachedThreadPool()
+    private val threadPool : ThreadPoolExecutor = Executors.newCachedThreadPool()
 
     init {
         EventNotifier.subscribe(this, EventType.USER_EXIT)
@@ -35,7 +36,7 @@ object BackgroundTask : Subscriber {
      */
     @Synchronized
     fun submit(runnable: Runnable) {
-        if (!threadPool.isShutdown)
+        if (!threadPool.isShutdown && threadPool.isTerminating)
             threadPool.submit(runnable)
     }
 
@@ -45,11 +46,7 @@ object BackgroundTask : Subscriber {
      *
      * @return Tasks waiting in the [threadPool] queue for execution.
      */
-    fun scheduledTasks(): BlockingQueue<Runnable> {
-        val scheduled = threadPool as ThreadPoolExecutor
-
-        return scheduled.queue
-    }
+    fun scheduledTasks() = threadPool.queue
 
 
     /**
@@ -62,12 +59,22 @@ object BackgroundTask : Subscriber {
         threadPool.shutdown()
 
         try {
+            // Politely wait for current tasks to close.
             if (!threadPool.awaitTermination(10L, TimeUnit.SECONDS))
-                threadPool.shutdownNow() // terminates remaining tasks after 10 seconds
+                // If there are still tasks running after timeout, force close.
+                onShutdownInterrupted()
         } catch (e: InterruptedException) {
-            threadPool.shutdownNow()
-            // TODO - dialog functionality for user in the event of an error
+            // if this thread was interrupted whilst waiting for tasks to close
+            onShutdownInterrupted()
         }
+    }
+
+    /**
+     * Handles a failure to close the thread pool.
+     */
+    private fun onShutdownInterrupted() {
+        // TODO - dialog functionality for user in the event of an error
+        threadPool.shutdownNow()
     }
 
     override fun notify(e: EventType) {
