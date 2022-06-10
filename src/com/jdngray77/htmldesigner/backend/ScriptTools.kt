@@ -123,7 +123,6 @@ fun Element.saveToDisk(f: File) {
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 fun WarnError(e: Throwable) {
-
     Notifications.create()
         .title("An error has occurred with the editor.")
         .text("${e::class.simpleName} \n ${

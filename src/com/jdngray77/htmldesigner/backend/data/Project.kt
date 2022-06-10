@@ -334,9 +334,10 @@ class Project(
         File(subPath(loc)).apply {
             createNewFile()
             doc.title(name)
+            saveDocument(doc, path)
         }
 
-        saveDocument(doc, loc)
+
 
         saveMeta()
 

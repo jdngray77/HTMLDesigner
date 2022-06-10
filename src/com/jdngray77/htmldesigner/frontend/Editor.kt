@@ -1,13 +1,23 @@
 package com.jdngray77.htmldesigner.frontend
 
+import com.jdngray77.htmldesigner.ExitReasons
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.WarnError
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.loadFXMLScene
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import javafx.application.Application
+import javafx.application.Platform
 import javafx.scene.Scene
+import javafx.scene.control.Alert
+import javafx.scene.control.ButtonType
+import javafx.stage.DirectoryChooser
+import javafx.stage.FileChooser
 import javafx.stage.Stage
+import java.io.File
+import kotlin.system.exitProcess
 
 
 /**
@@ -93,6 +103,8 @@ class Editor : Application() {
      */
     private lateinit var scene: Pair<Scene, MainViewController>
 
+    lateinit var stage: Stage
+
     /**
      * Loads and initalises the GUI.
      *
@@ -100,6 +112,8 @@ class Editor : Application() {
      * ocour until this method has returned.
      */
     override fun start(stage: Stage) {
+        this.stage = stage
+
         EDITOR = this
 
         // Load the main view from FXML.
@@ -112,6 +126,50 @@ class Editor : Application() {
 
         stage.scene = scene.first
         stage.show()
-        mvc = MVC(Project.loadOrCreate("./testproject/"), scene.second)
+
+
+        var pathToLoad : String? = null
+
+        while (true) {
+            try {
+                pathToLoad = userLoadProject()?.path
+            } catch (e: Exception) { }
+
+
+            if (pathToLoad != null)
+                break;
+        }
+
+        mvc = MVC(Project.loadOrCreate(pathToLoad!!), scene.second)
     }
+
+
+    private fun userLoadProject(): File? {
+
+        val ButtonTypeLoad = ButtonType("Load existing Project")
+        val ButtonTypeCreate = ButtonType("Create a new Project")
+
+        val x = Alert(Alert.AlertType.INFORMATION, "Welcome! What would you like to do?", ButtonTypeCreate, ButtonTypeLoad)
+        x.showAndWait()
+
+        return when (x.result) {
+            ButtonTypeLoad -> {
+                DirectoryChooser().let {
+                    it.title = "Locate a project root"
+                    it.showDialog(stage)
+                }
+            }
+
+            ButtonTypeCreate -> {
+                FileChooser().let {
+                    it.title = "Create a new project"
+                    it.showSaveDialog(stage)
+                }
+            }
+            else -> null
+        }
+
+
+    }
+
 }
