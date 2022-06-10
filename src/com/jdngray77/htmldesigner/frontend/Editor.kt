@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.ExceptionListener
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.loadFXMLScene
 import com.sun.org.apache.xpath.internal.operations.Bool
@@ -30,6 +31,9 @@ class Editor : Application() {
          * Static reference to the model view controller.
          *
          * > ***NOTE WELL : CANNOT BE ACCESSED BEFORE THE EDITOR HAS LOADED.***
+         *
+         * If accessing from somewhere where the mvc *may* not yet be loaded,
+         * consider using [mvcIfAvail]
          */
         fun mvc() = EDITOR.mvc!!
 
@@ -107,7 +111,6 @@ class Editor : Application() {
         // Fullscreen the window, and show it.
         if (!System.getProperty("os.name").contains("Mac"))
             stage.isFullScreen = true
-
 
         stage.scene = scene.first
         stage.show()

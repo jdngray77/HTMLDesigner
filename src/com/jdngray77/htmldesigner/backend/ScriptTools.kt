@@ -119,10 +119,18 @@ fun Element.saveToDisk(f: File) {
 //                                                        Logging
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+fun WarnError(e: Throwable) {
+    Alert(
+        Alert.AlertType.ERROR,
+        "An internal problem has occurred. \n ${if (e.message == null) "" else e.message}",
+        ButtonType.OK
+    ).show()
+    e.message?.let { DeveloperWarning(it) }
+}
 
 
 fun DeveloperWarning(string: String) {
-    System.err.println(string)
+    UserWarning(string)
 }
 
 fun UserWarning(string: String) {
@@ -190,15 +198,16 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
  *
  * Returns true if user confirms action, else false.
  */
-fun userConfirm(message : String) = Alert(
-        Alert.AlertType.CONFIRMATION,
-        message,
-        ButtonType.YES,
-        ButtonType.NO
-    ).let {
-        it.showAndWait()
-        it.result == ButtonType.YES
-    }
+fun userConfirm(message : String) = userConfirm(message, ButtonType.NO, ButtonType.YES) == ButtonType.YES
+
+fun userConfirm(message : String, vararg buttonType: ButtonType) = Alert(
+    Alert.AlertType.CONFIRMATION,
+    message,
+    *buttonType
+).let {
+    it.showAndWait()
+    return@let it.result
+}
 
 
 

@@ -9,6 +9,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
+import java.sql.Time
 import java.time.Instant
 import java.util.*
 import kotlin.collections.HashMap
@@ -103,27 +104,27 @@ class Project(
     /**
      * The project's HTML directory
      */
-    val HTML = File(subFile(PROJECT_PATH_HTML))
+    val HTML = File(subPath(PROJECT_PATH_HTML))
 
     /**
      * The project's javascript directory
      */
-    val JS = File(subFile(PROJECT_PATH_JS))
+    val JS = File(subPath(PROJECT_PATH_JS))
 
     /**
      * The project's CSS directory
      */
-    val CSS = File(subFile(PROJECT_PATH_CSS))
+    val CSS = File(subPath(PROJECT_PATH_CSS))
 
     /**
      * The project's MEDIA directory
      */
-    val MEDIA = File(subFile(PROJECT_PATH_MEDIA))
+    val MEDIA = File(subPath(PROJECT_PATH_MEDIA))
 
     /**
      * The project's backup directory
      */
-    val BACKUP = File(subFile(PROJECT_PATH_BACKUP))
+    val BACKUP = File(subPath(PROJECT_PATH_BACKUP))
 
     /**
      * Storage of any document file after load.
@@ -205,11 +206,12 @@ class Project(
         with(locationOnDisk) {
             mkdirs()
 
-            creatSubDirectory(PROJECT_PATH_BACKUP)
-            creatSubDirectory(PROJECT_PATH_CSS)
-            creatSubDirectory(PROJECT_PATH_HTML)
-            creatSubDirectory(PROJECT_PATH_JS)
-            creatSubDirectory(PROJECT_PATH_MEDIA)
+            createSubDirectory(PROJECT_PATH_BACKUP)
+            createSubDirectory(PROJECT_PATH_LOGS)
+            createSubDirectory(PROJECT_PATH_CSS)
+            createSubDirectory(PROJECT_PATH_HTML)
+            createSubDirectory(PROJECT_PATH_JS)
+            createSubDirectory(PROJECT_PATH_MEDIA)
         }
     }
 
@@ -217,8 +219,17 @@ class Project(
      * Creates a directory within the project
      * structure.
      */
-    private fun creatSubDirectory(name: String) =
-        File(subFile(name)).mkdirs()
+    private fun createSubDirectory(name: String) =
+        File(subPath(name)).mkdirs()
+
+    /**
+     * Returns the path of the root of the project,
+     * so that it can be used to point to sub dirs and files.
+     *
+     * i.e `subFile("index.hmtl")
+     */
+    private fun subPath(subpath: String) =
+        locationOnDisk.path + "/" + subpath
 
     /**
      * Returns the path of the root of the project,
@@ -227,15 +238,13 @@ class Project(
      * i.e `subFile("index.hmtl")
      */
     private fun subFile(subpath: String) =
-        locationOnDisk.toPath().toString() + "/" + subpath
+        File(subPath(subpath))
 
     /**
-     * Validates the state of an existing document on the
-     * disk.
-     *
+     * Validates the existance of a file on the disk.
      * @throws NoSuchFileException if it does not exist, but is supposed to.
      */
-    private fun checkProjectDocument(f: File): File {
+    private fun assertProjectFileExists(f: File): File {
         if (!f.exists())
             throw NoSuchFileException(f, reason = "project document is missing!")
 
@@ -243,13 +252,15 @@ class Project(
     }
 
     /**
-     * Validates the state of an existing document on the
+     * Validates the state of an existing HTML document on the
      * disk.
+     *
+     * @param HTMLPath Path to the document (Root to ./HTML/)
      *
      * @throws NoSuchFileException if it does not exist, but is supposed to.
      */
-    private fun checkProjectDocument(f: String) =
-        checkProjectDocument(File(subFile(PROJECT_PATH_HTML + f)))
+    private fun assertHTMLFileExists(HTMLPath: String) =
+        assertProjectFileExists(File(subPath(PROJECT_PATH_HTML + HTMLPath)))
 
     /**
      * The name of this project, as inherited by
@@ -300,7 +311,7 @@ class Project(
     fun saveMeta() {
         backup()
 
-        saveObjectToDisk(subFile(PROJECT_PATH_META))
+        saveObjectToDisk(subPath(PROJECT_PATH_META))
         EventNotifier.notifyEvent(EventType.PROJECT_SAVED)
     }
 
@@ -319,13 +330,15 @@ class Project(
      */
     fun createDocument(subpath: String) : Document {
         val doc = Tag.testDOM.clone()
+        val loc = PROJECT_PATH_HTML + subpath
 
-        File(subFile(PROJECT_PATH_HTML + subpath)).apply {
+        File(subPath(loc)).apply {
             createNewFile()
             doc.title(name)
         }
 
-        saveDocument(doc, subpath)
+        saveDocument(doc, loc)
+
         saveMeta()
 
         EventNotifier.notifyEvent(EventType.PROJECT_NEW_DOCUMENT_CREATED)
@@ -337,8 +350,15 @@ class Project(
      *
      * Notifies [EventType.PROJECT_SAVED]
      */
+    fun saveDocument(d: Document) =
+        saveDocument(d, CACHE.filter { it.value == d }.entries.first().key)
+
+
     fun saveDocument(d: Document, path: String) {
-        checkProjectDocument(path).writeText(d.toString())
+        subFile(path).apply {
+            assertExists()
+            writeText(d.toString())
+        }
         EventNotifier.notifyEvent(EventType.PROJECT_SAVED)
     }
 
@@ -357,7 +377,7 @@ class Project(
         }
 
         with(file) {
-            checkProjectDocument(this)
+            assertProjectFileExists(this)
             return Jsoup.parse(readText()).also {
                 CACHE[file.path] = it
             }
@@ -368,7 +388,7 @@ class Project(
      * Creates a new stylesheet
      */
     fun createStylesheet(name: String) : StyleSheet {
-        File(subFile("$PROJECT_PATH_CSS$name.stylesheet")).apply {
+        File(subPath("$PROJECT_PATH_CSS$name.stylesheet")).apply {
             createNewFile()
             return StyleSheet(name).also {
                 saveStylesheet(it, this)
@@ -405,6 +425,16 @@ class Project(
     fun backup() {
 //        TODO()
         EventNotifier.notifyEvent(EventType.PROJECT_BACKEDUP)
+    }
+
+    fun logError(e : Throwable) {
+        subFile("$PROJECT_PATH_LOGS [ERR] ${Time.from(Instant.now())}.log").apply {
+            createNewFile()
+            printWriter().apply {
+                e.printStackTrace(this)
+                flush()
+            }
+        }
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -444,7 +474,12 @@ class Project(
         /**
          * The location of the project backups, relative to the project root.
          */
-        const val PROJECT_PATH_BACKUP: String = "backup/"
+        const val PROJECT_PATH_BACKUP: String = ".backup/"
+
+        /**
+         * The location of the logs, relative to the project root.
+         */
+        const val PROJECT_PATH_LOGS: String = ".logs/"
 
         /**
          * The location of the project css, relative to the project root.
