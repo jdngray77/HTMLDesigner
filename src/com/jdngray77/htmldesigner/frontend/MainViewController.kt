@@ -1,17 +1,14 @@
 package com.jdngray77.htmldesigner.frontend
 
-import com.jdngray77.htmldesigner.CamelToSentence
+import com.jdngray77.htmldesigner.backend.CamelToSentence
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.ExceptionListener
-import com.jdngray77.htmldesigner.backend.html.dom.Tag
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
 import com.jdngray77.htmldesigner.frontend.docks.Pages
 import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
-import com.jdngray77.htmldesigner.loadFXMLComponent
-import com.jdngray77.htmldesigner.userConfirm
+import com.jdngray77.htmldesigner.backend.loadFXMLComponent
+import com.jdngray77.htmldesigner.backend.userConfirm
 import javafx.fxml.FXML
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Label
@@ -133,8 +130,11 @@ class MainViewController {
                         if (isDirty) {
                             if (userConfirm("${document.title()} has not been saved. Save?", ButtonType.YES, ButtonType.CANCEL) == ButtonType.YES) {
                                 save()
-                            } else
+                                setAction("Closed ${document.title()}")
+                            } else {
+                                setAction("Not closing ${document.title()} ; It's not been saved.")
                                 it.consume()
+                            }
                         }
                     }
                 }
@@ -222,6 +222,19 @@ class MainViewController {
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                               MCV API
+    //region                                                    Menu
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    fun menu_debug_err() {
+        throw Exception("This is a test error, not a real problem.")
+    }
+
+    fun menu_debug_dirty() {
+        currentEditor().dirty()
+    }
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                                 Menu
     //region                                          Private Utility Methods
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
