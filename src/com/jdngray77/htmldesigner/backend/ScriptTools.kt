@@ -2,15 +2,16 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
+import com.sun.javafx.scene.control.skin.TableViewSkin
+import com.sun.javafx.scene.control.skin.TreeTableViewSkin
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
-import javafx.scene.control.Alert
-import javafx.scene.control.ButtonType
-import javafx.scene.control.TreeItem
+import javafx.scene.control.*
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import org.controlsfx.control.Notifications
+import org.controlsfx.control.PropertySheet.Item
 import org.jsoup.nodes.Element
 import java.awt.Toolkit
 import java.io.*
@@ -18,6 +19,7 @@ import java.nio.file.Files
 import java.util.function.Consumer
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.declaredMembers
 
 /**
  * # Container for generic utility methods to aid you in doing whatever it is you do.
@@ -234,6 +236,24 @@ fun <T> TreeItem<T>.applyToAll(e: Consumer<TreeItem<T>>) {
 }
 
 
+fun TreeTableView<*>.pack() {
+    columns.forEach {
+        it.pack(this)
+    }
+}
+
+fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
+    table.skin?.let {
+        TreeTableViewSkin::class.java.getDeclaredMethod(
+            "resizeColumnToFitContent",
+            TreeTableColumn::class.java,
+            Int::class.java
+        ).apply {
+            isAccessible = true
+            invoke(it, this@pack, -1)
+        }
+    }
+}
 
 
 
