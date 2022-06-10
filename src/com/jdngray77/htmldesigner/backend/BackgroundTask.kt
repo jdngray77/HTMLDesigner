@@ -22,17 +22,6 @@ object BackgroundTask : Subscriber {
     }
 
 
-    /**
-     * ### Executes a [runnable] task.
-     *
-     * Executes the given task on a new thread, a pooled thread or the calling thread, at the discretion of the
-     * [threadPool]. There are no guarantees that the task will be executed immediately.
-     */
-    fun execute(runnable: Runnable) {
-        threadPool.execute(runnable)
-    }
-
-
     @Deprecated("Currently not implemented.", ReplaceWith("TODO()"))
     fun runOnUIThread(runnable: Runnable) {
         TODO()
@@ -76,7 +65,7 @@ object BackgroundTask : Subscriber {
             if (!threadPool.awaitTermination(10L, TimeUnit.SECONDS))
                 threadPool.shutdownNow() // terminates remaining tasks after 10 seconds
         } catch (e: InterruptedException) {
-            threadPool.shutdownNow() // if await termination's calling thread is interrupted, shutdown the thread pool
+            threadPool.shutdownNow()
             // TODO - dialog functionality for user in the event of an error
         }
     }
