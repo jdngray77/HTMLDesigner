@@ -120,12 +120,27 @@ fun Element.saveToDisk(f: File) {
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 fun WarnError(e: Throwable) {
-    Alert(
-        Alert.AlertType.ERROR,
-        "An internal problem has occurred. \n ${if (e.message == null) "" else e.message}",
-        ButtonType.OK
-    ).show()
-    e.message?.let { DeveloperWarning(it) }
+
+    Notifications.create()
+        .title("An error has occurred with the editor.")
+        .text("${e::class.simpleName} \n ${
+                if (e.message != null)
+                    e.message 
+                else if (e.cause?.message != null)
+                    e.cause!!.message
+                else    
+                    "No further explanation has been provided."
+                    }")
+        .onAction {
+            mvcIfAvail()?.MainView?.textEditor_Open(
+                StringWriter().let {
+                    e.printStackTrace(PrintWriter(it))
+                    it.toString()
+                }
+
+            )
+        }
+        .showWarning()
 }
 
 
