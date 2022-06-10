@@ -1,7 +1,6 @@
-package com.jdngray77.htmldesigner
+package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.frontend.Editor
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
@@ -11,10 +10,12 @@ import javafx.scene.control.ButtonType
 import javafx.scene.control.TreeItem
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
+import org.controlsfx.control.Notifications
 import org.jsoup.nodes.Element
 import java.awt.Toolkit
 import java.io.*
 import java.nio.file.Files
+import java.util.function.Consumer
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty1
 
@@ -225,6 +226,14 @@ fun userConfirm(message : String, vararg buttonType: ButtonType) = Alert(
 }
 
 
+fun <T> TreeItem<T>.applyToAll(e: Consumer<TreeItem<T>>) {
+    this.children.forEach {
+        it.applyToAll(e)
+    }
+    e.accept(this)
+}
+
+
 
 
 
@@ -247,4 +256,4 @@ fun <R, T> changeProperty(prop : KProperty<*    >, rec: R, value: T) {
  * I.e it can store the underlying data of a tree item, but display a different string to the user.
  */
 class StoringTreeItem <T> (val data
-: T?, titler : (T?) -> String) : TreeItem<String>(titler(data))
+: T?, titler : (T?) -> String) : TreeItem<T>(data)
