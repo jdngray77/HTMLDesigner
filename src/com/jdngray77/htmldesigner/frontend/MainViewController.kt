@@ -125,6 +125,12 @@ class MainViewController {
                     openEditors.add(this)
                     switchToEditor(this)
                 }
+
+
+
+                it.setOnClosed {
+                    openEditors.remove(second)
+                }
             }
         }
     }
