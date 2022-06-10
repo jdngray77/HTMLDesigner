@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
  */
 object BackgroundTask : Subscriber {
 
-    private val threadPool = Executors.newCachedThreadPool()
+    private val threadPool : ThreadPoolExecutor = Executors.newCachedThreadPool()
 
     init {
         EventNotifier.subscribe(this, EventType.USER_EXIT)
@@ -56,11 +56,7 @@ object BackgroundTask : Subscriber {
      *
      * @return Tasks waiting in the [threadPool] queue for execution.
      */
-    fun scheduledTasks(): BlockingQueue<Runnable> {
-        val scheduled = threadPool as ThreadPoolExecutor
-
-        return scheduled.queue
-    }
+    fun scheduledTasks() = threadPool.queue
 
 
     /**
