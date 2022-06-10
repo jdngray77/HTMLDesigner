@@ -13,3 +13,26 @@ Projected features :
  - Debug with webtools
  - Local & git VCS
  - No need to know or edit HTML or CSS.
+
+
+# Getting Started Guide
+> Incomplete, will be maintained as the programme is developed.
+
+
+## Creating a project
+There's no option to, currently.
+
+Upon launch, a test project will be created / loaded in the pwd.
+
+## Creating a document
+You can't via the IDE currently, but you can
+edit the project files externally.
+
+Upon project creation, a template `index.html` is created and opened.
+
+## Opening a document.
+In the `Pages` dock, in the lower left of the display, find the page you wish to open and select it.
+
+A Document Editor containing that document will open in the center of the display.
+
+Multiple document editors can be swapped between by switching tabs. Where appropriate, the rest of the IDE will automatically update to reflect the Document Editor that is currently selected and displaying.
