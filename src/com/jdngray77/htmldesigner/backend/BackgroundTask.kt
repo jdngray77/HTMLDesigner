@@ -46,7 +46,7 @@ object BackgroundTask : Subscriber {
      */
     @Synchronized
     fun submit(runnable: Runnable) {
-        if (!threadPool.isShutdown)
+        if (!threadPool.isShutdown && threadPool.isTerminating)
             threadPool.submit(runnable)
     }
 
