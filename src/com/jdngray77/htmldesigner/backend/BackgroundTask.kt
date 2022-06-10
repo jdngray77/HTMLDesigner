@@ -78,7 +78,14 @@ object BackgroundTask : Subscriber {
         } catch (e: InterruptedException) {
             threadPool.shutdownNow() // if await termination's calling thread is interrupted, shutdown the thread pool
             // TODO - dialog functionality for user in the event of an error
-        }
+    }
+
+    /**
+     * Handles a failure to close the thread pool.
+     */
+    private fun onShutdownInterrupted() {
+        // TODO - dialog functionality for user in the event of an error
+        threadPool.shutdownNow()
     }
 
     override fun notify(e: EventType) {
