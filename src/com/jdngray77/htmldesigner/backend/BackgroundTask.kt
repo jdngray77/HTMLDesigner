@@ -1,7 +1,5 @@
 package com.jdngray77.htmldesigner.backend
 
-import com.jdngray77.htmldesigner.backend.html.dom.thread
-import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -16,7 +14,7 @@ import java.util.concurrent.TimeUnit
  */
 object BackgroundTask : Subscriber {
 
-    private val threadPool : ThreadPoolExecutor = Executors.newCachedThreadPool()
+    private val threadPool : ThreadPoolExecutor = Executors.newCachedThreadPool() as ThreadPoolExecutor
 
     init {
         EventNotifier.subscribe(this, EventType.USER_EXIT)
