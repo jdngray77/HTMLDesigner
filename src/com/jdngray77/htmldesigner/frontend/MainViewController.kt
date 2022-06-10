@@ -124,6 +124,15 @@ class MainViewController {
                     setDocument(document, it)
                     openEditors.add(this)
                     switchToEditor(this)
+
+                    it.setOnCloseRequest {
+                        if (isDirty) {
+                            if (userConfirm("${document.title()} has not been saved. Save?", ButtonType.YES, ButtonType.CANCEL) == ButtonType.YES) {
+                                save()
+                            } else
+                                it.consume()
+                        }
+                    }
                 }
 
 
