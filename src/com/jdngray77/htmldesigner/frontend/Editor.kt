@@ -3,10 +3,8 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.ExceptionListener
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.loadFXMLScene
-import com.sun.org.apache.xpath.internal.operations.Bool
+import com.jdngray77.htmldesigner.backend.loadFXMLScene
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage

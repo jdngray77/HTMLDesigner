@@ -2,7 +2,6 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
-import com.jdngray77.htmldesigner.log
 
 /**
  * Some examples of types of events.

@@ -1,6 +1,5 @@
 package com.jdngray77.htmldesigner.backend
 
-import com.jdngray77.htmldesigner.WarnError
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import java.lang.Thread.UncaughtExceptionHandler
 
