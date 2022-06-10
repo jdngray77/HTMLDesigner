@@ -74,12 +74,17 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
 
         tree.setOnMouseClicked {
             selectedTags().apply {
-                mvc().MainView.textEditor_Open(
-                    if (size != 1)
-                        ""
-                    else
-                        first().toString()
-                )
+                mvc().let {
+                    it.MainView.textEditor_Open(
+                        if (size != 1) {
+                            it.currentEditor().selectedTag = null
+                            ""
+                        } else {
+                            it.currentEditor().selectedTag = first()
+                            first().toString()
+                        }
+                    )
+                }
             }
         }
 
@@ -120,6 +125,9 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
                 }
             }
         }
+
+
+        tree.pack()
     }
 
     /**
@@ -137,7 +145,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
     override fun notify(e: EventType) {
         //TODO remove this once notifier is completed
         if (e == EventType.EDITOR_DOCUMENT_SWITCH || e == EventType.EDITOR_DOCUMENT_EDITED)
-            showDocument(mvc().MainView.currentDocument())
+            showDocument(mvc().currentDocument())
     }
 
     /**
