@@ -161,6 +161,10 @@ fun AlertUser(message: String) {
     Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK).showAndWait()
 }
 
+fun AlertUserOfError(message: String) {
+    Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait()
+}
+
 
 
 

@@ -547,20 +547,26 @@ class Project(
         const val PROJECT_PATH_MEDIA: String = "MEDIA/"
 
 
-
+        /**
+         * Creates a new project at the specified location.
+         *
+         * @param path The path to the project directory.
+         */
+        fun create(path : String) = Project(File(path))
 
         /**
-         * Attempts to load a project from disk, if it exists.
+         * Loads a project from disk
          *
-         * If there is no project at the [path], then one is created.
+         * If the project meta file exists, load it, validate it, and return it.
          *
-         * @return the existing or new project.
-         * @throws InvalidClassException if a project exists, but was made by a different version of the editor and cannot be loaded.
+         * @param path The path to the project folder
+         * @return A Project object
          */
-        fun loadOrCreate(path: String): Project? {
+        fun load(path : String) : Project? {
             File("$path/$PROJECT_PATH_META").apply {
-                if (exists()) {
-                    return try {
+                if (!exists())
+                    throw NoSuchFileException(this, reason = "\n\nThere is no $PROJECT_PATH_META file in ${parentFile.name}. \nAre you sure this is the right folder?")
+                return try {
                         val proj = loadObjectFromDisk(this) as Project
                         proj.validate()
                         logStatus("Loaded Existing Project '${proj.locationOnDisk.name}'")
@@ -570,9 +576,7 @@ class Project(
                                 "To load this project, you need an editor that supports the following project version : \n\n${Project::class.hashCode()}\n\n" +
                                 "To find what editor version you need, visit \n\nhttps://github.com/jdngray77/HTMLDesigner/wiki/IDE-to-Project-Version-Map")
                         null
-                    }
-                }
-                return Project(File(path))
+                   }
             }
         }
 
