@@ -115,9 +115,9 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
             createDocument(
                 (contextOrSelectedOrNull()?.let {
                     if (it.isDirectory)
-                        it.relativeTo(HTML).path + "/"
+                        it.relativeTo(HTML).path  + "/"
                     else
-                        it.relativeTo(HTML).parentFile.path
+                        it.relativeTo(HTML).parentFile?.let{ it.path + "/" } ?: ""
                 } ?: "")
                         +
                         TextInputDialog("FancyPage.html").let{

@@ -4,6 +4,8 @@ import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
@@ -12,6 +14,7 @@ import java.io.InvalidClassException
 import java.sql.Time
 import java.time.Instant
 import java.util.*
+import javax.print.Doc
 import kotlin.collections.HashMap
 
 /*
@@ -355,18 +358,30 @@ class Project(
             if (!createNewFile())
                 throw IOException("Could not create file")
 
-
             doc.title(name)
             doc.getElementById("PageTitle")?.text(name)
 
 
             saveDocument(doc, path)
+            CACHE[path] = doc
         }
 
         saveMeta()
 
+
+
         EventNotifier.notifyEvent(EventType.PROJECT_NEW_DOCUMENT_CREATED)
         return doc
+    }
+
+    fun fileForDocument(d: Document) : File {
+        CACHE.entries.find { it.value == d}
+        .apply {
+            if (this == null)
+                throw UnloadedDocumentException(d)
+
+            return File(key)
+        }
     }
 
     /**
@@ -560,5 +575,9 @@ class Project(
                 return Project(File(path))
             }
         }
+
+        fun Document.projectFile() = mvc().Project.fileForDocument(this)
     }
+
+    class UnloadedDocumentException(val d: Document) : Exception("The file for ${d.title()}.html was required, but the file was not loaded.")
 }

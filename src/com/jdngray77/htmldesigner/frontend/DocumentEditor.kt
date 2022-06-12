@@ -2,6 +2,7 @@ package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import javafx.event.Event
 import javafx.fxml.FXML
@@ -9,6 +10,7 @@ import javafx.scene.control.Tab
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import java.io.File
 
 /**
  * # Central document editor.
@@ -28,6 +30,12 @@ class DocumentEditor {
      * The document being edited.
      */
     lateinit var document : Document
+        private set
+
+    /**
+     * The document being edited.
+     */
+    lateinit var file : File
         private set
 
     /**
@@ -101,6 +109,7 @@ class DocumentEditor {
     fun setDocument(document: Document, tab: Tab) {
         if (this::document.isInitialized) return
 
+        this.file = document.projectFile()
         this.document = document
         this.tab = tab
 
@@ -127,9 +136,13 @@ class DocumentEditor {
 
         if (e.isConsumed) return
 
+        forceClose()
+    }
+
+    fun forceClose() {
         mvc().MainView.dockEditors.tabs.remove(tab)
 
-        tab.onClosed?.handle(e)
+        tab.onClosed?.handle(null)
     }
 
     companion object {
