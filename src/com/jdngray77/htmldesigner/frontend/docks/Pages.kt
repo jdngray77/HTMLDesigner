@@ -62,10 +62,7 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
             MenuItem("Delete").also {
                 it.setOnAction {
                     contextItem?.let { it1 -> mvc().delete(it1) }
-                    // TODO deletion logic shouldn't be here.
-                    // FIXME this does not clear the document from the editor or
-                    //       project cache.
-
+                    refresh()
                 }
             },
             MenuItem("「TODO」Cut"),
