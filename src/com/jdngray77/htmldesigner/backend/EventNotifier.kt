@@ -75,7 +75,7 @@ object EventNotifier {
             it.notify(e)
         }
 
-        log("Notified $e to ${tempList.size} Subscribers ($tempList)")
+        logStatus("Notified $e to ${tempList.size} Subscribers ($tempList)")
     }
 
 }

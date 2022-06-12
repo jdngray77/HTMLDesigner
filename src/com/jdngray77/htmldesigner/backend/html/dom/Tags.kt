@@ -1,6 +1,6 @@
 package com.jdngray77.htmldesigner.backend.html.dom
 
-import com.jdngray77.htmldesigner.backend.UserWarning
+import com.jdngray77.htmldesigner.backend.logWarning
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
@@ -298,7 +298,7 @@ class html(val title: String) : Tag() {
     override fun serialize(): String =
         super.serialize().let {
             if (Jsoup.isValid(it, Safelist.relaxed()))
-                UserWarning("Jsoup is telling me that the generated HTML is not 100% valid!")
+                logWarning("Jsoup is telling me that the generated HTML is not 100% valid!")
 
             Jsoup.parse(it).let {
                 builtDOMCache = it

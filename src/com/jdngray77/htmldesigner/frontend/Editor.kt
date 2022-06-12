@@ -1,15 +1,12 @@
 package com.jdngray77.htmldesigner.frontend
 
-import com.jdngray77.htmldesigner.ExitReasons
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.WarnError
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.loadFXMLScene
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import javafx.application.Application
-import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
@@ -17,7 +14,6 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.io.File
-import kotlin.system.exitProcess
 
 
 /**
@@ -129,18 +125,22 @@ class Editor : Application() {
 
 
         var pathToLoad : String? = null
+        var projToLoad : Project? = null
 
         while (true) {
             try {
                 pathToLoad = userLoadProject()?.path
-            } catch (e: Exception) { }
+            } catch (_: Exception) { }
 
 
-            if (pathToLoad != null)
-                break;
+            if (pathToLoad == null) continue
+
+            projToLoad = Project.loadOrCreate(pathToLoad)
+
+            if (projToLoad != null) break
         }
 
-        mvc = MVC(Project.loadOrCreate(pathToLoad!!), scene.second)
+        mvc = MVC(projToLoad!!, scene.second)
     }
 
 

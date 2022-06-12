@@ -4,6 +4,8 @@ import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.MainViewController
+import javafx.scene.control.Alert
+import javafx.scene.control.Alert.AlertType
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Tab
 import javafx.scene.layout.BorderPane
@@ -46,7 +48,7 @@ class MVC (
     }
 
     override fun notify(e: EventType) {
-        if (e == EventType.EDITOR_LOADED)
+        if (e == EventType.EDITOR_LOADED && Project.documents().isNotEmpty())
             openDocument(Project.loadDocument(Project.documents().first()))
     }
 
@@ -194,7 +196,6 @@ class MVC (
      */
     fun deleteTag(vararg tag: Element) {
         if (tag.isEmpty()) return
-
         if (!
             if (tag.size > 1)
                 userConfirm("Delete multiple tags? \n\n ${tag.joinToString { "\n" + it.tagName() }}")
@@ -212,6 +213,19 @@ class MVC (
             finishedModifying()
         }
         MainView.setAction("Deleted tag(s)")
+    }
+
+    fun delete(projectFile: File) {
+        if (projectFile.isDirectory &&
+            userConfirm("\"${projectFile.name} is not empty. \\n Are you sure you want to delete it's contents?\""))
+                projectFile.listTree().map { delete(it) }
+
+        if (projectFile.name.endsWith(".html")) {
+            findEditorFor(Project.loadDocument(projectFile))?.requestClose()
+            EventNotifier.notifyEvent(EventType.PROJECT_PAGE_DELETED)
+        }
+
+        Project.deleteFile(projectFile)
     }
 
     /**

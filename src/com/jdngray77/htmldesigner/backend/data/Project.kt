@@ -8,6 +8,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
+import java.io.InvalidClassException
 import java.sql.Time
 import java.time.Instant
 import java.util.*
@@ -138,7 +139,7 @@ class Project(
         createSkeleton()
         createDocument("index.html")
         validate()
-        UserMessage("Created new project '${locationOnDisk.name}'")
+        logStatus("Created new project '${locationOnDisk.name}'")
     }
 
 
@@ -329,15 +330,23 @@ class Project(
      */
     fun createDocument(subpath: String) : Document {
         val doc = Tag.testDOM.clone()
+
         val loc = PROJECT_PATH_HTML + subpath
 
         File(subPath(loc)).apply {
-            createNewFile()
+            if (exists())
+                throw FileAlreadyExistsException(this)
+
+            if (!createNewFile())
+                throw IOException("Could not create file")
+
+
             doc.title(name)
+            doc.getElementById("PageTitle")?.text(name)
+
+
             saveDocument(doc, path)
         }
-
-
 
         saveMeta()
 
@@ -416,6 +425,12 @@ class Project(
             CACHE[file.path] = it
         }
     }
+
+    fun deleteFile(projectFile: File) {
+        CACHE.remove(projectFile.relativeToOrSelf(locationOnDisk).path)
+        projectFile.delete()
+    }
+
 
     /**
      * Takes a copy of the HTML files and the meta into [PROJECT_PATH_BACKUP].
@@ -512,15 +527,22 @@ class Project(
          * @return the existing or new project.
          * @throws InvalidClassException if a project exists, but was made by a different version of the editor and cannot be loaded.
          */
-        fun loadOrCreate(path: String): Project {
+        fun loadOrCreate(path: String): Project? {
             File("$path/$PROJECT_PATH_META").apply {
-                return if (exists())
-                        (loadObjectFromDisk(this) as Project)
-                            .also {
-                                it.validate()
-                                UserMessage("Loaded Existing Project '${it.locationOnDisk.name}'")
-                            }
-                    else Project(File(path))
+                if (exists()) {
+                    return try {
+                        val proj = loadObjectFromDisk(this) as Project
+                        proj.validate()
+                        logStatus("Loaded Existing Project '${proj.locationOnDisk.name}'")
+                        proj
+                    } catch (e: InvalidClassException) {
+                        AlertUser("This project was made with a different version of the IDE, and is incompatible.\n\n" +
+                                "To load this project, you need an editor that supports the following project version : \n\n${Project::class.hashCode()}\n\n" +
+                                "To find what editor version you need, visit \n\nhttps://github.com/jdngray77/HTMLDesigner/wiki/IDE-to-Project-Version-Map")
+                        null
+                    }
+                }
+                return Project(File(path))
             }
         }
     }

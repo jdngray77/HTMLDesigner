@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import javafx.event.Event
 import javafx.fxml.FXML
 import javafx.scene.control.Tab
 import javafx.scene.web.WebView
@@ -118,6 +119,17 @@ class DocumentEditor {
     fun save() {
         mvc().Project.saveDocument(document)
         clean()
+    }
+
+    fun requestClose() {
+        val e = Event(javafx.event.EventType("INTERNAL_CLOSE_REQUEST"))
+        tab.onCloseRequest?.handle(e)
+
+        if (e.isConsumed) return
+
+        mvc().MainView.dockEditors.tabs.remove(tab)
+
+        tab.onClosed?.handle(e)
     }
 
     companion object {
