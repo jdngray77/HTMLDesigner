@@ -1,14 +1,10 @@
 package com.jdngray77.htmldesigner.frontend
 
-import com.jdngray77.htmldesigner.backend.CamelToSentence
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
 import com.jdngray77.htmldesigner.frontend.docks.Pages
 import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
-import com.jdngray77.htmldesigner.backend.loadFXMLComponent
-import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.TagProperties
 import javafx.fxml.FXML
@@ -19,6 +15,7 @@ import javafx.scene.control.TabPane
 import javafx.scene.layout.BorderPane
 import javafx.scene.web.HTMLEditor
 import org.jsoup.nodes.Document
+import java.io.File
 
 
 /**
@@ -151,6 +148,16 @@ class MainViewController {
 
     fun menu_debug_dirty() {
         mvc().currentEditor().documentChanged()
+    }
+
+    fun menu_debug_showcache() {
+        AlertUser(
+            "Project files loaded into cache are : "
+            +
+            mvc().Project.getCache().entries.joinToString {
+                it.key + if (File(it.key).exists()) "" else "(Missing)" +"\n"
+            }
+        )
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

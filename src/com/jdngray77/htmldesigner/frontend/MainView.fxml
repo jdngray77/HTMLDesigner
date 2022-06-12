@@ -51,6 +51,7 @@
                   <Menu mnemonicParsing="false" text="IDE Debug">
                      <items>
                         <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_showcache" text="Show Project File Cache" />
                         <MenuItem mnemonicParsing="false" onAction="#menu_debug_dirty" text="Mark current editor as dirty" />
                      </items>
                   </Menu>

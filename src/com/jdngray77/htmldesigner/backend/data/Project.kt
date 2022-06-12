@@ -134,6 +134,9 @@ class Project(
     @Transient
     private lateinit var CACHE : HashMap<String, Any>
 
+    @Deprecated("This is for debug access only. Cache is internal to the project only.")
+    fun getCache() = CACHE
+
     init {
         checkPath()
         createSkeleton()
@@ -169,6 +172,18 @@ class Project(
 
         if (!this::CACHE.isInitialized)
             CACHE = HashMap()
+        else validateCache()
+    }
+
+    fun validateCache() {
+        val toRemove = ArrayList<String>()
+
+        CACHE.entries.forEach {
+            if (!File(it.key).exists())
+                toRemove.add(it.key)
+        }
+
+        toRemove.map { CACHE.remove(it) }
     }
 
 
@@ -427,8 +442,8 @@ class Project(
     }
 
     fun deleteFile(projectFile: File) {
-        CACHE.remove(projectFile.relativeToOrSelf(locationOnDisk).path)
         projectFile.delete()
+        validateCache()
     }
 
 
