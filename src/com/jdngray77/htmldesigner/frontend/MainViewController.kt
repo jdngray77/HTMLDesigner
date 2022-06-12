@@ -1,18 +1,19 @@
 package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
+import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.Pages
 import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
-import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
 import com.jdngray77.htmldesigner.frontend.docks.TagProperties
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
 import javafx.fxml.FXML
-import javafx.scene.control.ButtonType
 import javafx.scene.control.Label
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
-import javafx.scene.layout.BorderPane
+import javafx.scene.input.Clipboard
+import javafx.scene.input.ClipboardContent
 import javafx.scene.web.HTMLEditor
 import org.jsoup.nodes.Document
 import java.io.File
@@ -159,6 +160,13 @@ class MainViewController {
             }
         )
     }
+
+    fun menu_debug_showserial() {
+        val serial = Project::class.hashCode()
+        CopyToClipboard(serial.toString())
+        AlertUser("The current project serial hash version is : \n $serial")
+    }
+
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                 Menu

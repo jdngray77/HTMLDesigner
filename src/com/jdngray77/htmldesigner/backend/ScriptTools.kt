@@ -7,6 +7,8 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.*
+import javafx.scene.input.Clipboard
+import javafx.scene.input.ClipboardContent
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import org.controlsfx.control.Notifications
@@ -252,6 +254,14 @@ fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
 
 fun Document.open() {
     mvcIfAvail()?.openDocument(this)
+}
+
+fun CopyToClipboard(string: String) {
+    Clipboard.getSystemClipboard().setContent(
+        ClipboardContent().apply {
+            putString(string)
+        }
+    )
 }
 
 
