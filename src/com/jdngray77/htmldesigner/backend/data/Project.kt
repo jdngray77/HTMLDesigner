@@ -143,8 +143,8 @@ class Project(
     init {
         checkPath()
         createSkeleton()
-        createDocument("index.html")
         validate()
+        createDocument("index.html")
         logStatus("Created new project '${locationOnDisk.name}'")
     }
 
