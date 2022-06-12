@@ -240,7 +240,7 @@ class MVC (
 
     fun delete(projectFile: File) {
         if (projectFile.isDirectory &&
-            userConfirm("\"${projectFile.name} is not empty. \\n Are you sure you want to delete it's contents?\""))
+            userConfirm("${projectFile.name} is not empty. \n Are you sure you want to delete it's contents?"))
                 projectFile.listTree().map { delete(it) }
 
         Project.deleteFile(projectFile)
