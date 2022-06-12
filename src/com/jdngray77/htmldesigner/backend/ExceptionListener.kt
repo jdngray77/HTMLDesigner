@@ -9,7 +9,14 @@ object ExceptionListener : UncaughtExceptionHandler{
         e?.let {
             mvcIfAvail()?.Project?.logError(e)
             e.printStackTrace()
-            NotifyOfError(if (e is PrivilegedActionException) e.exception else e)
+            NotifyOfError(sanitizeException(e))
         }
     }
+
+    private fun sanitizeException(e: Throwable) =
+        if (e is PrivilegedActionException) e.exception else e.rootCause()
 }
+
+
+fun Throwable.rootCause() : Throwable =
+    cause?.let { it.rootCause() } ?: this
