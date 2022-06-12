@@ -122,7 +122,7 @@ class DocumentEditor {
     }
 
     fun requestClose() {
-        val e = Event(javafx.event.EventType("INTERNAL_CLOSE_REQUEST"))
+        val e = Event(EDITOR_CLOSE_REQUEST)
         tab.onCloseRequest?.handle(e)
 
         if (e.isConsumed) return
@@ -138,5 +138,7 @@ class DocumentEditor {
          * A particle appended to the name when [isDirty]
          */
         private const val DIRTY_SUFFIX = " *"
+
+        private val EDITOR_CLOSE_REQUEST = javafx.event.EventType<Event>("EDITOR_CLOSE_REQUEST")
     }
 }
