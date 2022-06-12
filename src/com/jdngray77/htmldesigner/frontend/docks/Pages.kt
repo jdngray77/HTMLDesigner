@@ -20,7 +20,7 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
             implOpenSelected()
         }
 
-        tree.setOnKeyTyped {
+        tree.setOnKeyPressed {
             if (it.code == KeyCode.ENTER)
                 implOpenSelected()
         }
