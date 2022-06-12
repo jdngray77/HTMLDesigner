@@ -102,7 +102,10 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
                 } ?: "HTML")
                 + "/" + TextInputDialog("FancyProject").let{
                 it.showAndWait()
-                it.result
+                if (it.result.isNullOrBlank())
+                    return
+                else
+                    it.result
             }).mkdirs()
             refresh()
         }
@@ -122,7 +125,10 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
                         +
                         TextInputDialog("FancyPage.html").let{
                             it.showAndWait()
-                            it.result.AssertEndsWith(".html")
+                            if (it.result.isNullOrBlank())
+                                return
+                            else
+                                it.result.AssertEndsWith(".html")
                         }
             ).open()
             refresh()
