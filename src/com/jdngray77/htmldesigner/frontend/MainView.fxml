@@ -52,6 +52,12 @@
                      <items>
                         <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />
                         <MenuItem mnemonicParsing="false" onAction="#menu_debug_dirty" text="Mark current editor as dirty" />
+                        <Menu mnemonicParsing="false" text="Project">
+                           <items>
+                              <MenuItem mnemonicParsing="false" onAction="#menu_debug_showcache" text="Show Project File Cache Entires" />
+                              <MenuItem mnemonicParsing="false" onAction="#menu_debug_showserial" text="Show and Copy Project Serial Version" />
+                           </items>
+                        </Menu>
                      </items>
                   </Menu>
                   <MenuItem mnemonicParsing="false" text="Exit" />

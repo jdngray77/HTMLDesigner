@@ -9,3 +9,10 @@ fun main() {
     Thread.setDefaultUncaughtExceptionHandler(ExceptionListener)
     Application.launch(Editor::class.java)
 }
+
+enum class ExitReasons {
+    NORMAL,
+    NO_PROJECT,
+    USER_REQUEST,
+    CRASH_GENERIC
+}

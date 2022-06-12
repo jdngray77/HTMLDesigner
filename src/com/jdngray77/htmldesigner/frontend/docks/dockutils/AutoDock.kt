@@ -8,7 +8,7 @@ import javafx.scene.control.Spinner
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberProperties
-import com.jdngray77.htmldesigner.backend.DeveloperWarning
+import com.jdngray77.htmldesigner.backend.logWarning
 import com.jdngray77.htmldesigner.backend.changeProperty
 import javafx.scene.Parent
 import javafx.scene.control.Button
@@ -22,7 +22,6 @@ import javafx.scene.web.WebView
 import javafx.scene.control.Pagination
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.GridPane
-import org.controlsfx.control.PropertySheet
 import org.jsoup.nodes.Document
 import java.time.Instant
 import java.time.ZoneId
@@ -255,7 +254,7 @@ open class AutoDock : Dock() {
                 throw InspectableException("${loggableClassName()} $guiname has the wrong type ($returnType). It needs to be ${gui::class.qualifiedName} for the ${prop.returnType} stored in ${prop.name}")
             }
         } ?: run {
-            DeveloperWarning("${loggableClassName()} ${prop.name} does not have a matching $guiname variable for it's UI control.")
+            logWarning("${loggableClassName()} ${prop.name} does not have a matching $guiname variable for it's UI control.")
         }
     }
 

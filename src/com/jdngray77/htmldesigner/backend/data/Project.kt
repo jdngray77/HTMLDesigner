@@ -4,13 +4,17 @@ import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
+import java.io.InvalidClassException
 import java.sql.Time
 import java.time.Instant
 import java.util.*
+import javax.print.Doc
 import kotlin.collections.HashMap
 
 /*
@@ -133,12 +137,15 @@ class Project(
     @Transient
     private lateinit var CACHE : HashMap<String, Any>
 
+    @Deprecated("This is for debug access only. Cache is internal to the project only.")
+    fun getCache() = CACHE
+
     init {
         checkPath()
         createSkeleton()
-        createDocument("index.html")
         validate()
-        UserMessage("Created new project '${locationOnDisk.name}'")
+        createDocument("index.html")
+        logStatus("Created new project '${locationOnDisk.name}'")
     }
 
 
@@ -168,6 +175,18 @@ class Project(
 
         if (!this::CACHE.isInitialized)
             CACHE = HashMap()
+        else validateCache()
+    }
+
+    fun validateCache() {
+        val toRemove = ArrayList<String>()
+
+        CACHE.entries.forEach {
+            if (!File(it.key).exists())
+                toRemove.add(it.key)
+        }
+
+        toRemove.map { CACHE.remove(it) }
     }
 
 
@@ -329,19 +348,40 @@ class Project(
      */
     fun createDocument(subpath: String) : Document {
         val doc = Tag.testDOM.clone()
+
         val loc = PROJECT_PATH_HTML + subpath
 
         File(subPath(loc)).apply {
-            createNewFile()
-            doc.title(name)
-        }
+            if (exists())
+                throw FileAlreadyExistsException(this)
 
-        saveDocument(doc, loc)
+            if (!createNewFile())
+                throw IOException("Could not create file")
+
+            doc.title(name)
+            doc.getElementById("PageTitle")?.text(name)
+
+
+            saveDocument(doc, path)
+            CACHE[path] = doc
+        }
 
         saveMeta()
 
+
+
         EventNotifier.notifyEvent(EventType.PROJECT_NEW_DOCUMENT_CREATED)
         return doc
+    }
+
+    fun fileForDocument(d: Document) : File {
+        CACHE.entries.find { it.value == d}
+        .apply {
+            if (this == null)
+                throw UnloadedDocumentException(d)
+
+            return File(key)
+        }
     }
 
     /**
@@ -415,6 +455,12 @@ class Project(
             CACHE[file.path] = it
         }
     }
+
+    fun deleteFile(projectFile: File) {
+        projectFile.delete()
+        validateCache()
+    }
+
 
     /**
      * Takes a copy of the HTML files and the meta into [PROJECT_PATH_BACKUP].
@@ -501,26 +547,41 @@ class Project(
         const val PROJECT_PATH_MEDIA: String = "MEDIA/"
 
 
-
+        /**
+         * Creates a new project at the specified location.
+         *
+         * @param path The path to the project directory.
+         */
+        fun create(path : String) = Project(File(path))
 
         /**
-         * Attempts to load a project from disk, if it exists.
+         * Loads a project from disk
          *
-         * If there is no project at the [path], then one is created.
+         * If the project meta file exists, load it, validate it, and return it.
          *
-         * @return the existing or new project.
-         * @throws InvalidClassException if a project exists, but was made by a different version of the editor and cannot be loaded.
+         * @param path The path to the project folder
+         * @return A Project object
          */
-        fun loadOrCreate(path: String): Project {
+        fun load(path : String) : Project? {
             File("$path/$PROJECT_PATH_META").apply {
-                return if (exists())
-                        (loadObjectFromDisk(this) as Project)
-                            .also {
-                                it.validate()
-                                UserMessage("Loaded Existing Project '${it.locationOnDisk.name}'")
-                            }
-                    else Project(File(path))
+                if (!exists())
+                    throw NoSuchFileException(this, reason = "\n\nThere is no $PROJECT_PATH_META file in ${parentFile.name}. \nAre you sure this is the right folder?")
+                return try {
+                        val proj = loadObjectFromDisk(this) as Project
+                        proj.validate()
+                        logStatus("Loaded Existing Project '${proj.locationOnDisk.name}'")
+                        proj
+                    } catch (e: InvalidClassException) {
+                        AlertUser("This project was made with a different version of the IDE, and is incompatible.\n\n" +
+                                "To load this project, you need an editor that supports the following project version : \n\n${Project::class.hashCode()}\n\n" +
+                                "To find what editor version you need, visit \n\nhttps://github.com/jdngray77/HTMLDesigner/wiki/IDE-to-Project-Version-Map")
+                        null
+                   }
             }
         }
+
+        fun Document.projectFile() = mvc().Project.fileForDocument(this)
     }
+
+    class UnloadedDocumentException(val d: Document) : Exception("The file for ${d.title()}.html was required, but the file was not loaded.")
 }

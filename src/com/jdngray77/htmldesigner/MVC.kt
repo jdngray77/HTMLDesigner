@@ -2,6 +2,7 @@ package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import javafx.scene.control.ButtonType
@@ -46,7 +47,7 @@ class MVC (
     }
 
     override fun notify(e: EventType) {
-        if (e == EventType.EDITOR_LOADED)
+        if (e == EventType.EDITOR_LOADED && Project.documents().isNotEmpty())
             openDocument(Project.loadDocument(Project.documents().first()))
     }
 
@@ -89,6 +90,14 @@ class MVC (
      */
     fun findEditorFor(tab: Tab)  =
         openEditors.find { it.tab == tab }
+
+    /**
+     * Finds the editor for the given File
+     *
+     * @param file the file to find the editor for.
+     */
+    fun findEditorFor(file: File)  =
+        openEditors.find { it.file == file }
 
     /**
      * Creates and opens a new document editor for the
@@ -177,6 +186,22 @@ class MVC (
         findEditorFor(document)?.apply { switchToEditor(this) }
             ?: run { openDocument(document) }
 
+    fun validateEditors() {
+        // Find tabs that are not in [openEditors], and remove them.
+
+        MainView.dockEditors.tabs.removeAll(
+            MainView.dockEditors.tabs.filter { tab ->
+                openEditors.find { it.tab == tab } == null
+            }
+        )
+
+        // Check that remaining editors' files exist. Else, close the editor.
+        openEditors.filter {
+            !it.file.exists()
+        }.map {
+            it.requestClose()
+        }
+    }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                     Editors
@@ -194,7 +219,6 @@ class MVC (
      */
     fun deleteTag(vararg tag: Element) {
         if (tag.isEmpty()) return
-
         if (!
             if (tag.size > 1)
                 userConfirm("Delete multiple tags? \n\n ${tag.joinToString { "\n" + it.tagName() }}")
@@ -212,6 +236,20 @@ class MVC (
             finishedModifying()
         }
         MainView.setAction("Deleted tag(s)")
+    }
+
+    fun delete(projectFile: File) {
+        if (projectFile.isDirectory &&
+            userConfirm("${projectFile.name} is not empty. \n Are you sure you want to delete it's contents?"))
+                projectFile.listTree().map { delete(it) }
+
+        Project.deleteFile(projectFile)
+        if (projectFile.name.endsWith(".html")) {
+            findEditorFor(projectFile)?.forceClose()
+            EventNotifier.notifyEvent(EventType.PROJECT_PAGE_DELETED)
+        }
+
+        validateEditors()
     }
 
     /**

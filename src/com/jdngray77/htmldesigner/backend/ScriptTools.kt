@@ -2,16 +2,17 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
-import com.sun.javafx.scene.control.skin.TableViewSkin
 import com.sun.javafx.scene.control.skin.TreeTableViewSkin
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.*
+import javafx.scene.input.Clipboard
+import javafx.scene.input.ClipboardContent
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import org.controlsfx.control.Notifications
-import org.controlsfx.control.PropertySheet.Item
+import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.awt.Toolkit
 import java.io.*
@@ -19,7 +20,6 @@ import java.nio.file.Files
 import java.util.function.Consumer
 import kotlin.reflect.KProperty
 import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.full.declaredMembers
 
 /**
  * # Container for generic utility methods to aid you in doing whatever it is you do.
@@ -122,8 +122,7 @@ fun Element.saveToDisk(f: File) {
 //                                                        Logging
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-fun WarnError(e: Throwable) {
-
+fun NotifyOfError(e: Throwable) {
     Notifications.create()
         .title("An error has occurred with the editor.")
         .text("${e::class.simpleName} \n ${
@@ -147,23 +146,24 @@ fun WarnError(e: Throwable) {
 }
 
 
-fun DeveloperWarning(string: String) {
-    UserWarning(string)
-}
-
-fun UserWarning(string: String) {
+fun logWarning(string: String) {
     System.err.println(string)
     mvcIfAvail()?.MainView?.setStatus(string)
 }
 
-fun log(string: String) = UserMessage(string)
 
-fun UserMessage(string: String) {
+fun logStatus(string: String) {
     mvcIfAvail()?.MainView?.setStatus(string)
     println(string)
 }
 
+fun AlertUser(message: String) {
+    Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK).showAndWait()
+}
 
+fun AlertUserOfError(message: String) {
+    Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait()
+}
 
 
 
@@ -255,6 +255,18 @@ fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
     }
 }
 
+
+fun Document.open() {
+    mvcIfAvail()?.openDocument(this)
+}
+
+fun CopyToClipboard(string: String) {
+    Clipboard.getSystemClipboard().setContent(
+        ClipboardContent().apply {
+            putString(string)
+        }
+    )
+}
 
 
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

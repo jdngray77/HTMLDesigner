@@ -472,6 +472,7 @@ abstract class Tag : SerializableHTML {
                 .insertChildren(
                     0,
                     Element("h1")
+                        .id("PageTitle")
                         .appendText("Hello!")
                         .attr("style", "text-decoration: underline;"),
                     Element("hr"),

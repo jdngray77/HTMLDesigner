@@ -1,12 +1,15 @@
 package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.MVC
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.backend.loadFXMLScene
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import javafx.application.Application
 import javafx.scene.Scene
+import javafx.scene.control.Alert
+import javafx.scene.control.ButtonType
+import javafx.stage.DirectoryChooser
+import javafx.stage.FileChooser
 import javafx.stage.Stage
 
 
@@ -93,6 +96,8 @@ class Editor : Application() {
      */
     private lateinit var scene: Pair<Scene, MainViewController>
 
+    lateinit var stage: Stage
+
     /**
      * Loads and initalises the GUI.
      *
@@ -100,6 +105,8 @@ class Editor : Application() {
      * ocour until this method has returned.
      */
     override fun start(stage: Stage) {
+        this.stage = stage
+
         EDITOR = this
 
         // Load the main view from FXML.
@@ -112,6 +119,72 @@ class Editor : Application() {
 
         stage.scene = scene.first
         stage.show()
-        mvc = MVC(Project.loadOrCreate("./testproject/"), scene.second)
+
+        mvc = MVC(usrChooseProject(), scene.second)
     }
+
+    /**
+     * The boot behaviour project chooser.
+     *
+     * Will obtain a project from the user,
+     * weather it be new or existing, then
+     * returns it.
+     *
+     * Handles cancellation & problems.
+     * User will just be prompted [implUsrSelectProject]
+     * until a project is obtained.
+     */
+    private fun usrChooseProject() : Project {
+        var projToLoad : Project? = null
+
+        while (true) {
+            try {
+                projToLoad = implUsrSelectProject()
+            } catch (e: Exception) {
+                AlertUserOfError("Project access failed : \n${e.message}")
+            }
+
+            if (projToLoad == null)
+                continue
+            else
+                return projToLoad
+        }
+    }
+
+    /**
+     * A single instance of [usrChooseProject],
+     * where a flow of dialogs and choosers are used to create
+     * or load a project.
+     *
+     * Can return null if cancelled, or throw exceptions
+     * if project access or creation fails.
+     */
+    private fun implUsrSelectProject(): Project? {
+
+        val ButtonTypeLoad = ButtonType("Load existing Project")
+        val ButtonTypeCreate = ButtonType("Create a new Project")
+
+        val x = Alert(Alert.AlertType.INFORMATION, "Welcome! What would you like to do?", ButtonTypeCreate, ButtonTypeLoad)
+        x.showAndWait()
+
+        return when (x.result) {
+            ButtonTypeLoad -> {
+                Project.load(DirectoryChooser().let {
+                    it.title = "Locate a project root"
+                    it.showDialog(stage).path
+                })
+            }
+
+            ButtonTypeCreate -> {
+                Project.create(FileChooser().let {
+                    it.title = "Create a new project"
+                    it.showSaveDialog(stage).path
+                })
+            }
+            else -> null
+        }
+
+
+    }
+
 }

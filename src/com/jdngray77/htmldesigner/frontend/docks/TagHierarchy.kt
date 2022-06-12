@@ -73,7 +73,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
         // When a new item is selected, display it in the editor.
 
         tree.setOnMouseClicked {
-            selectedTags().apply {
+            selectedItems().apply {
                 mvc().let {
                     it.MainView.textEditor_Open(
                         if (size != 1) {
@@ -92,39 +92,31 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
 
         // Context menu
         // TODO only show some of these items when one item is selected.
-        val ctx = ContextMenu()
-        ctx.items.addAll(
-                MenuItem("「TODO」Edit alone"),
-                SeparatorMenuItem(),
-                MenuItem("Delete"),
-                MenuItem("「TODO」Cut"),
-                MenuItem("「TODO」Copy"),
-                SeparatorMenuItem(),
-                MenuItem("「TODO」Paste clipboard as above"),
-                MenuItem("「TODO」Paste clipboard as child"),
-                MenuItem("「TODO」Paste clipboard as below"),
-                MenuItem("「TODO」Wrap with clipboard"),
-                SeparatorMenuItem(),
-                MenuItem("「TODO」Move up"),
-                MenuItem("「TODO」Move down"),
-                SeparatorMenuItem(),
-                MenuItem("「TODO」Delete...")
-        )
-
-        tree.setRowFactory {
-            TreeTableRow<Element?>().apply {
-                contextMenu = ctx
-                setOnContextMenuRequested {
-                    ctx.items[2].setOnAction {
-                        selectedTags().apply {
-                            if (size > 1)
-                                mvc().deleteTag(*toTypedArray())
-                            else item?.let { mvc().deleteTag(it) }
-                        }
+        setContextMenu(
+            MenuItem("「TODO」Edit alone"),
+            SeparatorMenuItem(),
+            MenuItem("Delete").also {
+                it.setOnAction {
+                    selectedItems().apply {
+                        if (size > 1)
+                            mvc().deleteTag(*toTypedArray())
+                        else contextRow?.let { mvc().deleteTag(it.item) }
                     }
                 }
-            }
-        }
+            },
+            MenuItem("「TODO」Cut"),
+            MenuItem("「TODO」Copy"),
+            SeparatorMenuItem(),
+            MenuItem("「TODO」Paste clipboard as above"),
+            MenuItem("「TODO」Paste clipboard as child"),
+            MenuItem("「TODO」Paste clipboard as below"),
+            MenuItem("「TODO」Wrap with clipboard"),
+            SeparatorMenuItem(),
+            MenuItem("「TODO」Move up"),
+            MenuItem("「TODO」Move down"),
+            SeparatorMenuItem(),
+            MenuItem("「TODO」Delete...")
+        )
 
 
         tree.pack()
@@ -148,14 +140,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
             showDocument(mvc().currentDocument())
     }
 
-    /**
-     * If an element **inside** the root is selected within the [tree], it is returned.
-     */
-    fun selectedTags() =
-        tree.selectionModel.selectedItems
-            .filterNot { it == tree.root }
-            .map { (it as StoringTreeItem<Element>).data }
-            .filterNotNull()
+
 
     override fun getChildrenFor(el: Element): Iterable<Element> = el.children()
 

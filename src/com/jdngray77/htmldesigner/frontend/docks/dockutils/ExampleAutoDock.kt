@@ -1,6 +1,6 @@
 package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
-import com.jdngray77.htmldesigner.backend.UserWarning
+import com.jdngray77.htmldesigner.backend.logWarning
 import java.time.Instant
 import java.util.*
 
@@ -37,7 +37,7 @@ class ExampleAutoDock() : AutoDock() {
 
     // Note the position number here. Even though it's at the bottom of the file, it gets placed into the first group of controls.
     @Inspectable(20)
-    fun HelloWorld() = UserWarning("Fuck you.")
+    fun HelloWorld() = logWarning("Fuck you.")
 
 
     // Remember to call create when ready to populate the GUI.
