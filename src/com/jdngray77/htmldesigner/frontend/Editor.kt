@@ -22,6 +22,7 @@ import javafx.stage.Stage
 class Editor : Application() {
 
     companion object {
+
         /**
          * A static reference to the application instance
          */
@@ -40,6 +41,8 @@ class Editor : Application() {
 
         /**
          * Returns the [mvc], if it is available.
+         *
+         * Slower, but adds null safety where it's required.
          *
          * For use in places where the access is optional,
          * and calls may be made early - but it doesn't matter
@@ -61,22 +64,22 @@ class Editor : Application() {
         /**
          * Static reference to the model view controller.
          *
-         * > ***NOTE WELL : CANNOT BE ACCESSED BEFORE THE EDITOR HAS LOADED.***
+         * > ***NOTE WELL : CANNOT BE ACCESSED IF NOT [mvcIsAvail].***
          */
         fun project() = EDITOR.mvc!!.Project
 
         /**
          * Static reference to the model view controller.
          *
-         * > ***NOTE WELL : CANNOT BE ACCESSED BEFORE THE EDITOR HAS LOADED.***
+         * > ***NOTE WELL : CANNOT BE ACCESSED IF NOT [mvcIsAvail].***
          */
         fun maingui() = EDITOR.mvc!!.MainView
     }
 
     /**
-     * The model view controller for this editor.
+     * The model view controller for the IDE.
      *
-     * A mid-point between the front-end and back-end.
+     * Acts as a mid-point between the front-end (particularly the current document editor) and back-end.
      */
     var mvc : MVC? = null
         set(value) {
@@ -96,6 +99,9 @@ class Editor : Application() {
      */
     private lateinit var scene: Pair<Scene, MainViewController>
 
+    /**
+     * The stage that is used to show scenes.
+     */
     lateinit var stage: Stage
 
     /**
@@ -118,6 +124,7 @@ class Editor : Application() {
             stage.isFullScreen = true
 
         stage.scene = scene.first
+//        stage.scene.stylesheets.add("stylesheet.css");
         stage.show()
 
         mvc = MVC(usrChooseProject(), scene.second)
@@ -141,7 +148,7 @@ class Editor : Application() {
             try {
                 projToLoad = implUsrSelectProject()
             } catch (e: Exception) {
-                AlertUserOfError("Project access failed : \n${e.message}")
+                showErrorAlert("Project access failed : \n${e.message}")
             }
 
             if (projToLoad == null)

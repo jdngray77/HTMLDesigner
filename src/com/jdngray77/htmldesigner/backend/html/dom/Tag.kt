@@ -1,8 +1,10 @@
 package com.jdngray77.htmldesigner.backend.html.dom
 
-import com.jdngray77.htmldesigner.backend.RemoveDuplicates
+import com.jdngray77.htmldesigner.backend.removeDuplicates
 import com.jdngray77.htmldesigner.backend.html.style.Style
 import com.jdngray77.htmldesigner.backend.html.style.StyleArray
+import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
+import com.jdngray77.htmldesigner.backend.html.style.StyleSheet.Companion.IDE_DEBUG_SHEET
 import org.jsoup.nodes.Element
 
 
@@ -114,7 +116,7 @@ abstract class Tag : SerializableHTML {
      */
     fun classes(vararg clazz: String) = this.apply {
         cssClasses.addAll(clazz)
-        cssClasses.RemoveDuplicates()
+        cssClasses.removeDuplicates()
     }
 
     /**
@@ -127,7 +129,7 @@ abstract class Tag : SerializableHTML {
      */
     fun styles(vararg style: Style) = this.apply {
         styles.addAll(style)
-        styles.RemoveDuplicates()
+        styles.removeDuplicates()
     }
 
     /**
@@ -401,7 +403,7 @@ abstract class Tag : SerializableHTML {
      * have been populated.
      */
     open fun serializeOpen() : String =
-        "\n<${name()}${serializeID()}${notNullString(config)}${serializeClasses()}${serializeStyles()}>"
+        "<${name()}${serializeID()}${notNullString(config)}${serializeClasses()}${serializeStyles()}>"
 
     /**
      * Generates the closing tag
@@ -485,7 +487,11 @@ abstract class Tag : SerializableHTML {
                         .attr("href", "https://jordantgray.uk")
                         .attr("style", "color: yellow;")
                         .appendText("ME!"),
-                )
+                    Element("Style")
+                        .id(IDE_DEBUG_SHEET)
+                        .appendText(StyleSheet.DEBUG.serialize())
+                    )
+
         }
 
         /**

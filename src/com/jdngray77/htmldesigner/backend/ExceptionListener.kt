@@ -9,7 +9,7 @@ object ExceptionListener : UncaughtExceptionHandler{
         e?.let {
             mvcIfAvail()?.Project?.logError(e)
             e.printStackTrace()
-            NotifyOfError(sanitizeException(e))
+            showErrorNotification(sanitizeException(e))
         }
     }
 

@@ -7,13 +7,13 @@ import com.jdngray77.htmldesigner.frontend.docks.Pages
 import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
 import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
 import com.jdngray77.htmldesigner.frontend.docks.TagProperties
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
+import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import javafx.fxml.FXML
 import javafx.scene.control.Label
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
-import javafx.scene.input.Clipboard
-import javafx.scene.input.ClipboardContent
 import javafx.scene.web.HTMLEditor
 import org.jsoup.nodes.Document
 import java.io.File
@@ -79,7 +79,8 @@ class MainViewController {
      * Adds dock windows to the dock tabs.
      */
     private fun addDocks() {
-//        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
+        dockLeftTop.tabs.add(Tab(ToolboxDock::class.simpleName!!.CamelToSentence(), ToolboxDock()))
+        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
         dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.CamelToSentence(), TestDock()))
 
         dockLeftBottom.tabs.add(Tab(Pages::class.simpleName!!.CamelToSentence(), Pages()))
@@ -152,7 +153,7 @@ class MainViewController {
     }
 
     fun menu_debug_showcache() {
-        AlertUser(
+        showInformationalAlert(
             "Project files loaded into cache are : "
             +
             mvc().Project.getCache().entries.joinToString {
@@ -164,7 +165,7 @@ class MainViewController {
     fun menu_debug_showserial() {
         val serial = Project::class.hashCode()
         CopyToClipboard(serial.toString())
-        AlertUser("The current project serial hash version is : \n $serial")
+        showInformationalAlert("The current project serial hash version is : \n $serial")
     }
 
 

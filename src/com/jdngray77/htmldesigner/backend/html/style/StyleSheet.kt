@@ -1,6 +1,6 @@
 package com.jdngray77.htmldesigner.backend.html.style
 
-import com.jdngray77.htmldesigner.backend.RemoveDuplicates
+import com.jdngray77.htmldesigner.backend.removeDuplicates
 import com.jdngray77.htmldesigner.backend.html.dom.SerializableHTML
 
 /**
@@ -47,7 +47,7 @@ class StyleClass(val selectors: ArrayList<String>) : StyleArray(), SerializableH
      */
     fun styles (vararg styles: Style) = this.apply {
         addAll(styles)
-        RemoveDuplicates()
+        removeDuplicates()
     }
 }
 
@@ -82,5 +82,14 @@ class StyleSheet(val name: String) : ArrayList<StyleClass>(), SerializableHTML {
                 )
             )
         }
+
+
+        const val IDE_DEBUG_SHEET = "IDE_DEBUG_SHEET"
+        val DEBUG = StyleSheet(IDE_DEBUG_SHEET).classes(
+            StyleClass(".debug-outline")
+                .styles(
+                    Style("outline", "1px solid red")
+                )
+        )
     }
 }

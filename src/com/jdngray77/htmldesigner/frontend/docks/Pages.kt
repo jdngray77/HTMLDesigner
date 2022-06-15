@@ -11,21 +11,35 @@ import java.sql.Time
 import java.time.Instant
 import java.util.*
 
+/**
+ * A Dock which shows the pages in the loaded project.
+ *
+ * It will load pages which are clicked, and permit the creation and
+ * deletion of them
+ *
+ * TODO add searching
+ *
+ * FIXME every refresh resets the collapsed state of rows.
+ *
+ * TODO creation and deletion don't handle user cancellation
+ */
 class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
 
     init {
         EventNotifier.subscribe(this, EventType.PROJECT_PAGE_DELETED, EventType.PROJECT_PAGE_CREATED)
 
+        // Open documents that are clicked
         tree.setOnMouseClicked {
             implOpenSelected()
         }
 
+        // Open documents if the user uses the arrow keys and presses enter.
         tree.setOnKeyPressed {
             if (it.code == KeyCode.ENTER)
                 implOpenSelected()
         }
 
-
+        // Add columns to the tree.
         tree.columns.setAll(
             TreeTableColumn<File, String>("Name").also {
                 it.setCellValueFactory { p ->
@@ -40,9 +54,7 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
             }
         )
 
-        // TODO these are not cancelable
-
-
+        // Configure the context menu.
         setContextMenu(
             MenuItem("New Page").also {
                 it.setOnAction {
@@ -73,15 +85,16 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
             SeparatorMenuItem(),
             MenuItem("「TODO」New folder with selected items"),
         )
-
-
     }
 
     override fun notify(e: EventType) {
-        refresh()
+        if (e == EventType.PROJECT_PAGE_DELETED || e == EventType.PROJECT_PAGE_CREATED)
+            refresh()
     }
 
-    // FIXME everything is expanded on refresh.
+    /**
+     * Clears and sets the contents of the tree.
+     */
     fun refresh() {
         mvc().Project.HTML.apply {
             setRoot(this)
@@ -89,8 +102,21 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         }
     }
 
+    /**
+     * Determines the files within a given folder. Used by super
+     * to create the tree.
+     */
     override fun getChildrenFor(el: File) = el.listFiles()?.toList() ?: arrayListOf()
 
+    /**
+     * The code which will create a new folder
+     *
+     * This was made available for use in the button bar, but
+     * those don't make much sense in this dock. Context menu is better.
+     *
+     * Asks the user for the name, then creates it either inside a selected folder,
+     * or inside the same directory as a selected file.
+     */
     private fun implCreateNewFolder() {
         mvc().Project.apply {
             File(
@@ -111,8 +137,12 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         }
     }
 
-    private fun contextOrSelectedOrNull() = contextItem ?: selectedItems().getOrNull(0)
-
+    /**
+     * Creates a new page
+     *
+     * Asks the user for the name, then creates it either inside a selected folder,
+     * or inside the same directory as a selected file.
+     */
     private fun implCreateNewPage() {
         mvc().Project.apply {
             createDocument(
@@ -135,6 +165,9 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         }
     }
 
+    /**
+     * Opens an editor for the selected document.
+     */
     private fun implOpenSelected() {
         tree.selectionModel.selectedItem?.apply {
             (this as StoringTreeItem<File>).data!!.apply{
@@ -145,5 +178,13 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
             }
         }
     }
+
+    /**
+     * In order, returns either the [contextItem] if not null, else the first [selectedItems],
+     * else null if there's no [contextItem] and no items are selected.
+     *
+     * Makes the implementations above able to function via button bar or via context menu.
+     */
+    private fun contextOrSelectedOrNull() = contextItem ?: selectedItems().getOrNull(0)
 
 }

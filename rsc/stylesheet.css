@@ -1,202 +1,29 @@
-/*!--- PERSISTENT, CONTROLS, & UNIQUE ---!*/
-{
 
-    -fx-font-family: "Helvetica Neue";
-    -fx-font-size: 20;
-    -fx-text-fill: rgb(255,255,255);
-}
-
-
-.tab-pane .tab
-{
-    -fx-border-color: transparent transparent rgb(150,150,150) transparent ;
-}
-
-/* move menu text so it's not right at the edge */
-.menu
-{
-    -fx-label-padding: 3px;
-}
-
-.titled-pane,
-.list-view,
-.scroll-bar .thumb
-{
-    -fx-background-color: rgb(150,150,150);
-    -fx-border-color: rgb(80,80,80);
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
-}
-
-.date-picker-popup > * > .cell,
-.date-picker-popup *
-{
-    -fx-background-color: transparent;
-    -fx-border-color: rgb(40, 44, 52);
-}
-
-.date-picker:editable > .arrow-button {
-    -fx-background-color: transparent;
-}
+/**.tab-header-area,*/
+/*.tab-header-background,*/
+/*.tab,*/
+/*.tab-pane,*/
+/*.tab:selected,*/
+/*.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator*/
+/*{*/
+/*    -fx-background-color: white;*/
+/*}*/
 
 
-.date-picker:editable > .arrow-button > *{
-    -fx-background-color: rgb(91,91,91);
-}
-
-
-.aboutHeader > *
-{
-    -fx-font-size: 40px;
-    -fx-font-weight: 200;
-}
-
-.aboutBody > *
-{
-    -fx-font-weight: 300;
-    -fx-font-size: 20px;
-}
-
-.aboutSubHeader > *
-{
-    -fx-font-size: 20px;
-    -fx-font-weight: 200;
-}
-
-
-
-
-/*!--- BACKGROUND ---!*/
-
-/*General background*/
-.titled-pane,
-.list-view,
-*.tab-header-area,
-.tab-header-background,
 .tab,
-.root,
-.menu,
-.combo-box .cell,
-.date-picker,
-.combo-box *
+.tab-label
 {
-    -fx-background-color: transparent;
+    -fx-background-color: red !important;
+    -fx-start-margin: 0px !important;
+    -fx-end-margin: 0px !important;
+    -fx-padding: 0px !important;
+    -fx-label-padding: 0px !important;
+    height:0px!important;
 }
 
-/*
-    custom class reference to the root pane. Defined in code.
-    Creates a linear gradient. I did try to animate with many stops, but fx doesn't support css animation, sad face.
-*/
-.MSTRP {
-    /*-fx-background-color: radial-gradient(center 70% 70%, radius 100%, rgb(223,167,64), rgb(120,10,40), rgb(29,0,20));*/
-    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, /*rgb(217,29,95), rgb(252,134,18)*/ rgb(40, 44, 52), rgb(56, 61, 71));
-}
-
-
-/* default control background */
-.scroll-bar > *,
-.titled-pane > *,
-.list-cell:even,
-.text-area *,
-.MSTM,
-.combo-box,
-.button,
-.text-field,
-.menu-item,
-.calendar-grid,
-.date-picker,
-.combo-box-popup .list-view,
-.context-menu
-{
-    -fx-border-color: transparent transparent transparent transparent ;
-    -fx-background-color: rgb(39,43,50);
-}
-
-/* Slightly darker pop-up */
-.date-picker-popup {
-    -fx-background-color: rgb(40, 44, 52);
-}
-
-/* persistent background on selected tab */
-.tab-pane .tab:selected
-{
-    -fx-background-color: linear-gradient(to top, rgba(255, 255, 255,0.1), rgba(63, 66, 73,0));
-}
-
-/* light background used for hovered tabs */
-.tab-pane .tab:hover
-{
-    -fx-background-color: linear-gradient(to top, rgba(255,255,255,0.3), rgba(255,255,255,0.0));
-}
-
-
-
-
-/*!--- FOCUS ---!*/
-
-/* Focus line on bottom border */
-.menu-bar,
-.tab-pane .tab:selected,
-.menu-item:pressed,
-.button:pressed,
-.button:selected,
-.text-field:focused,
-.text-field:selected,
-.text-area:focused,
-.text-area:selected,
-.date-picker-popup > * > .cell:hover,
-.list-cell:filled:selected:focused, .list-cell:filled:selected,
-.combo-box-popup .list-view .list-cell:filled:selected
-{
-    -fx-border-color: transparent transparent rgb(255,255,255) transparent ;
-}
-
-/* Border on controls that are difficult to see */
-.titled-pane .button,
-.text-area *
-{
-    -fx-border-color: rgb(80,80,80);
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
-}
-
-
-/*get rid of bs blue square on selected tab*/
-.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
-    -fx-border-color: transparent;
-}
-
-/*Inset border used to move tab headers*/
-*.tab-header-area,
-.tab-header-background
-{
-    -fx-border-color: rgba(0,0,0,0);    /*Needs a border to have */
-    -fx-border-insets: 30, 100, 30, 100;
-}
-
-/* dark backgrounds used for hovered everything else */
-.list-cell:odd,
-.button:hover,
-.text-field:hover,
-.text-area:hover,
-.date-picker-popup > * > .cell:hover,
-.menu:hover,
-.menu:focused,
-.menu:pressed,
-.combo-box
-{
-    -fx-background-color: rgba(0,0,0,0.4);
-}
-
-
-.list-cell:filled:hover,
-.menu-item:hover,
-.menu-item:focused,
-.combo-box .cell:hover
-{
-    -fx-background-color: rgba(0, 0, 0, 0.4);
-}
-
-.titled-pane {
-    -fx-start-margin: 0, 100, 0, 100;
+.tab-header-area,
+.tab-header-background {
+    -fx-padding: 0px!important;
+    -fx-max-height: 10px!important;
+    -fx-background-color: red!important;
 }

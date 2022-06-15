@@ -2,7 +2,6 @@ package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import javafx.scene.control.ButtonType
@@ -73,6 +72,9 @@ class MVC (
      */
     fun currentEditor() =
         this.findEditorFor(MainView.dockEditors.selectionModel.selectedItem)!!
+
+    fun selectedTag() = currentEditor().selectedTag
+
 
 
     /**
@@ -241,7 +243,7 @@ class MVC (
     fun delete(projectFile: File) {
         if (projectFile.isDirectory &&
             userConfirm("${projectFile.name} is not empty. \n Are you sure you want to delete it's contents?"))
-                projectFile.listTree().map { delete(it) }
+                projectFile.flattenTree().map { delete(it) }
 
         Project.deleteFile(projectFile)
         if (projectFile.name.endsWith(".html")) {
@@ -251,6 +253,7 @@ class MVC (
 
         validateEditors()
     }
+
 
     /**
      * When making many changes at once, this can be used to delay the
