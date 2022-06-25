@@ -59,6 +59,9 @@ class DocumentEditor {
      */
     var selectedTag: Element? = null
         set(value) {
+            // Guard against repetition ; issue #19.
+            if (value == field) return
+
             field?.removeClass("debug-outline")
             field = value
             field?.addClass("debug-outline")
