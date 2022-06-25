@@ -26,7 +26,7 @@ import java.util.*
 class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
 
     init {
-        EventNotifier.subscribe(this, EventType.PROJECT_PAGE_DELETED, EventType.PROJECT_PAGE_CREATED)
+        EventNotifier.subscribe(this, EventType.EDITOR_LOADED, EventType.PROJECT_PAGE_DELETED, EventType.PROJECT_PAGE_CREATED)
 
         // Open documents that are clicked
         tree.setOnMouseClicked {
@@ -88,7 +88,8 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
     }
 
     override fun notify(e: EventType) {
-        if (e == EventType.PROJECT_PAGE_DELETED || e == EventType.PROJECT_PAGE_CREATED)
+        //TODO remove guard once notification sys is done.
+        if (e == EventType.PROJECT_PAGE_DELETED || e == EventType.PROJECT_PAGE_CREATED || e == EventType.EDITOR_LOADED)
             refresh()
     }
 
@@ -99,6 +100,7 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         mvc().Project.HTML.apply {
             setRoot(this)
             tree.root.isExpanded = true
+            tree.pack()
         }
     }
 
