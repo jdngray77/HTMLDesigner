@@ -128,11 +128,7 @@
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
-                              <TabPane fx:id="dockLeftTop" side="LEFT" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="500.0" tabMaxWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <tabs>
-                                  <Tab text="Prefabs" />
-                                </tabs>
-                              </TabPane>
+                              <TabPane fx:id="dockLeftTop" side="LEFT" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="500.0" tabMaxWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
                         </AnchorPane>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">

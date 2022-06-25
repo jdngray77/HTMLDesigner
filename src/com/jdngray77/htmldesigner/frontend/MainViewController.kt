@@ -3,10 +3,7 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.docks.Pages
-import com.jdngray77.htmldesigner.frontend.docks.ProjectDock
-import com.jdngray77.htmldesigner.frontend.docks.TagHierarchy
-import com.jdngray77.htmldesigner.frontend.docks.TagProperties
+import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
@@ -79,13 +76,25 @@ class MainViewController {
      * Adds dock windows to the dock tabs.
      */
     private fun addDocks() {
+
+        // TODO automate fetching of class names.
+
+        // TOP LEFT
+
         dockLeftTop.tabs.add(Tab(ToolboxDock::class.simpleName!!.CamelToSentence(), ToolboxDock()))
+        dockLeftTop.tabs.add(Tab(Prefabs::class.simpleName!!.CamelToSentence(), Prefabs()))
+
         dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
         dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.CamelToSentence(), TestDock()))
+
+
+        // BOTTOM LEFT
 
         dockLeftBottom.tabs.add(Tab(Pages::class.simpleName!!.CamelToSentence(), Pages()))
         dockLeftBottom.tabs.add(Tab(TagHierarchy::class.simpleName!!.CamelToSentence(), TagHierarchy()))
         dockLeftBottom.tabs.add(Tab(ProjectDock::class.simpleName!!.CamelToSentence(), ProjectDock()))
+
+        // RIGHT
 
         dockRight.tabs.add(Tab(TagProperties::class.simpleName!!.CamelToSentence(), TagProperties()))
     }
