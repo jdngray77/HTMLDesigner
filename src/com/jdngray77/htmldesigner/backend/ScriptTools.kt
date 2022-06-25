@@ -61,9 +61,9 @@ fun String.CamelToSentence() : String =
  * Returns the joining of each substring.
  */
 fun String.capitaliseEveryWord() =
-    this.split(" ").joinToString {
+    this.split(" ").joinToString(" ") {
         // For some reason, [String.capitalize] says to use replace it with this. I hate it.
-        it.replaceFirstChar { (if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()) + " "}
+        it.replaceFirstChar { (if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString())}
     }
 
 /**
