@@ -1,9 +1,23 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
-import com.jdngray77.htmldesigner.backend.html.style.StyleSheet.Companion.IDE_DEBUG_SHEET
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import javafx.event.Event
 import javafx.fxml.FXML
@@ -12,7 +26,6 @@ import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
-import javax.swing.text.html.StyleSheet
 
 /**
  * # Central document editor.

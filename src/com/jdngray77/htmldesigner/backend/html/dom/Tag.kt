@@ -1,10 +1,25 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner.backend.html.dom
 
-import com.jdngray77.htmldesigner.backend.removeDuplicates
 import com.jdngray77.htmldesigner.backend.html.style.Style
 import com.jdngray77.htmldesigner.backend.html.style.StyleArray
 import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import com.jdngray77.htmldesigner.backend.html.style.StyleSheet.Companion.IDE_DEBUG_SHEET
+import com.jdngray77.htmldesigner.backend.utility.removeDuplicates
 import org.jsoup.nodes.Element
 
 

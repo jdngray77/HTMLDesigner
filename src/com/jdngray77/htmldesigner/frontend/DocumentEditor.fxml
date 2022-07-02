@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+
+<!--░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+  ░                                                                                               ░
+  ░ Jordan T. Gray's                                                                              ░
+  ░                                                                                               ░
+  ░          HTML Designer                                                                        ░
+  ░                                                                                               ░
+  ░ FOSS 2022.                                                                                    ░
+  ░ License decision pending.                                                                     ░
+  ░                                                                                               ░
+  ░ https://www.github.com/jdngray77/HTMLDesigner/                                                ░
+  ░ https://www.jordantgray.uk                                                                    ░
+  ░                                                                                               ░
+  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░-->
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.web.*?>
-
+<?import javafx.scene.web.WebView?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.DocumentEditor">
    <center>
       <WebView fx:id="contentRenderer" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS" />

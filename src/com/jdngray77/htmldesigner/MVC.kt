@@ -1,7 +1,24 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.utility.flattenTree
+import com.jdngray77.htmldesigner.backend.utility.loadFXMLComponent
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import javafx.scene.control.ButtonType

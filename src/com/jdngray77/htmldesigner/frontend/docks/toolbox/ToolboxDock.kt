@@ -1,12 +1,26 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner.frontend.docks.toolbox
 
 import com.jdngray77.htmldesigner.backend.ContextMessage
+import com.jdngray77.htmldesigner.backend.extensions.injectSiblingAfter
+import com.jdngray77.htmldesigner.backend.extensions.injectSiblingBefore
 import com.jdngray77.htmldesigner.backend.html.dom.ALLTAGS
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
-import com.jdngray77.htmldesigner.backend.injectSiblingAfter
-import com.jdngray77.htmldesigner.backend.injectSiblingBefore
-import com.jdngray77.htmldesigner.backend.loadFXMLComponent
-import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.backend.utility.loadFXMLComponent
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import javafx.scene.control.ContextMenu
@@ -15,7 +29,6 @@ import javafx.scene.control.ScrollPane
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.VBox
 import org.jsoup.nodes.Element
-import org.jsoup.nodes.Node
 
 /**
  * A list of all tags that for the user to add to the dom.

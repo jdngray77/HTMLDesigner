@@ -1,7 +1,24 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.utility.CopyToClipboard
+import com.jdngray77.htmldesigner.backend.utility.camelToSentence
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
@@ -81,22 +98,22 @@ class MainViewController {
 
         // TOP LEFT
 
-        dockLeftTop.tabs.add(Tab(ToolboxDock::class.simpleName!!.CamelToSentence(), ToolboxDock()))
-        dockLeftTop.tabs.add(Tab(Prefabs::class.simpleName!!.CamelToSentence(), Prefabs()))
+        dockLeftTop.tabs.add(Tab(ToolboxDock::class.simpleName!!.camelToSentence(), ToolboxDock()))
+        dockLeftTop.tabs.add(Tab(Prefabs::class.simpleName!!.camelToSentence(), Prefabs()))
 
-        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.CamelToSentence(), ExampleAutoDock()))
-        dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.CamelToSentence(), TestDock()))
+        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.camelToSentence(), ExampleAutoDock()))
+        dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.camelToSentence(), TestDock()))
 
 
         // BOTTOM LEFT
 
-        dockLeftBottom.tabs.add(Tab(Pages::class.simpleName!!.CamelToSentence(), Pages()))
-        dockLeftBottom.tabs.add(Tab(TagHierarchy::class.simpleName!!.CamelToSentence(), TagHierarchy()))
-        dockLeftBottom.tabs.add(Tab(ProjectDock::class.simpleName!!.CamelToSentence(), ProjectDock()))
+        dockLeftBottom.tabs.add(Tab(Pages::class.simpleName!!.camelToSentence(), Pages()))
+        dockLeftBottom.tabs.add(Tab(TagHierarchy::class.simpleName!!.camelToSentence(), TagHierarchy()))
+        dockLeftBottom.tabs.add(Tab(ProjectDock::class.simpleName!!.camelToSentence(), ProjectDock()))
 
         // RIGHT
 
-        dockRight.tabs.add(Tab(TagProperties::class.simpleName!!.CamelToSentence(), TagProperties()))
+        dockRight.tabs.add(Tab(TagProperties::class.simpleName!!.camelToSentence(), TagProperties()))
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

@@ -1,10 +1,34 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner.frontend.docks
 
-import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.EventNotifier
+import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.extensions.open
+import com.jdngray77.htmldesigner.backend.utility.StoringTreeItem
+import com.jdngray77.htmldesigner.backend.utility.assertEndsWith
+import com.jdngray77.htmldesigner.backend.utility.pack
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.*
+import javafx.scene.control.MenuItem
+import javafx.scene.control.SeparatorMenuItem
+import javafx.scene.control.TextInputDialog
+import javafx.scene.control.TreeTableColumn
 import javafx.scene.input.KeyCode
 import java.io.File
 import java.sql.Time
@@ -160,7 +184,7 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
                             if (it.result.isNullOrBlank())
                                 return
                             else
-                                it.result.AssertEndsWith(".html")
+                                it.result.assertEndsWith(".html")
                         }
             ).open()
             refresh()

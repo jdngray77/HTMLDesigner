@@ -1,14 +1,16 @@
 
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
  ░                                                                                                ░
- ░ HTML Designer                                                                                  ░
+ ░          HTML Designer                                                                         ░
  ░                                                                                                ░
  ░ FOSS 2022.                                                                                     ░
  ░ License decision pending.                                                                      ░
  ░                                                                                                ░
  ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
  ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
 package com.jdngray77.htmldesigner.backend.utility
@@ -17,7 +19,6 @@ import com.sun.javafx.scene.control.skin.TreeTableViewSkin
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeTableColumn
 import javafx.scene.control.TreeTableView
-import java.util.ArrayList
 import java.util.function.Consumer
 
 /**

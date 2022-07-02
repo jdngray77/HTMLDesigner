@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 
+<!--░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+  ░                                                                                               ░
+  ░ Jordan T. Gray's                                                                              ░
+  ░                                                                                               ░
+  ░          HTML Designer                                                                        ░
+  ░                                                                                               ░
+  ░ FOSS 2022.                                                                                    ░
+  ░ License decision pending.                                                                     ░
+  ░                                                                                               ░
+  ░ https://www.github.com/jdngray77/HTMLDesigner/                                                ░
+  ░ https://www.jordantgray.uk                                                                    ░
+  ░                                                                                               ░
+  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░-->
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
 <AnchorPane prefHeight="20.0" prefWidth="194.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolBoxItemController">
    <children>
       <Label fx:id="name" layoutX="14.0" layoutY="21.0" text="name" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="0.0" />

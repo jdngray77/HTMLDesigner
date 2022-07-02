@@ -1,6 +1,21 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
-import com.jdngray77.htmldesigner.backend.CamelToSentence
+import com.jdngray77.htmldesigner.backend.utility.camelToSentence
 import javafx.beans.value.ObservableValue
 import org.controlsfx.control.PropertySheet
 import org.controlsfx.property.editor.PropertyEditor
@@ -25,7 +40,7 @@ open class ReflectivePropertySheetItem<T>(
     fun getReflectiveField() = obj::class.members.find { it.name == fieldName } as KMutableProperty<T>?
 
     override fun getCategory() = _category
-    override fun getName() = fieldName.CamelToSentence()
+    override fun getName() = fieldName.camelToSentence()
     override fun getDescription() = _description
 
     override fun getValue() = getReflectiveField()?.getter?.call()

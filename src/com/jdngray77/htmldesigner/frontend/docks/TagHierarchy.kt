@@ -1,6 +1,25 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner.frontend.docks
 
-import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.EventNotifier
+import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.utility.applyToAll
+import com.jdngray77.htmldesigner.backend.utility.pack
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import javafx.beans.property.SimpleObjectProperty
@@ -112,7 +131,11 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
             MenuItem("「TODO」Paste clipboard as below"),
             MenuItem("「TODO」Wrap with clipboard"),
             SeparatorMenuItem(),
-            MenuItem("「TODO」Move up"),
+            MenuItem("「TODO」Move up").also {
+                it.setOnAction {
+                    TODO()
+                }
+            },
             MenuItem("「TODO」Move down"),
         )
 

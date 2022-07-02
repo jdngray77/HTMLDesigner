@@ -1,33 +1,38 @@
+
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
 package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
-import com.jdngray77.htmldesigner.backend.CamelToSentence
-import javafx.scene.text.Text
 
-
-import javafx.scene.control.Spinner
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.memberProperties
 import com.jdngray77.htmldesigner.backend.logWarning
-import com.jdngray77.htmldesigner.backend.changeProperty
+import com.jdngray77.htmldesigner.backend.utility.camelToSentence
+import com.jdngray77.htmldesigner.backend.utility.changeProperty
 import javafx.scene.Parent
-import javafx.scene.control.Button
-import javafx.scene.control.CheckBox
-import javafx.scene.control.ColorPicker
-import javafx.scene.control.DatePicker
-import javafx.scene.control.Separator
-import javafx.scene.control.TextField
-import javafx.scene.paint.Color
-import javafx.scene.web.WebView
-import javafx.scene.control.Pagination
-import javafx.scene.control.ComboBox
+import javafx.scene.control.*
 import javafx.scene.layout.GridPane
+import javafx.scene.paint.Color
+import javafx.scene.text.Text
+import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
 import kotlin.reflect.*
-
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberProperties
 
 
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -235,7 +240,7 @@ open class AutoDock : Dock() {
 
         // Now we can add the GUI.
         this.children.let {
-            grid.add(Text(prop.name.CamelToSentence()), 0, index)
+            grid.add(Text(prop.name.camelToSentence()), 0, index)
             grid.add(gui, 1, index)
         }
 
@@ -276,7 +281,7 @@ open class AutoDock : Dock() {
      */
     private fun addFunction(function: KFunction<*>) {
         if (function.parameters.size != 1) throw InspectableException("${loggableClassName()} ${function.name} has parameters, so it can't be @Inspectable because I wouldn't know what to put in the parameters!")
-        grid.add(Button(function.name.CamelToSentence()).also { it.setOnMouseClicked { function.call(this) } }, 1, index)
+        grid.add(Button(function.name.camelToSentence()).also { it.setOnMouseClicked { function.call(this) } }, 1, index)
         index++
     }
 
