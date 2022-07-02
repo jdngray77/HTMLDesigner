@@ -13,44 +13,48 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.project
-
-import com.jdngray77.htmldesigner.backend.data.PREFERENCE
-import com.jdngray77.htmldesigner.backend.data.Preferences
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Order
-import org.junit.jupiter.api.Test
+package com.jdngray77.htmldesigner.backend.data.config
 
 
-class PreferencesTest {
+enum class USER_PREF {
+    EXPORT_AUTO_ENABLE_BOOL,
+    EXPORT_AUTO_FREQUENCY_INT,
 
-    val preference: Preferences = Preferences()
+    MISC_VALIDATION_SKIP_BOOL,
 
-    @Test
-    @Order(1)
-    fun InitialisationAndRead() {
-        preference.apply {
-            PREFERENCE.values().forEach { // For every PREFERENCE key,
-                try {
-                    assertTrue(get(it)!!::class.simpleName!! == typeOf(it)) // Try to read it, and check that the type recieved matches the type in the key.
-                    println("Read $it")
-                } catch (e: NullPointerException) {
-                    fail("Preference key was not initialised (i'm pretty sure) : $it")
-                } catch (e: IllegalStateException) {
-                    fail(e.message) // Data does not match name.
-                }
-            }
+    BACKUP_DEPTH_INT,
+    BACKUP_ENABLE_BOOL
+}
+
+/**
+ * A registry used to store project-specific preferences.
+ *
+ * Instances of this class are found serialized in the [Project].
+ */
+class Preferences : Registry<USER_PREF>() {
+
+    init {
+
+        // CONFIGURE DEFAULT PROJECT PREFERENCES HERE.
+
+        put(USER_PREF.EXPORT_AUTO_ENABLE_BOOL, true)
+        put(USER_PREF.EXPORT_AUTO_FREQUENCY_INT, 10)
+        put(USER_PREF.MISC_VALIDATION_SKIP_BOOL, false)
+        put(USER_PREF.BACKUP_DEPTH_INT, 20)
+        put(USER_PREF.BACKUP_ENABLE_BOOL, true)
+
+        validate()
+    }
+
+
+    /**
+     * Redundancy check for developers to ensure
+     * that all preference keys have been initalized.
+     */
+    private fun validate() {
+        USER_PREF.values().map {
+            // This throws an exception if the key did not exist.
+            get(it)
         }
-    }
-
-
-    @Test
-    fun flush() {
-        TODO()
-    }
-
-    @Test
-    fun reloadFromProject() {
-        TODO()
     }
 }

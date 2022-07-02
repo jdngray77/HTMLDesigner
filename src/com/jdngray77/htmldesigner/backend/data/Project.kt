@@ -17,6 +17,7 @@ package com.jdngray77.htmldesigner.backend.data
 
 import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.data.config.Preferences
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import com.jdngray77.htmldesigner.backend.utility.*
@@ -141,6 +142,11 @@ class Project(
      * The project's backup directory
      */
     val BACKUP = File(subPath(PROJECT_PATH_BACKUP))
+
+    /**
+     *
+     */
+    val PROJECT_PREFERENCES = Preferences()
 
     /**
      * Storage of any document file after load.
