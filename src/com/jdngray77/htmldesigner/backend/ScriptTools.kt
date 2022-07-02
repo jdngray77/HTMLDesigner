@@ -39,7 +39,7 @@ import kotlin.reflect.KMutableProperty1
  *
  * If it does, the string is returns unmodified, else the result is string + [suffix]
  **/
-fun String.AssertEndsWith(that: String) =
+fun String.assertEndsWith(that: String) =
     if (this.endsWith(that)) this else this + that
 
 
@@ -48,7 +48,7 @@ fun String.AssertEndsWith(that: String) =
  * with spaces between capitlized words and
  * capitalizations on the first character.
  */
-fun String.CamelToSentence() : String =
+fun String.camelToSentence() : String =
     this
         .map { if (it.isUpperCase()) " " + it.lowercase() else it }
         .joinToString("")
@@ -316,7 +316,9 @@ fun Element.injectSiblingAfter(element: Element) = injectRelativeSibling(element
  * Essentially, 0 = inject left, 1 = inject right.
  */
 fun Element.injectRelativeSibling(element: Element, offset: Int = 0) {
-    parent()?.insertChildren(childNodes().indexOf(this) + offset, element)
+    parent()?.let {
+        it.insertChildren(it.childNodes().indexOf(this) + offset, element)
+    }
 }
 
 

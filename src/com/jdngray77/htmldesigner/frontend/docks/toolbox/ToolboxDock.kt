@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.frontend.docks.toolbox
 import com.jdngray77.htmldesigner.backend.ContextMessage
 import com.jdngray77.htmldesigner.backend.html.dom.ALLTAGS
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
+import com.jdngray77.htmldesigner.backend.injectSiblingAfter
 import com.jdngray77.htmldesigner.backend.injectSiblingBefore
 import com.jdngray77.htmldesigner.backend.loadFXMLComponent
 import com.jdngray77.htmldesigner.frontend.Editor
@@ -39,11 +40,21 @@ class ToolboxDock : Dock() {
                 }
             }
         },
-        MenuItem("「TODO」Add below selected tag").apply {
-
+        MenuItem("Add below selected tag").apply {
+            setOnAction {
+                mvc().currentEditor().apply {
+                    selectedTag?.injectSiblingAfter(Element(contextItem!!.controller.name.text))
+                    documentChanged()
+                }
+            }
         },
-        MenuItem("「TODO」Add as child selected tag").apply {
-
+        MenuItem("Add as child selected tag").apply {
+            setOnAction {
+                mvc().currentEditor().apply {
+                    selectedTag?.insertChildren(0, Element(contextItem!!.controller.name.text))
+                    documentChanged()
+                }
+            }
         }
     )
 
