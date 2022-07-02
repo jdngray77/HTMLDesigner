@@ -114,8 +114,6 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
             SeparatorMenuItem(),
             MenuItem("「TODO」Move up"),
             MenuItem("「TODO」Move down"),
-            SeparatorMenuItem(),
-            MenuItem("「TODO」Delete...")
         )
 
 
