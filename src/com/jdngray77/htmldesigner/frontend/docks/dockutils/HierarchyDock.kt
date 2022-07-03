@@ -118,6 +118,20 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
             .mapNotNull { (it as StoringTreeItem<T>).data }
 
     /**
+     * Returns the FIRST selected item, if
+     * any are selected at all.
+     */
+    protected fun selectedItem(): T? {
+        try {
+            return selectedItems()[0]
+        } catch (e: java.lang.IndexOutOfBoundsException) {
+            return null
+        }
+    }
+
+
+
+    /**
      * Provides the children for an element.
      */
     protected abstract fun getChildrenFor(el : T) : Iterable<T>

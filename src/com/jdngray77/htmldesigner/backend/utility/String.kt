@@ -49,6 +49,8 @@ fun String.capitaliseEveryWord() =
         it.replaceFirstChar { (if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString())}
     }
 
+
+// TODO CLIPBOARD FILE.
 /**
  * Copies the string to the system clipboard.
  */
@@ -67,3 +69,30 @@ fun CopyToClipboard(string: String) {
         }
     )
 }
+
+
+
+
+
+
+
+/**
+ * Use to post data to clipboard.
+ *
+ * (copy)
+ */
+fun clipboard(callback : (ClipboardContent) -> Any ) {
+    clipboard().setContent(
+        ClipboardContent().apply {
+            callback(this)
+        }
+    )
+}
+
+/**
+ * Use to retrieve data.
+ *
+ * (paste)
+ */
+fun clipboard() =
+    Clipboard.getSystemClipboard()

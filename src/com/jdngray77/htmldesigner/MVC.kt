@@ -17,8 +17,7 @@ package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.backend.utility.flattenTree
-import com.jdngray77.htmldesigner.backend.utility.loadFXMLComponent
+import com.jdngray77.htmldesigner.backend.utility.*
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import javafx.scene.control.ButtonType
@@ -128,6 +127,7 @@ class MVC (
      *
      * @param document Document - The document to open
      */
+    // TODO should this be in Document Editor?
     fun openDocument(document: Document) {
         loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
             Tab(document.title(), first).let {
@@ -143,9 +143,16 @@ class MVC (
 
                     it.setOnCloseRequest {
                         if (isDirty) {
-                            if (userConfirm("${document.title()} has not been saved. Save?", ButtonType.YES, ButtonType.CANCEL) == ButtonType.YES) {
+                            val result = userConfirm("${document.title()} has not been saved. Save?", ButtonType_SAVE, ButtonType_CLOSEWITHOUTSAVE, ButtonType.CANCEL)
+                            if (result == ButtonType_SAVE) {
                                 save()
                                 MainView.setAction("Closed ${document.title()}")
+                            } else if (result == ButtonType_CLOSEWITHOUTSAVE){
+                                if (!userConfirm("You're absolutely sure you don't want to save ${document.title()}?")) {
+                                    it.consume()
+                                    MainView.setAction("Closed ${document.title()} without saving.")
+                                    // TODO take a backup of document not saved.
+                                }
                             } else {
                                 MainView.setAction("Not closing ${document.title()} ; It's not been saved.")
                                 it.consume()
@@ -245,6 +252,10 @@ class MVC (
                 userConfirm("Delete ${tag[0].tagName()} ?")
         ) return
 
+        implDeleteTag(*tag)
+    }
+
+    fun implDeleteTag(vararg tag: Element) {
         DocumentModificationTransaction().apply {
             tag.forEach {
                 val doc = it.ownerDocument() ?: return
@@ -270,6 +281,13 @@ class MVC (
 
         validateEditors()
     }
+
+    /**
+     * Marks the current document as dirty, and updates
+     * the GUI with the changes.
+     */
+    fun currentDocumentModified()
+        = currentEditor().documentChanged()
 
 
     /**

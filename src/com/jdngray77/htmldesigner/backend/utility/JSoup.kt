@@ -17,9 +17,12 @@ package com.jdngray77.htmldesigner.backend.extensions
 
 import com.jdngray77.htmldesigner.backend.utility.assertExists
 import com.jdngray77.htmldesigner.frontend.Editor
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import org.jsoup.parser.Parser.xmlParser
 import java.io.File
+import javax.swing.text.html.parser.Parser
 
 /*
  *
@@ -84,3 +87,10 @@ fun Element.injectRelativeSibling(element: Element, offset: Int = 0) {
         it.insertChildren(it.childNodes().indexOf(this) + offset, element)
     }
 }
+
+fun String.asElement(): Element =
+    Jsoup.parse(this, "", xmlParser()).let {
+        if (it.tagName() == "#root")
+            it.child(0)
+        else it
+    }

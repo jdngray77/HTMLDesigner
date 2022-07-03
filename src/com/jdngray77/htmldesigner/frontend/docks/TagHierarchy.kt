@@ -18,12 +18,17 @@ package com.jdngray77.htmldesigner.frontend.docks
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.extensions.asElement
+import com.jdngray77.htmldesigner.backend.extensions.injectSiblingAfter
+import com.jdngray77.htmldesigner.backend.extensions.injectSiblingBefore
 import com.jdngray77.htmldesigner.backend.utility.applyToAll
+import com.jdngray77.htmldesigner.backend.utility.clipboard
 import com.jdngray77.htmldesigner.backend.utility.pack
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.*
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
@@ -111,8 +116,11 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
 
         // Context menu
         // TODO only show some of these items when one item is selected.
+        // TODO There's so much fucking repetition here.
+
         setContextMenu(
-            MenuItem("「TODO」Edit alone"),
+            // TODO
+            MenuItem("「INOP」Edit alone"),
             SeparatorMenuItem(),
             MenuItem("Delete").also {
                 it.setOnAction {
@@ -123,20 +131,99 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
                     }
                 }
             },
-            MenuItem("「TODO」Cut"),
-            MenuItem("「TODO」Copy"),
-            SeparatorMenuItem(),
-            MenuItem("「TODO」Paste clipboard as above"),
-            MenuItem("「TODO」Paste clipboard as child"),
-            MenuItem("「TODO」Paste clipboard as below"),
-            MenuItem("「TODO」Wrap with clipboard"),
-            SeparatorMenuItem(),
-            MenuItem("「TODO」Move up").also {
+            MenuItem("Cut").also {
                 it.setOnAction {
-                    TODO()
+                    selectedItem()?.apply {
+
+                        clipboard {
+                            it.putHtml(this.toString())
+                        }
+
+                        mvc().implDeleteTag(this)
+
+                    }
                 }
             },
-            MenuItem("「TODO」Move down"),
+            MenuItem("Copy").also {
+                it.setOnAction {
+                    clipboard {
+                        it.putHtml(selectedItem().toString())
+                    }
+                }
+            },
+            SeparatorMenuItem(),
+            MenuItem("Paste above").also {
+                it.setOnAction {
+                    selectedItem()?.injectSiblingBefore(
+                        clipboard().html.asElement()
+                    )
+                    mvc().currentDocumentModified()
+                }
+            },
+            MenuItem("Paste inside").also {
+                it.setOnAction {
+                    selectedItem()?.insertChildren(0,
+                        clipboard().html.asElement()
+                    )
+                    mvc().currentDocumentModified()
+                }
+            },
+            MenuItem("Paste below").also {
+                it.setOnAction {
+                    selectedItem()?.injectSiblingAfter(
+                        clipboard().html.asElement()
+                    )
+                    mvc().currentDocumentModified()
+                }
+            },
+            MenuItem("Wrap with clipboard").also {
+                it.setOnAction {
+                    selectedItem()?.wrap(clipboard().html)
+                    mvc().currentDocumentModified()
+                }
+            },
+
+            SeparatorMenuItem(),
+            MenuItem("Move up within parent").also {
+                it.setOnAction {
+                    selectedItem()?.apply {
+                        parent()?.let {
+                            val index = it.children().indexOf(this)
+                            if (index == 0) return@apply
+
+                            it.insertChildren(index + 1, this)
+
+                            mvc().currentDocumentModified()
+                        }
+                    }
+                }
+            },
+            MenuItem("Move down within parent").also {
+                it.setOnAction {
+                    selectedItem()?.apply {
+                        parent()?.let {
+                            val index = it.children().indexOf(this)
+                            if (index == 0) return@apply
+
+                            it.insertChildren(index + 2, this)
+
+                            mvc().currentDocumentModified()
+                        }
+                    }
+                }
+            },
+            SeparatorMenuItem(),
+            MenuItem("Move out of parent").also {
+                it.setOnAction {
+                    selectedItem()?.apply {
+                        parent()?.let {
+                            mvc().implDeleteTag(this)
+                            it.injectSiblingBefore(this)
+                            mvc().currentDocumentModified()
+                        }
+                    }
+                }
+            },
         )
 
 

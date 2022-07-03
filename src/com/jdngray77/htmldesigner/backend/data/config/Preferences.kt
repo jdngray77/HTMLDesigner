@@ -52,6 +52,9 @@ class Preferences : Registry<USER_PREF>() {
      * that all preference keys have been initalized.
      */
     private fun validate() {
+        // TODO i want this validation to happen on boot,
+        //      rather than project creation - otherwise
+        //      it could still get missed.
         USER_PREF.values().map {
             // This throws an exception if the key did not exist.
             get(it)

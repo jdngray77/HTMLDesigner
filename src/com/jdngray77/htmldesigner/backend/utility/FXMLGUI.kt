@@ -19,6 +19,7 @@ import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.control.ButtonType
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import java.awt.Toolkit
@@ -61,3 +62,26 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
             Pair<T, Any>(it, loader.getController())
         }
     }
+
+
+// TODO Reminder for the future :
+//      It is not possible to add extension properties
+//      for companion objects in java classes, since java classes
+//      don't java companions.
+//      However, jetbrains are working on a solution.
+//      If you're reading this in the future,
+//      check if this works!
+//      ```
+//      val ButtonType.Companion.SAVE: ButtonType
+//          get() = ButtonType("Save")
+//      ```
+//      TLDR
+//      Since buttonType is java, we can't add static extension
+//      properties.
+//
+//      ALSO this won't work if you have to use getters.
+//           The instance returned must be exact, effectively final.
+
+val ButtonType_SAVE: ButtonType = ButtonType("Save")
+
+val ButtonType_CLOSEWITHOUTSAVE: ButtonType = ButtonType("Don't save")
