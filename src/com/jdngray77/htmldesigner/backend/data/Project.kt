@@ -18,8 +18,8 @@ package com.jdngray77.htmldesigner.backend.data
 import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.config.Preferences
+import com.jdngray77.htmldesigner.backend.extensions.*
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
-import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
 import com.jdngray77.htmldesigner.backend.utility.*
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import org.jsoup.Jsoup
@@ -139,6 +139,11 @@ class Project(
     val MEDIA = File(subPath(PROJECT_PATH_MEDIA))
 
     /**
+     * The project's PREFABS directory
+     */
+    val PREFABS = File(subPath(PROJECT_PATH_PREFABS))
+
+    /**
      * The project's backup directory
      */
     val BACKUP = File(subPath(PROJECT_PATH_BACKUP))
@@ -163,6 +168,11 @@ class Project(
 
     @Deprecated("This is for debug access only. Cache is internal to the project only.")
     fun getCache() = CACHE
+
+    inline fun <reified T> removeFromCache(any: T) {
+        getCache().entries.filter { it.value is T && it == any }
+            .map { getCache().remove(it.key) }
+    }
 
     /**
     * TODO request to reset cache / reload all documents from disk
@@ -232,6 +242,7 @@ class Project(
                 !hasChild(PROJECT_PATH_CSS)     ||
                 !hasChild(PROJECT_PATH_MEDIA)   ||
                 !hasChild(PROJECT_PATH_BACKUP)  ||
+                !hasChild(PROJECT_PATH_PREFABS) ||
                 !hasChild(PROJECT_PATH_JS)
             ) throw IllegalStateException("A project folder has gone missing") // TODO create it or prompt to restore backup
         }
@@ -276,6 +287,7 @@ class Project(
             createSubDirectory(PROJECT_PATH_HTML)
             createSubDirectory(PROJECT_PATH_JS)
             createSubDirectory(PROJECT_PATH_MEDIA)
+            createSubDirectory(PROJECT_PATH_PREFABS)
         }
     }
 
@@ -291,7 +303,7 @@ class Project(
      *
      * i.e `subFile("index.hmtl")
      */
-    private fun subPath(subpath: String) =
+    fun subPath(subpath: String) =
         locationOnDisk.path + "/" + subpath
 
     /**
@@ -300,7 +312,8 @@ class Project(
      *
      * i.e `subFile("index.hmtl")
      */
-    private fun subFile(subpath: String) =
+    @Deprecated("Moved to [File.subFile]", ReplaceWith("File.subFile(subpath))"))
+    fun subFile(subpath: String) =
         File(subPath(subpath))
 
 
@@ -419,6 +432,8 @@ class Project(
             doc.title(name)
             doc.getElementById("PageTitle")?.text(name)
 
+            doc.addStylesheet(CSS_ID_DOCUMENT_SPECIFIC)
+            doc.addStylesheet(CSS_ID_DEBUG, CSS_SHEET_DEBUG)
 
             saveDocument(doc, path)
             CACHE[path] = doc
@@ -470,38 +485,38 @@ class Project(
         }
     }
 
-    /**
-     * Creates a new stylesheet
-     */
-    fun createStylesheet(name: String) : StyleSheet {
-        File(subPath("$PROJECT_PATH_CSS$name.stylesheet")).apply {
-            createNewFile()
-            return StyleSheet(name).also {
-                saveStylesheet(it, this)
-            }
-        }
-    }
-
-    /**
-     * Saves a stylesheet to [file]
-     */
-    fun saveStylesheet(styleSheet: StyleSheet, file: File) =
-        styleSheet.saveObjectToDisk(file.toString()).also {
-            CACHE[file.path] = it
-        }
-
-    /**
-     * Loads a stylesheet from [file]
-     */
-    fun loadStylesheet(file: File) : StyleSheet {
-        getCached<StyleSheet>(file)?.apply {
-            return this
-        }
-
-        return (loadObjectFromDisk(file) as StyleSheet).also {
-            CACHE[file.path] = it
-        }
-    }
+//    /**
+//     * Creates a new stylesheet
+//     */
+//    fun createStylesheet(name: String) : StyleSheet {
+//        File(subPath("$PROJECT_PATH_CSS$name.stylesheet")).apply {
+//            createNewFile()
+//            return StyleSheet(name).also {
+//                saveStylesheet(it, this)
+//            }
+//        }
+//    }
+//
+//    /**
+//     * Saves a stylesheet to [file]
+//     */
+//    fun saveStylesheet(styleSheet: StyleSheet, file: File) =
+//        styleSheet.saveObjectToDisk(file.toString()).also {
+//            CACHE[file.path] = it
+//        }
+//
+//    /**
+//     * Loads a stylesheet from [file]
+//     */
+//    fun loadStylesheet(file: File) : StyleSheet {
+//        getCached<StyleSheet>(file)?.apply {
+//            return this
+//        }
+//
+//        return (loadObjectFromDisk(file) as StyleSheet).also {
+//            CACHE[file.path] = it
+//        }
+//    }
 
     /**
      * Deletes a file on disk then [validateCache]
@@ -599,6 +614,11 @@ class Project(
          * The location of the project media, relative to the project root.
          */
         const val PROJECT_PATH_MEDIA: String = "MEDIA/"
+
+        /**
+         * The location of prefabricated elements, relative to the root.
+         */
+        const val PROJECT_PATH_PREFABS: String = "PREFABS/"
 
 
         /**

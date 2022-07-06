@@ -23,12 +23,14 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
+import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import javafx.fxml.FXML
 import javafx.scene.control.Label
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.web.HTMLEditor
+import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import java.io.File
 
@@ -60,6 +62,8 @@ class MainViewController {
     @FXML lateinit var lblLeftStatus : Label
     @FXML lateinit var lblRightStatus : Label
 
+    @FXML lateinit var documentation : WebView
+
 
 
 
@@ -87,6 +91,7 @@ class MainViewController {
         }
 
         addDocks()
+        documentation.engine.load("https://www.github.com/Jdngray77/HTMLDesigner/wiki")
     }
 
     /**
@@ -102,7 +107,7 @@ class MainViewController {
         dockLeftTop.tabs.add(Tab(Prefabs::class.simpleName!!.camelToSentence(), Prefabs()))
 
         dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.camelToSentence(), ExampleAutoDock()))
-        dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.camelToSentence(), TestDock()))
+//        dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.camelToSentence(), TestDock()))
 
 
         // BOTTOM LEFT

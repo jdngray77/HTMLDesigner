@@ -36,12 +36,14 @@ enum class EventType {
     PROJECT_NEW_DOCUMENT_CREATED,
 
     EDITOR_DOCUMENT_SWITCH, // The editor has switched to show a different document.
-    EDITOR_DOCUMENT_EDITED  // The editor has made a change to the open document.
-    ,
+    EDITOR_DOCUMENT_EDITED,  // The editor has made a change to the open document.
+    EDITOR_DOCUMENT_CLOSED,
+
     PROJECT_PAGE_DELETED,
     PROJECT_PAGE_CREATED,
     EDITOR_LOADED,
-    EDITOR_SELECTED_TAG_CHANGED
+    EDITOR_SELECTED_TAG_CHANGED,
+    PROJECT_PREFAB_CREATED
 
 
 }

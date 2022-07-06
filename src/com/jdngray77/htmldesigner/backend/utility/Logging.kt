@@ -19,6 +19,7 @@ import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.scene.Node
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
+import javafx.scene.control.TextInputDialog
 import javafx.scene.text.Text
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.PopOver
@@ -150,4 +151,27 @@ fun userConfirm(message : String, vararg buttonType: ButtonType) = Alert(
 ).let {
     it.showAndWait()
     return@let it.result
+}
+
+/**
+ *
+ * @param inputValidator Optional input tester. Return an error message if you don't like what the user typed in, else null if OK.
+ */
+fun userInput(message: String, inputValidator: ((String) -> String?)? = null): String {
+    TextInputDialog().apply {
+        headerText = message
+        if (inputValidator == null)
+            return showAndWait().get()
+        else {
+            while (true) {
+                val result = showAndWait().get()
+                inputValidator(result)?.let {
+                    showErrorAlert(it)
+                } ?: run {
+                    return result
+                }
+
+            }
+        }
+    }
 }

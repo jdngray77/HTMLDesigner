@@ -19,6 +19,7 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.backend.extensions.asElement
+import com.jdngray77.htmldesigner.backend.extensions.createPrefab
 import com.jdngray77.htmldesigner.backend.extensions.injectSiblingAfter
 import com.jdngray77.htmldesigner.backend.extensions.injectSiblingBefore
 import com.jdngray77.htmldesigner.backend.utility.applyToAll
@@ -121,6 +122,13 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
         setContextMenu(
             // TODO
             MenuItem("「INOP」Edit alone"),
+            MenuItem("「WIP」Save As Prefab").also {
+                it.setOnAction {
+                    selectedItems().map {
+                        it.createPrefab()
+                    }
+                }
+            },
             SeparatorMenuItem(),
             MenuItem("Delete").also {
                 it.setOnAction {

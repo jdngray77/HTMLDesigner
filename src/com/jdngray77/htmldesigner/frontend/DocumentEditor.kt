@@ -18,28 +18,119 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
+import com.jdngray77.htmldesigner.backend.userConfirm
+import com.jdngray77.htmldesigner.backend.utility.ButtonType_CLOSEWITHOUTSAVE
+import com.jdngray77.htmldesigner.backend.utility.ButtonType_SAVE
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import javafx.event.Event
 import javafx.fxml.FXML
+import javafx.scene.control.ButtonType
 import javafx.scene.control.Tab
+import javafx.scene.layout.BorderPane
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
+import java.net.URL
+import javax.annotation.Resources
 
 /**
  * # Central document editor.
  *
- * Holds open documents in order to make and save changes.
+ * This file is the FXML Controller for the 'DocumentEditor.fxml' GUI.
  *
- * **Does not handle modifying the [document]. See [MVC].**
+ * It holds an open document in order to make and save changes, but note that
+ * it **Does not handle modifying the [document]. For that, see [MVC].**
  *
- * In the GUI, this is a tab that opens within the IDE displaying a document.
- * The IDE will access and edit the selected editor.
+ * In the GUI, this is a [tab] that opens within the IDE displaying a document.
+ * The IDE will access and edit the [DocumentEditor] that is selected.
  *
- * All of the docks will update to display and edit the selected editor.
+ * All docks will update to display and edit the selected editor via
+ * [EventType.EDITOR_DOCUMENT_SWITCH].
+ *
+ * The editor is created in [MVC.openEditor]. The document is also
+ * set here.
  */
 class DocumentEditor {
+
+    //region initalization
+
+    /**
+     * Late 'init' called by FXML.
+     *
+     * Kotlin init is too early. The GUI and @FXML lateinits won't have
+     * been created yet.
+     *
+     * This automatically the tab in the main GUI, and places this
+     * [DocumentEditor] into it, and configures the teardown logic.
+     *
+     * > N.B During initalization, there is no document yet.
+     *
+     * The editor is created in [MVC.openEditor]. The document is also
+     * set here.
+     */
+    @FXML
+    fun initialize() {
+        val mainView = mvc().MainView
+
+        // Create a Tab, store it locally, and add it to the main editor gui.
+        tab = Tab("", editorRoot).let {
+            mainView.dockEditors.tabs.add(it)
+
+            // Have the tab automatically resize to fill the entire editor space.
+            editorRoot.prefWidthProperty().bind(mainView.dockEditors.widthProperty())
+            editorRoot.prefHeightProperty().bind(mainView.dockEditors.heightProperty())
+
+            it.setOnCloseRequest {
+                if (isDirty) {
+                    val result = userConfirm("${document.title()} has not been saved. Save?", ButtonType_SAVE, ButtonType_CLOSEWITHOUTSAVE, ButtonType.CANCEL)
+                    if (result == ButtonType_SAVE) {
+                        save()
+                        mainView.setAction("Closed ${document.title()}")
+                    } else if (result == ButtonType_CLOSEWITHOUTSAVE){
+                        if (!userConfirm("You're absolutely sure you don't want to save ${document.title()}?")) {
+                            it.consume()
+                            mainView.setAction("Closed ${document.title()} without saving.")
+                            // TODO take a backup of document not saved.
+                        }
+                    } else {
+                        mainView.setAction("Not closing ${document.title()} ; It's not been saved.")
+                        it.consume()
+                    }
+                }
+            }
+
+            it.setOnClosed {
+                mvc().onEditorClosed(this)
+            }
+
+            it
+        }
+    }
+
+
+
+    /**
+     * For creation only.
+     *
+     * Rejects if has been set already.
+     */
+    @Deprecated("Only used for creation. You can't change the document.")
+    fun setDocument(document: Document) {
+        if (this::document.isInitialized) return
+
+        this.file = document.projectFile()
+        this.document = document
+
+        tab.text = document.title()
+
+        clean()
+        reRender()
+    }
+
+
+    //#region initalization
+
 
     /**
      * The document being edited.
@@ -48,48 +139,68 @@ class DocumentEditor {
         private set
 
     /**
-     * The document being edited.
+     * The file on disk where the [document] is located.
+     *
+     * This is where it will be saved to.
      */
     lateinit var file : File
         private set
 
     /**
-     * The tab displayed in the IDE, which contains the [contentRenderer]
-     */
-    lateinit var tab: Tab
-
-    /**
-     * A [WebView] that displays the [Document]
+     * A [WebView] placed inside the [tab] that displays the [Document]
+     * to the user.
      *
      * @see [reRender]
      */
     @FXML lateinit var contentRenderer : WebView
 
     /**
+     * The tab displayed in the IDE, which contains this editor.
+     */
+    lateinit var tab: Tab
+
+    /**
+     * The root container of this [DocumentEditor]
+     *
+     * See the parenting FXML file.
+     */
+    @FXML lateinit var editorRoot : BorderPane
+
+
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //region                                   EDITING
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    // But remember, this does not actually manipulate any data. That's the MVC's job.
+
+
+    /**
      * A tag selected via the [TagHierarchy].
      *
-     * Provides context for the IDE to perform tag modifications.
+     * Provides context for the MVC to perform tag modifications.
      */
     var selectedTag: Element? = null
         set(value) {
+            //FIXME these debug lines will be saved into the output document.
+
             // Guard against repetition ; issue #19.
             if (value == field) return
 
             field?.removeClass("debug-outline")
             field = value
             field?.addClass("debug-outline")
-            //FIXME these debug lines will be saved into the output document.
+
             reRender()
             EventNotifier.notifyEvent(EventType.EDITOR_SELECTED_TAG_CHANGED)
         }
 
 
 
-    //#region Dirty
-
+    //region dirty
 
     /**
-     * When high, indicates that this editor has been changed.
+     * When raised, this flag indicates that this editor has been changed.
      *
      * Marked high when [documentChanged] is called, and remains so until [document]
      * is saved via [save]
@@ -98,7 +209,7 @@ class DocumentEditor {
         private set
 
     /**
-     * Notifies the editor that the document has beem modified.
+     * Notifies this document editor that the document it holds has been modified.
      *
      * Marks the editor dirty & in need of saving.
      * Also notifies of document edit, and [reRender]'s [contentRenderer].
@@ -119,25 +230,8 @@ class DocumentEditor {
     }
 
 
-    //#endregion Dirty
+    //endregion Dirty
 
-
-    /**
-     * For creation only.
-     *
-     * Rejects if has been set already.
-     */
-    @Deprecated("Used only to create. Don't modify the document.")
-    fun setDocument(document: Document, tab: Tab) {
-        if (this::document.isInitialized) return
-
-        this.file = document.projectFile()
-        this.document = document
-        this.tab = tab
-
-        clean()
-        reRender()
-    }
 
     /**
      * Updates [WebView] to display the current state of the [document]
@@ -152,6 +246,21 @@ class DocumentEditor {
         clean()
     }
 
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                   EDITING
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+
+    /**
+     * Asks this editor to close.
+     *
+     * Identical to the user clicking the 'x'.
+     *
+     * Performs [tab.onCloseRequest], and if the user is happy to close,
+     * [forceClose] is used to close the tab.
+     */
     fun requestClose() {
         val e = Event(EDITOR_CLOSE_REQUEST)
         tab.onCloseRequest?.handle(e)
@@ -161,6 +270,10 @@ class DocumentEditor {
         forceClose()
     }
 
+    /**
+     * Force closes the tab, without saving or asking the user.
+     */
+    @Deprecated("This risks the user losing changes to their document. Prefer the use of requestClose.")
     fun forceClose() {
         mvc().MainView.dockEditors.tabs.remove(tab)
 
@@ -174,6 +287,11 @@ class DocumentEditor {
          */
         private const val DIRTY_SUFFIX = " *"
 
+        /**
+         * A JavaFX event thrown about when this editor creates close request events.
+         * Nothing important, just an empty placeholder request.
+         * It's stored here because event types can only be created once.
+         */
         private val EDITOR_CLOSE_REQUEST = javafx.event.EventType<Event>("EDITOR_CLOSE_REQUEST")
     }
 }

@@ -1,4 +1,5 @@
 
+
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -13,18 +14,18 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.frontend.docks
+package com.jdngray77.htmldesigner.frontend.docks.tagproperties
 
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
-import com.jdngray77.htmldesigner.frontend.docks.dockutils.ReflectivePropertySheetItem
 import org.controlsfx.control.PropertySheet
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory
 import org.controlsfx.property.editor.Editors
 import org.jsoup.nodes.Element
+import java.lang.System.gc
 
 /**
  * A dock which displays a [PropertySheet] for
@@ -43,6 +44,8 @@ class TagProperties : Dock(), Subscriber {
         // BUT it makes it difficult to target the property sheet
         // in CSS, if we ever should need to.
         it.styleClass.clear()
+
+        it.mode = PropertySheet.Mode.CATEGORY
     }
 
     init {
@@ -71,61 +74,100 @@ class TagProperties : Dock(), Subscriber {
                 }
             }
 
-            sheet.items.addAll(
-                    ElementProperty<String>(
-                        this,
-                        "id",
-                        "A unique reference to this tag.",
-                        "Scripting",
-                        true
-                    ),
+            val currentEditor = mvc().currentEditor()
+            sheet.items.clear()
 
-//                    ElementProperty<>(
-//                        this,
-//                        "",
-//                        "A unique reference to this tag.",
-//                        "Layout",
-//                        true
-//                    ),
+            sheet.items.addAll(
+                ReflectivePropertySheetItem<String>(
+                    "id",
+                    "Uniquely identify this element for scripting.",
+                    "Advanced",
+                    this,
+                    currentEditor,
+                    true
+                ),
+
+                PlaceholderPropertySheetItem(
+                    "Custom CSS",
+                    "Advanced"
+                ),
+
+                PlaceholderPropertySheetItem(
+                    "Attributes",
+                    "Advanced"
+                ),
+
+                // TODO list
+                // Breadcrumb
+
+                PlaceholderPropertySheetItem(
+                    "Width",
+                "Size & Position"
+                ),
+                PlaceholderPropertySheetItem(
+                    "Height",
+                    "Size & Position"
+                ),
+
+                PlaceholderPropertySheetItem(
+                    "Padding",
+                    "Size & Position"
+                ),
+
+                PlaceholderPropertySheetItem(
+                    "Margin",
+                    "Size & Position"
+                ),
+
+
+
+
+                PlaceholderPropertySheetItem(
+                    "Border",
+                    "Appearance"
+                ),
+
+                PlaceholderPropertySheetItem(
+                    "Background",
+                    "Appearance"
+                ),
+
+                PlaceholderPropertySheetItem(
+                    "Filters",
+                    "Appearance"
+                ),
+
+
+
+
+
+
+
+                PlaceholderPropertySheetItem(
+                    "Display",
+                    "Alignment"
+                ),
+
+                PlaceholderPropertySheetItem(
+                    "Flexbox",
+                    "Alignment"
+                ),
                 )
             }
         }
+        gc()
     }
 
-    /**
-     * A wrapper for [ReflectivePropertySheetItem],
-     * which can invoke getters and setters inside an
-     * html [Element] with the given data type.
-     */
-    inner class ElementProperty<T>(
-        val element : Element,
-        fieldName: String,
-        _description : String,
-        _category : String,
-        _isEditable: Boolean = true
-    ) : ReflectivePropertySheetItem<T>(
-        fieldName,
-        _description,
-        _category,
-        element,
-        _isEditable
+
+    inner class CSSProperty(
+        val element: Element,
+        val propertyName: String
+
     ) {
 
-        val getter = obj::class.java.getDeclaredMethod(fieldName)
-
-        val setter = obj::class.java.getDeclaredMethod(fieldName, type)
-
-        override fun getType(): Class<*> = getter.returnType
-
-        override fun getValue() = getter.invoke(obj) as T
-
-        override fun setValue(value: Any?) {
-            val before = getValue()
-            setter.invoke(obj, value)
-            println("Changed $fieldName from $before to ${getValue()}")
-
-        }
     }
+
+
 
 //    inner class CSSProperty (
 //        val element : Element,

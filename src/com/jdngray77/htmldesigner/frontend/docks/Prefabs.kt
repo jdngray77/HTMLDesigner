@@ -15,10 +15,24 @@
 
 package com.jdngray77.htmldesigner.frontend.docks
 
-import com.jdngray77.htmldesigner.frontend.docks.dockutils.AutoDock
+import com.jdngray77.htmldesigner.backend.EventNotifier
+import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.html.Prefab
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 
-class Prefabs : AutoDock() {
+class Prefabs : HierarchyDock<Prefab>({it?.locationOnDisk!!.name}), Subscriber {
     init {
-        create()
+        EventNotifier.subscribe(this, EventType.EDITOR_LOADED, EventType.PROJECT_PREFAB_CREATED)
     }
+
+    override fun notify(e: EventType) {
+        //TODO remove guard
+        if (e != EventType.EDITOR_LOADED && e != EventType.PROJECT_PREFAB_CREATED)
+            return
+
+
+    }
+
+    override fun getChildrenFor(el: Prefab) = listOf<Prefab>()
 }

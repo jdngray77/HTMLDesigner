@@ -56,6 +56,9 @@ fun File.assertExists(): Boolean {
     return exists()
 }
 
+fun File.subFile(subpath : String) =
+    File("$path/$subpath")
+
 /**
  * Requires that the file exists on disk, but does not create it
  * if it doesn't.

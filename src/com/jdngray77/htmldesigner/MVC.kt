@@ -19,6 +19,7 @@ import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.utility.*
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
+import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Tab
@@ -78,10 +79,19 @@ class MVC (
         ArrayList<DocumentEditor>()
 
     /**
+     * Event invoked when an editor tab is closed.
+     */
+    fun onEditorClosed(documentEditor: DocumentEditor) {
+        openEditors.remove(documentEditor)
+        Project.removeFromCache(documentEditor.document)
+        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_CLOSED)
+    }
+
+    /**
      * Returns the document of the current editor
      */
     fun currentDocument() =
-        currentEditor()!!.document
+        currentEditor().document
 
     /**
      * It returns the current editor
@@ -130,40 +140,10 @@ class MVC (
     // TODO should this be in Document Editor?
     fun openDocument(document: Document) {
         loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
-            Tab(document.title(), first).let {
-                MainView.dockEditors.tabs.add(it)
-
-                first.prefWidthProperty().bind(MainView.dockEditors.widthProperty())
-                first.prefHeightProperty().bind(MainView.dockEditors.heightProperty())
-
-                (second as DocumentEditor).apply {
-                    setDocument(document, it)
-                    openEditors.add(this)
-                    switchToEditor(this)
-
-                    it.setOnCloseRequest {
-                        if (isDirty) {
-                            val result = userConfirm("${document.title()} has not been saved. Save?", ButtonType_SAVE, ButtonType_CLOSEWITHOUTSAVE, ButtonType.CANCEL)
-                            if (result == ButtonType_SAVE) {
-                                save()
-                                MainView.setAction("Closed ${document.title()}")
-                            } else if (result == ButtonType_CLOSEWITHOUTSAVE){
-                                if (!userConfirm("You're absolutely sure you don't want to save ${document.title()}?")) {
-                                    it.consume()
-                                    MainView.setAction("Closed ${document.title()} without saving.")
-                                    // TODO take a backup of document not saved.
-                                }
-                            } else {
-                                MainView.setAction("Not closing ${document.title()} ; It's not been saved.")
-                                it.consume()
-                            }
-                        }
-                    }
-                }
-
-                it.setOnClosed {
-                    openEditors.remove(second)
-                }
+            (second as DocumentEditor).let {
+                it.setDocument(document)
+                openEditors.add(it)
+                switchToEditor(it)
             }
         }
     }

@@ -15,12 +15,9 @@
 
 package com.jdngray77.htmldesigner.backend.html.dom
 
-import com.jdngray77.htmldesigner.backend.html.style.Style
-import com.jdngray77.htmldesigner.backend.html.style.StyleArray
-import com.jdngray77.htmldesigner.backend.html.style.StyleSheet
-import com.jdngray77.htmldesigner.backend.html.style.StyleSheet.Companion.IDE_DEBUG_SHEET
 import com.jdngray77.htmldesigner.backend.utility.removeDuplicates
 import org.jsoup.nodes.Element
+import org.w3c.dom.css.CSSRuleList
 
 
 /**
@@ -61,12 +58,13 @@ abstract class Tag : SerializableHTML {
      */
     var cssClasses = StringArray()
 
-    /**
-     * Unique CSS styles applied to this element only.
-     *
-     * i.e `<example style="background: blue;"></example>`
-     */
-    var styles = StyleArray()
+// TODO reinstate
+//    /**
+//     * Unique CSS styles applied to this element only.
+//     *
+//     * i.e `<example style="background: blue;"></example>`
+//     */
+//    var styles = CSS()
 
     /**
      * The [Tag] that this tag is a child of.
@@ -142,9 +140,10 @@ abstract class Tag : SerializableHTML {
      *
      * Removes duplicates
      */
-    fun styles(vararg style: Style) = this.apply {
-        styles.addAll(style)
-        styles.removeDuplicates()
+    fun styles(vararg style: CSSRuleList) = this.apply {
+// TODO reinstate
+//        styles.addAll(style)
+//        styles.removeDuplicates()
     }
 
     /**
@@ -299,7 +298,8 @@ abstract class Tag : SerializableHTML {
         that.content = content
         that.ID = ID
         that.cssClasses = cssClasses
-        that.styles = styles
+// TODO reinstate
+//        that.styles = styles
     }
 
     /**
@@ -437,9 +437,10 @@ abstract class Tag : SerializableHTML {
      * Returns a string representation of the [styles]
      * unique to this tag, if there is any.
      */
-    fun serializeStyles() =
-        if (styles.isEmpty()) "" else
-            " style=\"${styles.joinToString("") { it.toString() + " " }}\""
+    fun serializeStyles() = ""
+// TODO reinstate
+//        if (styles.isEmpty()) "" else
+//            " style=\"${styles.joinToString("") { it.toString() + " " }}\""
 
     /**
      * Returns a string representation of the CSS Classes
@@ -485,7 +486,7 @@ abstract class Tag : SerializableHTML {
             it.body()
                 .id("MainContent")
                 .addClass("myStyle")
-                .attr("style", "background: pink; color: blue;")
+                .attr("style", "background: #373737; color: lightgray;")
                 .insertChildren(
                     0,
                     Element("h1")
@@ -501,12 +502,8 @@ abstract class Tag : SerializableHTML {
                         .addClass("yeet")
                         .attr("href", "https://jordantgray.uk")
                         .attr("style", "color: yellow;")
-                        .appendText("ME!"),
-                    Element("Style")
-                        .id(IDE_DEBUG_SHEET)
-                        .appendText(StyleSheet.DEBUG.serialize())
-                    )
-
+                        .appendText("ME!")
+                )
         }
 
         /**
