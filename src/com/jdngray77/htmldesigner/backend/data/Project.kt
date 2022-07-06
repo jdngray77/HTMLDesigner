@@ -17,7 +17,7 @@ package com.jdngray77.htmldesigner.backend.data
 
 import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.backend.data.config.Preferences
+import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
 import com.jdngray77.htmldesigner.backend.extensions.*
 import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import com.jdngray77.htmldesigner.backend.utility.*
@@ -151,7 +151,9 @@ class Project(
     /**
      *
      */
-    val PROJECT_PREFERENCES = Preferences()
+    @Transient
+    lateinit var PREFERENCES: ProjectPreferences
+        private set
 
     /**
      * Storage of any document file after load.
@@ -247,10 +249,15 @@ class Project(
             ) throw IllegalStateException("A project folder has gone missing") // TODO create it or prompt to restore backup
         }
 
+        // Handle transient properties
+
         if (!this::CACHE.isInitialized)
             CACHE = HashMap()
+        else
+            validateCache()
 
-        else validateCache()
+        if (!this::PREFERENCES.isInitialized)
+            PREFERENCES = ProjectPreferences(this)
     }
 
     /**

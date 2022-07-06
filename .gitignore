@@ -27,3 +27,5 @@ out/
 testproject/
 .DS_Store
 .idea/
+
+HTMLDesignerCfg.registry

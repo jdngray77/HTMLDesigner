@@ -15,6 +15,8 @@
 
 package com.jdngray77.htmldesigner.backend.utility
 
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
@@ -36,13 +38,18 @@ fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Pair<Sce
     Toolkit.getDefaultToolkit().screenSize.let {
         val component = loadFXMLComponent<Parent>(urlFromSrcRoot)
 
-        Pair<Scene, Any>(
+        Pair(
             Scene(
                 component.first,
                 it.width.toDouble(),
                 it.height.toDouble()
             ).also {
-                val jMetro = JMetro(Style.DARK)
+                val jMetro = JMetro(
+                    if (Config[Configs.DARK_MODE_BOOL] as Boolean)
+                        Style.DARK
+                    else
+                        Style.LIGHT
+                )
                 jMetro.scene = it
             }
             ,

@@ -16,9 +16,13 @@
 
 package com.jdngray77.htmldesigner.backend.data.config
 
+import com.jdngray77.htmldesigner.backend.html.dom.data
 import com.jdngray77.htmldesigner.backend.html.dom.html
+import com.jdngray77.htmldesigner.backend.utility.loadObjectFromDisk
+import com.jdngray77.htmldesigner.backend.utility.saveObjectToDisk
 import org.jsoup.nodes.Document
-import java.nio.file.Path
+import java.io.File
+import java.lang.System.gc
 
 // Format :
 // EPIC_NOUN_PROPERTY_DATATYPE
@@ -27,7 +31,9 @@ import java.nio.file.Path
 
 
 /**
- * A HashMap for storing configurable values.
+ * A HashMap for storing configurable values that are
+ * automatically saved to and loaded from
+ * disk.
  *
  * All keys must be entered at initalisation.
  * Keys can be modified later, but not created.
@@ -68,18 +74,36 @@ import java.nio.file.Path
  *  > PROJECT_BACKUP_DEPTH_INT
  *
  * @param T The type used for the KEY.
+ *
+ * @see initialize
+ * @see validate
+ * TODO validation is removed.
  */
-open class Registry <T> : HashMap<T, Any>() {
+open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
+
+    protected fun defferedInit() {
+        if (saveLocation.exists())
+            load()
+        else {
+            initialize()
+            flush()
+        }
+    }
 
     /**
      * Enters a value into the registry,
      * if the type matches
      */
-    final override fun put(key: T, value: Any) =
+    final override fun put(key: T, value: Any) {
         if (!isValidType(key, value))
             throw MismatchedTypeException(key, value)
         else
             super.put(key, value)
+
+        // TODO i don't like that this is called for every item when
+        //      adding many items at once.
+        flush()
+    }
 
     final override fun putAll(from: Map<out T, Any>) {
         from.map {
@@ -91,6 +115,7 @@ open class Registry <T> : HashMap<T, Any>() {
         try {
             return super.get(key)!!
         } catch (e : ClassCastException) {
+            // TODO can this even be reached?
             throw IllegalArgumentException("Tried to read a preferences value as the wrong type.")
         } catch (e : NullPointerException) {
             throw MissingEntryException(key)
@@ -114,7 +139,7 @@ open class Registry <T> : HashMap<T, Any>() {
                 "SHORT" -> Short::class.simpleName
                 "LONG" -> Long::class.simpleName
                 "DOUBLE" -> Double::class.simpleName
-                "STRING" -> Boolean::class.simpleName
+                "STRING" -> String::class.simpleName
                 "DOC" -> Document::class.simpleName
                 "HTML" -> html::class.simpleName
                 else -> throw IllegalStateException("Preference key name is not suffixed with a permitted data type : $key")
@@ -122,11 +147,42 @@ open class Registry <T> : HashMap<T, Any>() {
         }
     }
 
-    // TODO Write to file.
-    fun flush (){
-        TODO()
+    final fun flush() = saveObjectToDisk(saveLocation)
+
+    /**
+     * (re)loads from disk.
+     *
+     * If there is no file on disk, then [flush]es to create one.
+     */
+    final fun load (): Boolean {
+
+        return if (saveLocation.exists()) {
+            (loadObjectFromDisk(saveLocation) as Registry<T>).let {
+                clear()
+                it.entries.map { put(it.key, it.value) }
+                gc()
+            }
+            true
+        } else {
+            flush()
+            false
+        }
     }
 
+    /**
+     * Invoked to create data, when there is nothing on the disk to load from.
+     */
+    protected open fun initialize() {}
+
+    /**
+     * Invoked so you can check the data within the registry is as you'd expect.
+     *
+     * Throw exceptions or correct it.
+     */
+    protected open fun validate() {}
+
+
+
     class MismatchedTypeException(key : Any?, value: Any) : IllegalArgumentException("[DEV - DO NOT COMMIT] Registry value was ${value::class.simpleName}, but the key states that it should be ${keyType(key)}")
-    class MissingEntryException(key: Any?) : Exception("$key was not requested, but it was not created when the registry was. ")
+    class MissingEntryException(key: Any?) : Exception("$key wass requested, but it was not created when the registry was. ")
 }

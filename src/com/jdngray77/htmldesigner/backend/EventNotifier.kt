@@ -44,8 +44,6 @@ enum class EventType {
     EDITOR_LOADED,
     EDITOR_SELECTED_TAG_CHANGED,
     PROJECT_PREFAB_CREATED
-
-
 }
 
 /**

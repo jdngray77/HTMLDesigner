@@ -18,6 +18,9 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.backend.utility.loadFXMLScene
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import javafx.application.Application
@@ -38,6 +41,8 @@ import javafx.stage.Stage
 class Editor : Application() {
 
     companion object {
+
+
 
         /**
          * A static reference to the application instance
@@ -120,6 +125,8 @@ class Editor : Application() {
      */
     lateinit var stage: Stage
 
+    lateinit var REGISTRY: Registry<Configs>
+
     /**
      * Loads and initalises the GUI.
      *
@@ -130,6 +137,9 @@ class Editor : Application() {
         this.stage = stage
 
         EDITOR = this
+
+        //TODO invoke something else, something empty.
+        Config.load()
 
         // Load the main view from FXML.
         // It's controller will take over from here.
@@ -143,8 +153,22 @@ class Editor : Application() {
 //        stage.scene.stylesheets.add("stylesheet.css");
         stage.show()
 
-        mvc = MVC(usrChooseProject(), scene.second)
+
+
+        mvc = MVC(determineProject(), scene.second)
     }
+
+    override fun stop() {
+        // TODO this could be useful.
+    }
+
+    private fun determineProject(): Project =
+        if (Config[Configs.LAST_PROJECT_PATH_STRING] == "")
+            usrChooseProject().also {
+                Config.put(Configs.LAST_PROJECT_PATH_STRING, it.locationOnDisk.path)
+            }
+        else
+            Project.load(Config[Configs.LAST_PROJECT_PATH_STRING] as String) ?: usrChooseProject()
 
     /**
      * The boot behaviour project chooser.
@@ -206,8 +230,7 @@ class Editor : Application() {
             }
             else -> null
         }
-
-
     }
-
 }
+
+
