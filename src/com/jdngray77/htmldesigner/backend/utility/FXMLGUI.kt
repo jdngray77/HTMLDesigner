@@ -44,13 +44,7 @@ fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Pair<Sce
                 it.width.toDouble(),
                 it.height.toDouble()
             ).also {
-                val jMetro = JMetro(
-                    if (Config[Configs.DARK_MODE_BOOL] as Boolean)
-                        Style.DARK
-                    else
-                        Style.LIGHT
-                )
-                jMetro.scene = it
+                getTheme().scene = it
             }
             ,
             component.second
@@ -69,6 +63,15 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
             Pair<T, Any>(it, loader.getController())
         }
     }
+
+fun getTheme() = JMetro(
+    if (Config[Configs.DARK_MODE_BOOL] as Boolean)
+        Style.DARK
+    else
+        Style.LIGHT
+)
+
+
 
 
 // TODO Reminder for the future :

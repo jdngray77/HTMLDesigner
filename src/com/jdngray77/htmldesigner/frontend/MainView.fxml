@@ -58,7 +58,7 @@
       <menus>
             <Menu mnemonicParsing="false" text="HTML Designer">
               <items>
-                <MenuItem mnemonicParsing="false" text="Settings" />
+                <MenuItem mnemonicParsing="false" onAction="#menu_registry" text="Registry..." />
                   <Menu mnemonicParsing="false" text="Debug">
                     <items>
                         <Menu mnemonicParsing="false" text="IDE">
@@ -77,62 +77,63 @@
                         </Menu>
                     </items>
                   </Menu>
+                  <MenuItem mnemonicParsing="false" onAction="#menu_soft_restart" text="Soft Restart..." />
                   <MenuItem mnemonicParsing="false" text="Exit" />
               </items>
             </Menu>
         <Menu mnemonicParsing="false" text="Project">
           <items>
-                  <MenuItem mnemonicParsing="false" text="Save Project" />
-            <MenuItem mnemonicParsing="false" text="Create a new project" />
-            <MenuItem mnemonicParsing="false" text="Load a project" />
-                  <MenuItem mnemonicParsing="false" text="Close Project" />
+                  <MenuItem mnemonicParsing="false" text="[inop] Save" />
+            <MenuItem mnemonicParsing="false" text="[inop] New..." />
+            <MenuItem mnemonicParsing="false" text="[inop] Load..." />
+                  <MenuItem mnemonicParsing="false" onAction="#menu_project_close" text="Close Project &amp; Restart" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <Menu mnemonicParsing="false" text="Backups">
+                  <Menu mnemonicParsing="false" text="[inop] Backups">
                     <items>
                         <MenuItem mnemonicParsing="false" text="Backup now" />
                       <MenuItem mnemonicParsing="false" text="Restore backup..." />
                         <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
                     </items>
                   </Menu>
-            <Menu mnemonicParsing="false" text="Open Recent" />
+            <Menu mnemonicParsing="false" text="[inop] Open Recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Preferences…" />
+            <MenuItem mnemonicParsing="false" text="[inop] Preferences…" />
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
           <items>
-            <MenuItem mnemonicParsing="false" text="Undo" />
-            <MenuItem mnemonicParsing="false" text="Redo" />
+            <MenuItem mnemonicParsing="false" text="[inop] Undo" />
+            <MenuItem mnemonicParsing="false" text="[inop] Redo" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Cut" />
-            <MenuItem mnemonicParsing="false" text="Copy" />
-            <MenuItem mnemonicParsing="false" text="Paste" />
-            <MenuItem mnemonicParsing="false" text="Delete" />
+            <MenuItem mnemonicParsing="false" text="[inop] Cut" />
+            <MenuItem mnemonicParsing="false" text="[inop] Copy" />
+            <MenuItem mnemonicParsing="false" text="[inop] Paste" />
+            <MenuItem mnemonicParsing="false" text="[inop] Delete" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Select All" />
-            <MenuItem mnemonicParsing="false" text="Unselect All" />
+            <MenuItem mnemonicParsing="false" text="[inop] Select All" />
+            <MenuItem mnemonicParsing="false" text="[inop] Unselect All" />
           </items>
         </Menu>
             <Menu mnemonicParsing="false" text="Tools">
                <items>
-                  <MenuItem mnemonicParsing="false" text="View in browser" />
-                  <MenuItem mnemonicParsing="false" text="Open in VSCode" />
+                  <MenuItem mnemonicParsing="false" text="[inop] View in browser" />
+                  <MenuItem mnemonicParsing="false" />
                   <MenuItem mnemonicParsing="false" text="Debug in Chrome Dev Tools" />
                </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Git">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Publish changes..." />
-                  <MenuItem mnemonicParsing="false" text="Update project..." />
-                  <MenuItem mnemonicParsing="false" text="Branches..." />
-                  <MenuItem mnemonicParsing="false" text="Delete changes..." />
+                  <MenuItem mnemonicParsing="false" text="[inop] Publish changes..." />
+                  <MenuItem mnemonicParsing="false" text="[inop] Update project..." />
+                  <MenuItem mnemonicParsing="false" text="[inop] Branches..." />
+                  <MenuItem mnemonicParsing="false" text="[inop] Delete changes..." />
                </items>
             </Menu>
         <Menu mnemonicParsing="false" text="Help">
           <items>
-                  <MenuItem mnemonicParsing="false" text="Read the wiki" />
-                  <MenuItem mnemonicParsing="false" text="Visit the repository" />
-                  <MenuItem mnemonicParsing="false" text="About" />
+                  <MenuItem mnemonicParsing="false" text="[inop] Read the wiki" />
+                  <MenuItem mnemonicParsing="false" text="[inop] Visit the repository" />
+                  <MenuItem mnemonicParsing="false" text="[inop] About" />
           </items>
         </Menu>
       </menus>

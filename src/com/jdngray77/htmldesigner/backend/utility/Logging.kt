@@ -15,6 +15,8 @@
 
 package com.jdngray77.htmldesigner.backend
 
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.scene.Node
 import javafx.scene.control.Alert
@@ -28,8 +30,13 @@ import java.io.StringWriter
 
 /**
  * Shows a floating notification in the lower right, displaying the [error]
+ *
+ * Has no effect if [Configs.SUPRESS_EXCEPTION_NOTIFICATIONS_BOOL] is true
  */
 fun showErrorNotification(error: Throwable) {
+    if (Config[Configs.SUPRESS_EXCEPTION_NOTIFICATIONS_BOOL] as Boolean)
+        return
+
     Notifications.create()
         .title("An error has occurred with the editor.")
         .text("${error::class.simpleName} \n ${
@@ -50,6 +57,20 @@ fun showErrorNotification(error: Throwable) {
             )
         }
         .showWarning()
+}
+
+fun showWarningNotification(title: String = "", message: String = "") {
+    Notifications.create()
+        .title(title)
+        .text(message)
+        .showWarning()
+}
+
+fun showNotification(title: String = "", message: String = "") {
+    Notifications.create()
+        .title(title)
+        .text(message)
+        .showInformation()
 }
 
 /**

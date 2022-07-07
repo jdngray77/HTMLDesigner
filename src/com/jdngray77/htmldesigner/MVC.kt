@@ -75,8 +75,9 @@ class MVC (
     /**
      * A list of all open editors.
      */
-    private val openEditors =
-        ArrayList<DocumentEditor>()
+    private val openEditors: ArrayList<DocumentEditor> = ArrayList()
+
+    fun getOpenEditors() = (openEditors.clone() as ArrayList<DocumentEditor>)
 
     /**
      * Event invoked when an editor tab is closed.

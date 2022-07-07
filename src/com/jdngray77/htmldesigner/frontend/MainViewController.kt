@@ -20,16 +20,16 @@ import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.backend.utility.camelToSentence
+import com.jdngray77.htmldesigner.backend.utility.getTheme
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
-import com.jdngray77.htmldesigner.frontend.docks.dockutils.TestDock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import javafx.fxml.FXML
-import javafx.scene.control.Label
-import javafx.scene.control.Tab
-import javafx.scene.control.TabPane
+import javafx.scene.Scene
+import javafx.scene.control.*
 import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
@@ -207,6 +207,15 @@ class MainViewController {
     fun menu_debug_reset_config() =
         Config.reset()
 
+    fun menu_soft_restart() =
+        Editor.EDITOR.restart()
+
+    fun menu_project_close() =
+        Editor.EDITOR.closeProject()
+
+    fun menu_registry() {
+        RegistryEditor(Config).showDialog()
+    }
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
