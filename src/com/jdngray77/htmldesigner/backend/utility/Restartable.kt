@@ -12,33 +12,8 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend.data.config
+package com.jdngray77.htmldesigner.backend.utility
 
-import java.io.File
-
-enum class Configs {
-
-    LAST_PROJECT_PATH_STRING,
-    DARK_MODE_BOOL,
-    SUPRESS_EXCEPTION_NOTIFICATIONS_BOOL,
-
-}
-
-object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
-
-    init {
-        defferedInit()
-    }
-
-    override fun initialize() {
-        put(Configs.DARK_MODE_BOOL, true)
-        put(Configs.LAST_PROJECT_PATH_STRING, "")
-        put(Configs.SUPRESS_EXCEPTION_NOTIFICATIONS_BOOL, true)
-    }
-
-    override fun validate() {
-        Configs.values().map {
-            get(it)
-        }
-    }
+interface Restartable {
+    fun onIDERestart()
 }

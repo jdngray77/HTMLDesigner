@@ -16,6 +16,7 @@
 package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
+import com.jdngray77.htmldesigner.backend.utility.Restartable
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Dylan Brand
  */
-object BackgroundTask : Subscriber {
+object BackgroundTask : Subscriber, Restartable {
 
     private val threadPool : ThreadPoolExecutor = Executors.newCachedThreadPool() as ThreadPoolExecutor
 
@@ -95,5 +96,9 @@ object BackgroundTask : Subscriber {
         // TODO - remove when necessary
         if (e == EventType.USER_EXIT)
             shutdown()
+    }
+
+    override fun onIDERestart() {
+
     }
 }

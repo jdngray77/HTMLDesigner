@@ -26,6 +26,7 @@ import org.jsoup.nodes.Document
 import java.io.File
 import java.io.InvalidClassException
 import java.lang.System.gc
+import kotlin.reflect.KClass
 
 
 /*
@@ -204,17 +205,20 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
             value::class.simpleName == keyType(key)
 
 
-        fun keyType(key: Any?) : String? {
+        fun keyType(key: Any?) =
+            keyClass(key).simpleName
+
+        fun keyClass(key: Any?) : KClass<*> {
             return when (key.toString().split("_").last()) {
                 // IF THIS LIST IS ALTERED, UPDATE THE LIST CLASS DOCS.
-                "BOOL" -> Boolean::class.simpleName
-                "INT" -> Integer::class.simpleName
-                "SHORT" -> Short::class.simpleName
-                "LONG" -> Long::class.simpleName
-                "DOUBLE" -> Double::class.simpleName
-                "STRING" -> String::class.simpleName
-                "DOC" -> Document::class.simpleName
-                "HTML" -> html::class.simpleName
+                "BOOL" -> Boolean::class
+                "INT" -> Integer::class
+                "SHORT" -> Short::class
+                "LONG" -> Long::class
+                "DOUBLE" -> Double::class
+                "STRING" -> String::class
+                "DOC" -> Document::class
+                "HTML" -> html::class
                 else -> throw IllegalStateException("Preference key name is not suffixed with a permitted data type : $key")
             }
         }

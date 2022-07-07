@@ -30,6 +30,7 @@ import javafx.scene.control.ButtonType
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
+import java.lang.System.gc
 
 
 /**
@@ -160,6 +161,31 @@ class Editor : Application() {
 
     override fun stop() {
         // TODO this could be useful.
+        //      stop background threads
+
+        mvcIfAvail()?.apply {
+            getOpenEditors().forEach {
+                if (!it.requestClose()) {
+                    showNotification("Shutdown or restart aborted", "An editor refused to close.")
+                    throw InterruptedException("Shutdown or restart aborted. An editor refused to close.")
+                }
+            }
+        }
+
+        EventNotifier.onIDERestart()
+        BackgroundTask.onIDERestart()
+    }
+
+    fun closeProject() {
+        Config[Configs.LAST_PROJECT_PATH_STRING] = ""
+        restart()
+    }
+
+    fun restart() {
+        stop()
+        gc()
+
+        start(stage)
     }
 
     private fun determineProject(): Project =
@@ -231,6 +257,8 @@ class Editor : Application() {
             else -> null
         }
     }
+
+
 }
 
 

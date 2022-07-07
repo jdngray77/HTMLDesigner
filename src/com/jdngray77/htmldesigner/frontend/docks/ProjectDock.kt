@@ -18,6 +18,10 @@ package com.jdngray77.htmldesigner.frontend.docks
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.AutoDock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Inspectable
@@ -57,7 +61,7 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     @Inspectable(10000)
     fun CloseProject() {
-        exitProcess(69)
+        EDITOR.closeProject()
     }
 
     init {

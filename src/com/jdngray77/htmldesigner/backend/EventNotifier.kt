@@ -16,6 +16,7 @@
 package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.EventNotifier.subscribe
+import com.jdngray77.htmldesigner.backend.utility.Restartable
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
 
@@ -60,7 +61,7 @@ interface Subscriber {
  * [subscribe] a [subscriber], and it will be invoked when
  * the requested events occour.
  */
-object EventNotifier {
+object EventNotifier : Restartable {
 
     // FIXME this is just so i can test things which need the events to work.
     //       This is not the final implementation. Replace it.
@@ -92,6 +93,10 @@ object EventNotifier {
         }
 
         logStatus("Notified $e to ${tempList.size} Subscribers ($tempList)")
+    }
+
+    override fun onIDERestart() {
+        tempList.clear()
     }
 
 }

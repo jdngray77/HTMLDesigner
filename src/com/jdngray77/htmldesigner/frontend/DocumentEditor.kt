@@ -260,14 +260,17 @@ class DocumentEditor {
      *
      * Performs [tab.onCloseRequest], and if the user is happy to close,
      * [forceClose] is used to close the tab.
+     *
+     * @return false if will not close.
      */
-    fun requestClose() {
+    fun requestClose(): Boolean {
         val e = Event(EDITOR_CLOSE_REQUEST)
         tab.onCloseRequest?.handle(e)
 
-        if (e.isConsumed) return
+        if (e.isConsumed) return false
 
         forceClose()
+        return true
     }
 
     /**
