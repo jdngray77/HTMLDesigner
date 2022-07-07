@@ -17,6 +17,7 @@ package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.backend.utility.camelToSentence
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
@@ -198,6 +199,14 @@ class MainViewController {
         CopyToClipboard(serial.toString())
         showInformationalAlert("The current project serial hash version is : \n $serial")
     }
+
+    fun menu_debug_reset_projprefs() =
+        mvc().Project.PREFERENCES.reset()
+
+
+    fun menu_debug_reset_config() =
+        Config.reset()
+
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
