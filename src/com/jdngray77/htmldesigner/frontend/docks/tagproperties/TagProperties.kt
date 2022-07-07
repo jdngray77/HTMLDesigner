@@ -64,15 +64,7 @@ class TagProperties : Dock(), Subscriber {
 
 
             editor.selectedTag?.apply {
-            sheet.setPropertyEditorFactory {
-                when (it.type) {
-                    // TODO this is useless, just here as an example.
-                    //      We can add custom editors here when they're needed.
-                    String::class.java -> Editors.createTextEditor(it)
-
-                    else -> DefaultPropertyEditorFactory().call(it)
-                }
-            }
+            sheet.propertyEditorFactory = TagPropertyEditorFactory
 
             val currentEditor = mvc().currentEditor()
             sheet.items.clear()
@@ -139,18 +131,16 @@ class TagProperties : Dock(), Subscriber {
 
 
 
-
-
-
-
-                PlaceholderPropertySheetItem(
-                    "Display",
-                    "Alignment"
+                CSSAlignmentPropertySheetItem(
+                    "Align inner content",
+                    this,
+                    "Alignment",
+                    "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
                 ),
 
                 PlaceholderPropertySheetItem(
-                    "Flexbox",
-                    "Alignment"
+                    "Align direction",
+                    "Appearance"
                 ),
                 )
             }

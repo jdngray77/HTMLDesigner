@@ -16,6 +16,7 @@
 package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
 import com.jdngray77.htmldesigner.backend.logWarning
+import com.jdngray77.htmldesigner.frontend.controls.AlignControl
 import java.time.Instant
 import java.util.*
 
@@ -60,4 +61,13 @@ class ExampleAutoDock() : AutoDock() {
     // otherwise the value won't be shown until the next time
     // the window is updated.
     init { create() }
+
+
+
+
+    init {
+
+        top = AlignControl()
+
+    }
 }

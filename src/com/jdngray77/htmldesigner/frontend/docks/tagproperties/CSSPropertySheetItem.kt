@@ -1,16 +1,19 @@
 package com.jdngray77.htmldesigner.frontend.docks.tagproperties
 
+import com.jdngray77.htmldesigner.frontend.controls.AlignControl
 import javafx.beans.value.ObservableValue
+import javafx.scene.Node
 import org.controlsfx.control.PropertySheet
+import org.controlsfx.property.editor.PropertyEditor
 import org.jsoup.nodes.Element
 import org.w3c.dom.css.CSSStyleSheet
 import java.util.*
 
 
-class CSSPropertySheetItem(
+open class CSSPropertySheetItem(
+    val _name: String,
     val element : Element,
     val property : String,
-    val sheet: CSSStyleSheet,
     val _category: String,
     val _description: String
 ) : PropertySheet.Item {
@@ -18,19 +21,50 @@ class CSSPropertySheetItem(
     override fun getType() = String::class.java
 
     override fun getCategory() = _category
-    override fun getName() = property
+    override fun getName() = _name
     override fun getDescription() = _description
 
-    override fun getValue(): Any {
-        TODO("Not yet implemented")
-    }
+    // TODO
+    override fun getValue(): Any = ""
 
+    // TODO
     override fun setValue(value: Any?) {
-        TODO("Not yet implemented")
+
     }
 
-    override fun getObservableValue(): Optional<ObservableValue<out Any>> {
-        TODO("Not yet implemented")
-    }
+    override fun getObservableValue(): Optional<ObservableValue<out Any>> =
+        Optional.empty()
+}
 
+
+class CSSAlignmentPropertySheetItem (
+    _name: String,
+    element : Element,
+    _category: String,
+    _description: String
+) : CSSPropertySheetItem(
+    _name,
+    element,
+    "justify-content",
+    _category,
+    _description
+) {
+
+
+}
+
+class CSSAlignmentPropertyEditor : PropertyEditor<String>{
+
+    val editor = AlignControl()
+
+    override fun getEditor(): Node =
+        editor
+
+
+    override fun getValue(): String =
+        editor.getAlignment() ?: ""
+
+    override fun setValue(value: String) {
+        editor.setAlignment(value)
+    }
 }

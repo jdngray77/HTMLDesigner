@@ -77,3 +77,6 @@ fun TreeTableView<*>.pack() {
         it.pack(this)
     }
 }
+
+fun <V,K> HashMap<V,K>.reverseGet(value : V) =
+    entries.find { it.value == value }?.key
