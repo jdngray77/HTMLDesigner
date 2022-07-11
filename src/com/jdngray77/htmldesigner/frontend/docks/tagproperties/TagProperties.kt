@@ -20,10 +20,10 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.controls.PlaceholderPropertySheetItem
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
+import com.jdngray77.htmldesigner.utility.ReflectivePropertySheetItem
 import org.controlsfx.control.PropertySheet
-import org.controlsfx.property.editor.DefaultPropertyEditorFactory
-import org.controlsfx.property.editor.Editors
 import org.jsoup.nodes.Element
 import java.lang.System.gc
 
@@ -75,7 +75,6 @@ class TagProperties : Dock(), Subscriber {
                     "Uniquely identify this element for scripting.",
                     "Advanced",
                     this,
-                    currentEditor,
                     true
                 ),
 

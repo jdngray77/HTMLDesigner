@@ -15,10 +15,10 @@
 
 package com.jdngray77.htmldesigner.frontend.docks.tagproperties
 
-import com.jdngray77.htmldesigner.backend.extensions.asStyleSheet
-import com.jdngray77.htmldesigner.backend.extensions.changed
+import com.jdngray77.htmldesigner.utility.changed
 import com.jdngray77.htmldesigner.backend.html.StyleAttribute
 import com.jdngray77.htmldesigner.frontend.controls.AlignControl
+import com.jdngray77.htmldesigner.utility.readPrivateProperty
 import javafx.beans.value.ObservableValue
 import javafx.scene.Node
 import org.controlsfx.control.PropertySheet
@@ -26,11 +26,19 @@ import org.controlsfx.property.editor.AbstractPropertyEditor
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory
 import org.jsoup.nodes.Element
 import java.util.*
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
+
+/*
+ *
+ *
+ *
+ *          This file contains items and editors for the TagProperties dock.
+ *
+ *
+ *
+ */
 
 /**
- * The base for editable CSS properties.
+ * The base item for editable CSS properties.
  */
 open class CSSPropertySheetItem(
 
@@ -168,13 +176,8 @@ class CSSAlignmentPropertyEditor(
 
 
     override fun getObservableValue() =
+        (readPrivateProperty(AbstractPropertyEditor::class, "control") as AlignControl).observableValue
 
-        // TODO document and turn this into a function
-        (AbstractPropertyEditor::class.memberProperties.find { it.name == "control" }!!.let {
-            it.isAccessible = true
-            it.get(this)
-        } as AlignControl)
-            .observableValue
 }
 
 

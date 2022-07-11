@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -13,32 +12,63 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend
+package com.jdngray77.htmldesigner.frontend.controls
 
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
-import java.lang.Thread.UncaughtExceptionHandler
-import java.security.PrivilegedActionException
+import javafx.scene.control.ListView
+import javafx.scene.control.TextField
+import javafx.scene.input.KeyCode
+import javafx.scene.layout.VBox
 
-/**
- * Added to the main thread, this listener saves log files
- * and displays notifications for unhandled exceptions.
- */
-object ExceptionListener : UncaughtExceptionHandler{
+open class SearchableList <T> (var items: Iterable<T> = arrayListOf()): VBox() {
 
-    override fun uncaughtException(t: Thread?, e: Throwable?) {
-        e?.let {
-            mvcIfAvail()?.Project?.logError(e)
-            e.printStackTrace()
-            showErrorNotification(sanitizeException(e))
+    val searchBox = TextField()
+
+    val list = ListView<T>()
+
+    init {
+
+        searchBox.setOnKeyPressed {
+            if (it.code == KeyCode.ENTER && list.items.isNotEmpty()) {
+                list.selectionModel.selectedItem?.let {
+                    onAction(it)
+                } ?: run {
+                    list.items.first().apply {
+                        onAction(this)
+                    }
+                }
+            } else if (it.code == KeyCode.DOWN || it.code == KeyCode.UP) {
+                if (!list.isFocused) {
+                    list.requestFocus()
+                    list.selectionModel.select(0)
+                }
+            } else searchBox.requestFocus()
+
+            searchBox.textProperty().addListener { a, b, c ->
+                doSearch()
+            }
         }
+
+        list.onKeyPressed = searchBox.onKeyPressed
+
+        children.addAll(searchBox, list)
+        doSearch()
     }
 
-    private fun sanitizeException(e: Throwable) =
-        if (e is PrivilegedActionException) e.exception else e.rootCause()
-}
+    private fun doSearch() {
+        list.items.clear()
 
-/**
- * Traverses the [cause] to find the top most cause, then returns it.
- */
-fun Throwable.rootCause() : Throwable =
-    cause?.let { it.rootCause() } ?: this
+        list.items.addAll(items.filter { it.toString().toLowerCase().contains(searchBox.text.toLowerCase()) })
+    }
+
+    fun clearSearch() {
+        searchBox.text = ""
+    }
+
+    /**
+     * Automatically invoked when the user presses enter.
+     *
+     * If an item is highlighted, it's that one.
+     * Otherwise it's the topmost item.
+     */
+    protected open fun onAction(item: T) {}
+}

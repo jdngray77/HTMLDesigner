@@ -16,11 +16,10 @@
 
 package com.jdngray77.htmldesigner.backend.data.config
 
-import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.backend.html.dom.data
-import com.jdngray77.htmldesigner.backend.html.dom.html
-import com.jdngray77.htmldesigner.backend.utility.loadObjectFromDisk
-import com.jdngray77.htmldesigner.backend.utility.saveObjectToDisk
+import com.jdngray77.htmldesigner.backend.data.config.Registry.Companion.keyType
+import com.jdngray77.htmldesigner.backend.showWarningNotification
+import com.jdngray77.htmldesigner.utility.loadObjectFromDisk
+import com.jdngray77.htmldesigner.utility.saveObjectToDisk
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import org.jsoup.nodes.Document
 import java.io.File
@@ -73,15 +72,15 @@ import kotlin.reflect.KClass
  *
  *      TRY TO AVOID CHANGING THE SCHEMA OF THIS CLASS IF POSSIBLE.
  *
- *      IT IMPACTS BACKWARDS COMPATABILITY WITH PROJECT LOADING.
+ *      IT IMPACTS BACKWARDS COMPATABILITY WITH LOADING.
  *
  *      CHANGES TO THE SCHEMA OF THIS CLASS WILL FORCE THE IDE TO
  *      RESET REGISTRIES, DELETING USERS SETTINGS AND PREFERENCES
- *      WHEN THEY UPDATE.
+ *      WHEN THEY UPDATE THEIR IDE.
  *
  *      What's OK :
  *
- *          Altering code within an existing function
+ *          Altering code within an existing functions
  *
  *      What breaks compatability :
  *
@@ -98,12 +97,6 @@ import kotlin.reflect.KClass
  *
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  */
-
-
-// Format :
-// EPIC_NOUN_PROPERTY_DATATYPE
-// aka
-// MAJORSYSTEM_FEATURE_BEHAVIOUR_DATATYPE
 
 
 /**
@@ -133,7 +126,6 @@ import kotlin.reflect.KClass
  *  - DOUBLE
  *  - SHORT
  *  - DOC
- *  - HTML
  *  - STRING
  *
  * More data types can be added by adding them to [keyType],
@@ -157,11 +149,19 @@ import kotlin.reflect.KClass
  */
 open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
 
+    /**
+     * A work around for late initalising.
+     *
+     * I can't remember exactly why this was
+     * required.
+     */
     protected fun defferedInit() {
         if (saveLocation.exists())
             load()
         else
             reset()
+
+        autosave = true
     }
 
     /**
@@ -172,11 +172,8 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
         if (!isValidType(key, value))
             throw MismatchedTypeException(key, value)
         else
-            super.put(key, value)
-
-        // TODO i don't like that this is called for every item when
-        //      adding many items at once.
-        flush()
+            if (value != super.put(key, value))
+                dirty()
     }
 
     final override fun putAll(from: Map<out T, Any>) {
@@ -188,9 +185,6 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
     final override fun get(key: T): Any {
         try {
             return super.get(key)!!
-        } catch (e : ClassCastException) {
-            // TODO can this even be reached?
-            throw IllegalArgumentException("Tried to read a preferences value as the wrong type.")
         } catch (e : NullPointerException) {
             throw MissingEntryException(key)
         }
@@ -200,31 +194,48 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
     final override fun getOrDefault(key: T, defaultValue: Any) =
         get(key)
 
-    companion object {
-        fun isValidType(key: Any?, value: Any) =
-            value::class.simpleName == keyType(key)
-
-
-        fun keyType(key: Any?) =
-            keyClass(key).simpleName
-
-        fun keyClass(key: Any?) : KClass<*> {
-            return when (key.toString().split("_").last()) {
-                // IF THIS LIST IS ALTERED, UPDATE THE LIST CLASS DOCS.
-                "BOOL" -> Boolean::class
-                "INT" -> Integer::class
-                "SHORT" -> Short::class
-                "LONG" -> Long::class
-                "DOUBLE" -> Double::class
-                "STRING" -> String::class
-                "DOC" -> Document::class
-                "HTML" -> html::class
-                else -> throw IllegalStateException("Preference key name is not suffixed with a permitted data type : $key")
-            }
-        }
+    /**
+     * Saves the current state of the registry to disk
+     * in the prior provided [saveLocation] if there are changes to save.
+     *
+     * Only has effect if [dirty] is high.
+     *
+     */
+    final fun flush() {
+        if (dirty)
+            forceFlush()
     }
 
-    final fun flush() = saveObjectToDisk(saveLocation)
+    /**
+     * Ignores the [dirty] flag, and saves the registry.
+     *
+     * [dirty] flag is cleared.
+     */
+    final fun forceFlush() {
+        saveObjectToDisk(saveLocation)
+
+        dirty = false
+    }
+
+    var dirty = false
+        private set
+
+    /**
+     * When this flag is high, then the registry
+     * is automatically saved when [dirty] is called.
+     *
+     * This is low for initalisation and loading,
+     * but automatically raised once the registry is ready
+     * for use.
+     */
+    var autosave = false
+
+    fun dirty() {
+        if (autosave)
+            forceFlush()
+        else
+            dirty = true
+    }
 
     /**
      * (re)loads from disk.
@@ -239,9 +250,12 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
                     it.entries.map { put(it.key, it.value) }
                     gc()
                 }
+
+                validate()
+
                 return true
 
-            } catch (e : InvalidClassException) {
+            } catch (e : Exception) {
                 mvcIfAvail()?.apply {
                     Project.logError(e)
                     showWarningNotification("A Registry was reset.", "A project or IDE config file was incompatible with this version of the IDE, so it was upgraded. Settings it contained have been reset to their defaults.")
@@ -250,15 +264,22 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
                 reset()
             }
         } else
-            flush()
+            forceFlush()
         return false
     }
 
+
+    /**
+     * Clears the registry, resets all values to defaults, then saves the changes to the disk.
+     */
     fun reset() {
+        autosave = false
         clear()
         initialize()
-        flush()
+        autosave = true
+        forceFlush()
     }
+
 
 
     /**
@@ -271,8 +292,43 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
      *
      * Throw exceptions or correct it.
      */
-    protected open fun validate() {}
+    open fun validate() {}
 
+    companion object {
+
+        /**
+         * Confirms that a key's name ends with a valid type.
+         *
+         * @see keyClass for valid types.
+         */
+        fun isValidType(key: Any?, value: Any) =
+            value::class.simpleName == keyType(key)
+
+        /**
+         * Returns the NAME of the type
+         * associated with this key.
+         */
+        fun keyType(key: Any?) =
+            keyClass(key).simpleName
+
+        /**
+         * Returns the [KClass] of the type
+         * associated with this key.
+         */
+        fun keyClass(key: Any?) : KClass<*> {
+            return when (key.toString().split("_").last()) {
+                // IF THIS LIST IS ALTERED, UPDATE THE LIST CLASS DOCS.
+                "BOOL" -> Boolean::class
+                "INT" -> Integer::class
+                "SHORT" -> Short::class
+                "LONG" -> Long::class
+                "DOUBLE" -> Double::class
+                "STRING" -> String::class
+                "DOC" -> Document::class
+                else -> throw IllegalStateException("Preference key name is not suffixed with a permitted data type : $key")
+            }
+        }
+    }
 
 
     class MismatchedTypeException(key : Any?, value: Any) : IllegalArgumentException("[DEV - DO NOT COMMIT] Registry value was ${value::class.simpleName}, but the key states that it should be ${keyType(key)}")

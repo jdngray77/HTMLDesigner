@@ -17,8 +17,9 @@ package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
 
 import com.jdngray77.htmldesigner.backend.logWarning
-import com.jdngray77.htmldesigner.backend.utility.camelToSentence
-import com.jdngray77.htmldesigner.backend.utility.changeProperty
+import com.jdngray77.htmldesigner.frontend.controls.AlignControl
+import com.jdngray77.htmldesigner.utility.camelToSentence
+import com.jdngray77.htmldesigner.utility.changeProperty
 import javafx.scene.Parent
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
@@ -112,7 +113,11 @@ annotation class Page(val index: Int)
 annotation class Tooltip(val string: String)
 
 
-
+/**
+ * Exception thrown when properties marked [Inspectable] are not fit to be so.
+ *
+ * i.e a val cannot be edited, so it cannot be presented to be edited.
+ */
 class InspectableException(message: String? = null) : Exception(message)
 
 
@@ -133,13 +138,36 @@ class InspectableException(message: String? = null) : Exception(message)
  * A dockable window that automatically populates itself with controls that modify
  * variables.
  *
- * Mark variables or functions with [Inspectable] to have them auto-add to the dock.
+ * Similar to a [PropertySheet], but significantly easier to implement.
+ *
+ * Use a property sheet :
+ *
+ *      - When different objects may need to be edited.
+ *      - When custom editors are required
+ *      - When categorisation and searching for fields is desired.
+ *
+ * Use AutoDock :
+ *
+ *      - When youre not editing multiple objects
+ *      - When you require only simple field editors.
+ *      - When you want to create a new dock rather quickly and simply without the stress.
+ *
+ * Simply mark variables or functions with the [Inspectable] annotation to have them added to the window
+ * automatically.
+ *
+ * The [Inspectable] annotation recieves a number, this is used to sort the order of controls in the window.
+ *
+ * This you to order variables and functions in your class as you wish, but order them differently in the UI.
+ * Read below for more information on ordering.
  *
  * # Functions
  * Functions with no parameters are added as buttons for the user to click.
  *
+ * TODO support functions with parameters by exposing the parameters with controls?
+ *
  * # Variables
- * Supported variable types can be manipulated through a control. Simply annotate the variable with [Inspectable].
+ * Supported variable types can be manipulated through a control. Simply annotate the variable with [Inspectable],
+ * and they'll be exposed to the user.
  *
  * See [createGUIForProperty] for supported types.
  *
@@ -149,30 +177,30 @@ class InspectableException(message: String? = null) : Exception(message)
  * ```
  *
  * # Order
- * Reflection is used to get a list of all properties, but the order is random.
+ * Reflection is used to get a list of all properties, but unfortunately the order is random.
  *
- * So for us to know what order to add the elements in, you must provide an order in the [Inspectable] annotation.
+ * For us to know what order to add the elements in, you must provide an order in the [Inspectable] annotation.
  *
  * Note that this order number :
- * - Is not the final index, the numbers are just relative to each other.
- * - Having two variables at the same position will not overwrite one of them.
  * - Is simply used to sort the list into the desired order
+ * - It's not the final index. The numbers are just relative to each other. Larger numbers appear after lower numbers.
+ * - Having two variables at the same position will not overwrite one of them.
  *
  * I recommend incrementing in 10's, so you have gaps to insert
  * new controls into a pane in the future without needing to change all the numbers.
  *
  *
  * # References to the GUI
- * The GUI controls created for each item can be stored in a variable, if
- * desired :
+ * References to the GUI controls created for each item can be stored in a variable, if desired :
  *
- *  - Create a second variable with the same name as the thing annotated with [Inspectable].
+ *  - Create a second variable with the same name as the [Inspectable] variable, value or function.
  *  - Give it the type of the control. See [createGUIForProperty].
  *  - Append "_GUI" to the end of the name.
  *  - Annotate it with [GUI]
  *
  * i.e :
- * ```
+ * ``` Kotlin
+ *     @Inspectable(0) var number = 420
  *     @GUI lateinit var number_GUI: Spinner<Int>
  * ```
  *
@@ -230,7 +258,8 @@ open class AutoDock : Dock() {
     private fun <T> addProperty(prop: KProperty<T>) {
         val guiname = "${prop.name}_GUI"
 
-        if (prop.isConst) throw InspectableException("${loggableClassName()} ${prop.name} is not variable, so it cannot be added to the editor for the user to edit.")
+        // Constants are displayed in fields that are disabled, so they cannot be edited.
+        //if (prop.isConst) throw InspectableException("${loggableClassName()} ${prop.name} is not variable, so it cannot be added to the editor for the user to edit.")
 
         // Create the gui, but don't add it yet. It's done early to check it's valid.
         val gui = createGUIForProperty(prop, (prop as KProperty1<Any, Any>).get(this))
@@ -317,12 +346,13 @@ open class AutoDock : Dock() {
         when (prop.returnType.javaType.toString().split(".").last().lowercase()) {
             String::class.simpleName!!.lowercase() -> {
                 TextField(value as String).also {
+
                     it.disableProperty().set(prop.isConst)
+
                     it.textProperty().addListener { p0, p1, p2 ->
-                        run {
                             changeProperty(prop, this, it.text)
-                        }
                     }
+
                 }
             }
 
@@ -453,5 +483,58 @@ class TestDock : AutoDock() {
 
     init {
         create()
+    }
+}
+
+
+/**
+ * An example of an automatically populated utility window.
+ */
+class ExampleAutoDock() : AutoDock() {
+
+    // Create a heading. Will appear above the next variable, where ever that is.
+    @Title("Project")
+    @Inspectable(0) var ProjectName = "Yeet"
+        set(value) {
+            field = value
+            println(value)
+        }
+
+    // The position number determines where in the list the item will be.
+    // I recommend incrementing in 10's, so you have space to insert
+    // new things without having to change all of the numbers.
+    // i.e : Want something between 10 and 20? put it at 15!
+    //       Want something directly after 10? insert it at 11!
+    @Inspectable(10) var Author = "Big Dick McGee"
+
+    @Title("Meta Data")
+    @Inspectable(20) var CreatedOn = Date.from(Instant.now())
+    @Inspectable(30) var BacksUpEveryXMinutes = 10
+
+    // A function with no params is added as a button.
+    // Stupid high number so it's always at the bottom, even if i add more things and forget about it.
+    @Inspectable(10000)
+    fun CloseProject() {
+        System.exit(69)
+    }
+
+    // Note the position number here. Even though it's at the bottom of the file, it gets placed into the first group of controls.
+    @Inspectable(20)
+    fun HelloWorld() = logWarning("Fuck you.")
+
+
+    // Remember to call create when ready to populate the GUI.
+    // Variables must contain the value you want to show before creating,
+    // otherwise the value won't be shown until the next time
+    // the window is updated.
+    init { create() }
+
+
+
+
+    init {
+
+        top = AlignControl()
+
     }
 }

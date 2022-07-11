@@ -28,85 +28,38 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.frontend.docks.tagproperties
+package com.jdngray77.htmldesigner.utility
 
-import com.jdngray77.htmldesigner.backend.utility.camelToSentence
-import com.jdngray77.htmldesigner.frontend.DocumentEditor
-import javafx.beans.value.ObservableValue
-import org.controlsfx.control.PropertySheet
-import org.controlsfx.property.editor.PropertyEditor
-import java.util.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 /**
- *  A wrapper around a field of an object that allows you to use that field as a property sheet item
+ * Uses Kotlin reflection to mutate a variable in an object.
  *
- *  When making A [PropertySheet], provides a way to easily edit any field
- *  in eny object via reflection
+ * @param [prop] the property to mutate. KProperties can be obtained from the list of an object's properties - `X::class.memberProperties`
  */
-class ReflectivePropertySheetItem<T>(
-
-    /**
-     * The name of the property (variable) within [obj]
-     * that will be modified. This is also the
-     * name displayed to the user.
-     */
-    val fieldName: String,
-
-    /**
-     * More information that is shown to the user, when they hover
-     * the cursor.
-     */
-    val _description : String,
-
-    /**
-     * The string used to group properties together in the GUI.
-     */
-    val _category : String,
-
-    /**
-     * The object being modified
-     */
-    val obj : Any,
-
-    /**
-     * The editor that will be marked dirty when this
-     * property is changed.
-     */
-    val currentEditor: DocumentEditor,
-
-    /**
-     * Determines if this property is read-only
-     */
-    val _isEditable: Boolean = true
-) : PropertySheet.Item {
-
-    val javaGetter = obj::class.java.getDeclaredMethod(fieldName)
-
-    val javaSetter = obj::class.java.getDeclaredMethod(fieldName, getType())
+fun <R, T> changeProperty(prop : KProperty<*>, instance: R, newValue: T) =
+    (prop as KMutableProperty1<R, T>).set(instance, newValue)
 
 
-    override fun getValue() =
-        javaGetter.invoke(obj) as T
-
-
-    override fun setValue(value: Any?) {
-        javaSetter.invoke(obj, value)
-    }
-
-    override fun getType() = javaGetter.returnType
-
-    override fun getCategory() = _category
-
-    override fun getName() = fieldName.camelToSentence()
-
-    override fun getDescription() = _description
-
-    override fun isEditable() = _isEditable
-
-    override fun getObservableValue(): Optional<ObservableValue<out Any>> =
-        Optional.empty()
-
-    override fun getPropertyEditorClass(): Optional<Class<out PropertyEditor<*>>> =
-        Optional.empty()
-
-}
+/**
+ * Returns the value of a property in this object's supers,
+ * that you wouldn't otherwise be allowed to access.
+ *
+ * Sometimes there's a perfectly good reason to read a value from a class
+ * you're extending, but you can't because it's private. That's
+ * what this is for.
+ *
+ * @param superClass The class of the super you want to retrieve the value from.
+ *                   Must be the KClass of a class in your extension hierarchy.
+ *                   This may just be the class you're extending, or it may be higher,
+ *                   like the super's super.
+ */
+fun <T> Any.readPrivateProperty(superClass: KClass<*>, propertyName: String) : T =
+    (superClass as KClass<Any>).memberProperties.find { it.name == propertyName }?.let {
+        it.isAccessible = true
+        it.get(this)
+    } as T

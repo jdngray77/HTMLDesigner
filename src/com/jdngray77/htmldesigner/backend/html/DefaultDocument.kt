@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -13,13 +12,40 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend.html.dom
+package com.jdngray77.htmldesigner.backend.html
+
+import org.jsoup.nodes.Element
 
 /**
- * Some kind of element which can be turned
- * into text for the HTML output.
- * @author [Jordan T. Gray](https://www.jordantgray.uk) on 9/6/2022
+ * When creating a new page in the [project],
+ * document used to initalise the page.
+ *
+ * A simple gray page with some text/
  */
-interface SerializableHTML : java.io.Serializable{
-    fun serialize() : String
+class DefaultDocument : org.jsoup.nodes.Document(""){
+    init {
+        title("Dummy HTML")
+
+        body()
+            .id("MainContent")
+            .addClass("myStyle")
+            .attr("style", "background: #373737; color: lightgray;")
+            .insertChildren(
+                0,
+                Element("h1")
+                    .id("PageTitle")
+                    .appendText("Hello!")
+                    .attr("style", "text-decoration: underline;"),
+                Element("hr"),
+                Element("p")
+                    .appendText("So who's responsible for this shitshow, anyway?"),
+                Element("br"),
+                Element("a")
+                    .id("Link")
+                    .addClass("yeet")
+                    .attr("href", "https://jordantgray.uk")
+                    .attr("style", "color: yellow;")
+                    .appendText("ME!")
+            )
+    }
 }

@@ -16,8 +16,8 @@
 package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
 import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.utility.StoringTreeItem
-import com.jdngray77.htmldesigner.backend.utility.pack
+import com.jdngray77.htmldesigner.utility.StoringTreeItem
+import com.jdngray77.htmldesigner.utility.pack
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import javafx.scene.control.TreeTableRow
@@ -44,7 +44,6 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
     init {
         top = buttons
         center = tree
-        tree.isEditable = false
     }
 
 
@@ -53,7 +52,7 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      *
      * @see getChildrenFor
      */
-    fun setRoot(root: T) = setRoot(StoringTreeItem(root, titler), root).apply {
+    fun setRoot(root: T) = setRoot(StoringTreeItem(root), root).apply {
         tree.root = this
         tree.root.isExpanded = true
         tree.pack()
@@ -98,7 +97,7 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
     private fun setRoot(parent : StoringTreeItem<T>, root : T): StoringTreeItem<T> {
         getChildrenFor(root).forEach { it ->
             setRoot(
-                StoringTreeItem<T>(it, titler).also {
+                StoringTreeItem<T>(it).also {
                     parent.children?.add(it)
                     it.isExpanded = true
                 }
@@ -114,7 +113,6 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      */
     protected fun selectedItems() =
         tree.selectionModel.selectedItems
-            .filterNot { it == tree.root }
             .mapNotNull { (it as StoringTreeItem<T>).data }
 
     /**

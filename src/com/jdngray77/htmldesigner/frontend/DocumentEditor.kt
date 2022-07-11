@@ -19,8 +19,8 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.backend.userConfirm
-import com.jdngray77.htmldesigner.backend.utility.ButtonType_CLOSEWITHOUTSAVE
-import com.jdngray77.htmldesigner.backend.utility.ButtonType_SAVE
+import com.jdngray77.htmldesigner.utility.ButtonType_CLOSEWITHOUTSAVE
+import com.jdngray77.htmldesigner.utility.ButtonType_SAVE
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import javafx.event.Event
 import javafx.fxml.FXML

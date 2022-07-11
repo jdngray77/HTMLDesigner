@@ -13,7 +13,7 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend.utility
+package com.jdngray77.htmldesigner.utility
 
 import com.sun.javafx.scene.control.skin.TreeTableViewSkin
 import javafx.scene.control.TreeItem
@@ -40,23 +40,23 @@ fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
     }
 }
 
+/**
+ * Mutates this array to remove duplicate values.
+ *
+ * This differs from [distinct], in that it's mutative.
+ */
 fun ArrayList<*>.removeDuplicates(): ArrayList<*> {
     this.removeAll((this - this.distinct().toSet()).toSet())
     return this
 }
 
-
-
 /**
- * A tree item which can display one thing, but store something else
- * for later retrieval.
- *
- * I.e it can store the underlying data of a tree item, but display a different string to the user.
+ * A [TreeItem] with exposed and retrievable value.
  */
-class StoringTreeItem <T> (val data: T?, titler : (T?) -> String) : TreeItem<T>(data)
+class StoringTreeItem <T>(val data: T?) : TreeItem<T>(data)
 
 /**
- * Applies [function] to every item in the tree
+ * Recursively applies [function] to every item in the tree
  * held by this [TreeItem].
  */
 fun <T> TreeItem<T>.applyToAll(function: Consumer<TreeItem<T>>) {
@@ -78,5 +78,10 @@ fun TreeTableView<*>.pack() {
     }
 }
 
+/**
+ * Inverse of [get]
+ *
+ * Finds the key using the value.
+ */
 fun <V,K> HashMap<V,K>.reverseGet(value : V) =
     entries.find { it.value == value }?.key

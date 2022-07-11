@@ -16,10 +16,12 @@
 package com.jdngray77.htmldesigner.backend.data.config
 
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.backend.utility.subFile
+import com.jdngray77.htmldesigner.utility.subFile
 
-
-enum class USER_PREF {
+/**
+ * Keys for the [ProjectPreferences] registry.
+ */
+enum class ProjectPreference {
     EXPORT_AUTO_ENABLE_BOOL,
     EXPORT_AUTO_FREQUENCY_INT,
 
@@ -34,23 +36,23 @@ enum class USER_PREF {
  *
  * Instances of this class are found serialized in the [Project].
  */
-class ProjectPreferences(project: Project) : Registry<USER_PREF>(project.locationOnDisk.subFile("ProjectPrefs.registry")) {
+class ProjectPreferences(project: Project) : Registry<ProjectPreference>(project.locationOnDisk.subFile("ProjectPrefs.registry")) {
 
     init {
         defferedInit()
     }
 
     override fun initialize() {
-        put(USER_PREF.EXPORT_AUTO_ENABLE_BOOL, true)
-        put(USER_PREF.EXPORT_AUTO_FREQUENCY_INT, 10)
-        put(USER_PREF.MISC_VALIDATION_SKIP_BOOL, false)
-        put(USER_PREF.BACKUP_DEPTH_INT, 20)
-        put(USER_PREF.BACKUP_ENABLE_BOOL, true)
+        put(ProjectPreference.EXPORT_AUTO_ENABLE_BOOL, true)
+        put(ProjectPreference.EXPORT_AUTO_FREQUENCY_INT, 10)
+        put(ProjectPreference.MISC_VALIDATION_SKIP_BOOL, false)
+        put(ProjectPreference.BACKUP_DEPTH_INT, 20)
+        put(ProjectPreference.BACKUP_ENABLE_BOOL, true)
     }
 
     override fun validate() {
         // Simply try to read every value.
         // This throws an exception if the key did not exist.
-        USER_PREF.values().map { get(it) }
+        ProjectPreference.values().map { get(it) }
     }
 }

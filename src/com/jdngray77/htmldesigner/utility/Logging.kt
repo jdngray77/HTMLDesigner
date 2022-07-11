@@ -31,10 +31,10 @@ import java.io.StringWriter
 /**
  * Shows a floating notification in the lower right, displaying the [error]
  *
- * Has no effect if [Configs.SUPRESS_EXCEPTION_NOTIFICATIONS_BOOL] is true
+ * Has no effect if [Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL] is true
  */
 fun showErrorNotification(error: Throwable) {
-    if (Config[Configs.SUPRESS_EXCEPTION_NOTIFICATIONS_BOOL] as Boolean)
+    if (Config[Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL] as Boolean)
         return
 
     Notifications.create()

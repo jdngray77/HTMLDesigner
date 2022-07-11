@@ -16,24 +16,37 @@ package com.jdngray77.htmldesigner.backend.data.config
 
 import java.io.File
 
+/**
+ * Keys for the [config] registry.
+ */
 enum class Configs {
 
     LAST_PROJECT_PATH_STRING,
     DARK_MODE_BOOL,
-    SUPRESS_EXCEPTION_NOTIFICATIONS_BOOL,
+    SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL,
+    TOOLBOX_DOCK_FILTER_EXACT_BOOL
 
 }
 
+/**
+ * The IDE specific registry.
+ *
+ * Stores settings and state that's not relative to a given project.
+ *
+ * Saved in the pwd.
+ */
 object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
 
     init {
+        // FIXME i don't like this work-around.
         defferedInit()
     }
 
     override fun initialize() {
         put(Configs.DARK_MODE_BOOL, true)
         put(Configs.LAST_PROJECT_PATH_STRING, "")
-        put(Configs.SUPRESS_EXCEPTION_NOTIFICATIONS_BOOL, true)
+        put(Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL, true)
+        put(Configs.TOOLBOX_DOCK_FILTER_EXACT_BOOL, true)
     }
 
     override fun validate() {

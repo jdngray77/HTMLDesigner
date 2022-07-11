@@ -12,7 +12,7 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend.utility
+package com.jdngray77.htmldesigner.utility
 
 interface Restartable {
     fun onIDERestart()

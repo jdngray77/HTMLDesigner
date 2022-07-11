@@ -7,15 +7,14 @@
       <sourceFolder url="file://$MODULE_DIR$/rsc" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/bin" />
-      <excludeFolder url="file://$MODULE_DIR$/src/main" />
       <excludeFolder url="file://$MODULE_DIR$/src/view" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
-    <orderEntry type="library" name="jfxtras.jmetro" level="project" />
-    <orderEntry type="library" name="jsoup" level="project" />
-    <orderEntry type="library" name="jetbrains.kotlin.serialization" level="project" />
+    <orderEntry type="library" exported="" name="KotlinJavaRuntime" level="project" />
+    <orderEntry type="library" exported="" name="jfxtras.jmetro" level="project" />
+    <orderEntry type="library" exported="" name="jsoup" level="project" />
+    <orderEntry type="library" exported="" name="jetbrains.kotlin.serialization" level="project" />
     <orderEntry type="module-library" scope="TEST">
       <library name="JUnit5.8.1">
         <CLASSES>
@@ -50,7 +49,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="controlsfx" level="project" />
-    <orderEntry type="library" name="net.sourceforge.cssparser" level="project" />
+    <orderEntry type="library" exported="" name="controlsfx" level="project" />
+    <orderEntry type="library" exported="" name="net.sourceforge.cssparser" level="project" />
   </component>
 </module>

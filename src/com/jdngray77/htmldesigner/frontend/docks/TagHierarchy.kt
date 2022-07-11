@@ -18,18 +18,16 @@ package com.jdngray77.htmldesigner.frontend.docks
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
-import com.jdngray77.htmldesigner.backend.extensions.asElement
-import com.jdngray77.htmldesigner.backend.extensions.createPrefab
-import com.jdngray77.htmldesigner.backend.extensions.injectSiblingAfter
-import com.jdngray77.htmldesigner.backend.extensions.injectSiblingBefore
-import com.jdngray77.htmldesigner.backend.utility.applyToAll
-import com.jdngray77.htmldesigner.backend.utility.clipboard
-import com.jdngray77.htmldesigner.backend.utility.pack
+import com.jdngray77.htmldesigner.utility.asElement
+import com.jdngray77.htmldesigner.utility.createPrefab
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
+import com.jdngray77.htmldesigner.utility.applyToAll
+import com.jdngray77.htmldesigner.utility.clipboard
+import com.jdngray77.htmldesigner.utility.pack
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.*
-import org.jsoup.Jsoup
+import javafx.scene.control.cell.TextFieldTreeTableCell
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
@@ -52,6 +50,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
         tree.selectionModel.selectionMode = SelectionMode.MULTIPLE
         EventNotifier.subscribe(this, EventType.EDITOR_DOCUMENT_SWITCH, EventType.EDITOR_DOCUMENT_EDITED)
 
+        tree.isEditable = true
 
         // Add buttons to the button bar.
 
@@ -89,6 +88,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
 
             TreeTableColumn<Element, String>("Content").also {
                 it.setCellValueFactory { p -> SimpleObjectProperty(p.value.value.text()) }
+                it.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn<Element>())
             }
         )
 
@@ -162,7 +162,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
             SeparatorMenuItem(),
             MenuItem("Paste above").also {
                 it.setOnAction {
-                    selectedItem()?.injectSiblingBefore(
+                    selectedItem()?.before(
                         clipboard().html.asElement()
                     )
                     mvc().currentDocumentModified()
@@ -178,7 +178,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
             },
             MenuItem("Paste below").also {
                 it.setOnAction {
-                    selectedItem()?.injectSiblingAfter(
+                    selectedItem()?.after(
                         clipboard().html.asElement()
                     )
                     mvc().currentDocumentModified()
@@ -226,7 +226,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
                     selectedItem()?.apply {
                         parent()?.let {
                             mvc().implDeleteTag(this)
-                            it.injectSiblingBefore(this)
+                            it.before(this)
                             mvc().currentDocumentModified()
                         }
                     }

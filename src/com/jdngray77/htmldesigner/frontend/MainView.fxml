@@ -58,9 +58,11 @@
       <menus>
             <Menu mnemonicParsing="false" text="HTML Designer">
               <items>
+                  <MenuItem mnemonicParsing="false" onAction="#menu_debug_run_anything" text="Run a Task" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_registry" text="Registry..." />
                   <Menu mnemonicParsing="false" text="Debug">
                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_eval" text="Evaluate..." />
                         <Menu mnemonicParsing="false" text="IDE">
                            <items>
                               <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />

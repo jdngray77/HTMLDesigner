@@ -15,10 +15,10 @@
 
 package com.jdngray77.htmldesigner.frontend.docks.toolbox
 
-import com.jdngray77.htmldesigner.backend.html.dom.Tag
 import javafx.fxml.FXML
 import javafx.scene.control.Label
 import javafx.scene.layout.AnchorPane
+import org.jsoup.nodes.Element
 
 
 /**
@@ -34,10 +34,10 @@ class ToolBoxItem(val pane: AnchorPane) {
     lateinit var controller : ToolBoxItemController
 
 
-    fun initialize(tag: Tag, controller: ToolBoxItemController) {
+    fun initialize(tag: Element, controller: ToolBoxItemController) {
         this.controller = controller
 
-        controller.name.text = tag.name()
-        controller.tag.text  = tag.serializeOpen()
+        controller.name.text = tag.tagName()
+        controller.tag.text  = tag.toString()
     }
 }

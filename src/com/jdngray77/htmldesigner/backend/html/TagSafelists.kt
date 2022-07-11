@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -13,32 +12,33 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend
+package com.jdngray77.htmldesigner.backend.html
 
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
-import java.lang.Thread.UncaughtExceptionHandler
-import java.security.PrivilegedActionException
+import org.jsoup.safety.Safelist
 
-/**
- * Added to the main thread, this listener saves log files
- * and displays notifications for unhandled exceptions.
+/*
+ *
+ *      This file contains lists of tags that may be used to filter
+ *      documents for safe tags, or filter lists of tags shown to the user.
+ *
  */
-object ExceptionListener : UncaughtExceptionHandler{
 
-    override fun uncaughtException(t: Thread?, e: Throwable?) {
-        e?.let {
-            mvcIfAvail()?.Project?.logError(e)
-            e.printStackTrace()
-            showErrorNotification(sanitizeException(e))
-        }
+
+object AllElements : Safelist() {
+    init {
+        addTags("a", "article", "aside", "b", "i", "blockquote", "body", "br", "button", "caption", "code", "details", "div", "em", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hr", "img", "label", "legend", "li", "link", "main", "mark", "nav", "p", "progress", "q", "script", "section", "span", "strong", "style", "textarea", "title", "noscript", "meter", "meta", "abbr", "address", "area", "base", "bdi", "bdo", "canvas", "cite", "col", "colgroup", "data", "datalist", "dd", "del", "dfn", "dialog", "dl", "dt", "embed", "fieldset", "figure", "font", "footer", "form", "iframe", "input", "ins", "kbd", "map", "object", "ol", "optgroup", "option", "output", "param", "picture", "pre", "rp", "rt", "ruby", "s", "samp", "select", "small", "source", "sub", "summary", "sup", "svg", "table", "tbody", "td", "template", "tfoot", "th", "thread", "time", "tr", "track", "u", "ul", "var", "video", "w", "b")
     }
-
-    private fun sanitizeException(e: Throwable) =
-        if (e is PrivilegedActionException) e.exception else e.rootCause()
 }
 
-/**
- * Traverses the [cause] to find the top most cause, then returns it.
- */
-fun Throwable.rootCause() : Throwable =
-    cause?.let { it.rootCause() } ?: this
+
+object Headings : Safelist() {
+    init {
+        addTags("h1","h2","h3","h4","h5","h6")
+    }
+}
+
+object Text : Safelist() {
+    init {
+        addTags("h1","h2","h3","h4","h5","h6","b","strong","u","em","i","p","mark","small","del","ins","sub","sup","blockquote")
+    }
+}

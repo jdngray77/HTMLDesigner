@@ -1,4 +1,5 @@
 
+
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -13,7 +14,21 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend.utility
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
+package com.jdngray77.htmldesigner.utility
 
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent

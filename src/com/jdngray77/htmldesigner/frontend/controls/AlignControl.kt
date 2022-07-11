@@ -14,7 +14,7 @@
 
 package com.jdngray77.htmldesigner.frontend.controls
 
-import com.jdngray77.htmldesigner.backend.utility.reverseGet
+import com.jdngray77.htmldesigner.utility.reverseGet
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.ToggleButton
 import org.controlsfx.control.SegmentedButton

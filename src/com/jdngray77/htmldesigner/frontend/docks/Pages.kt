@@ -18,10 +18,10 @@ package com.jdngray77.htmldesigner.frontend.docks
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
-import com.jdngray77.htmldesigner.backend.extensions.open
-import com.jdngray77.htmldesigner.backend.utility.StoringTreeItem
-import com.jdngray77.htmldesigner.backend.utility.assertEndsWith
-import com.jdngray77.htmldesigner.backend.utility.pack
+import com.jdngray77.htmldesigner.utility.open
+import com.jdngray77.htmldesigner.utility.StoringTreeItem
+import com.jdngray77.htmldesigner.utility.assertEndsWith
+import com.jdngray77.htmldesigner.utility.pack
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import javafx.beans.property.SimpleObjectProperty

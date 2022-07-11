@@ -18,10 +18,9 @@ package com.jdngray77.htmldesigner.backend.data
 import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
-import com.jdngray77.htmldesigner.backend.extensions.*
-import com.jdngray77.htmldesigner.backend.html.dom.Tag
-import com.jdngray77.htmldesigner.backend.utility.*
+import com.jdngray77.htmldesigner.backend.html.DefaultDocument
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.utility.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
@@ -444,7 +443,7 @@ class Project(
      *         i.e the file has been deleted or the document did not originate from the project.
      */
     fun fileForDocument(d: Document) : File {
-        CACHE.entries.find { it.value == d}
+        CACHE.entries.find { it.value == d }
             .apply {
                 if (this == null)
                     throw UnloadedDocumentException(d)
@@ -484,7 +483,7 @@ class Project(
      * @return the new document.
      */
     fun createDocument(subpath: String) : Document {
-        val doc = Tag.testDOM.clone()
+        val doc = DefaultDocument()
 
         val loc = PROJECT_PATH_HTML + subpath
 

@@ -1,4 +1,5 @@
 
+
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -13,18 +14,19 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend.extensions
+
+package com.jdngray77.htmldesigner.utility
 
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.backend.html.Prefab
 import com.jdngray77.htmldesigner.backend.userInput
-import com.jdngray77.htmldesigner.backend.utility.assertExists
 import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import com.steadystate.css.dom.CSSStyleSheetImpl
 import com.steadystate.css.parser.CSSOMParser
 import com.steadystate.css.parser.SACParserCSS3
-import com.sun.org.apache.xerces.internal.dom.DocumentImpl
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -82,38 +84,16 @@ fun Document.changed()
  *
  * Automatically asserts that the file exists.
  */
+@Deprecated("Elements should be saved as prefabs, but there are exceptions.")
 fun Element.saveToDisk(f: File) {
     f.assertExists()
     f.writeText(toString())
 }
 
 
-// TODO replace these.
 /**
- * Injects a child into [this]'s parent prior to [this].
+ * Quick convinience method to create a prefab.
  */
-@Deprecated("There's functions in Element for this.", ReplaceWith("Element.before()"))
-fun Element.injectSiblingBefore(element: Element) = injectRelativeSibling(element)
-
-/**
- * Injects a child into [this]'s parent after to [this].
- */
-@Deprecated("There's functions in Element for this.", ReplaceWith("After"))
-fun Element.injectSiblingAfter(element: Element) = injectRelativeSibling(element, 1)
-
-/**
- * It's a method that takes an element and inserts it into the parent of the element that called it.
- *
- * The sibling is injected at the offset, where 0 replaces this, and shifts the remainder right.
- *
- * Essentially, 0 = inject left, 1 = inject right.
- */
-fun Element.injectRelativeSibling(element: Element, offset: Int = 0) {
-    parent()?.let {
-        it.insertChildren(it.childNodes().indexOf(this) + offset, element)
-    }
-}
-
 fun Element.createPrefab(): Prefab? {
     var ret: Prefab? = null
 
@@ -148,6 +128,11 @@ fun String.asElement(): Element =
  *         head, if there is one.
  */
 fun Document.getStylesheet(id : String) = this.head().getElementById(id)?.asStyleSheet()
+
+fun Document.delete() {
+    mvcIfAvail()?.delete(projectFile())
+}
+
 
 
 /**

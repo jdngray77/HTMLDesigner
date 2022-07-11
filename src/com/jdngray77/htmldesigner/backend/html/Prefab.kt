@@ -15,10 +15,10 @@
 
 package com.jdngray77.htmldesigner.backend.html
 
-import com.jdngray77.htmldesigner.backend.extensions.asElement
-import com.jdngray77.htmldesigner.backend.utility.assertEndsWith
-import com.jdngray77.htmldesigner.backend.utility.assertExists
-import com.jdngray77.htmldesigner.backend.utility.subFile
+import com.jdngray77.htmldesigner.utility.asElement
+import com.jdngray77.htmldesigner.utility.assertEndsWith
+import com.jdngray77.htmldesigner.utility.assertExists
+import com.jdngray77.htmldesigner.utility.subFile
 import com.jdngray77.htmldesigner.frontend.Editor
 import org.jsoup.nodes.Element
 import java.io.File
@@ -36,28 +36,49 @@ import java.io.File
  * Setting new content into [element] automatically saves prefab to disk.
  */
 class Prefab (
-    val locationOnDisk : File,
-    element: Element? = null
-) {
+
     /**
-     * For creating a new prefab only.
+     * The file where this [element] will be saved
+     */
+    val locationOnDisk : File,
+
+    /**
+     * The element to save.
      *
+     * If Provided then it's assumed that you're saving a new
+     * prefab.
+     *
+     * If NOT provided, then it is loaded from disk.
+     *
+     * If NOT provided, but there is no prefab on disk to load,
+     * a [NoSuchFileException] is thrown.
+     */
+    element: Element? = null
+
+) {
+
+    /**
      * Creates [locationOnDisk] relative to [Project.PREFABS] with [subPath]
      */
-    constructor(subPath: String) : this(Editor.mvc().Project.PREFABS.subFile(subPath.assertEndsWith(".html")))
+    constructor(subPath: String, element: Element? = null) : this(Editor.mvc().Project.PREFABS.subFile(subPath.assertEndsWith(".html")), element)
 
     /**
      * The element in this prefab.
+     *
+     * Either provided in constructor OR loaded from disk.
      */
     private lateinit var element: Element
 
     /**
+     * This replaces anything already saved to [locationOnDisk]
+     * with the new [element]
+     *
      * Sets the element used in this prefab,
      * and saves it to disk.
      *
-     * This replaces anything already saved to [locationOnDisk]
+
      */
-    fun setElement(value: Element) {
+    fun replaceSavedElement(value: Element) {
         element = value
         doSave()
     }
@@ -89,6 +110,6 @@ class Prefab (
             else
                 throw NoSuchFileException(locationOnDisk, reason = "Prefab loading constructor was used, but there was no file to load.")
         else
-            setElement(element)
+            replaceSavedElement(element)
     }
 }

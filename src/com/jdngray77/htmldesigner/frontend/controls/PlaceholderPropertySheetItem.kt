@@ -13,15 +13,46 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend.utility
+package com.jdngray77.htmldesigner.frontend.controls
 
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KProperty
+import javafx.beans.value.ObservableValue
+import org.controlsfx.control.PropertySheet
+import org.controlsfx.property.editor.PropertyEditor
+import java.util.*
 
 /**
- * Uses Kotlin reflection to mutate a variable in an object.
+ * A [PropertySheet.Item] that represents an editor / item that
+ * has not yet been added.
  *
- * @param [prop] the property to mutate. KProperties can be obtained from the list of an object's properties - `X::class.memberProperties`
+ * Displays a label and a disabled text field.
  */
-fun <R, T> changeProperty(prop : KProperty<*>, instance: R, newValue: T) =
-    (prop as KMutableProperty1<R, T>).set(instance, newValue)
+class PlaceholderPropertySheetItem(
+
+    /**
+     * The name of the non-existant field.
+     */
+    val _name: String,
+
+    /**
+     * The string used to group properties together in the GUI.
+     */
+    val _category : String
+
+) : PropertySheet.Item {
+
+
+    override fun getValue() = description
+    override fun setValue(value: Any?) {}
+    override fun getType() = String::class.java
+
+    override fun getCategory() = _category
+    override fun getName() = _name
+    override fun getDescription() = "This field has not yet been implemented."
+    override fun isEditable() = false
+
+    override fun getObservableValue(): Optional<ObservableValue<out Any>> =
+        Optional.empty()
+
+    override fun getPropertyEditorClass(): Optional<Class<out PropertyEditor<*>>> =
+        Optional.empty()
+}

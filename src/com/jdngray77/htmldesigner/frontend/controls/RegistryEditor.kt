@@ -16,7 +16,6 @@ package com.jdngray77.htmldesigner.frontend.controls
 
 import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.backend.userConfirm
-import com.jdngray77.htmldesigner.backend.utility.getTheme
 import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.beans.value.ObservableValue
 import javafx.scene.control.Button
@@ -25,27 +24,51 @@ import javafx.scene.control.Dialog
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
-import javafx.stage.Stage
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import org.controlsfx.control.PropertySheet
 import java.util.*
 
 /**
- * @param T The type of key.
+ * A property sheet control for displaying and
+ * editing a [registry].
+ *
+ *
+ * Can be used as a control anywhere in the GUI as a stand-alone sheet,
+ * or displayed as a pop-up dialog with [showDialog].
+ *
+ * Side note : For now, dialogs are forced to light mode.
+ *             Dark mode caused issues with the rendering of text boxes.
+ *             I'm not sure why.
+ *
+ * Changes made by the user are instantly and automatically
+ * saved to the registry, and to disk.
+ *
+ * This can be prevented by setting the registry's [Registry.autosave]
+ * flag low.
+ *
+ * @param T The type of key, typically an enum.
  */
 class RegistryEditor<T>(
+
+    /**
+     * The registry to edit and display.
+     */
     val registry: Registry<T>
+
+
 ): PropertySheet() {
 
     init {
         mode = Mode.CATEGORY
         styleClass.clear() // Fix broken css.
 
-        reload()
+        refreshEditor()
     }
 
-    fun reload() {
+    fun refreshEditor() {
+        // FIXME when sorted by category, this clears the selected category.
+
         items.clear()
 
         registry.entries.forEach {
@@ -55,9 +78,16 @@ class RegistryEditor<T>(
         }
     }
 
+    /**
+     * A Property sheet item representing an entry within the
+     * [registry].
+     */
     inner class RegistryEntry(
+
         val key: T
+
     ) : Item {
+
         override fun getType(): Class<*> =
             Registry.keyClass(key).java
 
@@ -80,8 +110,11 @@ class RegistryEditor<T>(
             Optional.empty()
     }
 
-
-
+    /**
+     * Convenience method to create and display this registry editor
+     * into a dialog, so you don't have to faf around with placing it into
+     * a ui, or make your own.
+     */
     fun showDialog() {
         Dialog<ButtonType>().apply {
 
@@ -92,11 +125,7 @@ class RegistryEditor<T>(
             title = "Registry Editor"
             headerText = "Warning - For advanced users only!"
 
-//            (dialogPane.scene.window as Stage).isAlwaysOnTop = true
-
             dialogPane.content = BorderPane().apply {
-
-                // Keep the dialog on top.
 
 
                 top = Text("Changes here affect the IDE directly. Make sure you know what you're doing first.\n\n( This page is temporarily in light mode because of a bug. Sorry :(  )")
@@ -107,14 +136,17 @@ class RegistryEditor<T>(
                         it.setOnAction {
                             if (userConfirm("This will reset all settings to default.\nAre you sure?")) {
                                 registry.reset()
-                                reload()
+                                refreshEditor()
                             }
                         }
                     },
                     Button("Quick restart").also {
                         it.setOnAction {
-                            Editor.EDITOR.restart()
-                            toFront()
+                            Editor.EDITOR.restart() // This waits for the entire restart, including project selection.
+
+                            toFront()       // Once the ide has loaded, bring the dialog back into focus.
+
+                            refreshEditor() // Update the registry editor. The IDE may have made changes during the restart.
                         }
                     },
                     Text("Most changes require a restart to take effect.")
@@ -126,5 +158,4 @@ class RegistryEditor<T>(
             dialogPane.buttonTypes.addAll(ButtonType.OK)
         }.showAndWait()
     }
-
 }

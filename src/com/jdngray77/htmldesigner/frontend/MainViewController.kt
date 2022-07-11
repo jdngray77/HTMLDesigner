@@ -18,22 +18,24 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
-import com.jdngray77.htmldesigner.backend.utility.CopyToClipboard
-import com.jdngray77.htmldesigner.backend.utility.camelToSentence
-import com.jdngray77.htmldesigner.backend.utility.getTheme
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
+import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
+import com.jdngray77.htmldesigner.utility.CopyToClipboard
+import com.jdngray77.htmldesigner.utility.camelToSentence
+import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import java.io.File
+import javax.script.ScriptEngineManager
+import javax.script.SimpleScriptContext
 
 
 /**
@@ -215,6 +217,17 @@ class MainViewController {
 
     fun menu_registry() {
         RegistryEditor(Config).showDialog()
+    }
+
+    fun menu_debug_eval() {
+        ScriptEngineManager().engineFactories.forEach { println(it.extensions) }
+        val input = userInput("Enter Kotlin code to evaluate in the MVC.")
+
+        showInformationalAlert(ScriptEngineManager().getEngineByExtension("kts")!!.eval(input).toString())
+    }
+
+    fun menu_debug_run_anything(actionEvent: ActionEvent) {
+        RunAnything.showDialog()
     }
 
 

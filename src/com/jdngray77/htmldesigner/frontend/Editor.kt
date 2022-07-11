@@ -21,7 +21,7 @@ import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.Registry
-import com.jdngray77.htmldesigner.backend.utility.loadFXMLScene
+import com.jdngray77.htmldesigner.utility.loadFXMLScene
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import javafx.application.Application
 import javafx.scene.Scene

@@ -16,7 +16,7 @@
 package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
-import com.jdngray77.htmldesigner.backend.utility.Restartable
+import com.jdngray77.htmldesigner.utility.Restartable
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit

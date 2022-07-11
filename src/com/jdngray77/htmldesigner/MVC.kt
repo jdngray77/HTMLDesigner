@@ -17,11 +17,10 @@ package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.backend.utility.*
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
-import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.MainViewController
-import javafx.scene.control.ButtonType
+import com.jdngray77.htmldesigner.utility.flattenTree
+import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.scene.control.Tab
 import javafx.scene.layout.BorderPane
 import org.jsoup.nodes.Document
@@ -238,7 +237,9 @@ class MVC (
 
     fun implDeleteTag(vararg tag: Element) {
         DocumentModificationTransaction().apply {
-            tag.forEach {
+            tag
+                .filterNot { it.parent() == null }
+                .forEach {
                 val doc = it.ownerDocument() ?: return
                 it.remove()
                 modified(doc)

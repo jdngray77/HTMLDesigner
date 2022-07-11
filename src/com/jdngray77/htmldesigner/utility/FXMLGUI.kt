@@ -1,4 +1,5 @@
 
+
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -13,7 +14,21 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.backend.utility
+/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ░                                                                                                ░
+ ░ Jordan T. Gray's                                                                               ░
+ ░                                                                                                ░
+ ░          HTML Designer                                                                         ░
+ ░                                                                                                ░
+ ░ FOSS 2022.                                                                                     ░
+ ░ License decision pending.                                                                      ░
+ ░                                                                                                ░
+ ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
+ ░ https://www.jordantgray.uk                                                                     ░
+ ░                                                                                                ░
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
+
+package com.jdngray77.htmldesigner.utility
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
@@ -64,6 +79,10 @@ fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
         }
     }
 
+/**
+ * Returns a JMetro instance
+ * in the correct color scheme.
+ */
 fun getTheme() = JMetro(
     if (Config[Configs.DARK_MODE_BOOL] as Boolean)
         Style.DARK

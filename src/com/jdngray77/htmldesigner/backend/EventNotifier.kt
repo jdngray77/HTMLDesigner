@@ -16,7 +16,7 @@
 package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.EventNotifier.subscribe
-import com.jdngray77.htmldesigner.backend.utility.Restartable
+import com.jdngray77.htmldesigner.utility.Restartable
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
 
