@@ -15,6 +15,7 @@
 package com.jdngray77.htmldesigner.frontend.controls
 
 import com.jdngray77.htmldesigner.backend.utility.reverseGet
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.ToggleButton
 import org.controlsfx.control.SegmentedButton
 
@@ -36,21 +37,48 @@ class AlignControl : SegmentedButton() {
 //            ToggleButton("7", fontAwesome.create(Glyph.ARROW_DOWN)),
 //            ToggleButton("8", fontAwesome.create(Glyph.AMBULANCE)),
 
-            ToggleButton("Start"),
-            ToggleButton("Center"),
-            ToggleButton("Justify"),
-            ToggleButton("End")
+            // TODO sort this fucking mess out
+            // TODO value is not cleared if all buttons are de-selected.
+
+            ToggleButton("Start").apply {
+               setOnAction {
+                   observableValue.value = text
+               }
+            },
+            ToggleButton("Center").apply {
+                setOnAction {
+                    observableValue.value = text
+                }
+            },
+            ToggleButton("Justify").apply {
+                setOnAction {
+                    observableValue.value = text
+                }
+            },
+            ToggleButton("End").apply {
+                setOnAction {
+                    observableValue.value = text
+                }
+            }
         )
     }
 
+
+    //TODO listener on buttons
+
+    val observableValue = SimpleStringProperty()
+
     fun getAlignment() =
-        FlexJustify[buttons.filtered { it.isSelected }.first().text]
+        observableValue.value
+//        FlexJustify[buttons.filtered { it.isSelected }.first().text]
 
     fun setAlignment(x : String) {
         buttons.forEach { it.isSelected = false }
 
         val y = FlexJustify.reverseGet(x)
         buttons.find { it.text == y }?.isSelected = true
+
+        observableValue.value = x
     }
 }
 

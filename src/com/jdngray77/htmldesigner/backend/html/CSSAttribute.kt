@@ -12,18 +12,37 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-package com.jdngray77.htmldesigner.frontend.docks.tagproperties
+package com.jdngray77.htmldesigner.backend.html
 
-import javafx.util.Callback
-import org.controlsfx.control.PropertySheet
-import org.controlsfx.property.editor.DefaultPropertyEditorFactory
-import org.controlsfx.property.editor.PropertyEditor
+/**
+ * A container for CSS properties that can be added directly
+ * to an element as an attribute.
+ *
+ * i.e
+ * ```
+ * <div style="...;">
+ * ```
+ *
+ * usage
+ * ```
+ * val styles = StyleAttribute()
+ *
+ * styles["display"] = "flex"
+ * styles["justify-content"] = "center"
+ *
+ * element.attr("style", styles)
+ * ```
+ */
+class StyleAttribute : HashMap<String, String>() {
 
-object TagPropertyEditorFactory : Callback<PropertySheet.Item, PropertyEditor<*>> {
-    override fun call(item: PropertySheet.Item): PropertyEditor<*> {
-        return when (item) {
-            is CSSAlignmentPropertySheetItem -> CSSAlignmentPropertyEditor(item)
-            else -> DefaultPropertyEditorFactory().call(item)
-        }
-    }
+    fun style(propertyName : String, value : String) =
+        put(propertyName, value)
+
+    fun style(propertyName : String) =
+        get(propertyName)
+
+
+    override fun toString()=
+        entries.joinToString("") { it.key + ": " + it.value + "; " }
+
 }

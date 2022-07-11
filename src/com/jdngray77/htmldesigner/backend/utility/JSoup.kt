@@ -54,6 +54,19 @@ import java.io.StringReader
 fun Document.open() =
     Editor.mvcIfAvail()?.openDocument(this)
 
+/**
+ * Finds an editor in the IDE that is editing this document,
+ * if there is one.
+ */
+fun Document.editor() =
+    Editor.mvcIfAvail()?.findEditorFor(this)
+
+/**
+ * If the document is open in an editor, notifies
+ * the editor that the document has changed.
+ */
+fun Document.changed()
+    = editor()?.documentChanged()
 
 
 

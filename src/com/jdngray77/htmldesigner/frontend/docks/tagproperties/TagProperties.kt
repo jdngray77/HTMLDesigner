@@ -130,9 +130,11 @@ class TagProperties : Dock(), Subscriber {
                 ),
 
 
+                // TODO align text
+                // TODO manual editor
 
                 CSSAlignmentPropertySheetItem(
-                    "Align inner content",
+                    "Align children",
                     this,
                     "Alignment",
                     "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
