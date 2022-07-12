@@ -230,6 +230,10 @@ class MainViewController {
         RunAnything.showDialog()
     }
 
+    fun menu_project_projprefs(actionEvent: ActionEvent) {
+        RegistryEditor(mvc().Project.PREFERENCES).showDialog()
+    }
+
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                 Menu

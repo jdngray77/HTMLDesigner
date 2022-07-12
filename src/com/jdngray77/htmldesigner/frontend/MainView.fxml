@@ -99,7 +99,7 @@
                   </Menu>
             <Menu mnemonicParsing="false" text="[inop] Open Recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="[inop] Preferences…" />
+            <MenuItem mnemonicParsing="false" text="Registry…" onAction="#menu_project_projprefs"/>
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
