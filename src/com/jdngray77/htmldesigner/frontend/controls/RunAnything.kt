@@ -18,6 +18,7 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.backend.showInformationalAlert
 import com.jdngray77.htmldesigner.backend.userInput
 import com.jdngray77.htmldesigner.frontend.Editor
@@ -39,15 +40,14 @@ class Task(val name: String, val script: () -> Unit) : Runnable {
 
 object RunAnything : SearchableList<Task>(
     arrayListOf(
-        Task("Registry > Edit") { RegistryEditor(Config).showDialog() },
-        Task("Registry > Force save") { Config.forceFlush() },
-        Task("Registry > Save") { Config.flush() },
-        Task("Registry > Restore defaults") { Config.reset() },
-        Task("Registry > Validate") { Config.validate() },
-        Task("Registry > Toggle Dark Mode (requires restart)") {
+        *RegistryTaskFactory("Project").createTasks(Config),
+        *RegistryTaskFactory("IDE").createTasks(Config),
+        Task("IDE Registry > Toggle Dark Mode (requires restart)") {
             Config[Configs.DARK_MODE_BOOL] = !(Config[Configs.DARK_MODE_BOOL] as Boolean)
             Editor.EDITOR.restart()
-       },
+        },
+
+
 
         Task("Restart") { Editor.EDITOR.restart() },
         Task("Quit") { Editor.EDITOR.stop() },
@@ -57,10 +57,10 @@ object RunAnything : SearchableList<Task>(
         Task("Project > Close") { Editor.EDITOR.closeProject() },
 
         Task("Notify Event") {
-                             EventNotifier.notifyEvent(
-                                 EventType.valueOf(userInput("Enter an Event to notify of."))
-                             )
-                },
+            EventNotifier.notifyEvent(
+                EventType.valueOf(userInput("Enter an Event to notify of."))
+            )
+        },
 
         Task("Current Document > Delete") { mvc().currentDocument().delete() },
         Task("Current Document > Validate") {
@@ -69,7 +69,8 @@ object RunAnything : SearchableList<Task>(
                     "Document contains tags which Jsoup considers un-safe in regards to XSS attacks."
                 else
                     "Jsoup believes the document to be safe, containing only it considers safe."
-                ) },
+            )
+        },
 
         Task("Current Editor > Close") { mvc().currentEditor().requestClose() },
         Task("Current Editor > Save") { mvc().currentEditor().save() },
@@ -77,7 +78,7 @@ object RunAnything : SearchableList<Task>(
         Task("Current editor > Close without saving") { mvc().currentEditor().forceClose() },
 
 
-    )
+        )
 ) {
 
     override fun onAction(item: Task) {
@@ -110,3 +111,26 @@ object RunAnything : SearchableList<Task>(
         dialog.show()
 
 }
+
+
+//░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+//region                        Task factories
+//░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+// The helper classes below here help produce tasks to place in the window above.
+
+private interface TaskFactory<T> {
+    fun createTasks(item: T): Array<Task>
+}
+
+private class RegistryTaskFactory(val regName: String) : TaskFactory<Registry<*>> {
+    override fun createTasks(item: Registry<*>) =
+        arrayOf(
+            Task("$regName Registry > Edit") { RegistryEditor(item).showDialog() },
+            Task("$regName Registry > Force save") { item.forceFlush() },
+            Task("$regName Registry > Save") { item.flush() },
+            Task("$regName Registry > Restore defaults") { item.reset() },
+            Task("$regName Registry > Validate") { Config.validate() },
+        )
+}
+
+
