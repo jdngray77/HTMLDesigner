@@ -23,14 +23,21 @@ import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.utility.loadFXMLScene
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
+import de.codecentric.centerdevice.MenuToolkit
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
+import javafx.scene.control.Menu
+import javafx.scene.control.MenuBar
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.lang.System.gc
+import javafx.scene.layout.BorderPane
+
+
+
 
 
 /**
@@ -149,6 +156,11 @@ class Editor : Application() {
         // Fullscreen the window, and show it.
         if (!System.getProperty("os.name").contains("Mac"))
             stage.isFullScreen = true
+        else
+            if (Config[Configs.USE_MAC_MENU] as Boolean)
+                (scene.first.lookup("#MenuBar") as MenuBar)
+                    .useSystemMenuBarProperty().set(true)
+
 
         stage.scene = scene.first
 //        stage.scene.stylesheets.add("stylesheet.css");

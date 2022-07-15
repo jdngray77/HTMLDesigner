@@ -55,11 +55,10 @@ interface Subscriber {
 }
 
 /**
- * Distributes notifications of events
- * throughout the system.
+ * A simple global notification distributing service
  *
- * [subscribe] a [subscriber], and it will be invoked when
- * the requested events occour.
+ * See [the documentation](https://github.com/jdngray77/HTMLDesigner/wiki/Technical-Systems)
+ * for a full and simple guide on how to use this system.
  */
 object EventNotifier : Restartable {
 
