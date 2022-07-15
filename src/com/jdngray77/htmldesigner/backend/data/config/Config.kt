@@ -18,13 +18,16 @@ import java.io.File
 
 /**
  * Keys for the [config] registry.
+ *
+ * See the [Documentation](https://github.com/jdngray77/HTMLDesigner/wiki/Registry-Keys)
  */
 enum class Configs {
 
     LAST_PROJECT_PATH_STRING,
     DARK_MODE_BOOL,
     SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL,
-    TOOLBOX_DOCK_FILTER_EXACT_BOOL
+    TOOLBOX_DOCK_FILTER_EXACT_BOOL,
+    USE_MAC_MENU
 
 }
 

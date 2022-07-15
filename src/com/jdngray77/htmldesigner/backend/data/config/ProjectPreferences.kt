@@ -20,13 +20,10 @@ import com.jdngray77.htmldesigner.utility.subFile
 
 /**
  * Keys for the [ProjectPreferences] registry.
+ *
+ * See the [Documentation](https://github.com/jdngray77/HTMLDesigner/wiki/Registry-Keys)
  */
 enum class ProjectPreference {
-    EXPORT_AUTO_ENABLE_BOOL,
-    EXPORT_AUTO_FREQUENCY_INT,
-
-    MISC_VALIDATION_SKIP_BOOL,
-
     BACKUP_DEPTH_INT,
     BACKUP_ENABLE_BOOL
 }
@@ -43,9 +40,6 @@ class ProjectPreferences(project: Project) : Registry<ProjectPreference>(project
     }
 
     override fun initialize() {
-        put(ProjectPreference.EXPORT_AUTO_ENABLE_BOOL, true)
-        put(ProjectPreference.EXPORT_AUTO_FREQUENCY_INT, 10)
-        put(ProjectPreference.MISC_VALIDATION_SKIP_BOOL, false)
         put(ProjectPreference.BACKUP_DEPTH_INT, 20)
         put(ProjectPreference.BACKUP_ENABLE_BOOL, true)
     }
