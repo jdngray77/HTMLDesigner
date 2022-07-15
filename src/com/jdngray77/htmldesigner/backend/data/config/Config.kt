@@ -27,7 +27,7 @@ enum class Configs {
     DARK_MODE_BOOL,
     SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL,
     TOOLBOX_DOCK_FILTER_EXACT_BOOL,
-    USE_MAC_MENU
+    USE_MAC_MENU_BOOL
 
 }
 
@@ -50,6 +50,7 @@ object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
         put(Configs.LAST_PROJECT_PATH_STRING, "")
         put(Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL, true)
         put(Configs.TOOLBOX_DOCK_FILTER_EXACT_BOOL, true)
+        put(Configs.USE_MAC_MENU_BOOL, true)
     }
 
     override fun validate() {

@@ -21,23 +21,17 @@ import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.Registry
-import com.jdngray77.htmldesigner.utility.loadFXMLScene
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
-import de.codecentric.centerdevice.MenuToolkit
+import com.jdngray77.htmldesigner.utility.loadFXMLScene
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
-import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.lang.System.gc
-import javafx.scene.layout.BorderPane
-
-
-
 
 
 /**
