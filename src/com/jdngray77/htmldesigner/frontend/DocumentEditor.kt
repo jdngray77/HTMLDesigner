@@ -15,27 +15,28 @@
 
 package com.jdngray77.htmldesigner.frontend
 
+import com.jdngray77.htmldesigner.backend.BackgroundTask
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
+import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
 import com.jdngray77.htmldesigner.backend.userConfirm
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.utility.ButtonType_CLOSEWITHOUTSAVE
 import com.jdngray77.htmldesigner.utility.ButtonType_SAVE
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import javafx.application.Platform
 import javafx.event.Event
 import javafx.fxml.FXML
 import javafx.scene.control.ButtonType
+import javafx.scene.control.Label
 import javafx.scene.control.Tab
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
-import java.net.URL
-import javax.annotation.Resources
+import kotlin.math.roundToInt
 
 /**
  * # Central document editor.
@@ -106,6 +107,10 @@ class DocumentEditor {
 
             it
         }
+
+
+        // Update zoom label.
+        zoomChanged()
     }
 
 
@@ -165,6 +170,11 @@ class DocumentEditor {
      * See the parenting FXML file.
      */
     @FXML lateinit var editorRoot : BorderPane
+
+    /**
+     * Label which shows the zoom level to the user.
+     */
+    @FXML lateinit var lblZoom: Label
 
 
 
@@ -283,6 +293,37 @@ class DocumentEditor {
         tab.onClosed?.handle(null)
     }
 
+    fun zoomOut() {
+        contentRenderer.zoom -= project().PREFERENCES[ProjectPreference.ZOOM_STEP_SIZE_DOUBLE] as Double
+        zoomChanged()
+    }
+
+    fun zoomIn() {
+        contentRenderer.zoom += project().PREFERENCES[ProjectPreference.ZOOM_STEP_SIZE_DOUBLE] as Double
+        zoomChanged()
+    }
+
+    private fun zoomChanged() {
+        lblZoom.text = "${(contentRenderer.zoom * 100).roundToInt()}%"
+    }
+
+    fun resetZoom() {
+        contentRenderer.zoom = 1.0
+        zoomChanged()
+    }
+
+    fun back() {
+        Platform.runLater {
+            contentRenderer.engine.executeScript("history.back()")
+        }
+    }
+
+    fun forward() {
+        Platform.runLater {
+            contentRenderer.engine.executeScript("history.forward()")
+        }
+    }
+
     companion object {
 
         /**
@@ -297,4 +338,11 @@ class DocumentEditor {
          */
         private val EDITOR_CLOSE_REQUEST = javafx.event.EventType<Event>("EDITOR_CLOSE_REQUEST")
     }
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //region                                   GUI
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
 }

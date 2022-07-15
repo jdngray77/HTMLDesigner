@@ -25,7 +25,8 @@ import com.jdngray77.htmldesigner.utility.subFile
  */
 enum class ProjectPreference {
     BACKUP_DEPTH_INT,
-    BACKUP_ENABLE_BOOL
+    BACKUP_ENABLE_BOOL,
+    ZOOM_STEP_SIZE_DOUBLE
 }
 
 /**
@@ -42,6 +43,7 @@ class ProjectPreferences(project: Project) : Registry<ProjectPreference>(project
     override fun initialize() {
         put(ProjectPreference.BACKUP_DEPTH_INT, 20)
         put(ProjectPreference.BACKUP_ENABLE_BOOL, true)
+        put(ProjectPreference.ZOOM_STEP_SIZE_DOUBLE, .1)
     }
 
     override fun validate() {

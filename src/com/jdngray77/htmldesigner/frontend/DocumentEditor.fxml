@@ -18,18 +18,21 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.web.*?>
 
-<BorderPane fx:id="editorRoot" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.DocumentEditor">
+<BorderPane fx:id="editorRoot" prefHeight="617.0" prefWidth="808.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.DocumentEditor">
    <center>
       <WebView fx:id="contentRenderer" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS" />
    </center>
    <bottom>
       <ToolBar prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>
-          <Button mnemonicParsing="false" text="-" />
-            <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" text="+" />
+            <Button fx:id="btnBack" mnemonicParsing="false" onAction="#back" text="&lt;-" />
+            <Button mnemonicParsing="false" onAction="#reRender" text="Reset" />
+            <Button fx:id="btnForward" mnemonicParsing="false" onAction="#forward" text="-&gt;" />
+          <Button fx:id="btnZoomOut" mnemonicParsing="false" onAction="#zoomOut" text="-" />
+            <Label fx:id="lblZoom" onMouseClicked="#resetZoom" text="100%" />
+            <Button fx:id="btnZoomIn" layoutX="10.0" layoutY="13.0" mnemonicParsing="false" onAction="#zoomIn" text="+" />
             <Pane HBox.hgrow="ALWAYS" />
-            <ChoiceBox prefWidth="150.0" />
-            <Pane HBox.hgrow="ALWAYS" />
+            <ChoiceBox fx:id="cmbSizePreset" prefWidth="150.0" />
             <Button layoutX="39.0" layoutY="10.0" mnemonicParsing="false" text="Fit" />
         </items>
       </ToolBar>
