@@ -27,6 +27,9 @@ import javafx.fxml.FXML
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Tab
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -77,9 +80,6 @@ class DocumentEditor {
         tab = Tab("", editorRoot).let {
             mainView.dockEditors.tabs.add(it)
 
-            // Have the tab automatically resize to fill the entire editor space.
-            editorRoot.prefWidthProperty().bind(mainView.dockEditors.widthProperty())
-            editorRoot.prefHeightProperty().bind(mainView.dockEditors.heightProperty())
 
             it.setOnCloseRequest {
                 if (isDirty) {
