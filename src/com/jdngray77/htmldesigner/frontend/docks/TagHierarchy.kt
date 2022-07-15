@@ -26,6 +26,7 @@ import com.jdngray77.htmldesigner.utility.applyToAll
 import com.jdngray77.htmldesigner.utility.clipboard
 import com.jdngray77.htmldesigner.utility.pack
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.*
 import javafx.scene.control.cell.TextFieldTreeTableCell
 import org.jsoup.nodes.Document
@@ -87,8 +88,14 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
             },
 
             TreeTableColumn<Element, String>("Content").also {
-                it.setCellValueFactory { p -> SimpleObjectProperty(p.value.value.text()) }
-                it.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn<Element>())
+                it.setCellValueFactory { p -> SimpleStringProperty(p.value.value.ownText())}
+
+                it.setOnEditCommit {
+                            // TODO we can access the old value too. This will be useful for implementing undo.
+                            it.rowValue.value.text(it.newValue)
+                            mvc().currentEditor().reRender()
+                }
+                it.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn())
             }
         )
 
@@ -233,8 +240,6 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
                 }
             },
         )
-
-
         tree.pack()
     }
 
@@ -245,9 +250,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
      */
     fun showDocument(doc: Document) {
         document = doc
-        setRoot(doc.body())//.also {
-//            it.value = doc.title()
-//        }
+        setRoot(doc.body())
     }
 
     override fun notify(e: EventType) {
