@@ -151,7 +151,7 @@ class Editor : Application() {
         if (!System.getProperty("os.name").contains("Mac"))
             stage.isFullScreen = true
         else
-            if (Config[Configs.USE_MAC_MENU] as Boolean)
+            if (Config[Configs.USE_MAC_MENU_BOOL] as Boolean)
                 (scene.first.lookup("#MenuBar") as MenuBar)
                     .useSystemMenuBarProperty().set(true)
 
