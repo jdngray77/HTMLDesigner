@@ -24,6 +24,7 @@ import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.utility.loadFXMLScene
 import javafx.application.Application
+import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
@@ -120,7 +121,8 @@ class Editor : Application() {
      * Typically, the controller is accessed using [maingui]
      * via the [mvc]
      */
-    private lateinit var scene: Pair<Scene, MainViewController>
+    lateinit var scene: Pair<Scene, MainViewController>
+        private set
 
     /**
      * The stage that is used to show scenes.
@@ -165,6 +167,7 @@ class Editor : Application() {
         mvc = MVC(determineProject(), scene.second)
     }
 
+    @Deprecated("Use 'exit'")
     override fun stop() {
         // TODO this could be useful.
         //      stop background threads
@@ -180,6 +183,11 @@ class Editor : Application() {
 
         EventNotifier.onIDERestart()
         BackgroundTask.onIDERestart()
+    }
+
+    fun exit() {
+        stop()
+        Platform.exit()
     }
 
     fun closeProject() {
@@ -263,6 +271,8 @@ class Editor : Application() {
             else -> null
         }
     }
+
+
 
 
 }
