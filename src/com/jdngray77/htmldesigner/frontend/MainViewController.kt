@@ -19,6 +19,7 @@ import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.docks.*
@@ -27,6 +28,7 @@ import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.utility.camelToSentence
+import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.*
@@ -232,6 +234,35 @@ class MainViewController {
 
     fun menu_project_projprefs(actionEvent: ActionEvent) {
         RegistryEditor(mvc().Project.PREFERENCES).showDialog()
+    }
+
+    fun menu_file_revert() {
+        mvc().currentEditor().apply {
+            // Store the current tab position
+            val index = dockEditors.tabs.indexOf(tab)
+
+            // Close and re-load from disk
+            forceClose()
+            project().removeFromCache(document)
+            mvc().openDocument(file)
+
+            // Move the new editor to the same index
+            mvc().currentEditor().tab.let {
+                with(dockEditors) {
+                    tabs.remove(it)
+                    tabs.add(index, it)
+                    selectionModel.select(it)
+                }
+            }
+        }
+    }
+
+    fun menu_file_save() {
+        mvc().currentEditor().save()
+    }
+
+    fun menu_exit() {
+        Platform.exit()
     }
 
 
