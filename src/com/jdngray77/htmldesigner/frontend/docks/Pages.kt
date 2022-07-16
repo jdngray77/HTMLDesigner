@@ -15,9 +15,7 @@
 
 package com.jdngray77.htmldesigner.frontend.docks
 
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.utility.open
 import com.jdngray77.htmldesigner.utility.StoringTreeItem
 import com.jdngray77.htmldesigner.utility.assertEndsWith
@@ -171,22 +169,28 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
      */
     private fun implCreateNewPage() {
         mvc().Project.apply {
-            createDocument(
-                (contextOrSelectedOrNull()?.let {
-                    if (it.isDirectory)
-                        it.relativeTo(HTML).path  + "/"
-                    else
-                        it.relativeTo(HTML).parentFile?.let{ it.path + "/" } ?: ""
-                } ?: "")
-                        +
-                        TextInputDialog("FancyPage.html").let{
-                            it.showAndWait()
-                            if (it.result.isNullOrBlank())
-                                return
-                            else
-                                it.result.assertEndsWith(".html")
-                        }
-            ).open()
+            try {
+                createDocument(
+                    (contextOrSelectedOrNull()?.let {
+                        if (it.isDirectory)
+                            it.relativeTo(HTML).path  + "/"
+                        else
+                            it.relativeTo(HTML).parentFile?.let{ it.path + "/" } ?: ""
+                    } ?: "")
+                            +
+                            TextInputDialog("FancyPage.html").let{
+                                it.showAndWait()
+                                if (it.result.isNullOrBlank())
+                                    return
+                                else
+                                    it.result.assertEndsWith(".html")
+                            }
+                ).open()
+
+            } catch (e: FileAlreadyExistsException) {
+                // Issue 24
+                showErrorAlert("A file with that name already exists!")
+            }
             refresh()
         }
     }
