@@ -237,7 +237,20 @@ class MainViewController {
     }
 
     fun menu_file_revert() {
+
+        if (!mvc().currentEditor().isDirty) {
+            showNotification("Nothing to revert.", "No changes have been made since the last save.")
+            return
+        }
+
+        if (!userConfirm("This will delete any changes you've made since the last time the file was saved. \n\nAre you sure?"))
+            return
+
+
         mvc().currentEditor().apply {
+
+
+
             // Store the current tab position
             val index = dockEditors.tabs.indexOf(tab)
 
@@ -257,13 +270,11 @@ class MainViewController {
         }
     }
 
-    fun menu_file_save() {
+    fun menu_file_save() =
         mvc().currentEditor().save()
-    }
 
-    fun menu_exit() {
+    fun menu_exit() =
         Platform.exit()
-    }
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
