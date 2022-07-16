@@ -24,12 +24,17 @@ import com.jdngray77.htmldesigner.backend.userInput
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.utility.delete
+import javafx.event.ActionEvent
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Dialog
+import javafx.scene.control.Menu
+import javafx.scene.control.MenuBar
+import javafx.scene.control.SeparatorMenuItem
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist
+import java.util.stream.Collectors
 
 class Task(val name: String, val script: () -> Unit) : Runnable {
     final override fun toString() = name
@@ -48,9 +53,10 @@ object RunAnything : SearchableList<Task>(
         },
 
 
+        *MenuTaskFactory().createTasks(Editor.EDITOR.scene.first.lookup("#MenuBar") as MenuBar),
 
         Task("Restart") { Editor.EDITOR.restart() },
-        Task("Quit") { Editor.EDITOR.stop() },
+        Task("Quit") { Editor.EDITOR.exit() },
 
 
         Task("Project > Validate Cache") { mvc().Project.validateCache() },
@@ -131,6 +137,31 @@ private class RegistryTaskFactory(val regName: String) : TaskFactory<Registry<*>
             Task("$regName Registry > Restore defaults") { item.reset() },
             Task("$regName Registry > Validate") { Config.validate() },
         )
+}
+
+private class MenuTaskFactory() : TaskFactory<MenuBar> {
+    override fun createTasks(menu: MenuBar): Array<Task> {
+        val tasks = arrayListOf<Task>()
+
+        menu.menus.forEach {
+            tasks.addAll(recurseMenu(it))
+        }
+
+        return tasks.toTypedArray()
+    }
+
+    private fun recurseMenu(menu: Menu): Collection<Task> {
+        val tasks = arrayListOf<Task>()
+        menu.items.forEach {
+            if (it is Menu)
+                tasks.addAll(recurseMenu(it))
+            else if (it !is SeparatorMenuItem && it.onAction != null && it.text != null)
+                tasks.add(Task("Menu > ${menu.text} > ${it.text}") { it.onAction.handle(ActionEvent()) })
+        }
+
+        return tasks
+    }
+
 }
 
 
