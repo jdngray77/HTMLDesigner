@@ -230,7 +230,7 @@ class Project(
     fun getCache() = CACHE
 
     inline fun <reified T> removeFromCache(any: T) {
-        getCache().entries.filter { it.value is T && it == any }
+        getCache().entries.filter { it.value is T && it.value == any }
             .map { getCache().remove(it.key) }
     }
 
