@@ -155,7 +155,7 @@ fun Document.addStylesheet(css: CSSStyleSheet) {
 }
 
 fun Document.addStylesheet(id: String, initialContent: String = ""): CSSStyleSheet? {
-    head().appendChild(newStyleTag(id, initialContent))
+    body().parent()!!.prependChild(newStyleTag(id, initialContent))
     return getStylesheet(id)
 }
 
