@@ -54,7 +54,7 @@
 
 <VBox prefHeight="1108.0" prefWidth="1606.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.MainViewController">
   <children>
-    <MenuBar VBox.vgrow="NEVER" fx:id="MenuBar">
+    <MenuBar fx:id="MenuBar" VBox.vgrow="NEVER">
       <menus>
             <Menu mnemonicParsing="false" text="HTML Designer">
               <items>
@@ -80,7 +80,7 @@
                     </items>
                   </Menu>
                   <MenuItem mnemonicParsing="false" onAction="#menu_soft_restart" text="Soft Restart..." />
-                  <MenuItem mnemonicParsing="false" text="Exit" />
+                  <MenuItem mnemonicParsing="false" onAction="#menu_exit" text="Exit" />
               </items>
             </Menu>
         <Menu mnemonicParsing="false" text="Project">
@@ -99,9 +99,26 @@
                   </Menu>
             <Menu mnemonicParsing="false" text="[inop] Open Recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Registry…" onAction="#menu_project_projprefs"/>
+            <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
           </items>
         </Menu>
+            <Menu mnemonicParsing="false" text="File">
+               <items>
+                  <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save" />
+                  <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert changes" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <Menu mnemonicParsing="false" text="[inop] Backups">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="Backup now" />
+                        <MenuItem mnemonicParsing="false" text="Restore backup..." />
+                        <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
+                     </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="[inop] Open Recent" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
+               </items>
+            </Menu>
         <Menu mnemonicParsing="false" text="Edit">
           <items>
             <MenuItem mnemonicParsing="false" text="[inop] Undo" />

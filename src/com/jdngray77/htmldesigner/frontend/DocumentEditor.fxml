@@ -30,21 +30,6 @@
         <VBox>
 
 
-            <!--
-
-                      NOTE : This file cannot be loaded with Scene Builder whilst
-                      this bread crumb bar is included.
-
-                      This is because ControlsFX controls are not supported by it.
-
-                      Comment this line out to edit in the editor, then just put the line
-                      back in when you're done.
-
-                 -->
-            <BreadCrumbBar fx:id="breadCrumb"/>
-
-
-
             <ToolBar prefWidth="200.0" BorderPane.alignment="CENTER">
                 <items>
                     <Button fx:id="btnBack" mnemonicParsing="false" onAction="#back" text="&lt;-"/>
@@ -59,6 +44,21 @@
                     <Button layoutX="39.0" layoutY="10.0" mnemonicParsing="false" text="Fit"/>
                 </items>
             </ToolBar>
+
+
+
+            <!--
+
+                      NOTE : This file cannot be loaded with Scene Builder whilst
+                      this bread crumb bar is included.
+
+                      This is because ControlsFX controls are not supported by it.
+
+                      Comment this line out to edit in the editor, then just put the line
+                      back in when you're done.
+
+                 -->
+            <BreadCrumbBar fx:id="breadCrumb"/>
         </VBox>
     </bottom>
 </BorderPane>
