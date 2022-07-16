@@ -20,6 +20,9 @@ import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeTableColumn
 import javafx.scene.control.TreeTableView
 import java.util.function.Consumer
+import java.util.stream.Collectors
+import java.util.stream.Stream
+
 
 /**
  * Resizes a [TreeTableColumn] to fit the content within it.
@@ -65,6 +68,19 @@ fun <T> TreeItem<T>.applyToAll(function: Consumer<TreeItem<T>>) {
     }
     function.accept(this)
 }
+
+fun <T> TreeTableView<T>.findItem(item : T): TreeItem<T>? =
+    root.flatten().collect(Collectors.toList()).find { it.value == item }
+
+
+fun <T> TreeItem<T>.flatten(): Stream<TreeItem<T>> =
+    flatten(this)
+
+fun <T> TreeItem<T>.flatten(item : TreeItem<T>): Stream<TreeItem<T>> =
+    Stream.concat(
+        Stream.of(item),
+        item.children.stream().flatMap { flatten(it) }
+    )
 
 /**
  * Resizes columns in a [TreeTableView] to fit the content within them.

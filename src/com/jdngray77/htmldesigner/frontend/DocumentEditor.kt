@@ -15,7 +15,6 @@
 
 package com.jdngray77.htmldesigner.frontend
 
-import com.jdngray77.htmldesigner.backend.BackgroundTask
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
@@ -25,14 +24,14 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.utility.ButtonType_CLOSEWITHOUTSAVE
 import com.jdngray77.htmldesigner.utility.ButtonType_SAVE
+import impl.org.controlsfx.skin.BreadCrumbBarSkin
 import javafx.application.Platform
 import javafx.event.Event
 import javafx.fxml.FXML
-import javafx.scene.control.ButtonType
-import javafx.scene.control.Label
-import javafx.scene.control.Tab
+import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
 import javafx.scene.web.WebView
+import org.controlsfx.control.BreadCrumbBar
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
@@ -46,8 +45,10 @@ import kotlin.math.roundToInt
  * It holds an open document in order to make and save changes, but note that
  * it **Does not handle modifying the [document]. For that, see [MVC].**
  *
- * In the GUI, this is a [tab] that opens within the IDE displaying a document.
+ * In the IDE's interface, this is a [tab] that opens within the IDE displaying a document.
  * The IDE will access and edit the [DocumentEditor] that is selected.
+ *
+ * There is a reference to the [tab] used to hold this [DocumentEditor] for convenience.
  *
  * All docks will update to display and edit the selected editor via
  * [EventType.EDITOR_DOCUMENT_SWITCH].
@@ -111,6 +112,16 @@ class DocumentEditor {
 
         // Update zoom label.
         zoomChanged()
+
+        // Breadcrumb only shows tag name
+        breadCrumb.setCrumbFactory {
+            BreadCrumbBarSkin.BreadCrumbButton(it.value.tagName() + if (it.value.id().isNotBlank()) "#${it.value.id()}" else "" )
+        }
+
+        // When the user click's a crumb, select that tag.
+        breadCrumb.setOnCrumbAction {
+            selectTag(it.selectedCrumb)
+        }
     }
 
 
@@ -138,7 +149,10 @@ class DocumentEditor {
 
 
     /**
-     * The document being edited.
+     * The document held by this editor.
+     *
+     * Remember, this file does not actually edit the
+     * [document].
      */
     lateinit var document : Document
         private set
@@ -151,30 +165,46 @@ class DocumentEditor {
     lateinit var file : File
         private set
 
+
     /**
-     * A [WebView] placed inside the [tab] that displays the [Document]
-     * to the user.
+     * The tab displayed in the IDE, which contains this editor.
+     *
+     * Close request listeners are automatically added to this tab
+     * when the editor is created, that prevent closing
+     * if [isDirty].
+     */
+    lateinit var tab: Tab
+
+    /**
+     * A [WebView] that displays the [Document] to the user.
      *
      * @see [reRender]
      */
     @FXML lateinit var contentRenderer : WebView
 
     /**
-     * The tab displayed in the IDE, which contains this editor.
-     */
-    lateinit var tab: Tab
-
-    /**
      * The root container of this [DocumentEditor]
+     *
+     * Contains the [WebView], [breadCrumb], and toolbar.
+     *
+     * Is placed directly into the [tab].
      *
      * See the parenting FXML file.
      */
     @FXML lateinit var editorRoot : BorderPane
 
     /**
-     * Label which shows the zoom level to the user.
+     * Button which shows the zoom level to the user,
+     * and allows them to reset the zoom when clicked.
      */
-    @FXML lateinit var lblZoom: Label
+    @FXML lateinit var btnZoom: Button
+
+    /**
+     * Breadcrumb bar for the element the user has selected.
+     *
+     * Selects elements that are clicked.
+     */
+    @FXML lateinit var breadCrumb: BreadCrumbBar<Element>
 
 
 
@@ -191,11 +221,14 @@ class DocumentEditor {
      * Provides context for the MVC to perform tag modifications.
      */
     var selectedTag: Element? = null
-        set(value) {
+        private set(value) {
             //FIXME these debug lines will be saved into the output document.
 
             // Guard against repetition ; issue #19.
             if (value == field) return
+
+            // Guard against excluding head
+            if (value == document.body()) return
 
             field?.removeClass("debug-outline")
             field = value
@@ -205,6 +238,25 @@ class DocumentEditor {
             EventNotifier.notifyEvent(EventType.EDITOR_SELECTED_TAG_CHANGED)
         }
 
+    /**
+     * Selects the given element, but does not populate the [breadCrumb].
+     *
+     * A [TreeItem] from [TagHierarchy]'s [TreeTableView] or equivellant
+     * is required to populate the [breadCrumb].
+     */
+    @Deprecated("This method of selecting a tag cannot not populate the breadcrumb view, giving the user no feedback on thier selection.")
+    fun selectTag(tag: Element?) {
+        selectedTag = tag
+        breadCrumb.selectedCrumb = null
+    }
+
+    /**
+     * Selects the given element, but does and populates the [breadCrumb].
+     */
+    fun selectTag(treeItem: TreeItem<Element>) {
+        selectedTag = treeItem.value
+        breadCrumb.selectedCrumb = treeItem
+    }
 
 
     //region dirty
@@ -258,8 +310,9 @@ class DocumentEditor {
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                   EDITING
+    //region                                      GUI APU
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
+    // This section contains functions called by the FXML framework.
 
 
 
@@ -271,7 +324,7 @@ class DocumentEditor {
      * Performs [tab.onCloseRequest], and if the user is happy to close,
      * [forceClose] is used to close the tab.
      *
-     * @return false if will not close.
+     * @return true if tab closed, false if request was refused.
      */
     fun requestClose(): Boolean {
         val e = Event(EDITOR_CLOSE_REQUEST)
@@ -289,40 +342,82 @@ class DocumentEditor {
     @Deprecated("This risks the user losing changes to their document. Prefer the use of requestClose.")
     fun forceClose() {
         mvc().MainView.dockEditors.tabs.remove(tab)
-
         tab.onClosed?.handle(null)
     }
 
+    /**
+     * Zoom out
+     *
+     * decreases the zoom level of the content renderer by the zoom step size
+     */
     fun zoomOut() {
         contentRenderer.zoom -= project().PREFERENCES[ProjectPreference.ZOOM_STEP_SIZE_DOUBLE] as Double
         zoomChanged()
     }
 
+    /**
+     * Zoom in button
+     *
+     * increases the zoom level of the content renderer by the zoom step size
+     */
     fun zoomIn() {
         contentRenderer.zoom += project().PREFERENCES[ProjectPreference.ZOOM_STEP_SIZE_DOUBLE] as Double
         zoomChanged()
     }
 
     private fun zoomChanged() {
-        lblZoom.text = "${(contentRenderer.zoom * 100).roundToInt()}%"
+        btnZoom.text = "${(contentRenderer.zoom * 100).roundToInt()}%"
     }
 
+
+    /**
+     * [btnZoom]
+     *
+     * Resets the zoom level to 1.0
+     */
     fun resetZoom() {
         contentRenderer.zoom = 1.0
         zoomChanged()
     }
 
+    /**
+     * Reset the editor to its default state.
+     *
+     * i.e undoes the visual fiddling about that the user
+     * may have done, like zooming, vising other pages, or selecting tags.
+     */
+    fun resetEditor() {
+        selectTag(null)
+        resetZoom()
+        reRender()
+    }
+
+
+    /**
+     * Navigates back a page.
+     *
+     * FIXME
+     * Known issue : This will not navigate to the first
+     * page in the history.
+     */
     fun back() {
         Platform.runLater {
             contentRenderer.engine.executeScript("history.back()")
         }
     }
 
+    /**
+     * Navigates forward a page.
+     */
     fun forward() {
         Platform.runLater {
             contentRenderer.engine.executeScript("history.forward()")
         }
     }
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                      GUI APU
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     companion object {
 

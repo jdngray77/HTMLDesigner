@@ -112,8 +112,12 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      * If an element **inside** the root is selected within the [tree], it is returned.
      */
     protected fun selectedItems() =
-        tree.selectionModel.selectedItems
+        selectedTableItems()
             .mapNotNull { (it as StoringTreeItem<T>).data }
+
+    protected fun selectedTableItems() =
+        tree.selectionModel.selectedItems
+            .filterNotNull()
 
     /**
      * Returns the FIRST selected item, if

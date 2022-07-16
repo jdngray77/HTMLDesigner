@@ -17,24 +17,48 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.web.*?>
+<?import org.controlsfx.control.BreadCrumbBar?>
 
-<BorderPane fx:id="editorRoot" prefHeight="617.0" prefWidth="808.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.DocumentEditor">
-   <center>
-      <WebView fx:id="contentRenderer" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS" />
-   </center>
-   <bottom>
-      <ToolBar prefWidth="200.0" BorderPane.alignment="CENTER">
-        <items>
-            <Button fx:id="btnBack" mnemonicParsing="false" onAction="#back" text="&lt;-" />
-            <Button mnemonicParsing="false" onAction="#reRender" text="Reset" />
-            <Button fx:id="btnForward" mnemonicParsing="false" onAction="#forward" text="-&gt;" />
-          <Button fx:id="btnZoomOut" mnemonicParsing="false" onAction="#zoomOut" text="-" />
-            <Label fx:id="lblZoom" onMouseClicked="#resetZoom" text="100%" />
-            <Button fx:id="btnZoomIn" layoutX="10.0" layoutY="13.0" mnemonicParsing="false" onAction="#zoomIn" text="+" />
-            <Pane HBox.hgrow="ALWAYS" />
-            <ChoiceBox fx:id="cmbSizePreset" prefWidth="150.0" />
-            <Button layoutX="39.0" layoutY="10.0" mnemonicParsing="false" text="Fit" />
-        </items>
-      </ToolBar>
-   </bottom>
+<BorderPane fx:id="editorRoot" prefHeight="617.0" prefWidth="808.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"
+            xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.jdngray77.htmldesigner.frontend.DocumentEditor">
+    <center>
+        <WebView fx:id="contentRenderer" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER"
+                 VBox.vgrow="ALWAYS"/>
+    </center>
+    <bottom>
+        <VBox>
+
+
+            <!--
+
+                      NOTE : This file cannot be loaded with Scene Builder whilst
+                      this bread crumb bar is included.
+
+                      This is because ControlsFX controls are not supported by it.
+
+                      Comment this line out to edit in the editor, then just put the line
+                      back in when you're done.
+
+                 -->
+            <BreadCrumbBar fx:id="breadCrumb"/>
+
+
+
+            <ToolBar prefWidth="200.0" BorderPane.alignment="CENTER">
+                <items>
+                    <Button fx:id="btnBack" mnemonicParsing="false" onAction="#back" text="&lt;-"/>
+                    <Button mnemonicParsing="false" onAction="#resetEditor" text="Reset"/>
+                    <Button fx:id="btnForward" mnemonicParsing="false" onAction="#forward" text="-&gt;"/>
+                    <Button fx:id="btnZoomOut" mnemonicParsing="false" onAction="#zoomOut" text="-"/>
+                    <Button fx:id="btnZoom" onMouseClicked="#resetZoom" text="100%"/>
+                    <Button fx:id="btnZoomIn" layoutX="10.0" layoutY="13.0" mnemonicParsing="false" onAction="#zoomIn"
+                            text="+"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <ChoiceBox fx:id="cmbSizePreset" prefWidth="150.0"/>
+                    <Button layoutX="39.0" layoutY="10.0" mnemonicParsing="false" text="Fit"/>
+                </items>
+            </ToolBar>
+        </VBox>
+    </bottom>
 </BorderPane>

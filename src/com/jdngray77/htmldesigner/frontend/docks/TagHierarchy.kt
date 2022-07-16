@@ -18,13 +18,9 @@ package com.jdngray77.htmldesigner.frontend.docks
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
-import com.jdngray77.htmldesigner.utility.asElement
-import com.jdngray77.htmldesigner.utility.createPrefab
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
-import com.jdngray77.htmldesigner.utility.applyToAll
-import com.jdngray77.htmldesigner.utility.clipboard
-import com.jdngray77.htmldesigner.utility.pack
+import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.*
@@ -49,7 +45,7 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
 
     init {
         tree.selectionModel.selectionMode = SelectionMode.MULTIPLE
-        EventNotifier.subscribe(this, EventType.EDITOR_DOCUMENT_SWITCH, EventType.EDITOR_DOCUMENT_EDITED)
+        EventNotifier.subscribe(this, EventType.EDITOR_DOCUMENT_SWITCH, EventType.EDITOR_DOCUMENT_EDITED, EventType.EDITOR_SELECTED_TAG_CHANGED)
 
         tree.isEditable = true
 
@@ -105,14 +101,14 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
         // When a new item is selected, display it in the editor.
 
         tree.setOnMouseClicked {
-            selectedItems().apply {
+            selectedTableItems().apply {
                 mvc().let {
                     it.MainView.textEditor_Open(
                         if (size != 1) {
-                            it.currentEditor().selectedTag = null
+                            it.currentEditor().selectTag(null)
                             ""
                         } else {
-                            it.currentEditor().selectedTag = first()
+                            it.currentEditor().selectTag(first())
                             first().toString()
                         }
                     )
@@ -257,6 +253,16 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
         //TODO remove this once notifier is completed
         if (e == EventType.EDITOR_DOCUMENT_SWITCH || e == EventType.EDITOR_DOCUMENT_EDITED)
             showDocument(mvc().currentDocument())
+
+//        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED)
+//            document.editor()?.selectedTag?.let {
+//                tree.selectionModel.clearSelection()
+//                tree.findItem(it).apply {
+//                    tree.selectionModel.select(this)
+//                    tree.focusModel.focus(tree.selectionModel.selectedIndex)
+//                }
+//
+//            }
     }
 
 
