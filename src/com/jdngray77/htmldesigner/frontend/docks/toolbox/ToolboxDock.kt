@@ -56,7 +56,11 @@ class ToolboxDock : Dock() {
         MenuItem("Add Above selected tag").apply {
             setOnAction {
                 mvc().currentEditor().apply {
-                    selectedTag?.before(Element(contextItem!!.controller.name.text))
+                    Element(contextItem!!.controller.name.text).let {
+                        selectedTag?.before(it)
+                        selectTag(it)
+                    }
+
                     documentChanged()
                     clearSearch()
                 }
@@ -65,7 +69,10 @@ class ToolboxDock : Dock() {
         MenuItem("Add below selected tag").apply {
             setOnAction {
                 mvc().currentEditor().apply {
-                    selectedTag?.after(Element(contextItem!!.controller.name.text))
+                    Element(contextItem!!.controller.name.text).let {
+                        selectedTag?.after(it)
+                        selectTag(it)
+                    }
                     documentChanged()
                     clearSearch()
                 }
@@ -74,7 +81,10 @@ class ToolboxDock : Dock() {
         MenuItem("Add as child selected tag").apply {
             setOnAction {
                 mvc().currentEditor().apply {
-                    selectedTag?.insertChildren(0, Element(contextItem!!.controller.name.text))
+                    Element(contextItem!!.controller.name.text).let {
+                        selectedTag?.insertChildren(0, Element(contextItem!!.controller.name.text))
+                        selectTag(it)
+                    }
                     documentChanged()
                     clearSearch()
                 }
