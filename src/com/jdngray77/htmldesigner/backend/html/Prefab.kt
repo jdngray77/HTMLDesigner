@@ -67,7 +67,11 @@ class Prefab (
      *
      * Either provided in constructor OR loaded from disk.
      */
-    private lateinit var element: Element
+    lateinit var element: Element
+        private set
+
+    fun id() =
+        element.attr("prefab-id")
 
     /**
      * This replaces anything already saved to [locationOnDisk]
@@ -99,6 +103,8 @@ class Prefab (
      * Saves [element] to [locationOnDisk]
      */
     private fun doSave() {
+        element.removeClass("debug-outline")
+        element.attr("prefab-id", locationOnDisk.nameWithoutExtension)
         locationOnDisk.assertExists()
         locationOnDisk.writeText(element!!.outerHtml())
     }

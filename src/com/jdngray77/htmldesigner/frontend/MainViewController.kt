@@ -111,7 +111,7 @@ class MainViewController {
         dockLeftTop.tabs.add(Tab(ToolboxDock::class.simpleName!!.camelToSentence(), ToolboxDock()))
         dockLeftTop.tabs.add(Tab(Prefabs::class.simpleName!!.camelToSentence(), Prefabs()))
 
-        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.camelToSentence(), ExampleAutoDock()))
+//        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.camelToSentence(), ExampleAutoDock()))
 //        dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.camelToSentence(), TestDock()))
 
 

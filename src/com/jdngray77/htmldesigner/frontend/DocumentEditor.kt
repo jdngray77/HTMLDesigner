@@ -275,8 +275,10 @@ class DocumentEditor {
      *
      * Marks the editor dirty & in need of saving.
      * Also notifies of document edit, and [reRender]'s [contentRenderer].
+     *
      */
     fun documentChanged() {
+        // TODO auto detection using hashes, on document access
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
         reRender()
 

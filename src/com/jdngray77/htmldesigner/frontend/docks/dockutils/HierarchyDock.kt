@@ -113,7 +113,7 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      */
     protected fun selectedItems() =
         selectedTableItems()
-            .mapNotNull { (it as StoringTreeItem<T>).data }
+            .mapNotNull { it.value }
 
     protected fun selectedTableItems() =
         tree.selectionModel.selectedItems
