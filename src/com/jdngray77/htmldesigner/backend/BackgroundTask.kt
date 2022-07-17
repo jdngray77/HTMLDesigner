@@ -17,9 +17,9 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
 import com.jdngray77.htmldesigner.utility.Restartable
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import com.jdngray77.htmldesigner.utility.readPrivateProperty
+import javafx.application.Platform
+import java.util.concurrent.*
 
 /**
  * ## Executes tasks in the background
@@ -37,12 +37,9 @@ object BackgroundTask : Subscriber, Restartable {
         EventNotifier.subscribe(this, EventType.USER_EXIT)
     }
 
-
-    @Deprecated("Currently not implemented.", ReplaceWith("TODO()"))
-    fun runOnUIThread(runnable: Runnable) {
-        TODO()
+    fun submitToUI(runnable: Runnable) {
+        onUIThread(runnable)
     }
-
 
     /**
      * Submits a [runnable] task to the for [threadPool] for execution.
@@ -50,9 +47,11 @@ object BackgroundTask : Subscriber, Restartable {
      * If the thread pool has been instructed to or is already shutdown, the task will not be submitted.
      */
     @Synchronized
-    fun submit(runnable: Runnable) {
-        if (!threadPool.isShutdown && threadPool.isTerminating)
-            threadPool.submit(runnable)
+    fun submit(runnable: Runnable): Future<*>? {
+        if (!threadPool.isShutdown && !threadPool.isTerminating)
+            return threadPool.submit(runnable)
+
+        return null
     }
 
 
@@ -93,9 +92,7 @@ object BackgroundTask : Subscriber, Restartable {
     }
 
     override fun notify(e: EventType) {
-        // TODO - remove when necessary
-        if (e == EventType.USER_EXIT)
-            shutdown()
+        shutdown()
     }
 
     override fun onIDERestart() {

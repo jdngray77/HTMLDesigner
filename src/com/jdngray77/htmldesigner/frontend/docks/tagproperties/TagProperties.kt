@@ -54,10 +54,6 @@ class TagProperties : Dock(), Subscriber {
     }
 
     override fun notify(e: EventType) {
-        // TODO Remove
-        if (e != EventType.EDITOR_SELECTED_TAG_CHANGED)
-            return
-
         // TODO offload to worker threads. This is not efficient.
         mvc().currentEditor().let { editor ->
 

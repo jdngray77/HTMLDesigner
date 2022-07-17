@@ -48,9 +48,22 @@ fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
  *
  * This differs from [distinct], in that it's mutative.
  */
-fun ArrayList<*>.removeDuplicates(): ArrayList<*> {
+fun <T> ArrayList<T>.removeDuplicates(): ArrayList<T> {
     this.removeAll((this - this.distinct().toSet()).toSet())
     return this
+}
+
+/**
+ * Adds an item to an array list if it's not already in it.
+ *
+ * @return true if the item was added, false if already exists.
+ **/
+fun <T> ArrayList<T>.addIfAbsent(item: T): Boolean {
+    if (find { it == item } == null) {
+        add(item)
+        return true
+    }
+    return false
 }
 
 /**

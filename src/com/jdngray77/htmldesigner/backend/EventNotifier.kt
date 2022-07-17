@@ -15,10 +15,12 @@
 
 package com.jdngray77.htmldesigner.backend
 
-import com.jdngray77.htmldesigner.backend.EventNotifier.subscribe
-import com.jdngray77.htmldesigner.utility.Restartable
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
+import com.jdngray77.htmldesigner.utility.Restartable
+import com.jdngray77.htmldesigner.utility.addIfAbsent
+import javafx.application.Platform
+
 
 /**
  * Some examples of types of events.
@@ -47,12 +49,18 @@ enum class EventType {
     PROJECT_PREFAB_CREATED
 }
 
+fun EventType.notify() {
+    EventNotifier.notifyEvent(this)
+}
+
 /**
  * An interface for objects that wish to be subscribed to use.
  */
 interface Subscriber {
     fun notify(e: EventType)
 }
+
+typealias SubscriberMap = HashMap<EventType, ArrayList<Subscriber>>
 
 /**
  * A simple global notification distributing service
@@ -62,18 +70,30 @@ interface Subscriber {
  */
 object EventNotifier : Restartable {
 
-    // FIXME this is just so i can test things which need the events to work.
-    //       This is not the final implementation. Replace it.
-    val tempList = arrayListOf<Subscriber>()
+    val backgroundSubscribers = SubscriberMap()
 
-    fun subscribe(s: Subscriber, vararg NotifyOnEvents: EventType) {
-        tempList.add(s)
+    val FXSubscribers = SubscriberMap()
+
+
+    fun subscribe(newSubscriber: Subscriber, vararg subscribeTo: EventType) =
+        subscribe(newSubscriber, *subscribeTo, map = FXSubscribers)
+
+    fun subscribeInBackground(newSubscriber: Subscriber, vararg subscribeTo: EventType) =
+        subscribe(newSubscriber, *subscribeTo, map = backgroundSubscribers)
+
+    fun subscribe(newSubscriber: Subscriber, vararg subscribeTo: EventType, map: SubscriberMap = backgroundSubscribers) {
+        subscribeTo.forEach {
+            // Create an entry for the event type, if it's not already there,
+            map.putIfAbsent(it, ArrayList())
+
+            map[it]!!.addIfAbsent(newSubscriber)
+        }
     }
 
     /**
      * Notify the rest of the system that an event has occoured.
      */
-    fun notifyEvent(e: EventType) {
+    fun notifyEvent(event: EventType) {
         if (!mvcIsAvail()) return
 
         // TODO remove this once threading is in place. Just don't start the threading until well after the
@@ -87,15 +107,29 @@ object EventNotifier : Restartable {
         // TODO detect circular notifications. Maybe check what thread is calling [subscribe] whilst inside of [notify]?
         //      Also not sure that this is a good idea. Maybe just warn.
 
-        tempList.map {
-            it.notify(e)
+        notify(backgroundSubscribers, event) {
+            BackgroundTask.submit {
+                it.notify(event)
+            }
         }
 
-        logStatus("Notified $e to ${tempList.size} Subscribers ($tempList)")
+        notify(FXSubscribers, event) {
+            Platform.runLater {
+                it.notify(event)
+            }
+        }
+
+        logStatus("Notified $event to ${backgroundSubscribers.size + FXSubscribers.size} Subscribers")
     }
 
+    private fun notify(map: SubscriberMap, event: EventType, submitter: (Subscriber) -> Unit) {
+        map[event]?.map {
+            submitter.invoke(it)
+        }
+    }
     override fun onIDERestart() {
-        tempList.clear()
+        backgroundSubscribers.clear()
+        FXSubscribers.clear()
     }
 
 }

@@ -30,11 +30,25 @@ object ExceptionListener : UncaughtExceptionHandler{
             mvcIfAvail()?.Project?.logError(e)
             e.printStackTrace()
             showErrorNotification(sanitizeException(e))
+
+            checkSpecial(e)
         }
     }
 
     private fun sanitizeException(e: Throwable) =
         if (e is PrivilegedActionException) e.exception else e.rootCause()
+
+    private fun checkSpecial(e: Throwable) {
+        when (e) {
+            is IllegalStateException -> {
+                if (e.message?.startsWith("Not on FX application thread") == true) {
+                    showErrorNotification(e, false)
+                    showNotification("Developers : Not on FX thread","Is a subscriber on the wrong thread?\n\nCheck stack trace.")
+                }
+            }
+            else -> {}
+        }
+    }
 }
 
 /**

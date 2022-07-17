@@ -79,7 +79,7 @@ class Editor : Application() {
          */
         fun mvcIsAvail() : Boolean {
             try {
-                return EDITOR.mvc != null
+                return this::EDITOR.isInitialized && EDITOR.mvc != null
             } catch (e : EarlyEditorAccessException) {
                 return false
             }
@@ -171,6 +171,7 @@ class Editor : Application() {
     override fun stop() {
         // TODO this could be useful.
         //      stop background threads
+        EventType.USER_EXIT.notify()
 
         mvcIfAvail()?.apply {
             getOpenEditors().forEach {

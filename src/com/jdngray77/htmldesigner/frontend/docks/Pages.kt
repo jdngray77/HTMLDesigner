@@ -110,9 +110,7 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
     }
 
     override fun notify(e: EventType) {
-        //TODO remove guard once notification sys is done.
-        if (e == EventType.PROJECT_PAGE_DELETED || e == EventType.PROJECT_PAGE_CREATED || e == EventType.EDITOR_LOADED)
-            refresh()
+        refresh()
     }
 
     /**

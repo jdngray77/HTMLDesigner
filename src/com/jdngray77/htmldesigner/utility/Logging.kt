@@ -18,6 +18,7 @@ package com.jdngray77.htmldesigner.backend
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
+import javafx.application.Platform
 import javafx.scene.Node
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
@@ -33,53 +34,69 @@ import java.io.StringWriter
  *
  * Has no effect if [Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL] is true
  */
-fun showErrorNotification(error: Throwable) {
-    if (Config[Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL] as Boolean)
+fun showErrorNotification(error: Throwable, suppress: Boolean = Config[Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL] as Boolean ) {
+    if (suppress)
         return
 
-    Notifications.create()
-        .title("An error has occurred with the editor.")
-        .text("${error::class.simpleName} \n ${
-                if (error.message != null)
-                    error.message 
-                else if (error.cause?.message != null)
-                    error.cause!!.message
-                else    
-                    "No further explanation has been provided."
-                    }")
-        .onAction {
-            Editor.mvcIfAvail()?.MainView?.textEditor_Open(
-                StringWriter().let {
-                    error.printStackTrace(PrintWriter(it))
-                    it.toString()
-                }
-
+    onUIThread {
+        Notifications.create()
+            .title("An error has occurred with the editor.")
+            .text(
+                "${error::class.simpleName} \n ${
+                    if (error.message != null)
+                        error.message
+                    else if (error.cause?.message != null)
+                        error.cause!!.message
+                    else
+                        "No further explanation has been provided."
+                }"
             )
-        }
-        .showWarning()
+            .onAction {
+                Editor.mvcIfAvail()?.MainView?.textEditor_Open(
+                    StringWriter().let {
+                        error.printStackTrace(PrintWriter(it))
+                        it.toString()
+                    }
+
+                )
+            }
+            .showWarning()
+    }
 }
 
 fun showWarningNotification(title: String = "", message: String = "") {
-    Notifications.create()
-        .title(title)
-        .text(message)
-        .showWarning()
+    onUIThread() {
+        Notifications.create()
+            .title(title)
+            .text(message)
+            .showWarning()
+    }
 }
 
 fun showNotification(title: String = "", message: String = "") {
-    Notifications.create()
-        .title(title)
-        .text(message)
-        .showInformation()
+    onUIThread() {
+        Notifications.create()
+            .title(title)
+            .text(message)
+            .showInformation()
+    }
 }
+
+// TODO most of these functions need to be on the UI thread.
 
 /**
  * Prints [string] to the error output stream, and
  * also displays it in left of the status tray.
  */
 fun logWarning(string: String) {
-    System.err.println(string)
-    Editor.mvcIfAvail()?.MainView?.setStatus(string)
+    onUIThread {
+        System.err.println(string)
+        Editor.mvcIfAvail()?.MainView?.setStatus(string)
+    }
+}
+
+fun onUIThread(runnable: Runnable) {
+    Platform.runLater(runnable)
 }
 
 /**
@@ -89,7 +106,9 @@ fun logWarning(string: String) {
  * Used to log internal status'.
  */
 fun logStatus(string: String) {
-    Editor.mvcIfAvail()?.MainView?.setStatus(string)
+    onUIThread {
+        Editor.mvcIfAvail()?.MainView?.setStatus(string)
+    }
     println(string)
 }
 
@@ -98,7 +117,7 @@ fun logStatus(string: String) {
  * in the right of the status tray.
  */
 fun logAction(string: String) =
-    Editor.mvcIfAvail()?.MainView?.setAction(string)
+    onUIThread { Editor.mvcIfAvail()?.MainView?.setAction(string) }
 
 /**
  * Shows an [Alert] with a message and an OK button.
@@ -106,7 +125,7 @@ fun logAction(string: String) =
  * Returns once the user has dismissed it.
  */
 fun showInformationalAlert(message: String) =
-    Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK).showAndWait()
+    onUIThread { Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK).showAndWait() }
 
 /**
  * Shows a distracting [Alert] with a error message and an OK button.
@@ -116,7 +135,7 @@ fun showInformationalAlert(message: String) =
  */
 @Deprecated("This is distracting and obnoxious, try to avoid annoying the user. if more suitable use ContextMessage(...)", ReplaceWith("ContextMessage (If more appropriate)"))
 fun showErrorAlert(message: String) =
-    Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait()
+    onUIThread { Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait() }
 
 /**
  * Shows an unobtrusive pop-up message in context to some GUI element showing a message.
@@ -130,19 +149,21 @@ fun showErrorAlert(message: String) =
  * Automatically closes.
  */
 fun ContextMessage(contextGUIObject: Node, message: String, arrowLocation: PopOver.ArrowLocation = PopOver.ArrowLocation.TOP_CENTER) {
-    PopOver().apply {
-        isAutoHide = true
-        isAutoFix = true // automatically fix location, i.e if it goes off screen.
-        isHideOnEscape = true
+    onUIThread {
+        PopOver().apply {
+            isAutoHide = true
+            isAutoFix = true // automatically fix location, i.e if it goes off screen.
+            isHideOnEscape = true
 
-        isDetachable = false
-        isDetached = false
+            isDetachable = false
+            isDetached = false
 
 
-        contentNode = Text(message)
-        this.arrowLocation = arrowLocation
-        show(contextGUIObject)
-        (contentNode as Text).fill = javafx.scene.paint.Color.BLACK
+            contentNode = Text(message)
+            this.arrowLocation = arrowLocation
+            show(contextGUIObject)
+            (contentNode as Text).fill = javafx.scene.paint.Color.BLACK
+        }
     }
 }
 
