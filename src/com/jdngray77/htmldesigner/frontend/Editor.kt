@@ -229,7 +229,7 @@ class Editor : Application() {
             try {
                 projToLoad = implUsrSelectProject()
             } catch (e: Exception) {
-                showErrorAlert("Project access failed : \n${e.message}")
+                showErrorAlert("Project access failed : \n(${e::class.simpleName})\n\n${e.message ?: "No reason was provided"}")
             }
 
             if (projToLoad == null)
@@ -259,7 +259,7 @@ class Editor : Application() {
             ButtonTypeLoad -> {
                 Project.load(DirectoryChooser().let {
                     it.title = "Locate a project root"
-                    it.showDialog(stage).path
+                    it.showDialog(stage)?.path ?: run { return@implUsrSelectProject null }
                 })
             }
 
