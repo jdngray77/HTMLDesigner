@@ -250,6 +250,9 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
     }
 
     override fun notify(e: EventType) {
+        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED && selectedItem() == mvc().currentEditor().selectedTag)
+            return
+
         showDocument(mvc().currentDocument())
 
 //        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED)

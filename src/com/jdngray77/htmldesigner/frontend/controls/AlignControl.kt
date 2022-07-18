@@ -42,22 +42,22 @@ class AlignControl : SegmentedButton() {
 
             ToggleButton("Start").apply {
                setOnAction {
-                   observableValue.value = text
+                   observableValue.value = FlexJustify[text]
                }
             },
             ToggleButton("Center").apply {
                 setOnAction {
-                    observableValue.value = text
+                    observableValue.value = FlexJustify[text]
                 }
             },
             ToggleButton("Justify").apply {
                 setOnAction {
-                    observableValue.value = text
+                    observableValue.value = FlexJustify[text]
                 }
             },
             ToggleButton("End").apply {
                 setOnAction {
-                    observableValue.value = text
+                    observableValue.value = FlexJustify[text]
                 }
             }
         )
@@ -72,13 +72,15 @@ class AlignControl : SegmentedButton() {
         observableValue.value
 //        FlexJustify[buttons.filtered { it.isSelected }.first().text]
 
-    fun setAlignment(x : String) {
+    fun setAlignment(x : String?) {
         buttons.forEach { it.isSelected = false }
+
+        if (x == null) return
 
         val y = FlexJustify.reverseGet(x)
         buttons.find { it.text == y }?.isSelected = true
 
-        observableValue.value = x
+//        observableValue.value = x
     }
 }
 

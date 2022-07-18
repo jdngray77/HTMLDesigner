@@ -306,7 +306,10 @@ class DocumentEditor {
      * Saves the document this editor is for.
      */
     fun save() {
+        val tag = selectedTag
+        selectedTag = null
         mvc().Project.saveDocument(document)
+        selectedTag = tag
         clean()
     }
 

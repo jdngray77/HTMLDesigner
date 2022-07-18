@@ -16,9 +16,10 @@
 package com.jdngray77.htmldesigner.frontend.docks.tagproperties
 
 import com.jdngray77.htmldesigner.utility.changed
-import com.jdngray77.htmldesigner.backend.html.StyleAttribute
+import com.jdngray77.htmldesigner.backend.html.StyleAttributeSnapshot
 import com.jdngray77.htmldesigner.frontend.controls.AlignControl
 import com.jdngray77.htmldesigner.utility.readPrivateProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.scene.Node
 import org.controlsfx.control.PropertySheet
@@ -43,8 +44,7 @@ import java.util.*
 open class CSSPropertySheetItem(
 
     /**
-     * The name of the property
-     * displayed to the user.
+     * The name of the property displayed to the user.
      *
      * This is not used to identify the name
      * of the css property
@@ -70,30 +70,53 @@ open class CSSPropertySheetItem(
 
     ) : PropertySheet.Item {
 
-    val styles = StyleAttribute()
+    /**
+     * The styles obtained from the [element] at time
+     * of creation of this item
+     *
+     */
+    val styles = StyleAttributeSnapshot(element)
+
+    /**
+     * A copy of [styles], used to notify the editor of changes.
+     */
+    private val observableProp = SimpleStringProperty(styles.toString())
 
     override fun getType() = String::class.java
-
     override fun getCategory() = _category
     override fun getName() = _name
     override fun getDescription() = _description
 
-    override fun getValue(): Any = styles[property].toString()
+    /**
+     * Returns the current value of [property] in the [element]'s
+     * [styles].
+     *
+     * May be null if the style [property] is not in [styles].
+     */
+    override fun getValue(): Any? = styles[property]
 
-    // TODO If value is not null, require display flex
-    init { styles["display"] = "flex" }
     override fun setValue(value: Any?) {
+        // re-capture so we don't overwrite any changes made elsewhere.
+        styles.capture()
+
+        // Make our changes
         if (value == null || value.toString().isBlank())
             styles.clear()
         else
             styles[property] = value.toString()
 
-        element.attr("style", styles.toString())
+        // Commit the changes back to the tag
+        styles.commit()
+
+        // Notify the property sheet of the change
+        observableProp.value = styles.toString()
+
+        // Notify the IDE of the change
         element.ownerDocument()?.changed()
     }
 
     override fun getObservableValue(): Optional<ObservableValue<out Any>> =
-        Optional.empty()
+        Optional.of(observableProp)
 }
 
 
@@ -154,7 +177,12 @@ abstract class CSSPropertyEditor(
  * Property editor for `justify-content`
  */
 class CSSAlignmentPropertySheetItem (_name: String, element : Element, _category: String, _description: String)
-    : CSSPropertySheetItem (_name, element, "justify-content", _category, _description)
+    : CSSPropertySheetItem (_name, element, "justify-content", _category, _description) {
+
+    // TODO If value is not null, require display flex
+    init { styles["display"] = "flex" }
+
+}
 
 /**
  * Editor for the above [CSSAlignmentPropertySheetItem].
@@ -167,16 +195,25 @@ class CSSAlignmentPropertyEditor(
 
 ) : CSSPropertyEditor(property, AlignControl()) {
 
-    override fun setValue(value: String) {
+    init {
+        (readPrivateProperty(AbstractPropertyEditor::class, "control") as AlignControl).observableValue.addListener {
+            a,b,c ->
+            property.value = c
+        }
+    }
+
+
+    override fun setValue(value: String?) {
         (editor as AlignControl).setAlignment(value)
     }
 
     override fun getValue() =
-        (editor as AlignControl).getAlignment() ?: ""
+        (editor as AlignControl).getAlignment()?.lowercase() ?: ""
 
 
     override fun getObservableValue() =
-        (readPrivateProperty(AbstractPropertyEditor::class, "control") as AlignControl).observableValue
+        property.observableValue.get() as ObservableValue<String>
+//
 
 }
 

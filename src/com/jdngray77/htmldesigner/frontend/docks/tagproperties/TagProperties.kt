@@ -1,5 +1,3 @@
-
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -23,6 +21,10 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.PlaceholderPropertySheetItem
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.utility.ReflectivePropertySheetItem
+import com.jdngray77.htmldesigner.utility.readPrivateProperty
+import impl.org.controlsfx.skin.PropertySheetSkin
+import javafx.scene.control.Accordion
+import javafx.scene.control.ScrollPane
 import org.controlsfx.control.PropertySheet
 import org.jsoup.nodes.Element
 import java.lang.System.gc
@@ -32,6 +34,8 @@ import java.lang.System.gc
  * the currently selected [Element]
  */
 class TagProperties : Dock(), Subscriber {
+
+
 
     /**
      * A controlsfx property sheet used as the front end for editing things.
@@ -48,98 +52,113 @@ class TagProperties : Dock(), Subscriber {
         it.mode = PropertySheet.Mode.CATEGORY
     }
 
+    private var scrollPane : ScrollPane? = null
+
+
     init {
         center = sheet
         EventNotifier.subscribe(this, EventType.EDITOR_SELECTED_TAG_CHANGED)
     }
 
     override fun notify(e: EventType) {
-        // TODO offload to worker threads. This is not efficient.
+        if (scrollPane == null)
+            scrollPane = sheet.skin.readPrivateProperty<ScrollPane>(PropertySheetSkin::class, "scroller")
+
+
+
         mvc().currentEditor().let { editor ->
 
 
-
             editor.selectedTag?.apply {
-            sheet.propertyEditorFactory = TagPropertyEditorFactory
+                sheet.propertyEditorFactory = TagPropertyEditorFactory
 
-            val currentEditor = mvc().currentEditor()
-            sheet.items.clear()
-
-            sheet.items.addAll(
-                ReflectivePropertySheetItem<String>(
-                    "id",
-                    "Uniquely identify this element for scripting.",
-                    "Advanced",
-                    this,
-                    true
-                ),
-
-                PlaceholderPropertySheetItem(
-                    "Custom CSS",
-                    "Advanced"
-                ),
-
-                PlaceholderPropertySheetItem(
-                    "Attributes",
-                    "Advanced"
-                ),
-
-                // TODO list
-                // Breadcrumb
-
-                PlaceholderPropertySheetItem(
-                    "Width",
-                "Size & Position"
-                ),
-                PlaceholderPropertySheetItem(
-                    "Height",
-                    "Size & Position"
-                ),
-
-                PlaceholderPropertySheetItem(
-                    "Padding",
-                    "Size & Position"
-                ),
-
-                PlaceholderPropertySheetItem(
-                    "Margin",
-                    "Size & Position"
-                ),
+                var lastCategorySelected : String? = null
+                with (scrollPane!!.content) {
+                    if (this is Accordion)
+                        lastCategorySelected = expandedPane?.text
+                }
 
 
+                sheet.items.clear()
+
+                sheet.items.addAll(
+                    ReflectivePropertySheetItem<String>(
+                        "id",
+                        "Uniquely identify this element for scripting.",
+                        "Advanced",
+                        this,
+                        true
+                    ),
+
+                    PlaceholderPropertySheetItem(
+                        "Custom CSS",
+                        "Advanced"
+                    ),
+
+                    PlaceholderPropertySheetItem(
+                        "Attributes",
+                        "Advanced"
+                    ),
+
+                    // TODO list
+                    // Breadcrumb
+
+                    PlaceholderPropertySheetItem(
+                        "Width",
+                        "Size & Position"
+                    ),
+                    PlaceholderPropertySheetItem(
+                        "Height",
+                        "Size & Position"
+                    ),
+
+                    PlaceholderPropertySheetItem(
+                        "Padding",
+                        "Size & Position"
+                    ),
+
+                    PlaceholderPropertySheetItem(
+                        "Margin",
+                        "Size & Position"
+                    ),
 
 
-                PlaceholderPropertySheetItem(
-                    "Border",
-                    "Appearance"
-                ),
+                    PlaceholderPropertySheetItem(
+                        "Border",
+                        "Appearance"
+                    ),
 
-                PlaceholderPropertySheetItem(
-                    "Background",
-                    "Appearance"
-                ),
+                    PlaceholderPropertySheetItem(
+                        "Background",
+                        "Appearance"
+                    ),
 
-                PlaceholderPropertySheetItem(
-                    "Filters",
-                    "Appearance"
-                ),
+                    PlaceholderPropertySheetItem(
+                        "Filters",
+                        "Appearance"
+                    ),
 
 
-                // TODO align text
-                // TODO manual editor
+                    // TODO align text
+                    // TODO manual editor
 
-                CSSAlignmentPropertySheetItem(
-                    "Align children",
-                    this,
-                    "Alignment",
-                    "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
-                ),
+                    CSSAlignmentPropertySheetItem(
+                        "Align children",
+                        this,
+                        "Alignment",
+                        "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
+                    ),
 
-                PlaceholderPropertySheetItem(
-                    "Align direction",
-                    "Appearance"
-                ),
+                    PlaceholderPropertySheetItem(
+                        "Align direction",
+                        "Appearance"
+                    ),
                 )
+
+                if (lastCategorySelected != null)
+                    (scrollPane!!.content as Accordion).apply {
+                        expandedPane = panes.find { it.text == lastCategorySelected }
+                    }
             }
         }
         gc()
@@ -153,7 +172,6 @@ class TagProperties : Dock(), Subscriber {
     ) {
 
     }
-
 
 
 //    inner class CSSProperty (
