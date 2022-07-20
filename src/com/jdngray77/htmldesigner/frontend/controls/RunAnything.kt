@@ -80,7 +80,6 @@ object RunAnything : SearchableList<Task>(
 
         Task("Current Editor > Close") { mvc().currentEditor().requestClose() },
         Task("Current Editor > Save") { mvc().currentEditor().save() },
-        Task("Current editor > Mark Dirty") { mvc().currentEditor().documentChanged() },
         Task("Current editor > Close without saving") { mvc().currentEditor().forceClose() },
 
 
