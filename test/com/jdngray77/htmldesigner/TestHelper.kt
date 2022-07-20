@@ -19,7 +19,7 @@ import javafx.application.Platform
 
 internal object TestHelper {
     internal fun setUp() {
-        Thread { main() }.apply {
+        Thread { Launcher.main(arrayOf()) }.apply {
             isDaemon = true
             start()
         }
