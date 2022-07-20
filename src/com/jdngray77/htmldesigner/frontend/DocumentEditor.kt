@@ -18,6 +18,8 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
 import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
@@ -232,7 +234,9 @@ class DocumentEditor {
 
             field?.removeClass("debug-outline")
             field = value
-            field?.addClass("debug-outline")
+
+            if (Config[Configs.OUTLINE_SELECTED_TAG_BOOL] as Boolean)
+                field?.addClass("debug-outline")
 
             reRender()
             EventNotifier.notifyEvent(EventType.EDITOR_SELECTED_TAG_CHANGED)
