@@ -17,6 +17,7 @@
 package com.jdngray77.htmldesigner.backend.data.config
 
 import com.jdngray77.htmldesigner.backend.data.config.Registry.Companion.keyType
+import com.jdngray77.htmldesigner.backend.showErrorAlert
 import com.jdngray77.htmldesigner.backend.showWarningNotification
 import com.jdngray77.htmldesigner.utility.loadObjectFromDisk
 import com.jdngray77.htmldesigner.utility.saveObjectToDisk
@@ -24,6 +25,7 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.InvalidClassException
+import java.io.NotSerializableException
 import java.lang.System.gc
 import kotlin.reflect.KClass
 
@@ -212,7 +214,17 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
      * [dirty] flag is cleared.
      */
     final fun forceFlush() {
-        saveObjectToDisk(saveLocation)
+        try {
+            saveObjectToDisk(saveLocation)
+        } catch (e: NotSerializableException) {
+            showErrorAlert("DEVS : DO NOT COMMIT " +
+                    "\n\n A registry is unserializable, and cannot be saved." +
+                    "\n\n It's contents are now corrupted. " +
+                    "\n\n This was likely caused by an unserializable object within an array, which is a fatal problem." +
+                    "\n\n See stack trace." +
+                    "\n\n ${e.message}")
+            e.printStackTrace()
+        }
 
         dirty = false
     }
@@ -325,6 +337,7 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
                 "DOUBLE" -> Double::class
                 "STRING" -> String::class
                 "DOC" -> Document::class
+                "ARRAY" -> ArrayList::class
                 else -> throw IllegalStateException("Preference key name is not suffixed with a permitted data type : $key")
             }
         }
