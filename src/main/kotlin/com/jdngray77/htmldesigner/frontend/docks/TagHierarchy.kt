@@ -124,7 +124,14 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
 
         setContextMenu(
             // TODO
-            MenuItem("「INOP」Edit alone"),
+            MenuItem("Edit alone").also {
+                it.setOnAction {
+                    mvc().currentEditor().apply {
+                        selectTag(selectedTableItems().first())
+                        standaloneEditMode = true
+                    }
+                }
+            },
             MenuItem("「WIP」Save As Prefab").also {
                 it.setOnAction {
                     selectedItems().map {

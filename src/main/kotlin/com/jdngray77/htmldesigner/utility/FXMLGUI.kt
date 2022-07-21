@@ -37,9 +37,12 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.ButtonType
+import javafx.scene.paint.Color
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import java.awt.Toolkit
+import java.util.*
+import kotlin.math.roundToInt
 
 /**
  * Loads a FXML file as a scene, and initalises it's controllers and stylesheets.
@@ -114,3 +117,11 @@ fun getTheme() = JMetro(
 val ButtonType_SAVE: ButtonType = ButtonType("Save")
 
 val ButtonType_CLOSEWITHOUTSAVE: ButtonType = ButtonType("Don't save")
+
+fun Color.toHex(): String {
+    return String.format(null, "#%02x%02x%02x",
+            (red * 255).roundToInt(),
+            (green * 255).roundToInt(),
+            (blue * 255).roundToInt()
+        )
+}

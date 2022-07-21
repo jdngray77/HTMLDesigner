@@ -19,11 +19,19 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.application.Platform
+import javafx.geometry.Insets
+import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Alert
+import javafx.scene.control.Button
 import javafx.scene.control.ButtonType
+import javafx.scene.control.Label
 import javafx.scene.control.TextInputDialog
+import javafx.scene.layout.*
+import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import javafx.scene.text.Text
+import org.controlsfx.control.NotificationPane
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.PopOver
 import java.io.PrintWriter
@@ -81,6 +89,31 @@ fun showNotification(title: String = "", message: String = "") {
             .showInformation()
     }
 }
+
+/**
+ * A utility to create a notification pane.
+ *
+ * It is not shown, so take the return value and place it within the GUI.
+ */
+fun NotificationPane(string: String, buttonText: String = "", showOnBottom: Boolean = false, runnable: Runnable? = null) =
+        NotificationPane(
+            BorderPane().also {
+
+                it.left = HBox(Label(string)).also { it.alignment = Pos.CENTER }
+                if (runnable != null)
+                    it.right = Button(buttonText).also {
+                        it.setOnAction {
+                            runnable.run()
+                        }
+                    }
+            }
+        ).apply {
+            padding = Insets(10.0)
+            prefHeight = 48.0
+            isShowFromTop = !showOnBottom
+            show()
+        }
+
 
 // TODO most of these functions need to be on the UI thread.
 
