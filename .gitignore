@@ -1,11 +1,15 @@
-# Compiled class file
-*.class
+# Local HTML Designer projects / registries
+testproject/
+HTMLDesignerCfg.registry
+
+
 
 # Log file
 *.log
 
 # BlueJ files
 *.ctxt
+
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -17,15 +21,53 @@
 *.zip
 *.tar.gz
 *.rar
+*.jar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
+
+# From https://github.com/github/gitignore/blob/master/Gradle.gitignore
+.gradle
+
+# Compiled outputs
 gen/
 out/
+/build/
+*.class
 
-testproject/
+# Meta files, especially Mac's directory meta stuff.
 .DS_Store
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
 .idea/
+.AppleDouble
+.LSOverride
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
 
-HTMLDesignerCfg.registry
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# Thumbnails
+._*
