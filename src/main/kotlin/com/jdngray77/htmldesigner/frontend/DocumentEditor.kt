@@ -117,7 +117,9 @@ class DocumentEditor {
 
         // Breadcrumb only shows tag name
         breadCrumb.setCrumbFactory {
-            BreadCrumbBarSkin.BreadCrumbButton(it.value.tagName() + if (it.value.id().isNotBlank()) "#${it.value.id()}" else "" )
+            BreadCrumbBar.BreadCrumbButton(
+                it.value.tagName() + if (it.value.id().isNotBlank()) "#${it.value.id()}" else ""
+            )
         }
 
         // When the user click's a crumb, select that tag.

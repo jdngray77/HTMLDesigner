@@ -31,7 +31,7 @@ internal class AutoDockTest {
 
     @BeforeEach
     internal fun setUp() {
-        JFXPanel() // This is needed to initalise the JavaFX stuff under the hood.
+            JFXPanel() // This is needed to initalise the JavaFX stuff under the hood.
     }
 
 

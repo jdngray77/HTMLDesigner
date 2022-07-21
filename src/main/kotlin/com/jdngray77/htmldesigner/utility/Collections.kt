@@ -15,10 +15,10 @@
 
 package com.jdngray77.htmldesigner.utility
 
-import com.sun.javafx.scene.control.skin.TreeTableViewSkin
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeTableColumn
 import javafx.scene.control.TreeTableView
+import javafx.scene.control.skin.TreeTableViewSkin
 import java.util.function.Consumer
 import java.util.stream.Collectors
 import java.util.stream.Stream

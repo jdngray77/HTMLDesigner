@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -15,22 +14,25 @@
 
 package com.jdngray77.htmldesigner
 
-import com.jdngray77.htmldesigner.backend.ExceptionListener
 import com.jdngray77.htmldesigner.frontend.Editor
-import javafx.application.Application
+import javafx.application.Platform
+import main
 
-// TODO Create a project manager / launcher thing.
-object Launcher {
-    @JvmStatic
-    fun main(args: Array<String>) {
-        Thread.setDefaultUncaughtExceptionHandler(ExceptionListener)
-        Application.launch(Editor::class.java)
+internal object TestHelper {
+    internal fun setUp() {
+        Thread { main() }.apply {
+            isDaemon = true
+            start()
+        }
+
+        print("Awaiting editor load.")
+        while (!Editor.mvcIsAvail()) {
+            Thread.sleep(100)
+        }
     }
-}
 
-enum class ExitReasons {
-    NORMAL,
-    NO_PROJECT,
-    USER_REQUEST,
-    CRASH_GENERIC
+
+    internal fun tearDown() {
+        Platform.exit()
+    }
 }
