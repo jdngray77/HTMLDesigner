@@ -36,7 +36,6 @@ import java.lang.System.gc
 class TagProperties : Dock(), Subscriber {
 
 
-
     /**
      * A controlsfx property sheet used as the front end for editing things.
      */
@@ -52,116 +51,123 @@ class TagProperties : Dock(), Subscriber {
         it.mode = PropertySheet.Mode.CATEGORY
     }
 
-    private var scrollPane : ScrollPane? = null
+    private var scrollPane: ScrollPane? = null
 
 
     init {
         center = sheet
-        EventNotifier.subscribe(this, EventType.EDITOR_SELECTED_TAG_CHANGED)
+        EventNotifier.subscribe(this,
+            EventType.EDITOR_SELECTED_TAG_CHANGED,
+            EventType.EDITOR_DOCUMENT_CLOSED
+        )
     }
 
     override fun notify(e: EventType) {
         if (scrollPane == null)
             scrollPane = sheet.skin.readPrivateProperty<ScrollPane>(PropertySheetSkin::class, "scroller")
 
+        with(mvc()) {
+            sheet.items.clear()
 
+            if (e == EventType.EDITOR_DOCUMENT_CLOSED && !editorAvail())
+                return
 
-        mvc().currentEditor().let { editor ->
+            currentEditor().let { editor ->
 
+                editor.selectedTag?.apply {
+                    sheet.propertyEditorFactory = TagPropertyEditorFactory
 
-            editor.selectedTag?.apply {
-                sheet.propertyEditorFactory = TagPropertyEditorFactory
-
-                var lastCategorySelected : String? = null
-                with (scrollPane!!.content) {
-                    if (this is Accordion)
-                        lastCategorySelected = expandedPane?.text
-                }
-
-
-                sheet.items.clear()
-
-                sheet.items.addAll(
-                    ReflectivePropertySheetItem<String>(
-                        "id",
-                        "Uniquely identify this element for scripting.",
-                        "Advanced",
-                        this,
-                        true
-                    ),
-
-                    PlaceholderPropertySheetItem(
-                        "Custom CSS",
-                        "Advanced"
-                    ),
-
-                    PlaceholderPropertySheetItem(
-                        "Attributes",
-                        "Advanced"
-                    ),
-
-                    // TODO list
-                    // Breadcrumb
-
-                    PlaceholderPropertySheetItem(
-                        "Width",
-                        "Size & Position"
-                    ),
-                    PlaceholderPropertySheetItem(
-                        "Height",
-                        "Size & Position"
-                    ),
-
-                    PlaceholderPropertySheetItem(
-                        "Padding",
-                        "Size & Position"
-                    ),
-
-                    PlaceholderPropertySheetItem(
-                        "Margin",
-                        "Size & Position"
-                    ),
-
-
-                    PlaceholderPropertySheetItem(
-                        "Border",
-                        "Appearance"
-                    ),
-
-                    PlaceholderPropertySheetItem(
-                        "Background",
-                        "Appearance"
-                    ),
-
-                    PlaceholderPropertySheetItem(
-                        "Filters",
-                        "Appearance"
-                    ),
-
-
-                    // TODO align text
-                    // TODO manual editor
-
-                    CSSAlignmentPropertySheetItem(
-                        "Align children",
-                        this,
-                        "Alignment",
-                        "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
-                    ),
-
-                    PlaceholderPropertySheetItem(
-                        "Align direction",
-                        "Appearance"
-                    ),
-                )
-
-                if (lastCategorySelected != null)
-                    (scrollPane!!.content as Accordion).apply {
-                        expandedPane = panes.find { it.text == lastCategorySelected }
+                    var lastCategorySelected: String? = null
+                    with(scrollPane!!.content) {
+                        if (this is Accordion)
+                            lastCategorySelected = expandedPane?.text
                     }
+
+
+
+
+                    sheet.items.addAll(
+                        ReflectivePropertySheetItem<String>(
+                            "id",
+                            "Uniquely identify this element for scripting.",
+                            "Advanced",
+                            this,
+                            true
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Custom CSS",
+                            "Advanced"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Attributes",
+                            "Advanced"
+                        ),
+
+                        // TODO list
+                        // Breadcrumb
+
+                        PlaceholderPropertySheetItem(
+                            "Width",
+                            "Size & Position"
+                        ),
+                        PlaceholderPropertySheetItem(
+                            "Height",
+                            "Size & Position"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Padding",
+                            "Size & Position"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Margin",
+                            "Size & Position"
+                        ),
+
+
+                        PlaceholderPropertySheetItem(
+                            "Border",
+                            "Appearance"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Background",
+                            "Appearance"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Filters",
+                            "Appearance"
+                        ),
+
+
+                        // TODO align text
+                        // TODO manual editor
+
+                        CSSAlignmentPropertySheetItem(
+                            "Align children",
+                            this,
+                            "Alignment",
+                            "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Align direction",
+                            "Appearance"
+                        ),
+                    )
+
+                    if (lastCategorySelected != null)
+                        (scrollPane!!.content as Accordion).apply {
+                            expandedPane = panes.find { it.text == lastCategorySelected }
+                        }
+                }
             }
+            gc()
         }
-        gc()
     }
 
 

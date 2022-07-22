@@ -23,10 +23,7 @@ import com.jdngray77.htmldesigner.utility.pack
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.MenuItem
-import javafx.scene.control.SeparatorMenuItem
-import javafx.scene.control.TextInputDialog
-import javafx.scene.control.TreeTableColumn
+import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import java.io.File
 import java.sql.Time
@@ -205,6 +202,8 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
                 mvc().openDocument(this)
             }
         }
+
+        tree.selectionModel.clearSelection()
     }
 
     /**

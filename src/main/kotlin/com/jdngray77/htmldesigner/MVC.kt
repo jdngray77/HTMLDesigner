@@ -87,6 +87,13 @@ class MVC (
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_CLOSED)
     }
 
+    fun editorAvail() = try {
+            currentEditor()
+            true
+        } catch (e: Exception) {
+            false
+        }
+
     /**
      * Returns the document of the current editor
      */
@@ -99,7 +106,11 @@ class MVC (
     fun currentEditor() =
         this.findEditorFor(MainView.dockEditors.selectionModel.selectedItem)!!
 
-    fun selectedTag() = currentEditor().selectedTag
+    fun selectedTag() =
+        if (editorAvail())
+            currentEditor().selectedTag
+        else
+            null
 
 
 
@@ -269,7 +280,7 @@ class MVC (
      * the GUI with the changes.
      */
     fun currentDocumentModified()
-        = currentEditor().documentChanged()
+        = currentEditor()?.documentChanged()
 
 
     /**
