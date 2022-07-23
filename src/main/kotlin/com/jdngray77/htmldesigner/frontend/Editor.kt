@@ -204,7 +204,7 @@ class Editor : Application() {
     }
 
     private fun determineProject(): Project =
-        if (Config[Configs.LAST_PROJECT_PATH_STRING] == "")
+        if (!(Config[Configs.AUTO_LOAD_PROJECT_BOOL] as Boolean) || Config[Configs.LAST_PROJECT_PATH_STRING] == "")
             usrChooseProject().also {
                 Config.put(Configs.LAST_PROJECT_PATH_STRING, it.locationOnDisk.path)
             }

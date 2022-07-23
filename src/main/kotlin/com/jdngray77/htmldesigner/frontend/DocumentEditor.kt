@@ -15,25 +15,27 @@
 
 package com.jdngray77.htmldesigner.frontend
 
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
-import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.utility.ButtonType_CLOSEWITHOUTSAVE
 import com.jdngray77.htmldesigner.utility.ButtonType_SAVE
-import impl.org.controlsfx.skin.BreadCrumbBarSkin
+import com.jdngray77.htmldesigner.utility.toHex
+import com.sun.javafx.scene.control.skin.Utils
 import javafx.application.Platform
 import javafx.event.Event
 import javafx.fxml.FXML
 import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.HBox
+import javafx.scene.paint.Color
 import javafx.scene.web.WebView
 import org.controlsfx.control.BreadCrumbBar
+import org.controlsfx.control.ToggleSwitch
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
@@ -60,7 +62,7 @@ import kotlin.math.roundToInt
  */
 class DocumentEditor {
 
-    //region initalization
+    //region initialization
 
     /**
      * Late 'init' called by FXML.
@@ -149,7 +151,7 @@ class DocumentEditor {
     }
 
 
-    //#region initalization
+    //#endregion initalization
 
 
     /**
@@ -234,6 +236,9 @@ class DocumentEditor {
             // Guard against excluding head
             if (value == document.body()) return
 
+            if (value == null)
+                standaloneEditMode = false
+
             field?.removeClass("debug-outline")
             field = value
 
@@ -243,6 +248,94 @@ class DocumentEditor {
             reRender()
             EventNotifier.notifyEvent(EventType.EDITOR_SELECTED_TAG_CHANGED)
         }
+
+
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //#region standalone edit mode
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+    /**
+     * Determines the background color of the editor
+     * when in standalone edit mode.
+     */
+    private val standaloneColorPicker = ColorPicker().also {
+        it.value = Color.web("#808080")
+        it.setOnAction {
+            reRender()
+        }
+    }
+
+    /**
+     * A toggle switch that determines if the content is center aligned when in standalone edit mode.
+     */
+    private val standaloneCenter = ToggleSwitch("Align to center").also {
+            it.isSelected = true
+            it.setOnMouseClicked {
+                reRender()
+            }
+        }
+
+    /**
+     * A notification pane shown when the editor is in standalone edit mode.
+     *
+     * Contains controls to exit standalone edit mode, background color and toggle center alignment.
+     */
+    private val standaloneNotificationPane = NotificationPane("You're in standalone edit mode. Only the selected tag will be rendered.", "Exit standalone edit mode") {standaloneEditMode = false}.apply {
+        (content as BorderPane).apply {
+            val vbox = HBox(
+                right,
+                standaloneColorPicker,
+                standaloneCenter
+            ).apply {
+                spacing = 20.0
+            }
+            right = vbox
+        }
+    }
+
+
+    /**
+     * Standalone editor mode.
+     *
+     * When true, [selectedTag] becomes the only content to be rendered.
+     *
+     * if [Configs.STANDALONE_MODE_ALIGN_CENTER_BOOL] is true, the content will be
+     * rendered in the center of the editor.
+     *
+     * Cannot be enabled while [selectedTag] is null, and
+     * clearing selectedTab will clear this flag.
+     */
+    var standaloneEditMode: Boolean = false
+        set(value) {
+            if (selectedTag == null)
+                return
+
+            field = value
+
+
+            editorRoot.top =
+                if (field)
+                    standaloneNotificationPane
+                else
+                    null
+
+
+
+            reRender()
+        }
+
+
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //#endregion standalone edit mode
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
 
     /**
      * Selects the given element, but does not populate the [breadCrumb].
@@ -264,8 +357,9 @@ class DocumentEditor {
         breadCrumb.selectedCrumb = treeItem
     }
 
-
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region dirty
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     /**
      * When raised, this flag indicates that this editor has been changed.
@@ -299,14 +393,30 @@ class DocumentEditor {
         isDirty = false
     }
 
-
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion Dirty
-
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     /**
      * Updates [WebView] to display the current state of the [document]
      */
-    fun reRender() = contentRenderer.engine.loadContent(document.toString())
+    fun reRender() {
+        contentRenderer.engine.loadContent(
+            if (standaloneEditMode)
+                Element("div")
+                    .attr("style",
+                        "background: ${standaloneColorPicker.value.toHex()}; height: 100%; width: 100%; ${
+                            if (standaloneCenter.isSelected) 
+                                    "display: flex; " +
+                                    "justify-content: center; " +
+                                    "align-items: center; "
+                            else ""}")
+                    .appendChild(selectedTag!!.clone()).outerHtml()
+            else
+                document.toString()
+
+        )
+    }
 
     /**
      * Saves the document this editor is for.
@@ -444,11 +554,4 @@ class DocumentEditor {
          */
         private val EDITOR_CLOSE_REQUEST = javafx.event.EventType<Event>("EDITOR_CLOSE_REQUEST")
     }
-
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //region                                   GUI
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
 }
