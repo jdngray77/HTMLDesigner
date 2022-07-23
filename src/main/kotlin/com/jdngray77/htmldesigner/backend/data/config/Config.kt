@@ -29,7 +29,8 @@ enum class Configs {
     TOOLBOX_DOCK_FILTER_EXACT_BOOL,
     USE_MAC_MENU_BOOL,
 
-    OUTLINE_SELECTED_TAG_BOOL
+    OUTLINE_SELECTED_TAG_BOOL,
+    AUTO_LOAD_PROJECT_BOOL
 }
 
 /**
@@ -53,6 +54,7 @@ object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
         put(Configs.TOOLBOX_DOCK_FILTER_EXACT_BOOL, true)
         put(Configs.USE_MAC_MENU_BOOL, true)
         put(Configs.OUTLINE_SELECTED_TAG_BOOL, true)
+        put(Configs.AUTO_LOAD_PROJECT_BOOL, true)
     }
 
     override fun validate() {
