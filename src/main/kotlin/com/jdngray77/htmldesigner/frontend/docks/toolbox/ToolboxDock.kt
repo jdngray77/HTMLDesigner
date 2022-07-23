@@ -103,7 +103,7 @@ class ToolboxDock : Dock() {
                     item.initialize(t, it.second as ToolBoxItemController)
                     item.pane.prefWidthProperty().bind(widthProperty())
                     item.pane.setOnMouseClicked { mouse ->
-                        mvc().currentEditor().selectedTag?.let {
+                        mvc().selectedTag()?.let {
                             labelMenuItem.text = "Creating a '${item.controller.tag.text}' tag"
                             contextItem = item
                             contextMenu.show(item.pane, mouse.screenX, mouse.screenY)

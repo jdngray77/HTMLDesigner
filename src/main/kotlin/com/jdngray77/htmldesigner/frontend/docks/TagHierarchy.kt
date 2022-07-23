@@ -45,7 +45,12 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
 
     init {
         tree.selectionModel.selectionMode = SelectionMode.MULTIPLE
-        EventNotifier.subscribe(this, EventType.EDITOR_DOCUMENT_SWITCH, EventType.EDITOR_DOCUMENT_EDITED, EventType.EDITOR_SELECTED_TAG_CHANGED)
+        EventNotifier.subscribe(this,
+            EventType.EDITOR_DOCUMENT_SWITCH,
+            EventType.EDITOR_DOCUMENT_EDITED,
+            EventType.EDITOR_SELECTED_TAG_CHANGED,
+            EventType.EDITOR_DOCUMENT_CLOSED
+            )
 
         tree.isEditable = true
 
@@ -250,10 +255,19 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
     }
 
     override fun notify(e: EventType) {
-        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED && selectedItem() == mvc().currentEditor().selectedTag)
+        with (mvc()) {
+
+        if (e == EventType.EDITOR_DOCUMENT_CLOSED && !editorAvail()) {
+            tree.root = null
+            return
+        }
+
+        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED && selectedItem() == currentEditor().selectedTag)
             return
 
-        showDocument(mvc().currentDocument())
+        showDocument(currentDocument())
+        }
+
 
 //        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED)
 //            document.editor()?.selectedTag?.let {
