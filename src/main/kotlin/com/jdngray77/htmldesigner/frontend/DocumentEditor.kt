@@ -272,6 +272,7 @@ class DocumentEditor {
      * A toggle switch that determines if the content is center aligned when in standalone edit mode.
      */
     private val standaloneCenter = ToggleSwitch("Align to center").also {
+            it.isSelected = true
             it.setOnMouseClicked {
                 reRender()
             }
