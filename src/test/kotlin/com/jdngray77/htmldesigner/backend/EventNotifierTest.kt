@@ -42,7 +42,7 @@ internal class EventNotifierTest {
      */
     @Test
     fun testEventType() {
-        EventNotifier.onIDERestart()
+        EventNotifier.restart()
         assert(EventNotifier.FXSubscribers.size == 0)
         assert(EventNotifier.backgroundSubscribers.size == 0)
 
@@ -54,7 +54,7 @@ internal class EventNotifierTest {
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
 
 
-        EventNotifier.onIDERestart()
+        EventNotifier.restart()
         assert(EventNotifier.FXSubscribers.size == 0)
         assert(EventNotifier.backgroundSubscribers.size == 0)
 
@@ -64,7 +64,7 @@ internal class EventNotifierTest {
 
     @Test
     fun onIDERestart() {
-        EventNotifier.onIDERestart()
+        EventNotifier.restart()
         assert(EventNotifier.FXSubscribers.size == 0)
         assert(EventNotifier.backgroundSubscribers.size == 0)
 
@@ -72,7 +72,7 @@ internal class EventNotifierTest {
         assert(EventNotifier.FXSubscribers.size == 1)
         assert(EventNotifier.backgroundSubscribers.size == 0)
 
-        EventNotifier.onIDERestart()
+        EventNotifier.restart()
         assert(EventNotifier.FXSubscribers.size == 0)
         assert(EventNotifier.backgroundSubscribers.size == 0)
     }

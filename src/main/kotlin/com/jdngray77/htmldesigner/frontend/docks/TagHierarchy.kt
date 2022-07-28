@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -23,6 +22,8 @@ import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.control.*
 import javafx.scene.control.cell.TextFieldTreeTableCell
 import org.jsoup.nodes.Document
@@ -30,16 +31,16 @@ import org.jsoup.nodes.Element
 
 
 /**
- * A dock which can display the hierarchy of a single
- * [Document].
+ * A dock which can display the hierarchy of a single [Document].
  *
  * Displays current document on [EventType.EDITOR_DOCUMENT_EDITED] and [EventType.EDITOR_DOCUMENT_SWITCH]
  */
-class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
-
+class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
     /**
-     * Reference to the document whose tags we are displying.
+     * Reference to the document whose tags we are displaying.
+     *
+     * Reduces calls to the mvc.
      */
     private lateinit var document: Document
 
@@ -52,20 +53,19 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
             EventType.EDITOR_DOCUMENT_CLOSED
             )
 
+        EventNotifier.subscribe(
+            this,
+            EventType.EDITOR_DOCUMENT_SWITCH,
+            EventType.EDITOR_DOCUMENT_EDITED,
+            EventType.EDITOR_SELECTED_TAG_CHANGED
+        )
+
+
+        tree.selectionModel.selectionMode = SelectionMode.MULTIPLE
         tree.isEditable = true
 
-        // Add buttons to the button bar.
 
-        buttons.children.addAll(
-//            Button("Delete").apply {
-//                setOnAction {
-//                    mvc().apply {
-//                        deleteTag(*selectedTags().toTypedArray())
-//                    }
-//                    showDocument(document)
-//                }
-//            },
-
+        buttonBar.children.addAll(
             Button("Expand").apply {
                 setOnAction {
                     tree.root.applyToAll { it.isExpanded = true }
@@ -80,7 +80,6 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
         )
 
 
-
         // Configure the tree.
 
         tree.columns.setAll(
@@ -89,18 +88,16 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
             },
 
             TreeTableColumn<Element, String>("Content").also {
-                it.setCellValueFactory { p -> SimpleStringProperty(p.value.value.ownText())}
+                it.setCellValueFactory { p -> SimpleStringProperty(p.value.value.ownText()) }
 
                 it.setOnEditCommit {
-                            // TODO we can access the old value too. This will be useful for implementing undo.
-                            it.rowValue.value.text(it.newValue)
-                            mvc().currentEditor().reRender()
+                    // TODO we can access the old value too. This will be useful for implementing undo.
+                    it.rowValue.value.text(it.newValue)
+                    mvc().currentEditor().reRender()
                 }
                 it.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn())
             }
         )
-
-
 
 
         // When a new item is selected, display it in the editor.
@@ -122,137 +119,129 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
         }
 
 
-
         // Context menu
         // TODO only show some of these items when one item is selected.
-        // TODO There's so much fucking repetition here.
+
+        val menuItem: (String, EventHandler<ActionEvent>) -> MenuItem = { name, action ->
+            MenuItem(name).also {
+                it.onAction = action
+            }
+        }
 
         setContextMenu(
-            // TODO
-            MenuItem("Edit alone").also {
-                it.setOnAction {
-                    mvc().currentEditor().apply {
-                        selectTag(selectedTableItems().first())
-                        standaloneEditMode = true
-                    }
+            menuItem("Edit alone") {
+                mvc().currentEditor().apply {
+                    selectTag(selectedTableItems().first())
+                    standaloneEditMode = true
                 }
             },
-            MenuItem("「WIP」Save As Prefab").also {
-                it.setOnAction {
-                    selectedItems().map {
-                        it.createPrefab()
-                    }
+
+            menuItem("「WIP」Save As Prefab") {
+                selectedItems().map {
+                    it.createPrefab()
                 }
             },
+
             SeparatorMenuItem(),
-            MenuItem("Delete").also {
-                it.setOnAction {
-                    selectedItems().apply {
-                        if (size > 1)
-                            mvc().deleteTag(*toTypedArray())
-                        else contextRow?.let { mvc().deleteTag(it.item) }
-                    }
+
+            menuItem("Delete") {
+                selectedItems().apply {
+                    if (size > 1)
+                        mvc().deleteTag(*toTypedArray())
+                    else
+                        contextRow?.let { mvc().deleteTag(it.item) }
                 }
             },
-            MenuItem("Cut").also {
-                it.setOnAction {
-                    selectedItem()?.apply {
 
-                        clipboard {
-                            it.putHtml(this.toString())
-                        }
-
-                        mvc().implDeleteTag(this)
-
-                    }
-                }
-            },
-            MenuItem("Copy").also {
-                it.setOnAction {
+            menuItem("Cut") {
+                selectedItem()?.apply {
                     clipboard {
-                        it.putHtml(selectedItem().toString())
+                        it.putHtml(this.toString())
                     }
+                    mvc().implDeleteTag(this)
                 }
             },
-            SeparatorMenuItem(),
-            MenuItem("Paste above").also {
-                it.setOnAction {
-                    selectedItem()?.before(
-                        clipboard().html.asElement()
-                    )
-                    mvc().currentDocumentModified()
-                }
-            },
-            MenuItem("Paste inside").also {
-                it.setOnAction {
-                    selectedItem()?.insertChildren(0,
-                        clipboard().html.asElement()
-                    )
-                    mvc().currentDocumentModified()
-                }
-            },
-            MenuItem("Paste below").also {
-                it.setOnAction {
-                    selectedItem()?.after(
-                        clipboard().html.asElement()
-                    )
-                    mvc().currentDocumentModified()
-                }
-            },
-            MenuItem("Wrap with clipboard").also {
-                it.setOnAction {
-                    selectedItem()?.wrap(clipboard().html)
-                    mvc().currentDocumentModified()
+
+            menuItem("Copy") {
+                clipboard {
+                    it.putHtml(selectedItem().toString())
                 }
             },
 
             SeparatorMenuItem(),
-            MenuItem("Move up within parent").also {
-                it.setOnAction {
-                    selectedItem()?.apply {
-                        parent()?.let {
-                            val index = it.children().indexOf(this)
-                            if (index == 0) return@apply
 
-                            it.insertChildren(index + 1, this)
-
-                            mvc().currentDocumentModified()
-                        }
-                    }
-                }
+            menuItem("Paste above") {
+                selectedItem()?.before(
+                    clipboard().html.asElement()
+                )
+                mvc().currentDocumentModified()
             },
-            MenuItem("Move down within parent").also {
-                it.setOnAction {
-                    selectedItem()?.apply {
-                        parent()?.let {
-                            val index = it.children().indexOf(this)
-                            if (index == 0) return@apply
 
-                            it.insertChildren(index + 2, this)
-
-                            mvc().currentDocumentModified()
-                        }
-                    }
-                }
+            menuItem("Paste inside") {
+                selectedItem()?.insertChildren(
+                    0,
+                    clipboard().html.asElement()
+                )
             },
+
+            menuItem("Paste below") {
+                selectedItem()?.after(
+                    clipboard().html.asElement()
+                )
+                mvc().currentDocumentModified()
+            },
+
+            menuItem("Wrap with clipboard") {
+                selectedItem()?.wrap(clipboard().html)
+                mvc().currentDocumentModified()
+            },
+
             SeparatorMenuItem(),
-            MenuItem("Move out of parent").also {
-                it.setOnAction {
-                    selectedItem()?.apply {
-                        parent()?.let {
-                            mvc().implDeleteTag(this)
-                            it.before(this)
-                            mvc().currentDocumentModified()
-                        }
+
+            menuItem("Move up within parent") {
+                selectedItem()?.apply {
+                    parent()?.let {
+                        val index = it.children().indexOf(this)
+                        if (index == 0) return@apply
+
+                        it.insertChildren(index + 1, this)
+
+                        mvc().currentDocumentModified()
                     }
                 }
             },
+
+            menuItem("Move down within parent") {
+                selectedItem()?.apply {
+                    parent()?.let {
+                        val index = it.children().indexOf(this)
+                        if (index == 0) return@apply
+
+                        it.insertChildren(index + 2, this)
+
+                        mvc().currentDocumentModified()
+                    }
+                }
+            },
+
+            SeparatorMenuItem(),
+
+            menuItem("Move out of parent") {
+                selectedItem()?.apply {
+                    parent()?.let {
+                        mvc().implDeleteTag(this)
+                        it.before(this)
+                        mvc().currentDocumentModified()
+                    }
+                }
+            }
         )
+
         tree.pack()
     }
 
     /**
-     * Changes to show the model of [doc].
+     * Changes to show the model of a new [doc].
      *
      * Will be overwritten on the next document edit or editor switch.
      */
@@ -264,16 +253,19 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
     override fun notify(e: EventType) {
         with (mvc()) {
 
-        if (e == EventType.EDITOR_DOCUMENT_CLOSED && !editorAvail()) {
-            tree.root = null
-            return
-        }
+            if (e == EventType.EDITOR_DOCUMENT_CLOSED && !editorAvail()) {
+                tree.root = null
+                return
+            }
 
-        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED && selectedItem() == currentEditor().selectedTag)
-            return
+            // Saves refreshing if there is no change.
+            // Ignore tag changes, if the item selected in the hierarchy already matches the one selected in the editor.
+            if (e == EventType.EDITOR_SELECTED_TAG_CHANGED && selectedItem() == currentEditor().selectedTag)
+                return
 
-        showDocument(currentDocument())
+            showDocument(currentDocument())
         }
+    }
 
 
 //        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED)
@@ -288,7 +280,5 @@ class TagHierarchy : HierarchyDock<Element>({it!!.tagName()}), Subscriber {
     }
 
 
-
     override fun getChildrenFor(el: Element): Iterable<Element> = el.children()
-
 }

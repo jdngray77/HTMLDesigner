@@ -35,6 +35,7 @@ dependencies {
     implementation("org.jfxtras:jmetro:11.6.15")
     implementation("org.jsoup:jsoup:1.14.3")
     implementation("net.sourceforge.cssparser:cssparser:0.9.29")
+    implementation("org.reflections:reflections:0.10.2")
 }
 
 javafx {

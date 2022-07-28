@@ -23,6 +23,7 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.docks.*
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
@@ -104,26 +105,24 @@ class MainViewController {
      */
     private fun addDocks() {
 
-        // TODO automate fetching of class names.
-
         // TOP LEFT
-
-        dockLeftTop.tabs.add(Tab(ToolboxDock::class.simpleName!!.camelToSentence(), ToolboxDock()))
-        dockLeftTop.tabs.add(Tab(Prefabs::class.simpleName!!.camelToSentence(), Prefabs()))
-
-//        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.camelToSentence(), ExampleAutoDock()))
-//        dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.camelToSentence(), TestDock()))
-
+        implAddDock(dockLeftTop, ToolboxDock(), Prefabs())
 
         // BOTTOM LEFT
-
-        dockLeftBottom.tabs.add(Tab(Pages::class.simpleName!!.camelToSentence(), Pages()))
-        dockLeftBottom.tabs.add(Tab(TagHierarchy::class.simpleName!!.camelToSentence(), TagHierarchy()))
-        dockLeftBottom.tabs.add(Tab(ProjectDock::class.simpleName!!.camelToSentence(), ProjectDock()))
+        implAddDock(dockLeftBottom, Pages(), TagHierarchy(), ProjectDock())
 
         // RIGHT
+        implAddDock(dockRight, TagProperties())
+    }
 
-        dockRight.tabs.add(Tab(TagProperties::class.simpleName!!.camelToSentence(), TagProperties()))
+    private fun implAddDock(to: TabPane, vararg it : Dock) {
+        it.forEach {
+            to.tabs.add(Tab(
+                    it::class.simpleName!!.camelToSentence(),
+                    it
+                )
+            )
+        }
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

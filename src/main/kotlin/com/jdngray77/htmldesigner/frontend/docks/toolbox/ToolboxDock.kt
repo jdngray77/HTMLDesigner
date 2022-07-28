@@ -204,7 +204,6 @@ class ToolboxDock : Dock() {
             }
         }.readPrivateProperty<Set<Any>>(Safelist::class, "tagNames")
             .sortedBy { it.toString() }
-                // TODO add registry for search type (contains / starts with)
             .filter {
                 if (Config[Configs.TOOLBOX_DOCK_FILTER_EXACT_BOOL] as Boolean)
                     it.toString().startsWith(search.text)

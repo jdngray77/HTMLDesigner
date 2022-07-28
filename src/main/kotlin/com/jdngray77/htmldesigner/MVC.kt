@@ -148,7 +148,6 @@ class MVC (
      *
      * @param document Document - The document to open
      */
-    // TODO should this be in Document Editor?
     fun openDocument(document: Document) {
         loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
             (second as DocumentEditor).let {

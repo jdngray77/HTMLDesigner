@@ -27,7 +27,7 @@ import javafx.application.Platform
  */
 enum class EventType {
     USER_SAVE,
-    USER_EXIT,
+    EXIT,
 
     AUTO_SAVE,
 
@@ -127,7 +127,7 @@ object EventNotifier : Restartable {
             submitter.invoke(it)
         }
     }
-    override fun onIDERestart() {
+    override fun restart() {
         backgroundSubscribers.clear()
         FXSubscribers.clear()
     }

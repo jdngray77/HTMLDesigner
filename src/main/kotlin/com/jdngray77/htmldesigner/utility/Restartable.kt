@@ -14,17 +14,22 @@
 
 package com.jdngray77.htmldesigner.utility
 
-// TODO can these be found automatically using reflection?
 /**
- * For systems or objects that need
- * to perform actions when the IDE unloads a project,
- * or other-wise soft-restarts.
+ * When the IDE restarts, static systems are not unloaded, as the JVM is still running.
  *
- * When the IDE restarts, static systems are not unloaded
- * as the JVM is still running.
+ * Only instances of objects created within the [Editor] are unloaded and re-created.
  *
- * Use this, in conjunction with [Editor.restart]
+ * This is for the cases where static systems or objects that need to clean up when the IDE:
+ *  - unloads a project,
+ *  - shuts down
+ *  - or restarts.
+ *
+ * When implemented, [restart] will automatically be invoked when the IDE's [Editor.stop] is invoked.
+ *
+ * Instances are located and invoked using reflection, so there no need to invoke or subscribe.
+ *
+ * @author Jordan T. Gray
  */
 interface Restartable {
-    fun onIDERestart()
+    fun restart()
 }
