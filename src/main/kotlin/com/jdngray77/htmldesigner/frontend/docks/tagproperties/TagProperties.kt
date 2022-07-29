@@ -152,12 +152,12 @@ class TagProperties : Dock(), Subscriber {
                             ),
 
                             CSSRangeItem(
-                                "Border width",
+                                "Border thickness",
                                 this,
                                 "border-width",
                                 "Border",
                                 "Determines the width of the border, if there is a border.",
-                                0.0, 100.0,
+                                0.0, 100.0
                             ),
 
                             CSSRangeItem(
@@ -166,7 +166,7 @@ class TagProperties : Dock(), Subscriber {
                                 "border-radius",
                                 "Border",
                                 "Determines the radius of the border, if there is a border.",
-                                0.0, 90.0
+                                0.0, 90.0, false
                             ),
 
                             PlaceholderPropertySheetItem(

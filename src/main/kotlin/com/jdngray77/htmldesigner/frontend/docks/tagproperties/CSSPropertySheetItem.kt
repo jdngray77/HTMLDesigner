@@ -18,6 +18,8 @@ package com.jdngray77.htmldesigner.frontend.docks.tagproperties
 import com.jdngray77.htmldesigner.utility.changed
 import com.jdngray77.htmldesigner.backend.html.StyleAttributeSnapshot
 import com.jdngray77.htmldesigner.frontend.controls.AlignControl
+import com.jdngray77.htmldesigner.frontend.controls.CSSUnitSlider
+import com.jdngray77.htmldesigner.frontend.controls.removeCSSUnit
 import com.jdngray77.htmldesigner.utility.readPrivateProperty
 import com.jdngray77.htmldesigner.utility.toHex
 import javafx.beans.property.SimpleStringProperty
@@ -232,7 +234,7 @@ open class CSSPropertySheetItem(
 
         // Make our changes
         if (value == null || value.toString().isBlank())
-            styles.clear()
+            if (styles.contains(property)) styles.remove(property)
         else
             styles[property] = value.toString()
 
@@ -260,25 +262,8 @@ open class CSSPropertySheetItem(
     companion object {
 
         val colorCaster: (String) -> Color = { Color.web(it) }
-        val doubleCaster: (String) -> Double = { filterCSSSize(it).toDouble() }
+        val doubleCaster: (String) -> Double = { removeCSSUnit(it).toDouble() }
 
-
-        /**
-         * When provided a valid CSS size, removes all the units from a CSS size value.
-         *
-         * i.e "10px" -> "10"
-         *
-         * @param value just the numeric value of the size
-         */
-        fun filterCSSSize(value: String) =
-            value
-                .replace("px", "")
-                .replace("%", "")
-                .replace("em", "")
-                .replace("pt", "")
-                .replace("hw", "")
-                .replace("vh", "")
-                .trim()
 
     }
 }
@@ -327,6 +312,14 @@ abstract class CSSPropertyEditor<T>(
      * using the [DefaultPropertyEditorFactory].
      */
     constructor(property: CSSPropertySheetItem) : this(property, DefaultPropertyEditorFactory().call(property).editor)
+
+    init {
+        _editor.setOnMouseClicked {
+            if (it.clickCount == 2) {
+                value = null
+            }
+        }
+    }
 
     /**
      * Gets the GUI editor used to edit the item.
@@ -575,31 +568,29 @@ class CSSDropdownEditor(
 //region                                      Range Property
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-class CSSRangeItem(_name: String, element : Element, property: String, _category: String, _description: String, val min: Double, val max: Double)
-    : CSSPropertySheetItem (_name, element, property, _category, _description, caster = doubleCaster)
+class CSSRangeItem(_name: String, element : Element, property: String, _category: String, _description: String, val min: Double, val max: Double, val enableUnits: Boolean = true)
+    : CSSPropertySheetItem (_name, element, property, _category, _description)
 
 class CSSRangeEditor(
 
     property: CSSRangeItem
 
-) : CSSPropertyEditor<Double>(property, Slider()) {
+) : CSSPropertyEditor<String>(property, CSSUnitSlider(property.min, property.max, enableUnits = property.enableUnits)) {
 
     init {
-        (editor as Slider).min = property.min
-        (editor as Slider).max = property.max
-        (editor as Slider).valueProperty().addListener(onUserEditedEditor())
+        (editor as CSSUnitSlider).observableValue.addListener(onUserEditedEditor())
     }
 
-    override fun setValue(value: Double?) {
-        (editor as Slider).value = value ?: 0.0
+    override fun setValue(value: String?) {
+        (editor as CSSUnitSlider).setValue(value)
     }
 
     override fun getValue() =
-        floor((editor as Slider).value)
+        (editor as CSSUnitSlider).getValue()
 
     override fun getCSSValue(): String =
-        value.toString() + "px"
+        value
 
     override fun getObservableValue() =
-        ((getEditorEarly() as Slider).valueProperty()) as ObservableValue<Double>
+        (getEditorEarly() as CSSUnitSlider).observableValue
 }
