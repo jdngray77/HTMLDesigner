@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.frontend.controls
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
+import kotlin.math.floor
 
 /**
  *  A slider with a user selectable unit of css measure.
@@ -45,7 +46,7 @@ class CSSUnitSlider(
 
     override fun toString(): String =
         if (slider.value > 0.0)
-            slider.value.toString() + unit.value
+            floor(slider.value).toString() + unit.value
         else
             ""
 

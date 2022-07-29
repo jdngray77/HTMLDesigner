@@ -132,6 +132,15 @@ class TagProperties : Dock(), Subscriber {
                                 colorCaster
                             ),
 
+                            CSSDropdownItem(
+                                "Border style",
+                                this,
+                                "border-style",
+                                "Border",
+                                "Required to add a border. Determines the style line drawn around this element.",
+                                "none", "solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"
+                            ),
+
                             CSSPropertySheetItem(
                                 "Border color",
                                 this,
@@ -140,15 +149,6 @@ class TagProperties : Dock(), Subscriber {
                                 "Changes color of the border, if there is one.",
                                 Color::class.java,
                                 colorCaster
-                            ),
-
-                            CSSDropdownItem(
-                                "Border style",
-                                this,
-                                "border-style",
-                                "Border",
-                                "Required to add a border. Determines the style line drawn around this element.",
-                                "none", "solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"
                             ),
 
                             CSSRangeItem(
@@ -167,6 +167,15 @@ class TagProperties : Dock(), Subscriber {
                                 "Border",
                                 "Determines the radius of the border, if there is a border.",
                                 0.0, 90.0, false
+                            ),
+
+                            CSSRangeItem(
+                                "Border spacing",
+                                this,
+                                "padding",
+                                "Border",
+                                "Creates a gap between the border and the content in this element.",
+                                0.0, 100.0
                             ),
 
                             PlaceholderPropertySheetItem(

@@ -233,9 +233,9 @@ open class CSSPropertySheetItem(
         styles.capture()
 
         // Make our changes
-        if (value == null || value.toString().isBlank())
+        if (value == null || value.toString().isBlank()) {
             if (styles.contains(property)) styles.remove(property)
-        else
+        } else
             styles[property] = value.toString()
 
         // Invoke any extra behaviour of extensions.
