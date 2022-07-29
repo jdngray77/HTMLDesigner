@@ -277,8 +277,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 //                }
 //
 //            }
-    }
-
 
     override fun getChildrenFor(el: Element): Iterable<Element> = el.children()
+
 }

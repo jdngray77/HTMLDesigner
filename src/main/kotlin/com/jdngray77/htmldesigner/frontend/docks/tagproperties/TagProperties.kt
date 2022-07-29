@@ -25,6 +25,7 @@ import com.jdngray77.htmldesigner.utility.readPrivateProperty
 import impl.org.controlsfx.skin.PropertySheetSkin
 import javafx.scene.control.Accordion
 import javafx.scene.control.ScrollPane
+import javafx.scene.paint.Color
 import org.controlsfx.control.PropertySheet
 import org.jsoup.nodes.Element
 import java.lang.System.gc
@@ -75,7 +76,7 @@ class TagProperties : Dock(), Subscriber {
             currentEditor().let { editor ->
 
                 editor.selectedTag?.apply {
-                    sheet.propertyEditorFactory = TagPropertyEditorFactory
+                    sheet.propertyEditorFactory = CSSPropertyEditorFactory
 
                     var lastCategorySelected: String? = null
                     with(scrollPane!!.content) {
@@ -108,6 +109,38 @@ class TagProperties : Dock(), Subscriber {
                         // TODO list
                         // Breadcrumb
 
+//                        CSSPropertySheetItem(
+//                            "test",
+//                            this,
+//                            "test",
+//                            "test",
+//                            "",
+//                            Boolean::class.java
+//                        ).also {
+//                               it.value = false
+//                        },
+
+
+                        CSSPropertySheetItem(
+                            "Background color",
+                            this,
+                            "background-color",
+                            "Color",
+                            "Changes color displayed behind the content of this tag.",
+                            Color::class.java
+                        ),
+
+                        CSSPropertySheetItem(
+                            "Foreground color",
+                            this,
+                            "color",
+                            "Color",
+                            "Changes color of the content of this tag, such as text.",
+                            Color::class.java
+                        ),
+
+
+
                         PlaceholderPropertySheetItem(
                             "Width",
                             "Size & Position"
@@ -130,11 +163,6 @@ class TagProperties : Dock(), Subscriber {
 
                         PlaceholderPropertySheetItem(
                             "Border",
-                            "Appearance"
-                        ),
-
-                        PlaceholderPropertySheetItem(
-                            "Background",
                             "Appearance"
                         ),
 

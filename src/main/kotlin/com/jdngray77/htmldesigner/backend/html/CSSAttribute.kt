@@ -56,8 +56,10 @@ class StyleAttributeSnapshot(
      * Captures the style properties currently in the [element].
      *
      * This will reset any uncommitted changes.
+     *
+     * @return this for named idiomatic usage.
      */
-    fun capture() {
+    fun capture(): StyleAttributeSnapshot {
         // TODO test this
         if (element.hasAttr("style"))
             element.attr("style")
@@ -70,6 +72,8 @@ class StyleAttributeSnapshot(
             }
         else
             clear()
+
+        return this
     }
 
     /**
