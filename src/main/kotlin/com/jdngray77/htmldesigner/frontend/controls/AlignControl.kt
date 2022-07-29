@@ -90,6 +90,8 @@ object FlexJustify : HashMap<String, String>() {
         put("End", "flex-end")
         put("Center", "center")
 
+        put("Justify", "justify-content")
+
         put("Between", "space-between")
         put("Around", "space-around")
         put("Evenly", "space-evenly")
