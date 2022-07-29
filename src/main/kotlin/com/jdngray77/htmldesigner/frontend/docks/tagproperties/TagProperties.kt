@@ -17,9 +17,12 @@ package com.jdngray77.htmldesigner.frontend.docks.tagproperties
 import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.showErrorNotification
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.PlaceholderPropertySheetItem
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
+import com.jdngray77.htmldesigner.frontend.docks.tagproperties.CSSPropertySheetItem.Companion.colorCaster
+import com.jdngray77.htmldesigner.frontend.docks.tagproperties.CSSPropertySheetItem.Companion.doubleCaster
 import com.jdngray77.htmldesigner.utility.ReflectivePropertySheetItem
 import com.jdngray77.htmldesigner.utility.readPrivateProperty
 import impl.org.controlsfx.skin.PropertySheetSkin
@@ -86,112 +89,136 @@ class TagProperties : Dock(), Subscriber {
 
 
 
+                    try {
+                        sheet.items.addAll(
+                            ReflectivePropertySheetItem<String>(
+                                "id",
+                                "Uniquely identify this element for scripting.",
+                                "Advanced",
+                                this,
+                                true
+                            ),
 
-                    sheet.items.addAll(
-                        ReflectivePropertySheetItem<String>(
-                            "id",
-                            "Uniquely identify this element for scripting.",
-                            "Advanced",
-                            this,
-                            true
-                        ),
+                            PlaceholderPropertySheetItem(
+                                "Custom CSS",
+                                "Advanced"
+                            ),
 
-                        PlaceholderPropertySheetItem(
-                            "Custom CSS",
-                            "Advanced"
-                        ),
+                            PlaceholderPropertySheetItem(
+                                "Attributes",
+                                "Advanced"
+                            ),
 
-                        PlaceholderPropertySheetItem(
-                            "Attributes",
-                            "Advanced"
-                        ),
+                            // TODO list
+                            // Breadcrumb
 
-                        // TODO list
-                        // Breadcrumb
+                            CSSPropertySheetItem(
+                                "Background color",
+                                this,
+                                "background-color",
+                                "Color",
+                                "Changes color displayed behind the content of this tag.",
+                                Color::class.java,
+                                colorCaster
+                            ),
 
-//                        CSSPropertySheetItem(
-//                            "test",
-//                            this,
-//                            "test",
-//                            "test",
-//                            "",
-//                            Boolean::class.java
-//                        ).also {
-//                               it.value = false
-//                        },
+                            CSSPropertySheetItem(
+                                "Foreground color",
+                                this,
+                                "color",
+                                "Color",
+                                "Changes color of the content of this tag, such as text.",
+                                Color::class.java,
+                                colorCaster
+                            ),
+
+                            CSSPropertySheetItem(
+                                "Border color",
+                                this,
+                                "border-color",
+                                "Border",
+                                "Changes color of the border, if there is one.",
+                                Color::class.java,
+                                colorCaster
+                            ),
+
+                            CSSDropdownItem(
+                                "Border style",
+                                this,
+                                "border-style",
+                                "Border",
+                                "Required to add a border. Determines the style line drawn around this element.",
+                                "none", "solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"
+                            ),
+
+                            CSSRangeItem(
+                                "Border width",
+                                this,
+                                "border-width",
+                                "Border",
+                                "Determines the width of the border, if there is a border.",
+                                0.0, 100.0,
+                            ),
+
+                            CSSRangeItem(
+                                "Border radius",
+                                this,
+                                "border-radius",
+                                "Border",
+                                "Determines the radius of the border, if there is a border.",
+                                0.0, 90.0
+                            ),
+
+                            PlaceholderPropertySheetItem(
+                                "Width",
+                                "Size & Position"
+                            ),
+                            PlaceholderPropertySheetItem(
+                                "Height",
+                                "Size & Position"
+                            ),
+
+                            PlaceholderPropertySheetItem(
+                                "Padding",
+                                "Size & Position"
+                            ),
+
+                            PlaceholderPropertySheetItem(
+                                "Margin",
+                                "Size & Position"
+                            ),
+
+                            PlaceholderPropertySheetItem(
+                                "Filters",
+                                "Appearance"
+                            ),
 
 
-                        CSSPropertySheetItem(
-                            "Background color",
-                            this,
-                            "background-color",
-                            "Color",
-                            "Changes color displayed behind the content of this tag.",
-                            Color::class.java
-                        ),
+                            // TODO align text
+                            // TODO manual editor
 
-                        CSSPropertySheetItem(
-                            "Foreground color",
-                            this,
-                            "color",
-                            "Color",
-                            "Changes color of the content of this tag, such as text.",
-                            Color::class.java
-                        ),
+                            CSSAlignmentPropertySheetItem(
+                                "Align children",
+                                this,
+                                "Alignment",
+                                "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
+                            ),
 
-
-
-                        PlaceholderPropertySheetItem(
-                            "Width",
-                            "Size & Position"
-                        ),
-                        PlaceholderPropertySheetItem(
-                            "Height",
-                            "Size & Position"
-                        ),
-
-                        PlaceholderPropertySheetItem(
-                            "Padding",
-                            "Size & Position"
-                        ),
-
-                        PlaceholderPropertySheetItem(
-                            "Margin",
-                            "Size & Position"
-                        ),
-
-
-                        PlaceholderPropertySheetItem(
-                            "Border",
-                            "Appearance"
-                        ),
-
-                        PlaceholderPropertySheetItem(
-                            "Filters",
-                            "Appearance"
-                        ),
-
-
-                        // TODO align text
-                        // TODO manual editor
-
-                        CSSAlignmentPropertySheetItem(
-                            "Align children",
-                            this,
-                            "Alignment",
-                            "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
-                        ),
-
-                        PlaceholderPropertySheetItem(
-                            "Align direction",
-                            "Appearance"
-                        ),
-                    )
+                            PlaceholderPropertySheetItem(
+                                "Align direction",
+                                "Appearance"
+                            ),
+                        )
+                    } catch (e: Exception) {
+                        showErrorNotification(e, false)
+                        e.printStackTrace()
+                    }
 
                     if (lastCategorySelected != null)
                         (scrollPane!!.content as Accordion).apply {
                             expandedPane = panes.find { it.text == lastCategorySelected }
                         }
+
                 }
             }
             gc()

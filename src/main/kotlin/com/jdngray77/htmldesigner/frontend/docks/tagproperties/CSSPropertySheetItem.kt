@@ -23,8 +23,11 @@ import com.jdngray77.htmldesigner.utility.toHex
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
+import javafx.collections.FXCollections
 import javafx.scene.Node
 import javafx.scene.control.ColorPicker
+import javafx.scene.control.ComboBox
+import javafx.scene.control.Slider
 import javafx.scene.paint.Color
 import javafx.util.Callback
 import org.controlsfx.control.PropertySheet
@@ -33,6 +36,7 @@ import org.controlsfx.property.editor.DefaultPropertyEditorFactory
 import org.controlsfx.property.editor.PropertyEditor
 import org.jsoup.nodes.Element
 import java.util.*
+import kotlin.math.floor
 
 /**
  *
@@ -168,7 +172,12 @@ open class CSSPropertySheetItem(
     /**
      * Determines what type of editor to use for this property.
      */
-    val _type: Class<*> = String::class.java
+    val _type: Class<*> = String::class.java,
+
+    /**
+     * A function to cast the string found on the tag to the data type required by the GUI editor.
+     */
+    val caster: (String) -> Any = { it }
 
     ) : PropertySheet.Item {
 
@@ -215,7 +224,7 @@ open class CSSPropertySheetItem(
      *
      * May be null if the style [property] is not in [styles].
      */
-    override fun getValue(): Any? = styles.capture()[property] // The capture here is to ensure the current value is returned, not the value of the last capture.
+    override fun getValue(): Any? = styles.capture()[property]?.let { caster(it) }// The capture here is to ensure the current value is returned, not the value of the last capture.
 
     override fun setValue(value: Any?) {
         // re-capture to get the current style attribute state, so we don't overwrite any changes made elsewhere.
@@ -246,6 +255,32 @@ open class CSSPropertySheetItem(
      * Called after the [styles] have been updated, but not committed back to the [Element]
      */
     protected open fun onChange(value: Any?) {}
+
+
+    companion object {
+
+        val colorCaster: (String) -> Color = { Color.web(it) }
+        val doubleCaster: (String) -> Double = { filterCSSSize(it).toDouble() }
+
+
+        /**
+         * When provided a valid CSS size, removes all the units from a CSS size value.
+         *
+         * i.e "10px" -> "10"
+         *
+         * @param value just the numeric value of the size
+         */
+        fun filterCSSSize(value: String) =
+            value
+                .replace("px", "")
+                .replace("%", "")
+                .replace("em", "")
+                .replace("pt", "")
+                .replace("hw", "")
+                .replace("vh", "")
+                .trim()
+
+    }
 }
 
 
@@ -378,6 +413,8 @@ object CSSPropertyEditorFactory : Callback<PropertySheet.Item, PropertyEditor<*>
             else -> when (item) {
                 // justify-content
                 is CSSAlignmentPropertySheetItem -> CSSAlignmentPropertyEditor(item)
+                is CSSDropdownItem -> CSSDropdownEditor(item)
+                is CSSRangeItem -> CSSRangeEditor(item)
 
 
                 // Default to the default editor, which is a based on
@@ -452,6 +489,8 @@ class CSSAlignmentPropertyEditor(
 //region                                      Color Property
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+
+
 /**
  * Editor for any color based property.
  *
@@ -467,6 +506,7 @@ class CSSColorPropertyEditor(
 
     init {
         (editor as ColorPicker).valueProperty().addListener(onUserEditedEditor())
+        // TODO read or default color on init
     }
 
     override fun setValue(value: Color?) {
@@ -477,9 +517,89 @@ class CSSColorPropertyEditor(
         (editor as ColorPicker).value
 
     override fun getCSSValue(): String =
-        (editor as ColorPicker).value.toHex()
+        (getEditorEarly() as ColorPicker).value.toHex()
 
     override fun getObservableValue() =
         (getEditorEarly() as ColorPicker).valueProperty()
 }
 
+
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+//endregion                                 Color Property
+//region                                  Dropdown Property
+//░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+
+/**
+ * A [CSSPropertySheetItem] with a list of possible values to select from.
+ *
+ * Edited with a [CSSDropdownEditor]
+ */
+class CSSDropdownItem(_name: String, element : Element, property: String, _category: String, _description: String, vararg _possibleValues: String)
+    : CSSPropertySheetItem (_name, element, property, _category, _description) {
+    val possibleValues = _possibleValues.toList()
+}
+
+
+class CSSDropdownEditor(
+
+    property: CSSDropdownItem
+
+) : CSSPropertyEditor<String>(property, ComboBox<String>()) {
+
+    init {
+        (editor as ComboBox<String>).items = FXCollections.observableList(property.possibleValues)
+        (editor as ComboBox<String>).valueProperty().addListener(onUserEditedEditor())
+    }
+
+    override fun setValue(value: String?) {
+        (editor as ComboBox<String>).selectionModel.select(value)
+    }
+
+    override fun getValue() =
+        (editor as ComboBox<String>).selectionModel.selectedItem
+
+    override fun getCSSValue(): String = value
+
+    override fun getObservableValue() =
+        (getEditorEarly() as ComboBox<String>).valueProperty()
+}
+
+
+
+// ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+//endregion                                 Dropdown Property
+//region                                      Range Property
+//░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+class CSSRangeItem(_name: String, element : Element, property: String, _category: String, _description: String, val min: Double, val max: Double)
+    : CSSPropertySheetItem (_name, element, property, _category, _description, caster = doubleCaster)
+
+class CSSRangeEditor(
+
+    property: CSSRangeItem
+
+) : CSSPropertyEditor<Double>(property, Slider()) {
+
+    init {
+        (editor as Slider).min = property.min
+        (editor as Slider).max = property.max
+        (editor as Slider).valueProperty().addListener(onUserEditedEditor())
+    }
+
+    override fun setValue(value: Double?) {
+        (editor as Slider).value = value ?: 0.0
+    }
+
+    override fun getValue() =
+        floor((editor as Slider).value)
+
+    override fun getCSSValue(): String =
+        value.toString() + "px"
+
+    override fun getObservableValue() =
+        ((getEditorEarly() as Slider).valueProperty()) as ObservableValue<Double>
+}
