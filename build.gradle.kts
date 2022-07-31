@@ -35,6 +35,7 @@ dependencies {
     implementation("org.jfxtras:jmetro:11.6.15")
     implementation("org.jsoup:jsoup:1.14.3")
     implementation("net.sourceforge.cssparser:cssparser:0.9.29")
+    implementation("com.vladsch.javafx-webview-debugger:javafx-webview-debugger:0.7.6")
 }
 
 javafx {

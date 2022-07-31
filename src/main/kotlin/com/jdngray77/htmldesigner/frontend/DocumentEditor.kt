@@ -212,6 +212,8 @@ class DocumentEditor {
      */
     @FXML lateinit var breadCrumb: BreadCrumbBar<Element>
 
+    var debugger: DebugServer.EditorDebugger? = null
+
 
 
 
@@ -538,6 +540,8 @@ class DocumentEditor {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                      GUI APU
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
 
     companion object {
 

@@ -276,6 +276,10 @@ class MainViewController {
     fun menu_exit() =
         Platform.exit()
 
+    fun menu_debug_server() {
+        DebugServer.host(mvc().currentEditor())
+    }
+
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                 Menu

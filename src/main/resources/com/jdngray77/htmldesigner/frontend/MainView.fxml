@@ -63,6 +63,7 @@
                   <Menu mnemonicParsing="false" text="Debug">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#menu_debug_eval" text="Evaluate..." />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_server" text="Start Chrome Debug Server" />
                         <Menu mnemonicParsing="false" text="IDE">
                            <items>
                               <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />
@@ -77,6 +78,7 @@
                               <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_projprefs" text="Reset preferences registry" />
                            </items>
                         </Menu>
+
                     </items>
                   </Menu>
                   <MenuItem mnemonicParsing="false" onAction="#menu_soft_restart" text="Soft Restart..." />
