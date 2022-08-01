@@ -113,6 +113,7 @@ class MainViewController {
 
         // RIGHT
         implAddDock(dockRight, TagProperties())
+        implAddDock(dockRight, TestDock())
     }
 
     private fun implAddDock(to: TabPane, vararg it : Dock) {
