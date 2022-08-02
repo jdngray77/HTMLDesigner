@@ -139,6 +139,7 @@ class Editor : Application() {
      * ocour until this method has returned.
      */
     override fun start(stage: Stage) {
+
         this.stage = stage
 
         EDITOR = this
@@ -160,8 +161,6 @@ class Editor : Application() {
 
 
         stage.scene = scene.first
-//        stage.scene.stylesheets.add("stylesheet.css");
-        stage.show()
 
 
 
