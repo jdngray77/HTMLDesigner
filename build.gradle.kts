@@ -1,13 +1,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
+import java.io.FileOutputStream
 
 plugins {
     kotlin("jvm") version "1.7.10"
 
+    id("com.palantir.git-version") version "0.15.0"
     id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.jetbrains.dokka") version "1.7.10"
     id("java")
     id("distribution")
     application
 }
+
+val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
+
 
 java {
     sourceCompatibility = JavaVersion.VERSION_13
@@ -16,7 +23,6 @@ java {
 }
 
 group = "com.shinkson47"
-version = "BETA-1"
 
 repositories {
     mavenCentral()
@@ -50,7 +56,45 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "16"
 }
 
+tasks.build {
+    dependsOn("generateProperties")
+}
+
+tasks.withType<JavaExec>{
+    dependsOn("generateProperties")
+}
+
 application {
     mainClass.set("HTMLDesignerKt")
     applicationDefaultJvmArgs = listOf("-ea")
+    applicationDefaultJvmArgs
 }
+
+/*
+ *   Properties file for the application to read
+ */
+
+tasks.register("generateProperties") {
+    doLast {
+        val propertiesFile = file("$buildDir/resources/main/com/jdngray77/htmldesigner/meta.properties")
+        propertiesFile.parentFile.mkdirs()
+
+        val properties = Properties()
+
+
+
+        val details = versionDetails()
+        //        properties.setProperty("lastHash", gitVersion())
+        //        properties.setProperty("commitDistance", details.commitDistance.toString())
+        //        properties.setProperty("isCleanTag", details.isCleanTag.toString())
+        properties.setProperty("gitHash", details.lastTag)
+        properties.setProperty("gitHashFull", details.gitHashFull)
+        properties.setProperty("branchName", details.branchName)
+
+
+
+        properties.store(FileOutputStream(propertiesFile), null)
+    }
+}
+
+

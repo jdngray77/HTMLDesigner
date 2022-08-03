@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.frontend
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.animation.*
 import javafx.application.Application
+import javafx.fxml.FXML
 import javafx.scene.Scene
 import javafx.scene.control.Label
 import javafx.scene.effect.DropShadow
@@ -56,5 +57,11 @@ class SplashScreen() : Application() {
  * Reference to the GUI of the splash.
  */
 class SplashScreenController {
+    lateinit var lblVersion: Label
     lateinit var txtTitle: Label
+
+    @FXML
+    fun initialize() {
+        lblVersion.text = Editor.getVersionString()
+    }
 }

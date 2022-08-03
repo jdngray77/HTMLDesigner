@@ -15,6 +15,7 @@
 
 package com.jdngray77.htmldesigner.frontend
 
+import ExitCodes
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.AutoLoad
@@ -35,6 +36,7 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.lang.System.gc
+import java.util.*
 import kotlin.system.exitProcess
 import kotlin.test.assertNotNull
 
@@ -52,6 +54,20 @@ class Editor : Application() {
         private val ButtonTypeLoad = ButtonType("Load existing Project")
 
         private val ButtonTypeCreate = ButtonType("Create a new Project")
+
+        /**
+         * Meta data about the editor.
+         *
+         * i.e the IDE verions numbers and stuff.
+         */
+        val properties: Properties = let {
+            val input = this::class.java.getResourceAsStream("../meta.properties")
+            val prop = Properties()
+            prop.load(input)
+            return@let prop
+        }
+
+        fun getVersionString() = "${properties.getProperty("branchName")}@${properties.getProperty("gitHash")}"
 
         /**
          * A static reference to the application instance
@@ -134,6 +150,7 @@ class Editor : Application() {
      * The stage that is used to show scenes.
      */
     lateinit var stage: Stage
+
 
     /**
      * Loads and initalises the GUI.

@@ -69,6 +69,7 @@
                      </image></ImageView>
                    </children>
             </HBox>
+            <Label fx:id="lblVersion" layoutX="8.0" layoutY="435.0" text="&lt;version&gt;" />
          </children>
       </AnchorPane>
 
