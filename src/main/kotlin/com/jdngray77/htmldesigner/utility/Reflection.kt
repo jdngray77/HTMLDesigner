@@ -30,6 +30,7 @@
 
 package com.jdngray77.htmldesigner.utility
 
+import org.reflections.Reflections
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty
@@ -63,3 +64,11 @@ fun <T> Any.readPrivateProperty(superClass: KClass<*>, propertyName: String) : T
         it.isAccessible = true
         it.get(this)
     } as T
+
+val reflections = Reflections("com.jdngray77.htmldesigner")
+
+/**
+ * Returns a list of all instances of the [clazz]
+ */
+fun everyInstanceOf(clazz: KClass<*>) =
+    reflections.getSubTypesOf(clazz.java).mapNotNull { it.kotlin.objectInstance }

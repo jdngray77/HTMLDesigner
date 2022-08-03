@@ -17,8 +17,6 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
 import com.jdngray77.htmldesigner.utility.Restartable
-import com.jdngray77.htmldesigner.utility.readPrivateProperty
-import javafx.application.Platform
 import java.util.concurrent.*
 
 /**
@@ -34,7 +32,7 @@ object BackgroundTask : Subscriber, Restartable {
     private val threadPool : ThreadPoolExecutor = Executors.newCachedThreadPool() as ThreadPoolExecutor
 
     init {
-        EventNotifier.subscribe(this, EventType.USER_EXIT)
+        EventNotifier.subscribe(this, EventType.EXIT)
     }
 
     fun submitToUI(runnable: Runnable) {
@@ -95,7 +93,7 @@ object BackgroundTask : Subscriber, Restartable {
         shutdown()
     }
 
-    override fun onIDERestart() {
-
+    override fun restart() {
+        println("Background task did not handle the IDE restarting!")
     }
 }

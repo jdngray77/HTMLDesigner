@@ -36,16 +36,9 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      */
     protected val tree = TreeTableView<T>()
 
-    /**
-     * A row of buttons to perform actions.
-     */
-    val buttons = HBox()
-
     init {
-        top = buttons
         center = tree
     }
-
 
     /**
      * Recursively constructs tree items from a tree of elements.

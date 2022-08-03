@@ -23,6 +23,7 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.docks.*
+import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
@@ -31,7 +32,11 @@ import com.jdngray77.htmldesigner.utility.camelToSentence
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
+import javafx.geometry.Insets
 import javafx.scene.control.*
+import javafx.scene.image.Image
+import javafx.scene.layout.*
+import javafx.scene.paint.Color
 import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
@@ -95,6 +100,14 @@ class MainViewController {
             EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
         }
 
+        // Trigger switch event when user switches tabs.
+        dockEditors.selectionModel.selectedItemProperty().addListener {
+            _, _, _ ->
+            EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
+        }
+
+        dockEditors.background = Background(BackgroundImage(Image("/com/jdngray77/htmldesigner/frontend/template.png"), BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT))
+
         addDocks()
         documentation.engine.load("https://www.github.com/Jdngray77/HTMLDesigner/wiki")
     }
@@ -104,26 +117,25 @@ class MainViewController {
      */
     private fun addDocks() {
 
-        // TODO automate fetching of class names.
-
         // TOP LEFT
-
-        dockLeftTop.tabs.add(Tab(ToolboxDock::class.simpleName!!.camelToSentence(), ToolboxDock()))
-        dockLeftTop.tabs.add(Tab(Prefabs::class.simpleName!!.camelToSentence(), Prefabs()))
-
-//        dockLeftTop.tabs.add(Tab(ExampleAutoDock::class.simpleName!!.camelToSentence(), ExampleAutoDock()))
-//        dockLeftTop.tabs.add(Tab(TestDock::class.simpleName!!.camelToSentence(), TestDock()))
-
+        implAddDock(dockLeftTop, ToolboxDock(), Prefabs())
 
         // BOTTOM LEFT
-
-        dockLeftBottom.tabs.add(Tab(Pages::class.simpleName!!.camelToSentence(), Pages()))
-        dockLeftBottom.tabs.add(Tab(TagHierarchy::class.simpleName!!.camelToSentence(), TagHierarchy()))
-        dockLeftBottom.tabs.add(Tab(ProjectDock::class.simpleName!!.camelToSentence(), ProjectDock()))
+        implAddDock(dockLeftBottom, Pages(), TagHierarchy(), ProjectDock())
 
         // RIGHT
+        implAddDock(dockRight, TagProperties())
+        implAddDock(dockRight, TestDock())
+    }
 
-        dockRight.tabs.add(Tab(TagProperties::class.simpleName!!.camelToSentence(), TagProperties()))
+    private fun implAddDock(to: TabPane, vararg it : Dock) {
+        it.forEach {
+            to.tabs.add(Tab(
+                    it::class.simpleName!!.camelToSentence(),
+                    it
+                )
+            )
+        }
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -275,6 +287,18 @@ class MainViewController {
 
     fun menu_exit() =
         Platform.exit()
+
+    fun menu_server_start() {
+        WebServer.start()
+    }
+
+    fun menu_server_stop() {
+        WebServer.stop()
+    }
+
+    fun menu_server_tglauto(actionEvent: ActionEvent) {
+        WebServer.autoRefresh = (actionEvent.source as CheckMenuItem).isSelected
+    }
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

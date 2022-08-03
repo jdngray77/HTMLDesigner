@@ -148,7 +148,6 @@ class MVC (
      *
      * @param document Document - The document to open
      */
-    // TODO should this be in Document Editor?
     fun openDocument(document: Document) {
         loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
             (second as DocumentEditor).let {
@@ -177,7 +176,6 @@ class MVC (
      */
     fun switchToEditor(editor: DocumentEditor) {
         MainView.dockEditors.selectionModel.select(editor.tab)
-        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
     }
 
 

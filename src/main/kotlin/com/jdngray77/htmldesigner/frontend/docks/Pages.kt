@@ -41,6 +41,8 @@ import java.util.*
  * FIXME every refresh resets the collapsed state of rows.
  *
  * TODO creation and deletion don't handle user cancellation
+ *
+ * TODO it's possible to delete the HTML folder.
  */
 class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
 

@@ -115,8 +115,6 @@ fun NotificationPane(string: String, buttonText: String = "", showOnBottom: Bool
         }
 
 
-// TODO most of these functions need to be on the UI thread.
-
 /**
  * Prints [string] to the error output stream, and
  * also displays it in left of the status tray.

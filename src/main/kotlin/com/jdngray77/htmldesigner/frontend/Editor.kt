@@ -17,11 +17,13 @@ package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.data.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
-import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
+import com.jdngray77.htmldesigner.utility.Restartable
+import com.jdngray77.htmldesigner.utility.everyInstanceOf
 import com.jdngray77.htmldesigner.utility.loadFXMLScene
 import javafx.application.Application
 import javafx.application.Platform
@@ -33,6 +35,8 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.lang.System.gc
+import kotlin.system.exitProcess
+import kotlin.test.assertNotNull
 
 
 /**
@@ -45,7 +49,9 @@ class Editor : Application() {
 
     companion object {
 
+        private val ButtonTypeLoad = ButtonType("Load existing Project")
 
+        private val ButtonTypeCreate = ButtonType("Create a new Project")
 
         /**
          * A static reference to the application instance
@@ -129,8 +135,6 @@ class Editor : Application() {
      */
     lateinit var stage: Stage
 
-    lateinit var REGISTRY: Registry<Configs>
-
     /**
      * Loads and initalises the GUI.
      *
@@ -138,6 +142,7 @@ class Editor : Application() {
      * ocour until this method has returned.
      */
     override fun start(stage: Stage) {
+
         this.stage = stage
 
         EDITOR = this
@@ -159,19 +164,38 @@ class Editor : Application() {
 
 
         stage.scene = scene.first
-//        stage.scene.stylesheets.add("stylesheet.css");
+
+
         stage.show()
+        Platform.runLater {
+            mvc = MVC(determineProject(), scene.second)
 
+            assertNotNull(mvc)
+            if (!mvcIsAvail()) {
+                showErrorAlert("Encountered a fatal problem after selecting project.\n\n" +
+                        "For nerds :\nNo MVC was created after project load?\n\n")
 
-
-        mvc = MVC(determineProject(), scene.second)
+                exitProcess(ExitCodes.ERROR_NO_MVC.ordinal)
+            }
+        }
     }
 
-    @Deprecated("Use 'exit'")
+    /**
+     * Interruptable shutdown routine.
+     *
+     * Performs a clean shutdown of the application.
+     *
+     * Called by [exit], and by JavaFX.
+     *
+     * @throws InterruptedException if the shutdown is interrupted, typically by the user.
+     */
+    @Deprecated("Use 'exit' to request closure.")
     override fun stop() {
-        // TODO this could be useful.
-        //      stop background threads
-        EventType.USER_EXIT.notify()
+
+        // ==================
+        // Perform interruptable operations.
+        // Ensure we're clear to shutdown.
+        // ==================
 
         mvcIfAvail()?.apply {
             getOpenEditors().forEach {
@@ -182,20 +206,48 @@ class Editor : Application() {
             }
         }
 
-        EventNotifier.onIDERestart()
-        BackgroundTask.onIDERestart()
+
+        // ==================
+        // Clear to close. Commit to actually closing IDE.
+        // ==================
+
+        EventType.EXIT.notify()
+
+        // Notify every [Restartable] that we're restarting / closing.
+        everyInstanceOf(Restartable::class).forEach {
+            try {
+                (it as Restartable).restart()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
+    /**
+     * Requests the application to close.
+     *
+     * @see stop
+     */
     fun exit() {
         stop()
         Platform.exit()
     }
 
+    /**
+     * Closes the current project & restarts fresh.
+     */
     fun closeProject() {
-        Config[Configs.LAST_PROJECT_PATH_STRING] = ""
+        AutoLoad.clearLastProjectLoaded()
         restart()
     }
 
+    /**
+     * Performs the shutdown routine, then the startup routine.
+     *
+     * Just be aware that this is a soft restart, so only non-static things are reloaded.
+     *
+     * Static classes in the JVM persist. For cases where this matters, see [Restartable].
+     */
     fun restart() {
         stop()
         gc()
@@ -203,24 +255,62 @@ class Editor : Application() {
         start(stage)
     }
 
-    private fun determineProject(): Project =
-        if (!(Config[Configs.AUTO_LOAD_PROJECT_BOOL] as Boolean) || Config[Configs.LAST_PROJECT_PATH_STRING] == "")
-            usrChooseProject().also {
-                Config.put(Configs.LAST_PROJECT_PATH_STRING, it.locationOnDisk.path)
-            }
-        else
-            Project.load(Config[Configs.LAST_PROJECT_PATH_STRING] as String) ?: usrChooseProject()
 
     /**
-     * The boot behaviour project chooser.
+     * Sub routine of the startup.
+     *
+     * Determines what the IDE should load.
+     *
+     * Always returns a project. It's just a matter of figuring out what to load.
+     *
+     * If [Configs.AUTO_LOAD_PROJECT_BOOL] permits, and [Configs.LAST_PROJECT_PATH_STRING] is set, this will
+     * auto load the project path stored.
+     *
+     * If not, the user will be prompted.
+     *
+     * Upon load failure, [Configs.LAST_PROJECT_PATH_STRING] will be cleared, for safety.
+     * Prevents looping of auto-loads, if the project cannot be loaded.
+     *
+     * @see usrChooseProject
+     */
+    private fun determineProject(): Project {
+        while (true) {
+            try {
+                return if (AutoLoad.isAvailable())
+                    // If auto-load is available, load the last project.
+                    // However, if that fails then just prompt the user anyway.
+                    Project.load(AutoLoad.getLastProjectLoaded()) ?: usrChooseProject()
+                else
+                    // If auto-load is unavailable, prompt the user for a project.
+                    usrChooseProject().also {
+                        // Store what the user provided for the auto-load.
+                        AutoLoad.storeLastProjectLoaded(it.locationOnDisk.path)
+                    }
+
+
+            } catch (e: Exception) {
+                // If the project could not be loaded, notify the user and prompt.
+                showErrorAlert("Encountered a fatal problem whilst loading project.\n\n" + "${e.message}?")
+                e.printStackTrace()
+
+                // For safety. Prevents looping auto-loads, if it can't load the project.
+                AutoLoad.clearLastProjectLoaded()
+            }
+        }
+    }
+
+    /**
+     * Startup subroutine that prompts the user to choose a project.
      *
      * Will obtain a project from the user,
      * weather it be new or existing, then
      * returns it.
      *
      * Handles cancellation & problems.
-     * User will just be prompted [implUsrSelectProject]
-     * until a project is obtained.
+     *
+     * User will just be prompted [implUsrSelectProject] until a project is obtained.
+     *
+     * This will not return until the user has chosen a project.
      */
     private fun usrChooseProject() : Project {
         var projToLoad : Project? = null
@@ -240,22 +330,18 @@ class Editor : Application() {
     }
 
     /**
-     * A single instance of [usrChooseProject],
+     * A subroutine of [usrChooseProject]
      * where a flow of dialogs and choosers are used to create
      * or load a project.
      *
      * Can return null if cancelled, or throw exceptions
      * if project access or creation fails.
      */
-    private fun implUsrSelectProject(): Project? {
+    private fun implUsrSelectProject(): Project? =
+        when (
+            Alert(Alert.AlertType.INFORMATION, "Welcome! What would you like to do?", ButtonTypeCreate, ButtonTypeLoad).also { it.showAndWait() }.result
+        ) {
 
-        val ButtonTypeLoad = ButtonType("Load existing Project")
-        val ButtonTypeCreate = ButtonType("Create a new Project")
-
-        val x = Alert(Alert.AlertType.INFORMATION, "Welcome! What would you like to do?", ButtonTypeCreate, ButtonTypeLoad)
-        x.showAndWait()
-
-        return when (x.result) {
             ButtonTypeLoad -> {
                 Project.load(DirectoryChooser().let {
                     it.title = "Locate a project root"
@@ -269,13 +355,7 @@ class Editor : Application() {
                     it.showSaveDialog(stage).path
                 })
             }
+
             else -> null
         }
-    }
-
-
-
-
 }
-
-

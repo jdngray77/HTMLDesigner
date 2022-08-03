@@ -25,6 +25,8 @@ import org.jsoup.nodes.Element
  * Be aware of race conditions.
  * TODO implement a snapshot lock of some kind?
  *
+ * TODO this can be abstracted to snapshot any attribute.
+ *
  * i.e
  * ```
  * <div style="...;">
@@ -56,8 +58,12 @@ class StyleAttributeSnapshot(
      * Captures the style properties currently in the [element].
      *
      * This will reset any uncommitted changes.
+     *
+     * @return this for named idiomatic usage.
      */
-    fun capture() {
+    fun capture(): StyleAttributeSnapshot {
+        clear()
+
         // TODO test this
         if (element.hasAttr("style"))
             element.attr("style")
@@ -68,8 +74,8 @@ class StyleAttributeSnapshot(
                         style(get(0).trim(), get(1).trim())
                     }
             }
-        else
-            clear()
+
+        return this
     }
 
     /**
@@ -78,7 +84,10 @@ class StyleAttributeSnapshot(
      * Be aware of race conditions.
      */
     fun commit() {
-        element.attr("style", toString())
+        if (toString().isNotBlank())
+            element.attr("style", toString())
+        else if (element.hasAttr("style"))
+            element.removeAttr("style")
     }
 
     fun style(propertyName : String, value : String) =

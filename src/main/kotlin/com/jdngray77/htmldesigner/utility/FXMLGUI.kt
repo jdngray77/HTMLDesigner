@@ -14,29 +14,19 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
- ░                                                                                                ░
- ░ Jordan T. Gray's                                                                               ░
- ░                                                                                                ░
- ░          HTML Designer                                                                         ░
- ░                                                                                                ░
- ░ FOSS 2022.                                                                                     ░
- ░ License decision pending.                                                                      ░
- ░                                                                                                ░
- ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
- ░ https://www.jordantgray.uk                                                                     ░
- ░                                                                                                ░
- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
-
 package com.jdngray77.htmldesigner.utility
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
 import javafx.fxml.FXMLLoader
+import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.ButtonType
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
@@ -125,3 +115,7 @@ fun Color.toHex(): String {
             (blue * 255).roundToInt()
         )
 }
+
+fun Node.growH() = HBox.setHgrow(this, Priority.ALWAYS)
+fun Node.growV() = VBox.setVgrow(this, Priority.ALWAYS)
+fun Node.grow() { growH(); growV() }

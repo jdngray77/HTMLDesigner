@@ -27,7 +27,7 @@ import javafx.application.Platform
  */
 enum class EventType {
     USER_SAVE,
-    USER_EXIT,
+    EXIT,
 
     AUTO_SAVE,
 
@@ -70,17 +70,46 @@ typealias SubscriberMap = HashMap<EventType, ArrayList<Subscriber>>
  */
 object EventNotifier : Restartable {
 
+    /**
+     * Subscribers that are executed on background threads.
+     *
+     * @see BackgroundTask
+     */
     val backgroundSubscribers = SubscriberMap()
 
+    /**
+     * Subscribers that are executed on the JavaFX thread.
+     */
     val FXSubscribers = SubscriberMap()
 
-
+    /**
+     * Subscribes a listener to notifications raised by the given events.
+     *
+     * This method explicitly subscribes events to the JavaFX thread.
+     * @param newSubscriber The subscriber that will receive notifications.
+     * @param subscribeTo The events that the subscriber will be notified of.
+     * @param map Either [backgroundSubscribers] or [FXSubscribers]. Determines what thread the notification will occur.
+     */
     fun subscribe(newSubscriber: Subscriber, vararg subscribeTo: EventType) =
         subscribe(newSubscriber, *subscribeTo, map = FXSubscribers)
 
+    /**
+     * Subscribes a listener to notifications raised by the given events.
+     *
+     * This method subscribes explicitly to [backgroundSubscribers]
+     * @param newSubscriber The subscriber that will receive notifications.
+     * @param subscribeTo The events that the subscriber will be notified of.
+     */
     fun subscribeInBackground(newSubscriber: Subscriber, vararg subscribeTo: EventType) =
         subscribe(newSubscriber, *subscribeTo, map = backgroundSubscribers)
 
+    /**
+     * Subscribes a listener to notifications raised by the given events.
+     *
+     * @param newSubscriber The subscriber that will receive notifications.
+     * @param subscribeTo The events that the subscriber will be notified of.
+     * @param map Either [backgroundSubscribers] or [FXSubscribers]. Determines what thread the notification will occur.
+     */
     fun subscribe(newSubscriber: Subscriber, vararg subscribeTo: EventType, map: SubscriberMap = backgroundSubscribers) {
         subscribeTo.forEach {
             // Create an entry for the event type, if it's not already there,
@@ -91,7 +120,8 @@ object EventNotifier : Restartable {
     }
 
     /**
-     * Notify the rest of the system that an event has occoured.
+     * Notify any listening subscribers that an event has occurred.
+     * Returns with no effect if the MVC is not available.
      */
     fun notifyEvent(event: EventType) {
         if (!mvcIsAvail()) return
@@ -107,13 +137,13 @@ object EventNotifier : Restartable {
         // TODO detect circular notifications. Maybe check what thread is calling [subscribe] whilst inside of [notify]?
         //      Also not sure that this is a good idea. Maybe just warn.
 
-        notify(backgroundSubscribers, event) {
+        implNotify(backgroundSubscribers, event) {
             BackgroundTask.submit {
                 it.notify(event)
             }
         }
 
-        notify(FXSubscribers, event) {
+        implNotify(FXSubscribers, event) {
             Platform.runLater {
                 it.notify(event)
             }
@@ -122,14 +152,34 @@ object EventNotifier : Restartable {
         logStatus("Notified $event to ${backgroundSubscribers.size + FXSubscribers.size} Subscribers")
     }
 
-    private fun notify(map: SubscriberMap, event: EventType, submitter: (Subscriber) -> Unit) {
+    /**
+     * Notification performing sub routine.
+     */
+    private fun implNotify(map: SubscriberMap, event: EventType, submitter: (Subscriber) -> Unit) {
         map[event]?.map {
             submitter.invoke(it)
         }
     }
-    override fun onIDERestart() {
+
+    /**
+     * Removes all subscribed listeners.
+     */
+    override fun restart() {
         backgroundSubscribers.clear()
         FXSubscribers.clear()
     }
 
+    /**
+     * Removes a subscriber from the given event type.
+     *
+     * After unsubscribing, the subscriber will no longer receive notifications of the given event type(s).
+     * @param subscriber The subscriber that to unsub.
+     * @param unsubFrom The events that the subscriber will no-longer be notified of.
+     * @param map Either [backgroundSubscribers] or [FXSubscribers]. Determines what thread the notification will occur.
+     */
+    fun unsubscribe(subscriber: Subscriber, vararg unsubFrom: EventType, map: SubscriberMap = backgroundSubscribers) {
+        unsubFrom.forEach {
+            map[it]?.remove(subscriber)
+        }
+    }
 }

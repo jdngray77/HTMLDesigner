@@ -30,6 +30,7 @@ import java.util.stream.Stream
  * JavaFX does have a method for this, but it's not public
  * so this bodge uses reflection to access it.
  */
+@Deprecated("Since updating JavaFX, this no longer works - and throws an exception.")
 fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
     table.skin?.let {
         TreeTableViewSkin::class.java.getDeclaredMethod(
@@ -101,6 +102,7 @@ fun <T> TreeItem<T>.flatten(item : TreeItem<T>): Stream<TreeItem<T>> =
  * JavaFX does have a method for this, but it's not public
  * so this bodge uses reflection to access it.
  */
+@Deprecated("Since updating JavaFX, this no longer works - and throws an exception.")
 fun TreeTableView<*>.pack() {
     columns.forEach {
         it.pack(this)

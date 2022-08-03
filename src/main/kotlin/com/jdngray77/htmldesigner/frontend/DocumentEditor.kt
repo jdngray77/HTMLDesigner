@@ -228,7 +228,6 @@ class DocumentEditor {
      */
     var selectedTag: Element? = null
         private set(value) {
-            //FIXME these debug lines will be saved into the output document.
 
             // Guard against repetition ; issue #19.
             if (value == field) return
@@ -236,8 +235,8 @@ class DocumentEditor {
             // Guard against excluding head
             if (value == document.body()) return
 
-            if (value == null)
-                standaloneEditMode = false
+            // Exit standalone if no tag is selected.
+            if (value == null) standaloneEditMode = false
 
             field?.removeClass("debug-outline")
             field = value
@@ -378,7 +377,7 @@ class DocumentEditor {
      *
      */
     fun documentChanged() {
-        // TODO auto detection using hashes, on document access
+        // TODO auto detection using hashes, on document access?
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
         reRender()
 
@@ -518,8 +517,8 @@ class DocumentEditor {
      * Navigates back a page.
      *
      * FIXME
-     * Known issue : This will not navigate to the first
-     * page in the history.
+     *      Known issue : This will not navigate to the first
+     *                    page in the history.
      */
     fun back() {
         Platform.runLater {
