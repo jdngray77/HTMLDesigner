@@ -17,6 +17,8 @@ package com.jdngray77.htmldesigner.backend.data
 
 import com.jdngray77.htmldesigner.*
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
 import com.jdngray77.htmldesigner.backend.html.DefaultDocument
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
@@ -26,9 +28,13 @@ import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
 import java.io.InvalidClassException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 import java.sql.Time
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /*
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -119,6 +125,7 @@ import java.util.*
  * This object is serialized to disk as `project.designer`.
  *
  * @see locationOnDisk for project file structure.
+ * @author Jordan Gray
  */
 class Project(
 
@@ -163,7 +170,7 @@ class Project(
      * Name of the person or organisation
      * that created this project.
      *
-     * Save
+     * Saves meta when altered.
      */
     var author: String? = _author
         set(value) {
@@ -702,6 +709,10 @@ class Project(
          * @return A Project object
          */
         fun load(path : String) : Project? {
+            if (!File(path).exists()) {
+                throw NoSuchFileException(File(path), reason = "Tried to load a project, but there's nothing there!")
+            }
+
             File("$path/$PROJECT_PATH_META").apply {
                 if (!exists())
                     throw NoSuchFileException(this, reason = "\n\nThere is no $PROJECT_PATH_META file in ${parentFile.name}. \nAre you sure this is the right folder?")
@@ -723,4 +734,59 @@ class Project(
     }
 
     class UnloadedDocumentException(val d: Document) : Exception("The file for ${d.title().assertEndsWith(".html")} was required, but the file was not loaded.")
+}
+
+/**
+ * Simple object-oriented wrapper for Configs.AUTO_LOAD stuff,
+ * for convenience.
+ */
+internal object AutoLoad {
+
+    /**
+     * @return true if [Configs.AUTO_LOAD_PROJECT_BOOL] permits auto-loading, and the there is a project to load
+     *         within [Configs.AUTO_LOAD_PROJECT_PATH]
+     */
+    fun isAvailable() =
+        (Config[Configs.AUTO_LOAD_PROJECT_BOOL] as Boolean)
+        && Config[Configs.LAST_PROJECT_PATH_STRING] != ""
+
+    /**
+     * Raises [Configs.AUTO_LOAD_PROJECT_BOOL]
+     */
+    fun enable() {
+        Config[Configs.AUTO_LOAD_PROJECT_BOOL] = true
+    }
+
+    /**
+     * Lowers [Configs.AUTO_LOAD_PROJECT_BOOL]
+     */
+    fun disable() {
+        Config[Configs.AUTO_LOAD_PROJECT_BOOL] = false
+    }
+
+    /**
+     * @return the value of [Configs.AUTO_LOAD_PROJECT_PATH]
+     */
+    fun getLastProjectLoaded() =
+        Config[Configs.LAST_PROJECT_PATH_STRING] as String
+
+    /**
+     * Sets [Configs.AUTO_LOAD_PROJECT_PATH] to nothing.
+     *
+     * Makes [AutoLoad] not [isAvailable]
+     */
+    fun clearLastProjectLoaded() {
+        Config[Configs.LAST_PROJECT_PATH_STRING] = ""
+    }
+
+    /**
+     * Stores a project that could be loaded at next boot.
+     *
+     * Typically set when project is loaded.
+     *
+     * [Configs.AUTO_LOAD_PROJECT_PATH] to the specified value.
+     */
+    fun storeLastProjectLoaded(path: String) {
+        Config[Configs.LAST_PROJECT_PATH_STRING] = path
+    }
 }

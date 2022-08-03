@@ -19,6 +19,7 @@ import com.jdngray77.htmldesigner.utility.changed
 import com.jdngray77.htmldesigner.backend.html.StyleAttributeSnapshot
 import com.jdngray77.htmldesigner.frontend.controls.AlignControl
 import com.jdngray77.htmldesigner.frontend.controls.CSSUnitSlider
+import com.jdngray77.htmldesigner.frontend.controls.QuadControl
 import com.jdngray77.htmldesigner.frontend.controls.removeCSSUnit
 import com.jdngray77.htmldesigner.utility.readPrivateProperty
 import com.jdngray77.htmldesigner.utility.toHex
@@ -408,6 +409,7 @@ object CSSPropertyEditorFactory : Callback<PropertySheet.Item, PropertyEditor<*>
                 is CSSAlignmentPropertySheetItem -> CSSAlignmentPropertyEditor(item)
                 is CSSDropdownItem -> CSSDropdownEditor(item)
                 is CSSRangeItem -> CSSRangeEditor(item)
+                is CSSQuadRangeItem -> CSSQuadRangeEditor(item)
 
 
                 // Default to the default editor, which is a based on
@@ -593,4 +595,39 @@ class CSSRangeEditor(
 
     override fun getObservableValue() =
         (getEditorEarly() as CSSUnitSlider).observableValue
+}
+
+
+class CSSQuadRangeItem(_name: String, element : Element, property: String, _category: String, _description: String, val min: Double, val max: Double, val enableUnits: Boolean = true)
+    : CSSPropertySheetItem (_name, element, property, _category, _description)
+
+class CSSQuadRangeEditor(
+
+    property: CSSQuadRangeItem
+
+) : CSSPropertyEditor<String>(property,
+        QuadControl(
+            { CSSUnitSlider(property.min, property.max, enableUnits = property.enableUnits) },
+            { it.getValue() },
+            { it, value -> it.setValue(value) }
+        )
+    )
+{
+
+    init {
+//        (editor as QuadControl<String, CSSUnitSlider>).observableValue.addListener(onUserEditedEditor())
+    }
+
+    override fun setValue(value: String?) {
+        (editor as QuadControl<String, CSSUnitSlider>).setValue(value)
+    }
+
+    override fun getValue() =
+        (editor as QuadControl<String, CSSUnitSlider>).getValue()
+
+    override fun getCSSValue(): String =
+        value
+
+    override fun getObservableValue() =//TODO this is empty.
+        SimpleStringProperty("")
 }

@@ -32,7 +32,11 @@ import com.jdngray77.htmldesigner.utility.camelToSentence
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
+import javafx.geometry.Insets
 import javafx.scene.control.*
+import javafx.scene.image.Image
+import javafx.scene.layout.*
+import javafx.scene.paint.Color
 import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
@@ -98,8 +102,11 @@ class MainViewController {
 
         // Trigger switch event when user switches tabs.
         dockEditors.selectionModel.selectedItemProperty().addListener {
-            _, _, _ -> EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
+            _, _, _ ->
+            EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
         }
+
+        dockEditors.background = Background(BackgroundImage(Image("/com/jdngray77/htmldesigner/frontend/template.png"), BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT))
 
         addDocks()
         documentation.engine.load("https://www.github.com/Jdngray77/HTMLDesigner/wiki")
