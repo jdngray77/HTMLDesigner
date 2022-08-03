@@ -178,6 +178,16 @@ class Editor : Application() {
                 exitProcess(ExitCodes.ERROR_NO_MVC.ordinal)
             }
         }
+
+        stage.setOnCloseRequest {
+            try {
+                stop()
+            } catch (e: Exception) {
+                // Shutdown routine failed or rejected.
+                // Cancel close request.
+                it.consume()
+            }
+        }
     }
 
     /**
