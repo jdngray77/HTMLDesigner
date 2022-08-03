@@ -7,3 +7,9 @@ fun main() {
     Thread.setDefaultUncaughtExceptionHandler(ExceptionListener)
     Application.launch(SplashScreen::class.java)
 }
+
+enum class ExitCodes {
+    OK,
+    ERROR,
+    ERROR_NO_MVC,
+}

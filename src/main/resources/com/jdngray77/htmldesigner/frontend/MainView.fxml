@@ -135,9 +135,14 @@
         </Menu>
             <Menu mnemonicParsing="false" text="Tools">
                <items>
-                  <MenuItem mnemonicParsing="false" text="[inop] View in browser" />
-                  <MenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Debug in Chrome Dev Tools" />
+                  <Menu mnemonicParsing="false" text="Live Server">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#menu_server_start" text="Start" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_server_stop" text="Stop" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <CheckMenuItem mnemonicParsing="false" onAction="#menu_server_tglauto" selected="true" text="Toggle auto-refresh" />
+                    </items>
+                  </Menu>
                </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Git">

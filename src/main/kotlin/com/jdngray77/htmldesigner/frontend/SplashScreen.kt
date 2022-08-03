@@ -11,36 +11,28 @@ import javafx.stage.Stage
 import javafx.stage.StageStyle
 import javafx.util.Duration
 
-class SplashScreen : Application() {
+/**
+ * A proxy application to launch the main application, preposed with a splash screen.
+ *
+ * @author Jordan Gray
+ * @see SplashScreen.fxml for visuals
+ */
+class SplashScreen() : Application() {
 
+    /**
+     * Entry Point.
+     *
+     * Displays a splash screen, and then launches the main application.
+     * The splash screen is then disposed once after the appliction has launched.
+     */
     override fun start(primaryStage: Stage) {
+        // Load the visuals.
         val splash = loadFXMLComponent<AnchorPane>("SplashScreen.fxml")
 
-        val splashController = splash.second as SplashScreenController
-
+        // Create a new window. We won't interfere with the main stage; that's for the main application to use.
         val splashWindow = Stage()
         splashWindow.scene = Scene(splash.first)
-
         splashWindow.initStyle(StageStyle.TRANSPARENT)
-
-        // Pulse the text
-//        val shadow = (splashController.txtTitle.effect as DropShadow)
-//        val timeline = Timeline()
-//        timeline.keyFrames.setAll(
-//            KeyFrame(
-//                Duration.millis(100.0),
-//                KeyValue(shadow.radiusProperty(), .1),
-//            ),
-//
-//            KeyFrame(
-//                Duration.millis(100.0),
-//                KeyValue(shadow.radiusProperty(), 1),
-//            )
-//        )
-//
-//        timeline.cycleCount = 3
-//        timeline.isAutoReverse = true
-//        timeline.play()
 
         //Load splash screen with fade in effect
         val fadeIn = FadeTransition(Duration.seconds(0.8), splash.first)
@@ -48,17 +40,21 @@ class SplashScreen : Application() {
         fadeIn.toValue = 1.0
         fadeIn.cycleCount = 1
 
-        //After fade in, start fade out
+        //After fade in, load the app.
         fadeIn.setOnFinished { e ->
             Editor().start(primaryStage)
-            primaryStage.show()
+            splashWindow.close()
         }
 
+        // Display the splash.
         splashWindow.show()
         fadeIn.play()
     }
 }
 
+/**
+ * Reference to the GUI of the splash.
+ */
 class SplashScreenController {
     lateinit var txtTitle: Label
 }

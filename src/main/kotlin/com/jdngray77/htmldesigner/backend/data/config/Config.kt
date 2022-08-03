@@ -30,7 +30,10 @@ enum class Configs {
     USE_MAC_MENU_BOOL,
 
     OUTLINE_SELECTED_TAG_BOOL,
-    AUTO_LOAD_PROJECT_BOOL
+    AUTO_LOAD_PROJECT_BOOL,
+
+    WEB_SERVER_PORT_INT,
+    WEB_SERVER_REFRESH_DELAY_INT
 }
 
 /**
@@ -55,6 +58,8 @@ object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
         put(Configs.USE_MAC_MENU_BOOL, true)
         put(Configs.OUTLINE_SELECTED_TAG_BOOL, true)
         put(Configs.AUTO_LOAD_PROJECT_BOOL, true)
+        put(Configs.WEB_SERVER_PORT_INT, 8080)
+        put(Configs.WEB_SERVER_REFRESH_DELAY_INT, 0)
     }
 
     override fun validate() {

@@ -52,4 +52,5 @@ tasks.withType<KotlinCompile> {
 
 application {
     mainClass.set("HTMLDesignerKt")
+    applicationDefaultJvmArgs = listOf("-ea")
 }

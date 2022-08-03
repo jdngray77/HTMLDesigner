@@ -38,7 +38,7 @@ import org.controlsfx.control.SegmentedButton
  *
  * @author Jordan Gray
  */
-class QuadControl<T,R : Node>(val controlFactory : () -> R, val controlGetter: (R) -> T, val controlSetter: (R, T) -> Unit) : VBox(){
+class QuadControl<T,R : Node>(val controlFactory : () -> R, val controlGetter: (R) -> T, val controlSetter: (R, T?) -> Unit) : VBox(){
 
     companion object {
 
@@ -172,7 +172,7 @@ class QuadControl<T,R : Node>(val controlFactory : () -> R, val controlGetter: (
     /**
      * Blankly sets all controls to the provided value.
      */
-    fun setValue(value: T) {
+    fun setValue(value: T?) {
         getAllControls().forEach {
             controlSetter(it, value)
         }

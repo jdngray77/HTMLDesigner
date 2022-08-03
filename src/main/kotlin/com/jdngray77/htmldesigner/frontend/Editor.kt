@@ -17,6 +17,7 @@ package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.data.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
@@ -34,6 +35,8 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.lang.System.gc
+import kotlin.system.exitProcess
+import kotlin.test.assertNotNull
 
 
 /**
@@ -163,8 +166,18 @@ class Editor : Application() {
         stage.scene = scene.first
 
 
+        stage.show()
+        Platform.runLater {
+            mvc = MVC(determineProject(), scene.second)
 
-        mvc = MVC(determineProject(), scene.second)
+            assertNotNull(mvc)
+            if (!mvcIsAvail()) {
+                showErrorAlert("Encountered a fatal problem after selecting project.\n\n" +
+                        "For nerds :\nNo MVC was created after project load?\n\n")
+
+                exitProcess(ExitCodes.ERROR_NO_MVC.ordinal)
+            }
+        }
     }
 
     /**
@@ -202,7 +215,11 @@ class Editor : Application() {
 
         // Notify every [Restartable] that we're restarting / closing.
         everyInstanceOf(Restartable::class).forEach {
-            (it as Restartable).restart()
+            try {
+                (it as Restartable).restart()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -220,7 +237,7 @@ class Editor : Application() {
      * Closes the current project & restarts fresh.
      */
     fun closeProject() {
-        Config[Configs.LAST_PROJECT_PATH_STRING] = ""
+        AutoLoad.clearLastProjectLoaded()
         restart()
     }
 
@@ -244,19 +261,43 @@ class Editor : Application() {
      *
      * Determines what the IDE should load.
      *
+     * Always returns a project. It's just a matter of figuring out what to load.
+     *
      * If [Configs.AUTO_LOAD_PROJECT_BOOL] permits, and [Configs.LAST_PROJECT_PATH_STRING] is set, this will
      * auto load the project path stored.
      *
      * If not, the user will be prompted.
+     *
+     * Upon load failure, [Configs.LAST_PROJECT_PATH_STRING] will be cleared, for safety.
+     * Prevents looping of auto-loads, if the project cannot be loaded.
+     *
      * @see usrChooseProject
      */
-    private fun determineProject(): Project =
-        if (!(Config[Configs.AUTO_LOAD_PROJECT_BOOL] as Boolean) || Config[Configs.LAST_PROJECT_PATH_STRING] == "")
-            usrChooseProject().also {
-                Config.put(Configs.LAST_PROJECT_PATH_STRING, it.locationOnDisk.path)
+    private fun determineProject(): Project {
+        while (true) {
+            try {
+                return if (AutoLoad.isAvailable())
+                    // If auto-load is available, load the last project.
+                    // However, if that fails then just prompt the user anyway.
+                    Project.load(AutoLoad.getLastProjectLoaded()) ?: usrChooseProject()
+                else
+                    // If auto-load is unavailable, prompt the user for a project.
+                    usrChooseProject().also {
+                        // Store what the user provided for the auto-load.
+                        AutoLoad.storeLastProjectLoaded(it.locationOnDisk.path)
+                    }
+
+
+            } catch (e: Exception) {
+                // If the project could not be loaded, notify the user and prompt.
+                showErrorAlert("Encountered a fatal problem whilst loading project.\n\n" + "${e.message}?")
+                e.printStackTrace()
+
+                // For safety. Prevents looping auto-loads, if it can't load the project.
+                AutoLoad.clearLastProjectLoaded()
             }
-        else
-            Project.load(Config[Configs.LAST_PROJECT_PATH_STRING] as String) ?: usrChooseProject()
+        }
+    }
 
     /**
      * Startup subroutine that prompts the user to choose a project.

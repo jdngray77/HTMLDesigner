@@ -176,7 +176,6 @@ class MVC (
      */
     fun switchToEditor(editor: DocumentEditor) {
         MainView.dockEditors.selectionModel.select(editor.tab)
-        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
     }
 
 
