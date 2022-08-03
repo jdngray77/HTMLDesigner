@@ -14,20 +14,6 @@
  ░                                                                                                ░
  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
 
-/*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
- ░                                                                                                ░
- ░ Jordan T. Gray's                                                                               ░
- ░                                                                                                ░
- ░          HTML Designer                                                                         ░
- ░                                                                                                ░
- ░ FOSS 2022.                                                                                     ░
- ░ License decision pending.                                                                      ░
- ░                                                                                                ░
- ░ https://www.github.com/jdngray77/HTMLDesigner/                                                 ░
- ░ https://www.jordantgray.uk                                                                     ░
- ░                                                                                                ░
- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░*/
-
 package com.jdngray77.htmldesigner.utility
 
 import org.reflections.Reflections
@@ -72,3 +58,11 @@ val reflections = Reflections("com.jdngray77.htmldesigner")
  */
 fun everyInstanceOf(clazz: KClass<*>) =
     reflections.getSubTypesOf(clazz.java).mapNotNull { it.kotlin.objectInstance }
+
+
+fun getThreadByName(threadName: String): Thread? {
+    for (t in Thread.getAllStackTraces().keys) {
+        if (t.name == threadName) return t
+    }
+    return null
+}

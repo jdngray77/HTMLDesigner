@@ -119,3 +119,7 @@ fun Color.toHex(): String {
 fun Node.growH() = HBox.setHgrow(this, Priority.ALWAYS)
 fun Node.growV() = VBox.setVgrow(this, Priority.ALWAYS)
 fun Node.grow() { growH(); growV() }
+
+fun openURL(url: String) {
+    java.awt.Desktop.getDesktop().browse(java.net.URI(url))
+}

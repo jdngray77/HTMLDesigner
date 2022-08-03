@@ -29,6 +29,7 @@ import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.utility.camelToSentence
+import com.jdngray77.htmldesigner.utility.openURL
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -298,6 +299,30 @@ class MainViewController {
 
     fun menu_server_tglauto(actionEvent: ActionEvent) {
         WebServer.autoRefresh = (actionEvent.source as CheckMenuItem).isSelected
+    }
+
+    fun menu_help_about() {
+        AboutWindow()
+    }
+
+    fun menu_help_wiki() {
+        openURL("https://github.com/jdngray77/HTMLDesigner/wiki/A-Users-Guide-To-Getting-Started")
+    }
+
+    fun menu_help_repo() {
+        openURL("https://github.com/jdngray77/HTMLDesigner/")
+    }
+
+    fun menu_help_issues() {
+        openURL("https://github.com/jdngray77/HTMLDesigner/issues/new/choose")
+    }
+
+    fun menu_help_jdngray() {
+        openURL("https://www.jordantgray.uk/")
+    }
+
+    fun menu_help_dbrand(actionEvent: ActionEvent) {
+        openURL("https://dylanbrand.uk/")
     }
 
 
