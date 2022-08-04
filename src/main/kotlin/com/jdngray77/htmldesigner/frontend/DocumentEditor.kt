@@ -24,6 +24,7 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.utility.ButtonType_CLOSEWITHOUTSAVE
 import com.jdngray77.htmldesigner.utility.ButtonType_SAVE
+import com.jdngray77.htmldesigner.utility.SerializableDocument
 import com.jdngray77.htmldesigner.utility.toHex
 import com.sun.javafx.scene.control.skin.Utils
 import javafx.application.Platform
@@ -144,6 +145,8 @@ class DocumentEditor {
         this.file = document.projectFile()
         this.document = document
 
+        documentHistory = DocumentUndoRedo(SerializableDocument(document))
+
         tab.text = document.title()
 
         clean()
@@ -161,6 +164,9 @@ class DocumentEditor {
      * [document].
      */
     lateinit var document : Document
+        private set
+
+    lateinit var documentHistory : DocumentUndoRedo<SerializableDocument>
         private set
 
     /**
@@ -247,6 +253,17 @@ class DocumentEditor {
             reRender()
             EventNotifier.notifyEvent(EventType.EDITOR_SELECTED_TAG_CHANGED)
         }
+
+
+    fun undo() {
+        document = documentHistory.undo().get()
+        onDocumentChanged()
+    }
+
+    fun redo() {
+        document = documentHistory.redo().get()
+        onDocumentChanged()
+    }
 
 
 
@@ -378,13 +395,18 @@ class DocumentEditor {
      */
     fun documentChanged() {
         // TODO auto detection using hashes, on document access?
-        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
-        reRender()
+        onDocumentChanged()
+        documentHistory.push(SerializableDocument(document))
 
         if (isDirty) return
 
         tab.text += DIRTY_SUFFIX
         isDirty = true
+    }
+
+    private fun onDocumentChanged() {
+        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
+        reRender()
     }
 
     fun clean() {

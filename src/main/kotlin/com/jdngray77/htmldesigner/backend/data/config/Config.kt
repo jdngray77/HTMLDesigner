@@ -33,7 +33,8 @@ enum class Configs {
     AUTO_LOAD_PROJECT_BOOL,
 
     WEB_SERVER_PORT_INT,
-    WEB_SERVER_REFRESH_DELAY_INT
+    WEB_SERVER_REFRESH_DELAY_INT,
+    UNDO_HISTORY_MAX_INT
 }
 
 /**
@@ -60,6 +61,7 @@ object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
         put(Configs.AUTO_LOAD_PROJECT_BOOL, true)
         put(Configs.WEB_SERVER_PORT_INT, 8080)
         put(Configs.WEB_SERVER_REFRESH_DELAY_INT, 0)
+        put(Configs.UNDO_HISTORY_MAX_INT, 20)
     }
 
     override fun validate() {
