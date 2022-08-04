@@ -52,151 +52,135 @@
 <?import javafx.scene.text.*?>
 <?import javafx.scene.web.*?>
 
-<VBox prefHeight="1108.0" prefWidth="1606.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.jdngray77.htmldesigner.frontend.MainViewController">
+<VBox prefHeight="1108.0" prefWidth="1606.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.MainViewController">
     <children>
         <MenuBar fx:id="MenuBar" VBox.vgrow="NEVER">
             <menus>
                 <Menu mnemonicParsing="false" text="HTML Designer">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_run_anything" text="Run a Task"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_registry" text="Registry..."/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_run_anything" text="Run a Task" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_registry" text="Registry..." />
                         <Menu mnemonicParsing="false" text="Debug">
                             <items>
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_eval" text="Evaluate..."/>
+                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_eval" text="Evaluate..." />
                                 <Menu mnemonicParsing="false" text="IDE">
                                     <items>
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_err"
-                                                  text="Throw an exception"/>
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_dirty"
-                                                  text="Mark current editor as dirty"/>
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_config"
-                                                  text="Reset config registry"/>
+                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />
+                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_dirty" text="Mark current editor as dirty" />
+                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_config" text="Reset config registry" />
                                     </items>
                                 </Menu>
                                 <Menu mnemonicParsing="false" text="Project">
                                     <items>
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_showcache"
-                                                  text="Show Project File Cache Entires"/>
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_showserial"
-                                                  text="Show and Copy Project Serial Version"/>
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_projprefs"
-                                                  text="Reset preferences registry"/>
+                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_showcache" text="Show Project File Cache Entires" />
+                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_showserial" text="Show and Copy Project Serial Version" />
+                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_projprefs" text="Reset preferences registry" />
                                     </items>
                                 </Menu>
                             </items>
                         </Menu>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_soft_restart" text="Soft Restart..."/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_exit" text="Exit"/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_soft_restart" text="Soft Restart..." />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_exit" text="Exit" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Project">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="[inop] Save"/>
-                        <MenuItem mnemonicParsing="false" text="[inop] New..."/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Load..."/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_project_close"
-                                  text="Close Project &amp; Restart"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" text="[inop] Save" />
+                        <MenuItem mnemonicParsing="false" text="[inop] New..." />
+                        <MenuItem mnemonicParsing="false" text="[inop] Load..." />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_project_close" text="Close Project &amp; Restart" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
                         <Menu mnemonicParsing="false" text="[inop] Backups">
                             <items>
-                                <MenuItem mnemonicParsing="false" text="Backup now"/>
-                                <MenuItem mnemonicParsing="false" text="Restore backup..."/>
-                                <MenuItem mnemonicParsing="false" text="Revert changes made this session..."/>
+                                <MenuItem mnemonicParsing="false" text="Backup now" />
+                                <MenuItem mnemonicParsing="false" text="Restore backup..." />
+                                <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="[inop] Open Recent"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…"/>
+                        <Menu mnemonicParsing="false" text="[inop] Open Recent" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert unsaved changes"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert unsaved changes" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
                         <Menu mnemonicParsing="false" text="[inop] Backups">
                             <items>
-                                <MenuItem mnemonicParsing="false" text="Backup now"/>
-                                <MenuItem mnemonicParsing="false" text="Restore backup..."/>
-                                <MenuItem mnemonicParsing="false" text="Revert changes made this session..."/>
+                                <MenuItem mnemonicParsing="false" text="Backup now" />
+                                <MenuItem mnemonicParsing="false" text="Restore backup..." />
+                                <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="[inop] Open Recent"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…"/>
+                        <Menu mnemonicParsing="false" text="[inop] Open Recent" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="[inop] Undo"/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Redo"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Cut"/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Copy"/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Paste"/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Delete"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Select All"/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Unselect All"/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_edit_undo" text="[WIP] Undo" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_edit_redo" text="[WIP] Redo" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="[inop] Cut" />
+                        <MenuItem mnemonicParsing="false" text="[inop] Copy" />
+                        <MenuItem mnemonicParsing="false" text="[inop] Paste" />
+                        <MenuItem mnemonicParsing="false" text="[inop] Delete" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="[inop] Select All" />
+                        <MenuItem mnemonicParsing="false" text="[inop] Unselect All" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Tools">
                     <items>
                         <Menu mnemonicParsing="false" text="Live Server">
                             <items>
-                                <MenuItem mnemonicParsing="false" onAction="#menu_server_start" text="Start"/>
-                                <MenuItem mnemonicParsing="false" onAction="#menu_server_stop" text="Stop"/>
-                                <SeparatorMenuItem mnemonicParsing="false"/>
-                                <CheckMenuItem mnemonicParsing="false" onAction="#menu_server_tglauto" selected="true"
-                                               text="Toggle auto-refresh"/>
+                                <MenuItem mnemonicParsing="false" onAction="#menu_server_start" text="Start" />
+                                <MenuItem mnemonicParsing="false" onAction="#menu_server_stop" text="Stop" />
+                                <SeparatorMenuItem mnemonicParsing="false" />
+                                <CheckMenuItem mnemonicParsing="false" onAction="#menu_server_tglauto" selected="true" text="Toggle auto-refresh" />
                             </items>
                         </Menu>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Git">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="[inop] Publish changes..."/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Update project..."/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Branches..."/>
-                        <MenuItem mnemonicParsing="false" text="[inop] Delete changes..."/>
+                        <MenuItem mnemonicParsing="false" text="[inop] Publish changes..." />
+                        <MenuItem mnemonicParsing="false" text="[inop] Update project..." />
+                        <MenuItem mnemonicParsing="false" text="[inop] Branches..." />
+                        <MenuItem mnemonicParsing="false" text="[inop] Delete changes..." />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_wiki" text="Wiki"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_repo" text="Repository"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_issues" text="Report a problem"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_jdngray" text="Author"/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_dbrand" text="Co-Author"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false"  onAction="#menu_help_about" text="About"/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_wiki" text="Wiki" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_repo" text="Repository" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_issues" text="Report a problem" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_jdngray" text="Author" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_dbrand" text="Co-Author" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="About" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
         <BorderPane VBox.vgrow="ALWAYS">
             <center>
-                <SplitPane dividerPositions="0.1745635910224439, 0.8341645885286783" focusTraversable="true"
-                           prefHeight="-1.0" prefWidth="-1.0" BorderPane.alignment="CENTER">
+                <SplitPane dividerPositions="0.1745635910224439, 0.8341645885286783" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" BorderPane.alignment="CENTER">
                     <items>
                         <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                             <items>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                     <children>
-                                        <TabPane fx:id="dockLeftTop" side="LEFT" tabClosingPolicy="UNAVAILABLE"
-                                                 tabMaxHeight="500.0" tabMaxWidth="500.0" AnchorPane.bottomAnchor="0.0"
-                                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                                 AnchorPane.topAnchor="0.0"/>
+                                        <TabPane fx:id="dockLeftTop" side="LEFT" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="500.0" tabMaxWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     </children>
                                 </AnchorPane>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                     <children>
-                                        <TabPane fx:id="dockLeftBottom" prefHeight="200.0" prefWidth="200.0" side="LEFT"
-                                                 tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0"
-                                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                                 AnchorPane.topAnchor="0.0"/>
+                                        <TabPane fx:id="dockLeftBottom" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     </children>
                                 </AnchorPane>
                             </items>
@@ -206,37 +190,23 @@
 
                                 <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                     <children>
-                                        <TabPane fx:id="dockEditors" layoutX="77.0" layoutY="395.0"
-                                                 tabClosingPolicy="ALL_TABS" AnchorPane.bottomAnchor="0.0"
-                                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                                 AnchorPane.topAnchor="0.0"/>
+                                        <TabPane fx:id="dockEditors" layoutX="77.0" layoutY="395.0" tabClosingPolicy="ALL_TABS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     </children>
                                 </AnchorPane>
                                 <AnchorPane fx:id="dockbottom" prefHeight="200.0" prefWidth="200.0">
                                     <children>
-                                        <TabPane fx:id="dockBottom" prefHeight="200.0" prefWidth="200.0"
-                                                 tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0"
-                                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                                 AnchorPane.topAnchor="0.0">
+                                        <TabPane fx:id="dockBottom" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <tabs>
                                                 <Tab text="Documentation">
                                                     <content>
-                                                        <WebView fx:id="documentation" prefHeight="200.0"
-                                                                 prefWidth="200.0"/>
+                                                        <WebView fx:id="documentation" prefHeight="200.0" prefWidth="200.0" />
                                                     </content>
                                                 </Tab>
                                                 <Tab text="Content Editor (Experimental)">
                                                     <content>
-                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0"
-                                                                    prefWidth="200.0">
+                                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                             <children>
-                                                                <HTMLEditor fx:id="htmlEditor"
-                                                                            htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;"
-                                                                            prefHeight="200.0" prefWidth="506.0"
-                                                                            AnchorPane.bottomAnchor="0.0"
-                                                                            AnchorPane.leftAnchor="0.0"
-                                                                            AnchorPane.rightAnchor="0.0"
-                                                                            AnchorPane.topAnchor="0.0"/>
+                                                                <HTMLEditor fx:id="htmlEditor" htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" prefWidth="506.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                             </children>
                                                         </AnchorPane>
                                                     </content>
@@ -248,28 +218,26 @@
                                 </AnchorPane>
                             </items>
                         </SplitPane>
-                        <TabPane fx:id="dockRight" prefHeight="200.0" prefWidth="200.0" side="RIGHT"
-                                 tabClosingPolicy="UNAVAILABLE"/>
+                        <TabPane fx:id="dockRight" prefHeight="200.0" prefWidth="200.0" side="RIGHT" tabClosingPolicy="UNAVAILABLE" />
                     </items>
                 </SplitPane>
             </center>
         </BorderPane>
         <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" style="-fx-background-color: #373737;">
             <children>
-                <Label fx:id="lblLeftStatus" maxHeight="1.7976931348623157E308" maxWidth="-1.0" text=""
-                       HBox.hgrow="ALWAYS">
+                <Label fx:id="lblLeftStatus" maxHeight="1.7976931348623157E308" maxWidth="-1.0" text="" HBox.hgrow="ALWAYS">
                     <font>
-                        <Font size="11.0"/>
+                        <Font size="11.0" />
                     </font>
                     <textFill>
-                        <Color red="0.625" green="0.625" blue="0.625"/>
+                        <Color red="0.625" green="0.625" blue="0.625" />
                     </textFill>
                 </Label>
-                <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS"/>
-                <Label fx:id="lblRightStatus" maxWidth="-1.0" text="" HBox.hgrow="NEVER"/>
+                <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblRightStatus" maxWidth="-1.0" text="" HBox.hgrow="NEVER" />
             </children>
             <padding>
-                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
             </padding>
         </HBox>
 

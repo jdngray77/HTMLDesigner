@@ -76,6 +76,12 @@ class Editor : Application() {
         lateinit var EDITOR : Editor
 
         /**
+         * A flag that is raised when the editor is booted
+         * by junit in order to test the editor.
+         */
+        var TESTING = false
+
+        /**
          * Static reference to the model view controller.
          *
          * > ***NOTE WELL : CANNOT BE ACCESSED BEFORE THE EDITOR HAS LOADED.***

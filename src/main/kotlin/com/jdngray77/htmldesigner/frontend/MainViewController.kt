@@ -325,6 +325,14 @@ class MainViewController {
         openURL("https://dylanbrand.uk/")
     }
 
+    fun menu_edit_undo() {
+        mvc().currentEditor().undo()
+    }
+
+    fun menu_edit_redo() {
+        mvc().currentEditor().redo()
+    }
+
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                 Menu

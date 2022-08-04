@@ -34,6 +34,7 @@ import org.jsoup.parser.Parser.xmlParser
 import org.w3c.css.sac.InputSource
 import org.w3c.dom.css.CSSStyleSheet
 import java.io.File
+import java.io.Serializable
 import java.io.StringReader
 
 /*
@@ -182,6 +183,25 @@ fun Element.asStyleSheet(): CSSStyleSheet? {
     (x as CSSStyleSheetImpl).title = id()
 
     return x
+}
+
+/**
+ * The [DocumentUndoRedo] system relies on serialization.
+ *
+ * JSoup [Document]'s aren't serializable.
+ *
+ *
+ * Luclily, since it's just HTML, it's really easy to fix this.
+ *
+ * We can store the document as it's HTML, which is serializable, then use JSoup
+ * to interpret it back into a [Document].
+ */
+class SerializableDocument(document: Document) : Serializable {
+
+    // Store the document as a string, which can be serialized.
+    private val document = document.toString()
+
+    fun get() = Jsoup.parse(document)
 }
 
 

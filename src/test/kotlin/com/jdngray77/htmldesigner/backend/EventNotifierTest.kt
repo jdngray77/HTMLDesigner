@@ -15,20 +15,12 @@
 
 package com.jdngray77.htmldesigner.backend
 
-import com.jdngray77.htmldesigner.TestHelper
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import com.jdngray77.htmldesigner.RequiresEditorGUI
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(RequiresEditorGUI::class)
 internal class EventNotifierTest {
-
-    @BeforeEach
-    internal fun setUp() =
-        TestHelper.setUp()
-
-    @AfterEach
-    internal fun tearDown() =
-        TestHelper.tearDown()
 
     val subscriber = object : Subscriber {
         override fun notify(e: EventType) {

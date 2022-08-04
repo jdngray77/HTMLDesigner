@@ -109,7 +109,7 @@ internal class AutoDockTest {
             dock.create()
         } catch (e: Exception) {
             e.printStackTrace()
-            fail<Unit>(e.message)
+            fail<Unit>(e)
         }
 
 

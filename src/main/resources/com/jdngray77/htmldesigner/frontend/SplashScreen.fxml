@@ -9,7 +9,7 @@
 
 <StackPane minHeight="400.0" minWidth="600.0" prefHeight="457.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.SplashScreenController">
    <children>
-      <ImageView fitHeight="457.0" fitWidth="690.0" layoutY="6.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="-57.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-90.0" AnchorPane.topAnchor="0.0">
+      <ImageView fx:id="img" fitHeight="457.0" fitWidth="690.0" layoutY="6.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="-57.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-90.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@SplashScreen.jpeg" />
          </image>
@@ -21,7 +21,7 @@
          </effect></ImageView>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="25">
          <children>
-            <VBox AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="50.0">
+            <VBox fx:id="hbProduction" AnchorPane.bottomAnchor="50.0" AnchorPane.rightAnchor="50.0">
                <children>
                   <Label text="NOT PRODUCTION SAFE" textFill="#f2f2f2">
                      <font>
@@ -41,7 +41,7 @@
 
             <VBox prefHeight="200.0" prefWidth="426.0" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="80.0">
                <children>
-                  <Label fx:id="txtTitle1" text="Jordan T. Gray's">
+                  <Label fx:id="txtName" text="Jordan T. Gray's">
                      <font>
                         <Font name="Helvetica" size="14.0" />
                      </font>
@@ -54,14 +54,14 @@
                         <DropShadow offsetX="3.0" offsetY="6.0" />
                      </effect>
                   </Label>
-                  <Label fx:id="txtTitle11" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="10.0" layoutY="10.0" minWidth="400.0" text="is loading.">
+                  <Label fx:id="txtLoading" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="10.0" layoutY="10.0" minWidth="400.0" text="is loading.">
                      <font>
                         <Font name="Helvetica" size="14.0" />
                      </font>
                   </Label>
                </children>
             </VBox>
-            <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0">
+            <HBox fx:id="hbIcons" alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="50.0">
                    <children>
                       <ImageView fitHeight="60.0" fitWidth="56.0" pickOnBounds="true" preserveRatio="true">
                      <image>
