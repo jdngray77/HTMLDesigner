@@ -46,13 +46,6 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
     init {
         tree.selectionModel.selectionMode = SelectionMode.MULTIPLE
-        EventNotifier.subscribe(this,
-            EventType.EDITOR_DOCUMENT_SWITCH,
-            EventType.EDITOR_DOCUMENT_EDITED,
-            EventType.EDITOR_SELECTED_TAG_CHANGED,
-            EventType.EDITOR_DOCUMENT_CLOSED
-            )
-
         EventNotifier.subscribe(
             this,
             EventType.EDITOR_DOCUMENT_SWITCH,

@@ -286,10 +286,10 @@ open class AutoDock : Dock() {
                 (this as KMutableProperty1<Any, Any>).set(this@AutoDock, gui)
             } catch (e: Exception) {
                 throw InspectableException("${loggableClassName()} $guiname has the wrong type ($returnType). It needs to be ${gui::class.qualifiedName} for the ${prop.returnType} stored in ${prop.name}")
-            }
-        } ?: run {
-            logWarning("${loggableClassName()} ${prop.name} does not have a matching $guiname variable for it's UI control.")
-        }
+            }}
+//        ?: run {
+//            logWarning("${loggableClassName()} ${prop.name} does not have a matching $guiname variable for it's UI control.")
+//        }
     }
 
     /**

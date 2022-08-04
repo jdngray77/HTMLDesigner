@@ -66,7 +66,7 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     init {
         create()
-        EventNotifier.subscribe(this, EventType.EDITOR_DOCUMENT_EDITED, EventType.EDITOR_LOADED)
+        EventNotifier.subscribe(this, EventType.EDITOR_LOADED)
     }
 
     override fun notify(e: EventType) {
