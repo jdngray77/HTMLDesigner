@@ -14,6 +14,8 @@
 
 package com.jdngray77.htmldesigner.utility
 
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
+
 /**
  * When the IDE restarts, static systems are not unloaded, as the JVM is still running.
  *
@@ -24,25 +26,21 @@ package com.jdngray77.htmldesigner.utility
  *  - shuts down
  *  - or restarts.
  *
- * When implemented, [onIDERestart] will automatically be invoked when the IDE's [Editor.stop] is invoked.
+ * When implemented, [onIDEShutdown] will automatically be invoked when the IDE's [Editor.stop] is invoked.
  *
  * Instances are located and invoked using reflection, so there no need to invoke or subscribe.
  *
  * @author Jordan T. Gray
  */
-interface Restartable {
 
-    /**
-     * The IDE has just started for the first time.
-     *
-     * Configure boot up things.
-     */
-    fun onIDEBoot()
 
-    /**
-     * The IDE is performing a soft-restart.
-     *
-     * For resetting states and stuff.
-     */
-    fun onIDERestart()
+/**
+ * For systems that need to be loaded early, before the GUI or the mvc.
+ *
+ * Not safe for anything that requires the GUI or a project to be loaded.
+ *
+ * Use for systems that the GUI depends on to load.
+ */
+interface IDEEarlyBootListener {
+    fun onIDEBootEarly()
 }

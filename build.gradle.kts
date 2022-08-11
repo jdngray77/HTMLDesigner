@@ -10,8 +10,12 @@ plugins {
     id("org.jetbrains.dokka") version "1.7.10"
     id("java")
     id("distribution")
+    id("com.github.johnrengelman.shadow") version "7.0.0"
     application
 }
+
+
+
 
 val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
 
@@ -57,9 +61,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "16"
 }
 
-tasks.build {
-    dependsOn("generateProperties")
-}
+tasks.build { dependsOn("generateProperties") }
 
 tasks.withType<JavaExec>{
     dependsOn("generateProperties")
@@ -77,7 +79,7 @@ application {
 
 tasks.register("generateProperties") {
     doLast {
-        val propertiesFile = file("$buildDir/resources/main/com/jdngray77/htmldesigner/meta.properties")
+        val propertiesFile = file("$buildDir/resources/main/com/jdngray77/htmldesigner/frontend/meta.properties")
         propertiesFile.parentFile.mkdirs()
 
         val properties = Properties()
@@ -99,3 +101,13 @@ tasks.register("generateProperties") {
 }
 
 
+tasks.jar {
+    dependsOn("generateProperties")
+    manifest.attributes["Main-Class"] = "HTMLDesignerKt"
+    manifest.attributes["Class-Path"] = configurations
+//        .runtimeClasspath
+//        .get()
+//        .joinToString(separator = " ") { file ->
+//            "libs/${file.name}"
+//        }
+}
