@@ -47,7 +47,7 @@ import java.util.*
 class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
 
     init {
-        EventNotifier.subscribe(this, EventType.EDITOR_LOADED, EventType.PROJECT_PAGE_DELETED, EventType.PROJECT_PAGE_CREATED)
+        EventNotifier.subscribe(this, EventType.IDE_FINISHED_LOADING, EventType.PROJECT_PAGE_DELETED, EventType.PROJECT_CREATED)
 
         // Open documents that are clicked
         tree.setOnMouseClicked {

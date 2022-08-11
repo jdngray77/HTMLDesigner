@@ -16,6 +16,7 @@ package com.jdngray77.htmldesigner.backend.data.config
 
 import com.jdngray77.htmldesigner.backend.WebServer
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
+import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import jfxtras.styles.jmetro.Style.*
 import jfxtras.styles.jmetro.JMetro
 import java.io.File
@@ -125,7 +126,7 @@ enum class Configs {
  *
  * Saved in the pwd.
  */
-object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
+object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")), IDEEarlyBootListener {
 
     init {
         // FIXME i don't like this work-around.
@@ -157,5 +158,9 @@ object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
         Configs.values().map {
             get(it)
         }
+    }
+
+    override fun onIDEBootEarly() {
+        load()
     }
 }

@@ -18,6 +18,7 @@ package com.jdngray77.htmldesigner.backend
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
 import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.geometry.Pos
@@ -131,24 +132,34 @@ fun onUIThread(runnable: Runnable) {
 }
 
 /**
- * Prints [string] to the Standard output stream, and
- * also displays it in left of the status tray.
+ * Displays the last action took by the IDE.
  *
- * Used to log internal status'.
+ * This displays any status message that is not a direct result of the user's action.
+ *
+ * i.e event notifications, backups, builds, etc.
+ *
+ * @returns The message that was displayed.
  */
 fun logStatus(string: String) {
     onUIThread {
-        Editor.mvcIfAvail()?.MainView?.setStatus(string)
+        mvcIfAvail()?.MainView?.setStatus(string)
     }
     println(string)
 }
 
 /**
- * A static shortcut to log the completion of a user-requested actions
- * in the right of the status tray.
+ * Displays the last action that the user performed.
+ *
+ * These are displayed in the right of the status tray.
+ *
+ * This is specific to actions performed by the user only.
+ *
+ * i.e document changed, saved, undo, redo, etc.
+ *
+ * @param action The action to display.
  */
-fun logAction(string: String) =
-    onUIThread { Editor.mvcIfAvail()?.MainView?.setAction(string) }
+fun setAction(string: String) =
+    onUIThread { mvcIfAvail()?.MainView?.setAction(string) }
 
 /**
  * Shows an [Alert] with a message and an OK button.

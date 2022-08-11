@@ -16,7 +16,8 @@
 package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
-import com.jdngray77.htmldesigner.utility.Restartable
+import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
+import java.lang.System.gc
 import java.util.concurrent.*
 
 /**
@@ -27,13 +28,13 @@ import java.util.concurrent.*
  *
  * @author Dylan Brand
  */
-object BackgroundTask : Subscriber, Restartable {
-
-    private val threadPool : ThreadPoolExecutor = Executors.newCachedThreadPool() as ThreadPoolExecutor
+object BackgroundTask : Subscriber, IDEEarlyBootListener {
 
     init {
-        EventNotifier.subscribe(this, EventType.EXIT)
+        EventNotifier.subscribe(this, EventType.IDE_SHUTDOWN)
     }
+
+    private lateinit var threadPool : ThreadPoolExecutor
 
     fun submitToUI(runnable: Runnable) {
         onUIThread(runnable)
@@ -46,6 +47,7 @@ object BackgroundTask : Subscriber, Restartable {
      */
     @Synchronized
     fun submit(runnable: Runnable): Future<*>? {
+
         if (!threadPool.isShutdown && !threadPool.isTerminating)
             return threadPool.submit(runnable)
 
@@ -89,13 +91,14 @@ object BackgroundTask : Subscriber, Restartable {
         threadPool.shutdownNow()
     }
 
-    override fun notify(e: EventType) {
-        shutdown()
+    override fun onIDEBootEarly() {
+        threadPool = Executors.newCachedThreadPool() as ThreadPoolExecutor
+        gc()
     }
 
-    override fun onIDEBoot() {}
 
-    override fun onIDERestart() {
-        println("Background task did not handle the IDE restarting!")
+
+    override fun notify(e: EventType) {
+        shutdown()
     }
 }

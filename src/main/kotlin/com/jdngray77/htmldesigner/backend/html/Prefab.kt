@@ -109,6 +109,13 @@ class Prefab (
         locationOnDisk.writeText(element!!.outerHtml())
     }
 
+    /**
+     * Provides the name defined by the user.
+     *
+     * Is the name of the file on disk.
+     */
+    fun name() = locationOnDisk.name
+
     init {
         if (element == null)
             if (locationOnDisk.exists())

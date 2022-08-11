@@ -4,8 +4,13 @@ import com.jdngray77.htmldesigner.frontend.SplashScreen
 import javafx.application.Application
 
 fun main() {
-    Thread.setDefaultUncaughtExceptionHandler(ExceptionListener)
-    Application.launch(SplashScreen::class.java)
+    println("Starting HTML Designer")
+    try {
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionListener)
+        Application.launch(SplashScreen::class.java)
+    } catch (e: Throwable) {
+        e.printStackTrace()
+    }
 }
 
 /**

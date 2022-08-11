@@ -24,7 +24,7 @@ internal class EventNotifierTest {
 
     val subscriber = object : Subscriber {
         override fun notify(e: EventType) {
-            assert(e == EventType.EDITOR_LOADED)
+            assert(e == EventType.IDE_FINISHED_LOADING)
         }
     }
 
@@ -34,37 +34,37 @@ internal class EventNotifierTest {
      */
     @Test
     fun testEventType() {
-        EventNotifier.onIDERestart()
+        EventNotifier.onIDEShutdown()
         assert(EventNotifier.FXSubscribers.size == 0)
         assert(EventNotifier.backgroundSubscribers.size == 0)
 
-        EventNotifier.subscribe(subscriber, EventType.EDITOR_LOADED)
+        EventNotifier.subscribe(subscriber, EventType.IDE_FINISHED_LOADING)
         assert(EventNotifier.FXSubscribers.size == 1)
 
-        EventNotifier.notifyEvent(EventType.EDITOR_LOADED)
+        EventNotifier.notifyEvent(EventType.IDE_FINISHED_LOADING)
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
 
 
-        EventNotifier.onIDERestart()
+        EventNotifier.onIDEShutdown()
         assert(EventNotifier.FXSubscribers.size == 0)
         assert(EventNotifier.backgroundSubscribers.size == 0)
 
-        EventNotifier.subscribeInBackground(subscriber, EventType.EDITOR_LOADED)
+        EventNotifier.subscribeInBackground(subscriber, EventType.IDE_FINISHED_LOADING)
         assert(EventNotifier.backgroundSubscribers.size == 1)
     }
 
     @Test
     fun onIDERestart() {
-        EventNotifier.onIDERestart()
+        EventNotifier.onIDEShutdown()
         assert(EventNotifier.FXSubscribers.size == 0)
         assert(EventNotifier.backgroundSubscribers.size == 0)
 
-        EventNotifier.subscribe(subscriber, EventType.EDITOR_LOADED)
+        EventNotifier.subscribe(subscriber, EventType.IDE_FINISHED_LOADING)
         assert(EventNotifier.FXSubscribers.size == 1)
         assert(EventNotifier.backgroundSubscribers.size == 0)
 
-        EventNotifier.onIDERestart()
+        EventNotifier.onIDEShutdown()
         assert(EventNotifier.FXSubscribers.size == 0)
         assert(EventNotifier.backgroundSubscribers.size == 0)
     }

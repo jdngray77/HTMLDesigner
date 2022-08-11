@@ -28,13 +28,9 @@ import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
 import java.io.InvalidClassException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.attribute.BasicFileAttributes
 import java.sql.Time
 import java.time.Instant
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 /*
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -485,7 +481,7 @@ class Project(
      *
      * [saveMeta] is called after making the change.
      *
-     * Notifies [EventType.PROJECT_NEW_DOCUMENT_CREATED]
+     * Notifies [EventType.PROJECT_CREATED]
      *
      * @return the new document.
      */
@@ -513,7 +509,7 @@ class Project(
 
         saveMeta()
 
-        EventNotifier.notifyEvent(EventType.PROJECT_NEW_DOCUMENT_CREATED)
+        EventNotifier.notifyEvent(EventType.PROJECT_CREATED)
         return doc
     }
 
