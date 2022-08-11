@@ -1,0 +1,31 @@
+$dokka.format:javadoc-v1
+$dokka.linkExtension:html
+$dokka.location:////PointingToDeclaration/[root]/package-summary.html
+$dokka.location:/ExitCodes///PointingToDeclaration/[root]/ExitCodes.html
+$dokka.location:/HTMLDesignerKt///PointingToDeclaration/[root]/HTMLDesignerKt.html
+$dokka.location:com.jdngray77.htmldesigner.backend.data.config/Registry.Companion///PointingToDeclaration/com/jdngray77/htmldesigner/backend/data/config/Registry.Companion.html
+$dokka.location:com.jdngray77.htmldesigner.backend.data.config/Registry.MismatchedTypeException///PointingToDeclaration/com/jdngray77/htmldesigner/backend/data/config/Registry.MismatchedTypeException.html
+$dokka.location:com.jdngray77.htmldesigner.backend.data.config/Registry.MissingEntryException///PointingToDeclaration/com/jdngray77/htmldesigner/backend/data/config/Registry.MissingEntryException.html
+$dokka.location:com.jdngray77.htmldesigner.backend.data/Project.Companion///PointingToDeclaration/com/jdngray77/htmldesigner/backend/data/Project.Companion.html
+$dokka.location:com.jdngray77.htmldesigner.backend.data/Project.UnloadedDocumentException///PointingToDeclaration/com/jdngray77/htmldesigner/backend/data/Project.UnloadedDocumentException.html
+$dokka.location:com.jdngray77.htmldesigner.frontend.controls/QuadControl.Companion///PointingToDeclaration/com/jdngray77/htmldesigner/frontend/controls/QuadControl.Companion.html
+$dokka.location:com.jdngray77.htmldesigner.frontend.controls/QuadControl.QuadControlMode///PointingToDeclaration/com/jdngray77/htmldesigner/frontend/controls/QuadControl.QuadControlMode.html
+$dokka.location:com.jdngray77.htmldesigner.frontend.controls/RegistryEditor.RegistryEntry///PointingToDeclaration/com/jdngray77/htmldesigner/frontend/controls/RegistryEditor.RegistryEntry.html
+$dokka.location:com.jdngray77.htmldesigner.frontend.docks.tagproperties/CSSPropertySheetItem.Companion///PointingToDeclaration/com/jdngray77/htmldesigner/frontend/docks/tagproperties/CSSPropertySheetItem.Companion.html
+$dokka.location:com.jdngray77.htmldesigner.frontend.docks.tagproperties/TagProperties.CSSProperty///PointingToDeclaration/com/jdngray77/htmldesigner/frontend/docks/tagproperties/TagProperties.CSSProperty.html
+$dokka.location:com.jdngray77.htmldesigner.frontend/DocumentEditor.Companion///PointingToDeclaration/com/jdngray77/htmldesigner/frontend/DocumentEditor.Companion.html
+$dokka.location:com.jdngray77.htmldesigner.frontend/Editor.Companion///PointingToDeclaration/com/jdngray77/htmldesigner/frontend/Editor.Companion.html
+$dokka.location:com.jdngray77.htmldesigner/MVC.DocumentModificationTransaction///PointingToDeclaration/com/jdngray77/htmldesigner/MVC.DocumentModificationTransaction.html
+com.jdngray77.htmldesigner
+com.jdngray77.htmldesigner.backend
+com.jdngray77.htmldesigner.backend.data
+com.jdngray77.htmldesigner.backend.data.config
+com.jdngray77.htmldesigner.backend.html
+com.jdngray77.htmldesigner.frontend
+com.jdngray77.htmldesigner.frontend.controls
+com.jdngray77.htmldesigner.frontend.docks
+com.jdngray77.htmldesigner.frontend.docks.dockutils
+com.jdngray77.htmldesigner.frontend.docks.tagproperties
+com.jdngray77.htmldesigner.frontend.docks.toolbox
+com.jdngray77.htmldesigner.utility
+
