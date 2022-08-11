@@ -14,26 +14,107 @@
 
 package com.jdngray77.htmldesigner.backend.data.config
 
+import com.jdngray77.htmldesigner.backend.WebServer
+import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
+import jfxtras.styles.jmetro.Style.*
+import jfxtras.styles.jmetro.JMetro
 import java.io.File
+import java.lang.Thread.UncaughtExceptionHandler
 
 /**
  * Keys for the [config] registry.
  *
- * See the [Documentation](https://github.com/jdngray77/HTMLDesigner/wiki/Registry-Keys)
+ * See the [Documentation](https://github.com/jdngray77/HTMLDesigner/wiki/Registries#keys)
  */
 enum class Configs {
 
-    LAST_PROJECT_PATH_STRING,
-    DARK_MODE_BOOL,
-    SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL,
-    TOOLBOX_DOCK_FILTER_EXACT_BOOL,
-    USE_MAC_MENU_BOOL,
+    // Java docs here appear in the Dokka HTML renderings.
 
-    OUTLINE_SELECTED_TAG_BOOL,
+    /**
+     * Stores an absolute path to the project that was last loaded.
+     *
+     * When empty, the editor will prompt the user to select a project.
+     *
+     * This is cleared to close the project.
+     */
+    LAST_PROJECT_PATH_STRING,
+
+    /**
+     * When high, [LAST_PROJECT_PATH_STRING] will be automatically loaded on boot.
+     *
+     * If low, the user will always be prompted to load a project.
+     *
+     * Default is true
+     */
     AUTO_LOAD_PROJECT_BOOL,
 
+    /**
+     * When high, [JMetro] will be used with [DARK], else [LIGHT].
+     *
+     * Requires a soft restart to take effect.
+     *
+     * Default is true
+     */
+    DARK_MODE_BOOL,
+
+    /**
+     * Whem high, notifications will not be raised when exceptions are
+     * caught by the [UncaughtExceptionHandler].
+     *
+     * Default is true
+     */
+    SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL,
+
+    /**
+     * When high, the [ToolboxDock]'s search feature will
+     * use [String.startsWith], instead of [String.contains]
+     * for a more exact match.
+     *
+     * Default is true
+     */
+    TOOLBOX_DOCK_FILTER_EXACT_BOOL,
+
+    /**
+     * When high and on mac os x, the IDE will offload the menu bar to the system menu bar.
+     *
+     * Requires soft restart to take effect.
+     *
+     * Default is true
+     */
+    USE_MAC_MENU_BOOL,
+
+    /**
+     * When high, the selected tag will be outlined with a red border.
+     *
+     * Default is true
+     */
+    OUTLINE_SELECTED_TAG_BOOL,
+
+    /**
+     * Determines what port the [WebServer] will use.
+     *
+     * Default is 8080
+     */
     WEB_SERVER_PORT_INT,
+
+    /**
+     * When the [WebServer] is set to auto-refresh, this
+     * determines the delays between auto-refreshing.
+     *
+     * Time is in seconds.
+     *
+     * Default is 0
+     */
     WEB_SERVER_REFRESH_DELAY_INT,
+
+    /**
+     * Determines the maximum number of document states
+     * that can be held in RAM for undo/redo.
+     *
+     * This limit is to limit the amount of memory used by the editor.
+     *
+     * Default is 20.
+     */
     UNDO_HISTORY_MAX_INT
 }
 
@@ -51,6 +132,11 @@ object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
         defferedInit()
     }
 
+    /**
+     * Provides default values for [Configs].
+     *
+     * Used when a registry is created for the first time, reset, or invalidated.
+     */
     override fun initialize() {
         put(Configs.DARK_MODE_BOOL, true)
         put(Configs.LAST_PROJECT_PATH_STRING, "")
@@ -64,6 +150,9 @@ object Config : Registry<Configs>(File("./HTMLDesignerCfg.registry")) {
         put(Configs.UNDO_HISTORY_MAX_INT, 20)
     }
 
+    /**
+     * Confirms that all expected [Configs] are present in the registry.
+     */
     override fun validate() {
         Configs.values().map {
             get(it)
