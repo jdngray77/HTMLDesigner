@@ -24,7 +24,6 @@ import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
-import com.jdngray77.htmldesigner.frontend.docks.dockutils.ExampleAutoDock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
@@ -33,17 +32,14 @@ import com.jdngray77.htmldesigner.utility.openURL
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.geometry.Insets
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.layout.*
-import javafx.scene.paint.Color
 import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
 import org.jsoup.nodes.Document
 import java.io.File
 import javax.script.ScriptEngineManager
-import javax.script.SimpleScriptContext
 
 
 /**
@@ -127,6 +123,7 @@ class MainViewController {
         // RIGHT
         implAddDock(dockRight, TagProperties())
         implAddDock(dockRight, TestDock())
+        implAddDock(dockRight, HistoryDock())
     }
 
     private fun implAddDock(to: TabPane, vararg it : Dock) {

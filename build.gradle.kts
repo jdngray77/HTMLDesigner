@@ -38,9 +38,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-test")
     implementation("org.controlsfx:controlsfx:11.1.1")
-    implementation("org.jetbrains.kotlin:kotlin-serialization:1.7.0")
+    implementation("org.jetbrains.kotlin:kotlin-serialization:1.7.10")
     implementation("org.jfxtras:jmetro:11.6.15")
-    implementation("org.jsoup:jsoup:1.14.3")
+    implementation("org.jsoup:jsoup:1.15.2")
     implementation("net.sourceforge.cssparser:cssparser:0.9.29")
     implementation("org.reflections:reflections:0.10.2")
 }

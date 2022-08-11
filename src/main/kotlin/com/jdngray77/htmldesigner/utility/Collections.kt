@@ -32,16 +32,16 @@ import java.util.stream.Stream
  */
 @Deprecated("Since updating JavaFX, this no longer works - and throws an exception.")
 fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
-    table.skin?.let {
-        TreeTableViewSkin::class.java.getDeclaredMethod(
-            "resizeColumnToFitContent",
-            TreeTableColumn::class.java,
-            Int::class.java
-        ).apply {
-            isAccessible = true
-            invoke(it, this@pack, -1)
-        }
-    }
+//    table.skin?.let {
+//        TreeTableViewSkin::class.java.getDeclaredMethod(
+//            "resizeColumnToFitContent",
+//            TreeTableColumn::class.java,
+//            Int::class.java
+//        ).apply {
+//            isAccessible = true
+//            invoke(it, this@pack, -1)
+//        }
+//    }
 }
 
 /**

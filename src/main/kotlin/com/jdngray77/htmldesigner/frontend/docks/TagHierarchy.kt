@@ -86,7 +86,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                 it.setOnEditCommit {
                     // TODO we can access the old value too. This will be useful for implementing undo.
                     it.rowValue.value.text(it.newValue)
-                    mvc().currentEditor().reRender()
+                    mvc().currentEditor().documentChanged("Content of '${it.rowValue.value.tagName()}' changed to '${it.newValue}' ")
                 }
                 it.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn())
             }
@@ -165,9 +165,11 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
             menuItem("Paste above") {
                 selectedItem()?.before(
-                    clipboard().html.asElement()
+                    clipboard().html.asElement().let{
+                        mvc().currentEditor().documentChanged("${it.tagName()} pasted before ${selectedItem()!!.tagName()}")
+                        it
+                    }
                 )
-                mvc().currentDocumentModified()
             },
 
             menuItem("Paste inside") {
@@ -181,12 +183,14 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                 selectedItem()?.after(
                     clipboard().html.asElement()
                 )
-                mvc().currentDocumentModified()
+
+                // TODO
+                //mvc().currentDocumentModified()
             },
 
             menuItem("Wrap with clipboard") {
                 selectedItem()?.wrap(clipboard().html)
-                mvc().currentDocumentModified()
+//                mvc().currentDocumentModified()
             },
 
             SeparatorMenuItem(),
@@ -199,7 +203,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
                         it.insertChildren(index + 1, this)
 
-                        mvc().currentDocumentModified()
+//                        mvc().currentDocumentModified()
                     }
                 }
             },
@@ -212,7 +216,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
                         it.insertChildren(index + 2, this)
 
-                        mvc().currentDocumentModified()
+//                        mvc().currentDocumentModified()
                     }
                 }
             },
@@ -224,7 +228,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                     parent()?.let {
                         mvc().implDeleteTag(this)
                         it.before(this)
-                        mvc().currentDocumentModified()
+//                        mvc().currentDocumentModified()
                     }
                 }
             }

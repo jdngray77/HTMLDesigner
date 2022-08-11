@@ -26,7 +26,6 @@ import com.jdngray77.htmldesigner.utility.ButtonType_CLOSEWITHOUTSAVE
 import com.jdngray77.htmldesigner.utility.ButtonType_SAVE
 import com.jdngray77.htmldesigner.utility.SerializableDocument
 import com.jdngray77.htmldesigner.utility.toHex
-import com.sun.javafx.scene.control.skin.Utils
 import javafx.application.Platform
 import javafx.event.Event
 import javafx.fxml.FXML
@@ -244,15 +243,29 @@ class DocumentEditor {
             // Exit standalone if no tag is selected.
             if (value == null) standaloneEditMode = false
 
-            field?.removeClass("debug-outline")
-            field = value
+            // Clear breadcrumb.
+            // If selecting via hierarchy, it will be configured again correctly.
+            // If not, it will remain empty.
+            // Particularly important if the selected tag is cleared, or made obsolete
+            // when undoing or redoing.
+            breadCrumb.selectedCrumb = null
 
-            if (Config[Configs.OUTLINE_SELECTED_TAG_BOOL] as Boolean)
-                field?.addClass("debug-outline")
+            unhighlightSelectedTag()
+            field = value
+            highlightSelectedTag()
 
             reRender()
             EventNotifier.notifyEvent(EventType.EDITOR_SELECTED_TAG_CHANGED)
         }
+
+    fun highlightSelectedTag() {
+        if (Config[Configs.OUTLINE_SELECTED_TAG_BOOL] as Boolean && selectedTag?.hasClass("debug-outline") == false)
+            selectedTag?.addClass("debug-outline")
+    }
+
+    fun unhighlightSelectedTag() {
+        selectedTag?.removeClass("debug-outline")
+    }
 
 
     fun undo() {
@@ -262,6 +275,13 @@ class DocumentEditor {
 
     fun redo() {
         document = documentHistory.redo().get()
+        onDocumentChanged()
+    }
+
+    fun jumpTo(state: DocumentState<SerializableDocument>) {
+        selectedTag = null
+        documentHistory.jumpTo(state)
+        document = documentHistory.getDocument().get()
         onDocumentChanged()
     }
 
@@ -362,7 +382,6 @@ class DocumentEditor {
     @Deprecated("This method of selecting a tag cannot not populate the breadcrumb view, giving the user no feedback on thier selection.")
     fun selectTag(tag: Element?) {
         selectedTag = tag
-        breadCrumb.selectedCrumb = null
     }
 
     /**
@@ -393,10 +412,13 @@ class DocumentEditor {
      * Also notifies of document edit, and [reRender]'s [contentRenderer].
      *
      */
-    fun documentChanged() {
+    fun documentChanged(desc: String = "Unknown Change") {
         // TODO auto detection using hashes, on document access?
         onDocumentChanged()
-        documentHistory.push(SerializableDocument(document))
+
+        unhighlightSelectedTag()
+        documentHistory.push(SerializableDocument(document), desc)
+        highlightSelectedTag()
 
         if (isDirty) return
 

@@ -273,13 +273,6 @@ class MVC (
         validateEditors()
     }
 
-    /**
-     * Marks the current document as dirty, and updates
-     * the GUI with the changes.
-     */
-    fun currentDocumentModified()
-        = currentEditor()?.documentChanged()
-
 
     /**
      * When making many changes at once, this can be used to delay the

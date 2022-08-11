@@ -18,7 +18,7 @@ class HistoryDock : Dock(), Subscriber {
         center = ListView<DocumentState<SerializableDocument>>().also {
             it.setOnMouseClicked {e ->
                 mvc().currentEditor().apply {
-                    documentHistory.jumpTo(it.selectionModel.selectedItem)
+                    jumpTo(it.selectionModel.selectedItem)
                     reRender()
                 }
             }
