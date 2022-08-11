@@ -412,7 +412,7 @@ class DocumentEditor {
      * Also notifies of document edit, and [reRender]'s [contentRenderer].
      *
      */
-    fun documentChanged(desc: String = "Unknown Change") {
+    fun documentChanged(desc: String) {
         // TODO auto detection using hashes, on document access?
         onDocumentChanged()
 
@@ -420,6 +420,8 @@ class DocumentEditor {
         documentHistory.push(SerializableDocument(document), desc)
         highlightSelectedTag()
 
+
+        setAction(desc)
         if (isDirty) return
 
         tab.text += DIRTY_SUFFIX

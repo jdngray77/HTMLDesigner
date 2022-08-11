@@ -252,7 +252,7 @@ open class CSSPropertySheetItem(
 
         // Notify the IDE of the change
         if (initalised) {
-            element.ownerDocument()?.changed()
+            element.ownerDocument()?.changed(_name + " of " + element.tagName() + "changed to " + value)
         } else {
             initalised = true
         }

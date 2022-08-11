@@ -175,11 +175,12 @@ class MainViewController {
         htmlEditor.htmlText = rawHTML
     }
 
-
+    // TODO move these to logging
     fun setStatus(string: String) {
         lblLeftStatus.text = string
     }
 
+    // TODO move these to logging
     fun setAction(string: String) {
         lblRightStatus.text = string
     }
@@ -195,7 +196,7 @@ class MainViewController {
     }
 
     fun menu_debug_dirty() {
-        mvc().currentEditor().documentChanged()
+        mvc().currentEditor().documentChanged("Debug dirty.")
     }
 
     fun menu_debug_showcache() {

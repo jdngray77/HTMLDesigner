@@ -59,9 +59,10 @@ class ToolboxDock : Dock() {
                     Element(contextItem!!.controller.name.text).let {
                         selectedTag?.before(it)
                         selectTag(it)
+                        documentChanged("Added " + it.tagName() + " above ${selectedTag?.tagName() ?: "selected tag"}")
                     }
 
-                    documentChanged()
+
                     clearSearch()
                 }
             }
@@ -72,8 +73,8 @@ class ToolboxDock : Dock() {
                     Element(contextItem!!.controller.name.text).let {
                         selectedTag?.after(it)
                         selectTag(it)
+                        documentChanged("Added " + it.tagName() + " below ${selectedTag?.tagName() ?: "selected tag"}")
                     }
-                    documentChanged()
                     clearSearch()
                 }
             }
@@ -84,8 +85,8 @@ class ToolboxDock : Dock() {
                     Element(contextItem!!.controller.name.text).let {
                         selectedTag?.insertChildren(0, Element(contextItem!!.controller.name.text))
                         selectTag(it)
+                        documentChanged("Added " + it.tagName() + " inside ${selectedTag?.tagName() ?: "selected tag"}")
                     }
-                    documentChanged()
                     clearSearch()
                 }
             }
