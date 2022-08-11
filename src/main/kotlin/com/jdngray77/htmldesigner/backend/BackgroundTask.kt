@@ -93,7 +93,9 @@ object BackgroundTask : Subscriber, Restartable {
         shutdown()
     }
 
-    override fun restart() {
+    override fun onIDEBoot() {}
+
+    override fun onIDERestart() {
         println("Background task did not handle the IDE restarting!")
     }
 }

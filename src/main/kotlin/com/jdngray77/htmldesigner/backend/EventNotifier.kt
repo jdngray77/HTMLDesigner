@@ -161,10 +161,12 @@ object EventNotifier : Restartable {
         }
     }
 
+    override fun onIDEBoot() {}
+
     /**
      * Removes all subscribed listeners.
      */
-    override fun restart() {
+    override fun onIDERestart() {
         backgroundSubscribers.clear()
         FXSubscribers.clear()
     }

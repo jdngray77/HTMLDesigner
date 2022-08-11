@@ -24,12 +24,25 @@ package com.jdngray77.htmldesigner.utility
  *  - shuts down
  *  - or restarts.
  *
- * When implemented, [restart] will automatically be invoked when the IDE's [Editor.stop] is invoked.
+ * When implemented, [onIDERestart] will automatically be invoked when the IDE's [Editor.stop] is invoked.
  *
  * Instances are located and invoked using reflection, so there no need to invoke or subscribe.
  *
  * @author Jordan T. Gray
  */
 interface Restartable {
-    fun restart()
+
+    /**
+     * The IDE has just started for the first time.
+     *
+     * Configure boot up things.
+     */
+    fun onIDEBoot()
+
+    /**
+     * The IDE is performing a soft-restart.
+     *
+     * For resetting states and stuff.
+     */
+    fun onIDERestart()
 }

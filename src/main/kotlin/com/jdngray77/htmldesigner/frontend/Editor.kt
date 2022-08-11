@@ -75,6 +75,8 @@ class Editor : Application() {
         @Deprecated("Don't directly access", ReplaceWith("mvc(), project(), maingui"))
         lateinit var EDITOR : Editor
 
+        var booted = false
+
         /**
          * A flag that is raised when the editor is booted
          * by junit in order to test the editor.
@@ -137,6 +139,15 @@ class Editor : Application() {
         set(value) {
             field = value
             EventNotifier.notifyEvent(EventType.EDITOR_LOADED)
+
+            if (!booted)
+                everyInstanceOf(Restartable::class).forEach {
+                    try {
+                        (it as Restartable).onIDEBoot()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
         }
     get() = field?: run {throw EarlyEditorAccessException()}
 
@@ -200,6 +211,8 @@ class Editor : Application() {
 
                 exitProcess(ExitCodes.ERROR_NO_MVC.ordinal)
             }
+
+            booted = true
         }
     }
 
@@ -239,7 +252,7 @@ class Editor : Application() {
         // Notify every [Restartable] that we're restarting / closing.
         everyInstanceOf(Restartable::class).forEach {
             try {
-                (it as Restartable).restart()
+                (it as Restartable).onIDERestart()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

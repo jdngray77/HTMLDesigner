@@ -182,10 +182,12 @@ object WebServer : Subscriber, Restartable {
         mvc().MainView.setStatus("Web Server Stopped")
     }
 
+    override fun onIDEBoot() {}
+
     /**
      * Shuts down the server when the IDE is restarted.
      */
-    override fun restart() {
+    override fun onIDERestart() {
         stop()
     }
 
