@@ -22,7 +22,6 @@ import com.jdngray77.htmldesigner.backend.html.Prefab
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
-import com.jdngray77.htmldesigner.utility.pack
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.SelectionMode
@@ -74,7 +73,6 @@ class Prefabs : HierarchyDock<Prefab>({it?.locationOnDisk!!.name}), Subscriber {
 
 
         tree.selectionModel.selectionMode = SelectionMode.SINGLE
-        tree.pack()
     }
 
 

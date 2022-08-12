@@ -15,15 +15,20 @@
 
 package com.jdngray77.htmldesigner.frontend.docks
 
-import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.utility.open
-import com.jdngray77.htmldesigner.utility.StoringTreeItem
-import com.jdngray77.htmldesigner.utility.assertEndsWith
-import com.jdngray77.htmldesigner.utility.pack
+import com.jdngray77.htmldesigner.backend.EventNotifier
+import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.showErrorAlert
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
+import com.jdngray77.htmldesigner.utility.StoringTreeItem
+import com.jdngray77.htmldesigner.utility.assertEndsWith
+import com.jdngray77.htmldesigner.utility.open
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.*
+import javafx.scene.control.MenuItem
+import javafx.scene.control.SeparatorMenuItem
+import javafx.scene.control.TextInputDialog
+import javafx.scene.control.TreeTableColumn
 import javafx.scene.input.KeyCode
 import java.io.File
 import java.sql.Time
@@ -61,19 +66,24 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         }
 
         // Add columns to the tree.
-        tree.columns.setAll(
-            TreeTableColumn<File, String>("Name").also {
-                it.setCellValueFactory { p ->
-                    SimpleObjectProperty(p.value.value.name)
-                }
-            },
 
-            TreeTableColumn<File, Date>("Last Modified").also {
-                it.setCellValueFactory { p ->
-                    SimpleObjectProperty(Time.from(Instant.ofEpochMilli(p.value.value.lastModified())))
-                }
+        val col1 = TreeTableColumn<File, String>("Name").also {
+            it.setCellValueFactory { p ->
+                SimpleObjectProperty(p.value.value.name)
             }
-        )
+
+            it.prefWidth = 180.0
+        }
+
+        val col2 = TreeTableColumn<File, Date>("Last Modified").also {
+            it.setCellValueFactory { p ->
+                SimpleObjectProperty(Time.from(Instant.ofEpochMilli(p.value.value.lastModified())))
+            }
+
+            it.prefWidthProperty().bind(widthProperty().subtract(col1.widthProperty().add(5)))
+        }
+
+        tree.columns.setAll(col1, col2)
 
         // Configure the context menu.
         setContextMenu(
@@ -119,7 +129,6 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         mvc().Project.HTML.apply {
             setRoot(this)
             tree.root.isExpanded = true
-            tree.pack()
         }
     }
 

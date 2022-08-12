@@ -16,33 +16,11 @@
 package com.jdngray77.htmldesigner.utility
 
 import javafx.scene.control.TreeItem
-import javafx.scene.control.TreeTableColumn
 import javafx.scene.control.TreeTableView
-import javafx.scene.control.skin.TreeTableViewSkin
 import java.util.function.Consumer
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-
-/**
- * Resizes a [TreeTableColumn] to fit the content within it.
- *
- * JavaFX does have a method for this, but it's not public
- * so this bodge uses reflection to access it.
- */
-@Deprecated("Since updating JavaFX, this no longer works - and throws an exception.")
-fun TreeTableColumn<*, *>.pack(table : TreeTableView<*>) {
-//    table.skin?.let {
-//        TreeTableViewSkin::class.java.getDeclaredMethod(
-//            "resizeColumnToFitContent",
-//            TreeTableColumn::class.java,
-//            Int::class.java
-//        ).apply {
-//            isAccessible = true
-//            invoke(it, this@pack, -1)
-//        }
-//    }
-}
 
 /**
  * Mutates this array to remove duplicate values.
@@ -96,18 +74,6 @@ fun <T> TreeItem<T>.flatten(item : TreeItem<T>): Stream<TreeItem<T>> =
         item.children.stream().flatMap { flatten(it) }
     )
 
-/**
- * Resizes columns in a [TreeTableView] to fit the content within them.
- *
- * JavaFX does have a method for this, but it's not public
- * so this bodge uses reflection to access it.
- */
-@Deprecated("Since updating JavaFX, this no longer works - and throws an exception.")
-fun TreeTableView<*>.pack() {
-    columns.forEach {
-        it.pack(this)
-    }
-}
 
 /**
  * Inverse of [get]
