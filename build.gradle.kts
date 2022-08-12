@@ -11,6 +11,7 @@ plugins {
     id("java")
     id("distribution")
     id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("io.cloudflight.license-gradle-plugin") version "1.0.3"
     application
 }
 
@@ -47,6 +48,8 @@ dependencies {
     implementation("org.jsoup:jsoup:1.15.2")
     implementation("net.sourceforge.cssparser:cssparser:0.9.29")
     implementation("org.reflections:reflections:0.10.2")
+//    implementation("com.sibvisions.external.jvxfx:dndtabpane:0.1")
+
 }
 
 javafx {
@@ -69,8 +72,7 @@ tasks.withType<JavaExec>{
 
 application {
     mainClass.set("HTMLDesignerKt")
-    applicationDefaultJvmArgs = listOf("-ea")
-    applicationDefaultJvmArgs
+    applicationDefaultJvmArgs = listOf("-ea", "--add-opens", "javafx.controls/javafx.scene.control.skin=ALL-UNNAMED")
 }
 
 /*
