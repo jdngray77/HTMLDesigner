@@ -237,14 +237,7 @@ class Editor : Application() {
         // Ensure we're clear to shutdown.
         // ==================
 
-        mvcIfAvail()?.apply {
-            getOpenEditors().forEach {
-                if (!it.requestClose()) {
-                    showNotification("Shutdown or restart aborted", "An editor refused to close.")
-                    throw InterruptedException("Shutdown or restart aborted. An editor refused to close.")
-                }
-            }
-        }
+        mvcIfAvail()?.closeAllEditors()
 
 
         // ==================

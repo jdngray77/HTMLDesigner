@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -37,8 +36,13 @@ import javafx.scene.image.Image
 import javafx.scene.layout.*
 import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
+import org.eclipse.fx.ui.controls.tabpane.DndTabPane
+import org.eclipse.fx.ui.controls.tabpane.DndTabPaneFactory
+import org.eclipse.fx.ui.controls.tabpane.DndTabPaneFactory.FeedbackType
+import org.eclipse.fx.ui.controls.tabpane.skin.DnDTabPaneSkin
 import org.jsoup.nodes.Document
 import java.io.File
+import java.lang.System.gc
 import javax.script.ScriptEngineManager
 
 
@@ -56,24 +60,33 @@ class MainViewController {
     //region                                                   UI References.
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    @FXML lateinit var dockEditors : TabPane
+    lateinit var anchorDockLeftBottom: VBox
+    lateinit var anchorDockLeftTop: VBox
+    lateinit var anchorDockRight: VBox
 
-    @FXML lateinit var dockLeftTop : TabPane
-    @FXML lateinit var dockLeftBottom : TabPane
+    @FXML
+    lateinit var dockEditors: TabPane
 
-    @FXML lateinit var dockRight : TabPane
-    @FXML lateinit var dockBottom : TabPane
+    @FXML
+    lateinit var dockLeftTop: DndTabPane
+    @FXML
+    lateinit var dockLeftBottom: DndTabPane
 
-    @FXML lateinit var htmlEditor : HTMLEditor
+    @FXML
+    lateinit var dockRight: DndTabPane
+    @FXML
+    lateinit var dockBottom: TabPane
 
-    @FXML lateinit var lblLeftStatus : Label
-    @FXML lateinit var lblRightStatus : Label
+    @FXML
+    lateinit var htmlEditor: HTMLEditor
 
-    @FXML lateinit var documentation : WebView
+    @FXML
+    lateinit var lblLeftStatus: Label
+    @FXML
+    lateinit var lblRightStatus: Label
 
-
-
-
+    @FXML
+    lateinit var documentation: WebView
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -87,6 +100,25 @@ class MainViewController {
     @FXML
     fun initialize() {
 
+        // We need to create the skin manually, could also be your custom skin.
+
+        val skin = DnDTabPaneSkin(dockLeftTop)
+        val skin1 = DnDTabPaneSkin(dockLeftBottom)
+        val skin2 = DnDTabPaneSkin(dockRight)
+
+        // Setup the dragging.
+        //DndTabPaneFactory.setup(FeedbackType.MARKER, containerPane, skin2)
+        DndTabPaneFactory.setup(FeedbackType.MARKER, anchorDockLeftTop, skin)
+        DndTabPaneFactory.setup(FeedbackType.MARKER, anchorDockLeftBottom, skin1)
+        DndTabPaneFactory.setup(FeedbackType.MARKER, anchorDockRight, skin2)
+
+        dockLeftTop.skin = skin
+        dockLeftBottom.skin = skin1
+        dockRight.skin = skin2
+
+
+
+
         htmlEditor.setOnContextMenuRequested {
             textEditor_Open(mvc().currentDocument().html())
         }
@@ -98,12 +130,19 @@ class MainViewController {
         }
 
         // Trigger switch event when user switches tabs.
-        dockEditors.selectionModel.selectedItemProperty().addListener {
-            _, _, _ ->
+        dockEditors.selectionModel.selectedItemProperty().addListener { _, _, _ ->
             EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_SWITCH)
         }
 
-        dockEditors.background = Background(BackgroundImage(Image("/com/jdngray77/htmldesigner/frontend/template.png"), BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT))
+        dockEditors.background = Background(
+            BackgroundImage(
+                Image("/com/jdngray77/htmldesigner/frontend/template.png"),
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                BackgroundSize.DEFAULT
+            )
+        )
 
         addDocks()
         documentation.engine.load("https://www.github.com/Jdngray77/HTMLDesigner/wiki")
@@ -126,9 +165,10 @@ class MainViewController {
         implAddDock(dockRight, HistoryDock())
     }
 
-    private fun implAddDock(to: TabPane, vararg it : Dock) {
+    private fun implAddDock(to: TabPane, vararg it: Dock) {
         it.forEach {
-            to.tabs.add(Tab(
+            to.tabs.add(
+                Tab(
                     it::class.simpleName!!.camelToSentence(),
                     it
                 )
@@ -150,7 +190,6 @@ class MainViewController {
     fun updateDisplay(document: Document) {
         textEditor_Open(document)
     }
-
 
 
     /**
@@ -202,10 +241,10 @@ class MainViewController {
     fun menu_debug_showcache() {
         showInformationalAlert(
             "Project files loaded into cache are : "
-            +
-            mvc().Project.getCache().entries.joinToString {
-                it.key + if (File(it.key).exists()) "" else "(Missing)" +"\n"
-            }
+                    +
+                    mvc().Project.getCache().entries.joinToString {
+                        it.key + if (File(it.key).exists()) "" else "(Missing)" + "\n"
+                    }
         )
     }
 
@@ -259,7 +298,6 @@ class MainViewController {
 
 
         mvc().currentEditor().apply {
-
 
 
             // Store the current tab position
@@ -331,13 +369,46 @@ class MainViewController {
         mvc().currentEditor().redo()
     }
 
+    /**
+     * This is liable to causes memory leaks.
+     */
+    fun menu_window_resetdocks() {
+        clearDock(dockLeftTop)
+        clearDock(dockLeftBottom)
+        clearDock(dockRight)
+
+        addDocks()
+        EventType.IDE_FINISHED_LOADING.notify()
+        gc();
+    }
+
+    private fun clearDock(dock: TabPane) {
+        dock.tabs.apply {
+            map {
+                if (it is Subscriber)
+                    EventNotifier.unsubscribeFromAll(it)
+            }
+            clear()
+        }
+    }
+
+    fun menu_window_isolation() {
+        mvc().currentEditor().toggleStandaloneEditMode()
+    }
+
+    fun menu_window_fs() {
+        Editor.EDITOR.stage.isFullScreen = !Editor.EDITOR.stage.isFullScreen
+    }
+
+    fun menu_window_closeeditors() {
+        mvc().closeAllEditors()
+    }
+
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                 Menu
     //region                                          Private Utility Methods
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
 
 
 }

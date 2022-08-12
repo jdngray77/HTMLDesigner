@@ -238,4 +238,14 @@ object EventNotifier {
             map[it]?.remove(subscriber)
         }
     }
+
+    /**
+     * Removes a subscriber from any events that it's subscribed to.
+     */
+    fun unsubscribeFromAll(subscriber: Subscriber) {
+        EventType.values().map {
+            unsubscribe(subscriber, it)
+            unsubscribe(subscriber, it, map = FXSubscribers)
+        }
+    }
 }

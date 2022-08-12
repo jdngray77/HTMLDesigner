@@ -51,6 +51,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.web.*?>
+<?import org.eclipse.fx.ui.controls.tabpane.DndTabPane?>
 
 <VBox prefHeight="1108.0" prefWidth="1606.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.MainViewController">
     <children>
@@ -85,7 +86,6 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Project">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="[inop] Save" />
                         <MenuItem mnemonicParsing="false" text="[inop] New..." />
                         <MenuItem mnemonicParsing="false" text="[inop] Load..." />
                         <MenuItem mnemonicParsing="false" onAction="#menu_project_close" text="Close Project &amp; Restart" />
@@ -102,7 +102,7 @@
                         <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="File">
+                <Menu mnemonicParsing="false" text="Page">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save" />
                         <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert unsaved changes" />
@@ -115,14 +115,12 @@
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="[inop] Open Recent" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_edit_undo" text="[WIP] Undo" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_edit_redo" text="[WIP] Redo" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_edit_undo" text="Undo" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_edit_redo" text="Redo" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" text="[inop] Cut" />
                         <MenuItem mnemonicParsing="false" text="[inop] Copy" />
@@ -143,14 +141,25 @@
                                 <CheckMenuItem mnemonicParsing="false" onAction="#menu_server_tglauto" selected="true" text="Toggle auto-refresh" />
                             </items>
                         </Menu>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <Menu mnemonicParsing="false" text="Git">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="[inop] Publish changes..." />
+                                <MenuItem mnemonicParsing="false" text="[inop] Update project..." />
+                                <MenuItem mnemonicParsing="false" text="[inop] Branches..." />
+                                <MenuItem mnemonicParsing="false" text="[inop] Delete changes..." />
+                            </items>
+                        </Menu>
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Git">
+                <Menu text="View">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="[inop] Publish changes..." />
-                        <MenuItem mnemonicParsing="false" text="[inop] Update project..." />
-                        <MenuItem mnemonicParsing="false" text="[inop] Branches..." />
-                        <MenuItem mnemonicParsing="false" text="[inop] Delete changes..." />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_window_isolation" text="Toggle standalone edit mode" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_window_closeeditors" text="Close all open editors" />
+                        <SeparatorMenuItem/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_window_resetdocks" text="Reset docks" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_window_fs" text="Toggle Fullscreen" />
+
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
@@ -162,27 +171,28 @@
                         <MenuItem mnemonicParsing="false" onAction="#menu_help_jdngray" text="Author" />
                         <MenuItem mnemonicParsing="false" onAction="#menu_help_dbrand" text="Co-Author" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="About" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="[WIP] About" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="[inop] Licenses" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
-        <BorderPane VBox.vgrow="ALWAYS">
+        <BorderPane fx:id="mainBorderPane" VBox.vgrow="ALWAYS">
             <center>
                 <SplitPane dividerPositions="0.1745635910224439, 0.8341645885286783" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" BorderPane.alignment="CENTER">
                     <items>
                         <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                             <items>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                <VBox fx:id="anchorDockLeftTop" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                     <children>
-                                        <TabPane fx:id="dockLeftTop" side="LEFT" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="500.0" tabMaxWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                        <DndTabPane VBox.vgrow="ALWAYS" tabDragPolicy="REORDER" fx:id="dockLeftTop" side="LEFT" tabClosingPolicy="UNAVAILABLE" tabMaxHeight="500.0" tabMaxWidth="500.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     </children>
-                                </AnchorPane>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                                </VBox>
+                                <VBox fx:id="anchorDockLeftBottom" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                     <children>
-                                        <TabPane fx:id="dockLeftBottom" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                        <DndTabPane VBox.vgrow="ALWAYS" tabDragPolicy="REORDER" fx:id="dockLeftBottom" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     </children>
-                                </AnchorPane>
+                                </VBox>
                             </items>
                         </SplitPane>
                         <SplitPane dividerPositions="0.7" orientation="VERTICAL">
@@ -195,7 +205,7 @@
                                 </AnchorPane>
                                 <AnchorPane fx:id="dockbottom" prefHeight="200.0" prefWidth="200.0">
                                     <children>
-                                        <TabPane fx:id="dockBottom" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <TabPane  tabDragPolicy="REORDER" fx:id="dockBottom" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <tabs>
                                                 <Tab text="Documentation">
                                                     <content>
@@ -218,7 +228,11 @@
                                 </AnchorPane>
                             </items>
                         </SplitPane>
-                        <TabPane fx:id="dockRight" prefHeight="200.0" prefWidth="200.0" side="RIGHT" tabClosingPolicy="UNAVAILABLE" />
+                        <VBox  fx:id="anchorDockRight">
+                            <children>
+                                <DndTabPane VBox.vgrow="ALWAYS" tabDragPolicy="REORDER" fx:id="dockRight" prefHeight="200.0" prefWidth="200.0" side="RIGHT" tabClosingPolicy="UNAVAILABLE" />
+                            </children>
+                        </VBox>
                     </items>
                 </SplitPane>
             </center>
