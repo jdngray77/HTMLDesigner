@@ -363,6 +363,10 @@ class DocumentEditor {
             reRender()
         }
 
+    fun toggleStandaloneEditMode() {
+        standaloneEditMode = !standaloneEditMode
+    }
+
 
 
 

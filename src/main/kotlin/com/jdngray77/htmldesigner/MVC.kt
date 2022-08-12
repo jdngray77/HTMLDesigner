@@ -218,6 +218,18 @@ class MVC (
         }
     }
 
+    /**
+     * @throws InterruptedException if the user refuses to close an editor.
+     */
+    fun closeAllEditors() {
+        getOpenEditors().forEach {
+            if (!it.requestClose()) {
+                showNotification("Shutdown or restart aborted", "An editor refused to close.")
+                throw InterruptedException("Shutdown or restart aborted. An editor refused to close.")
+            }
+        }
+    }
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                     Editors
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
