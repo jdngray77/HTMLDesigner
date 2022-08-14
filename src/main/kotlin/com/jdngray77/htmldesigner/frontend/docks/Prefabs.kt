@@ -22,7 +22,6 @@ import com.jdngray77.htmldesigner.backend.html.Prefab
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
-import com.jdngray77.htmldesigner.utility.pack
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.SelectionMode
@@ -31,7 +30,7 @@ import javafx.scene.control.TreeTableColumn
 
 class Prefabs : HierarchyDock<Prefab>({it?.locationOnDisk!!.name}), Subscriber {
     init {
-        EventNotifier.subscribe(this, EventType.EDITOR_LOADED, EventType.PROJECT_PREFAB_CREATED)
+        EventNotifier.subscribe(this, EventType.IDE_FINISHED_LOADING, EventType.PROJECT_PREFAB_CREATED)
     }
 
     override fun notify(e: EventType) {
@@ -66,7 +65,7 @@ class Prefabs : HierarchyDock<Prefab>({it?.locationOnDisk!!.name}), Subscriber {
             selectedItem()?.element?.apply {
                 mvc().currentEditor().let {
                     it.selectedTag?.appendChild( this)
-                    it.documentChanged()
+                    it.documentChanged("Added prefab ${selectedItem()?.locationOnDisk!!.name ?: ""} to ${it.selectedTag?.tagName()}")
                     it.selectTag(this)
                 }
             }
@@ -74,7 +73,6 @@ class Prefabs : HierarchyDock<Prefab>({it?.locationOnDisk!!.name}), Subscriber {
 
 
         tree.selectionModel.selectionMode = SelectionMode.SINGLE
-        tree.pack()
     }
 
 

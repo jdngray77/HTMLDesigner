@@ -3,7 +3,6 @@ package com.jdngray77.htmldesigner.backend
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
-import com.jdngray77.htmldesigner.utility.Restartable
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import org.jsoup.nodes.Document
@@ -22,7 +21,7 @@ import java.net.URI
  * notifications show at [start] and [stop].
  * @author Jordan Gray
  */
-object WebServer : Subscriber, Restartable {
+object WebServer : Subscriber {
 
     /**
      * The port that the server will/is being hosted on.
@@ -158,7 +157,7 @@ object WebServer : Subscriber, Restartable {
             tr.printStackTrace()
         }
 
-        EventNotifier.subscribe(this, EventType.EDITOR_DOCUMENT_EDITED, EventType.EDITOR_DOCUMENT_SWITCH)
+        EventNotifier.subscribe(this, EventType.IDE_SHUTDOWN, EventType.EDITOR_DOCUMENT_EDITED, EventType.EDITOR_DOCUMENT_SWITCH)
 
         serve(mvc().currentDocument())
         Desktop.getDesktop().browse(URI.create("http://localhost:$PORT"))
@@ -183,13 +182,6 @@ object WebServer : Subscriber, Restartable {
     }
 
     /**
-     * Shuts down the server when the IDE is restarted.
-     */
-    override fun restart() {
-        stop()
-    }
-
-    /**
      * Changes the document that is being served.
      */
     fun serve(e: Document?) {
@@ -207,6 +199,11 @@ object WebServer : Subscriber, Restartable {
      * Updates the page being served.
      */
     override fun notify(e: EventType) {
+        if (e == EventType.IDE_SHUTDOWN) {
+            stop()
+            return
+        }
+
         if (server != null && DOCUMENT_SERVING != null)
             if (e == EventType.EDITOR_DOCUMENT_SWITCH)
                 serve(mvc().currentDocument())

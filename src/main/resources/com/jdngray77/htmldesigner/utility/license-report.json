@@ -1,0 +1,680 @@
+[
+    {
+        "project": "CSS Parser",
+        "description": "A CSS parser which implements SAC (the Simple API for CSS).",
+        "version": "0.9.29",
+        "developers": [
+            "David Schweinsberg",
+            "Alan Krueger",
+            "Daniel Gredler",
+            "Johannes Koch",
+            "Ronald Brill"
+        ],
+        "url": "http://cssparser.sourceforge.net/",
+        "year": "1999",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "net.sourceforge.cssparser:cssparser:0.9.29"
+    },
+    {
+        "project": "ControlsFX",
+        "description": "High quality UI controls and other tools to complement the core JavaFX distribution",
+        "version": "11.1.1",
+        "developers": [
+            "Jonathan Giles"
+        ],
+        "url": "http://www.controlsfx.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "The 3-Clause BSD License",
+                "license_url": "http://www.opensource.org/licenses/bsd-license.php"
+            }
+        ],
+        "dependency": "org.controlsfx:controlsfx:11.1.1"
+    },
+    {
+        "project": "DnDTabPane",
+        "description": "A TabPane for JavaFX that supports Drag and Drop.",
+        "version": "0.1",
+        "developers": [
+            "Tom Schindl",
+            "Robert Zenz"
+        ],
+        "url": "https://github.com/sibvisions/javafx.DndTabPane",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Eclipse Public License 1.0",
+                "license_id": "EPL-1.0",
+                "license_url": "https://www.eclipse.org/legal/epl-v10.html"
+            }
+        ],
+        "dependency": "com.sibvisions.external.jvxfx:dndtabpane:0.1"
+    },
+    {
+        "project": "FindBugs-jsr305",
+        "description": "JSR305 Annotations for Findbugs",
+        "version": "3.0.2",
+        "developers": [
+        ],
+        "url": "http://findbugs.sourceforge.net/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "com.google.code.findbugs:jsr305:3.0.2"
+    },
+    {
+        "project": "Hamcrest Core",
+        "description": "This is the core API of hamcrest matcher framework to be used by third-party framework providers. This includes the a foundation set of matcher implementations for common operations.",
+        "version": "1.3",
+        "developers": [
+            "Joe Walnes",
+            "Nat Pryce",
+            "Steve Freeman",
+            "Neil Dunn",
+            "Tom Denley"
+        ],
+        "url": "",
+        "year": "",
+        "licenses": [
+            {
+                "license": "BSD",
+                "license_url": "http://www.opensource.org/licenses/bsd-license.php"
+            }
+        ],
+        "dependency": "org.hamcrest:hamcrest-core:1.3"
+    },
+    {
+        "project": "IntelliJ IDEA Annotations",
+        "description": "A set of annotations used for code inspection support and code documentation.",
+        "version": "13.0",
+        "developers": [
+            "JetBrains Team"
+        ],
+        "url": "http://www.jetbrains.org",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains:annotations:13.0"
+    },
+    {
+        "project": "JUnit",
+        "description": "JUnit is a unit testing framework for Java, created by Erich Gamma and Kent Beck.",
+        "version": "4.12",
+        "developers": [
+            "David Saff",
+            "Kevin Cooney",
+            "Stefan Birkner",
+            "Marc Philipp"
+        ],
+        "url": "http://junit.org",
+        "year": "2002",
+        "licenses": [
+            {
+                "license": "Eclipse Public License 1.0",
+                "license_id": "EPL-1.0",
+                "license_url": "https://www.eclipse.org/legal/epl-v10.html"
+            }
+        ],
+        "dependency": "junit:junit:4.12"
+    },
+    {
+        "project": "Javassist",
+        "description": "Javassist (JAVA programming ASSISTant) makes Java bytecode manipulation\n    simple.  It is a class library for editing bytecodes in Java.",
+        "version": "3.28.0-GA",
+        "developers": [
+            "Shigeru Chiba",
+            "Andrew Dinn",
+            "Kabir Khan",
+            "Scott Marlow"
+        ],
+        "url": "http://www.javassist.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.javassist:javassist:3.28.0-GA"
+    },
+    {
+        "project": "Kotlin Gradle Plugin Api",
+        "description": "Kotlin Gradle Plugin Api",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.10"
+    },
+    {
+        "project": "Kotlin Native Utils",
+        "description": "Kotlin/Native utils",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-native-utils:1.7.10"
+    },
+    {
+        "project": "Kotlin Project Model",
+        "description": "Kotlin Project Model",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-project-model:1.7.10"
+    },
+    {
+        "project": "Kotlin Reflect",
+        "description": "Kotlin Full Reflection Library",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
+    },
+    {
+        "project": "Kotlin Stdlib",
+        "description": "Kotlin Standard Library for JVM",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-stdlib:1.7.10"
+    },
+    {
+        "project": "Kotlin Stdlib Common",
+        "description": "Kotlin Common Standard Library",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-stdlib-common:1.7.10"
+    },
+    {
+        "project": "Kotlin Test",
+        "description": "Kotlin Test Multiplatform library",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-test:1.7.10"
+    },
+    {
+        "project": "Kotlin Tooling Core",
+        "description": "Kotlin Tooling Core",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-tooling-core:1.7.10"
+    },
+    {
+        "project": "Kotlin Util Io",
+        "description": "Kotlin Util Io",
+        "version": "1.7.10",
+        "developers": [
+            "Kotlin Team"
+        ],
+        "url": "https://kotlinlang.org/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlin:kotlin-util-io:1.7.10"
+    },
+    {
+        "project": "Reflections",
+        "description": "Reflections - Java runtime metadata analysis",
+        "version": "0.10.2",
+        "developers": [
+            ""
+        ],
+        "url": "http://github.com/ronmamo/reflections",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.reflections:reflections:0.10.2"
+    },
+    {
+        "project": "SLF4J API Module",
+        "description": "The slf4j API",
+        "version": "1.7.32",
+        "developers": [
+            "Ceki Gulcu"
+        ],
+        "url": "http://www.slf4j.org",
+        "year": "",
+        "licenses": [
+            {
+                "license": "MIT License",
+                "license_id": "MIT",
+                "license_url": "http://www.opensource.org/licenses/mit-license.php"
+            }
+        ],
+        "dependency": "org.slf4j:slf4j-api:1.7.32"
+    },
+    {
+        "project": "Simple API for CSS",
+        "description": "SAC is a standard interface for CSS parsers.",
+        "version": "1.3",
+        "developers": [
+        ],
+        "url": "http://www.w3.org/Style/CSS/SAC/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "The W3C Software License",
+                "license_url": "http://www.w3.org/Consortium/Legal/copyright-software-19980720"
+            }
+        ],
+        "dependency": "org.w3c.css:sac:1.3"
+    },
+    {
+        "project": "javafx-base",
+        "description": "",
+        "version": "16",
+        "developers": [
+            "OpenJFX Mailing List"
+        ],
+        "url": "",
+        "year": "",
+        "licenses": [
+            {
+                "license": "GNU General Public License v2.0 w/Classpath exception",
+                "license_id": "GPL-2.0-with-classpath-exception",
+                "license_url": "https://www.gnu.org/software/classpath/license.html"
+            }
+        ],
+        "dependency": "org.openjfx:javafx-base:16"
+    },
+    {
+        "project": "javafx-controls",
+        "description": "",
+        "version": "16",
+        "developers": [
+            "OpenJFX Mailing List"
+        ],
+        "url": "",
+        "year": "",
+        "licenses": [
+            {
+                "license": "GNU General Public License v2.0 w/Classpath exception",
+                "license_id": "GPL-2.0-with-classpath-exception",
+                "license_url": "https://www.gnu.org/software/classpath/license.html"
+            }
+        ],
+        "dependency": "org.openjfx:javafx-controls:16"
+    },
+    {
+        "project": "javafx-fxml",
+        "description": "",
+        "version": "16",
+        "developers": [
+            "OpenJFX Mailing List"
+        ],
+        "url": "",
+        "year": "",
+        "licenses": [
+            {
+                "license": "GNU General Public License v2.0 w/Classpath exception",
+                "license_id": "GPL-2.0-with-classpath-exception",
+                "license_url": "https://www.gnu.org/software/classpath/license.html"
+            }
+        ],
+        "dependency": "org.openjfx:javafx-fxml:16"
+    },
+    {
+        "project": "javafx-graphics",
+        "description": "",
+        "version": "16",
+        "developers": [
+            "OpenJFX Mailing List"
+        ],
+        "url": "",
+        "year": "",
+        "licenses": [
+            {
+                "license": "GNU General Public License v2.0 w/Classpath exception",
+                "license_id": "GPL-2.0-with-classpath-exception",
+                "license_url": "https://www.gnu.org/software/classpath/license.html"
+            }
+        ],
+        "dependency": "org.openjfx:javafx-graphics:16"
+    },
+    {
+        "project": "javafx-media",
+        "description": "",
+        "version": "16",
+        "developers": [
+            "OpenJFX Mailing List"
+        ],
+        "url": "",
+        "year": "",
+        "licenses": [
+            {
+                "license": "GNU General Public License v2.0 w/Classpath exception",
+                "license_id": "GPL-2.0-with-classpath-exception",
+                "license_url": "https://www.gnu.org/software/classpath/license.html"
+            }
+        ],
+        "dependency": "org.openjfx:javafx-media:16"
+    },
+    {
+        "project": "javafx-swing",
+        "description": "",
+        "version": "16",
+        "developers": [
+            "OpenJFX Mailing List"
+        ],
+        "url": "",
+        "year": "",
+        "licenses": [
+            {
+                "license": "GNU General Public License v2.0 w/Classpath exception",
+                "license_id": "GPL-2.0-with-classpath-exception",
+                "license_url": "https://www.gnu.org/software/classpath/license.html"
+            }
+        ],
+        "dependency": "org.openjfx:javafx-swing:16"
+    },
+    {
+        "project": "javafx-web",
+        "description": "",
+        "version": "16",
+        "developers": [
+            "OpenJFX Mailing List"
+        ],
+        "url": "",
+        "year": "",
+        "licenses": [
+            {
+                "license": "GNU General Public License v2.0 w/Classpath exception",
+                "license_id": "GPL-2.0-with-classpath-exception",
+                "license_url": "https://www.gnu.org/software/classpath/license.html"
+            }
+        ],
+        "dependency": "org.openjfx:javafx-web:16"
+    },
+    {
+        "project": "jmetro",
+        "description": "A theme / look and feel for JavaFX inspired (but not a copy) by Microsoft's Fluent Design",
+        "version": "11.6.15",
+        "developers": [
+            "Pedro Duque Vieira"
+        ],
+        "url": "https://pixelduke.com/java-javafx-theme-jmetro/",
+        "year": "",
+        "licenses": [
+            {
+                "license": "BSD 3-Clause \"New\" or \"Revised\" License",
+                "license_id": "BSD-3-Clause",
+                "license_url": "https://opensource.org/licenses/BSD-3-Clause"
+            }
+        ],
+        "dependency": "org.jfxtras:jmetro:11.6.15"
+    },
+    {
+        "project": "jsoup Java HTML Parser",
+        "description": "jsoup is a Java library for working with real-world HTML. It provides a very convenient API for fetching URLs and extracting and manipulating data, using the best of HTML5 DOM methods and CSS selectors. jsoup implements the WHATWG HTML5 specification, and parses HTML to the same DOM as modern browsers do.",
+        "version": "1.15.2",
+        "developers": [
+            "Jonathan Hedley"
+        ],
+        "url": "https://jsoup.org/",
+        "year": "2009",
+        "licenses": [
+            {
+                "license": "The MIT License",
+                "license_id": "MIT",
+                "license_url": "https://jsoup.org/license"
+            }
+        ],
+        "dependency": "org.jsoup:jsoup:1.15.2"
+    },
+    {
+        "project": "kotlinx-serialization-core",
+        "description": "Kotlin multiplatform serialization runtime library",
+        "version": "1.3.3",
+        "developers": [
+            "JetBrains Team"
+        ],
+        "url": "https://github.com/Kotlin/kotlinx.serialization",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.3.3"
+    },
+    {
+        "project": "kotlinx-serialization-json",
+        "description": "Kotlin multiplatform serialization runtime library",
+        "version": "1.3.3",
+        "developers": [
+            "JetBrains Team"
+        ],
+        "url": "https://github.com/Kotlin/kotlinx.serialization",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.3.3"
+    },
+    {
+        "project": "org.junit:junit-commons",
+        "description": "Module \"junit-commons\" of JUnit 5.",
+        "version": "5.0.0-ALPHA",
+        "developers": [
+            "Stefan Bechtold",
+            "Johannes Link",
+            "Marc Philipp",
+            "Matthias Merdes",
+            "Sam Brannen"
+        ],
+        "url": "http://junit.org/junit-lambda.html",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Eclipse Public License 1.0",
+                "license_id": "EPL-1.0",
+                "license_url": "https://www.eclipse.org/legal/epl-v10.html"
+            }
+        ],
+        "dependency": "org.junit:junit-commons:5.0.0-ALPHA"
+    },
+    {
+        "project": "org.junit:junit-engine-api",
+        "description": "Module \"junit-engine-api\" of JUnit 5.",
+        "version": "5.0.0-ALPHA",
+        "developers": [
+            "Stefan Bechtold",
+            "Johannes Link",
+            "Marc Philipp",
+            "Matthias Merdes",
+            "Sam Brannen"
+        ],
+        "url": "http://junit.org/junit-lambda.html",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Eclipse Public License 1.0",
+                "license_id": "EPL-1.0",
+                "license_url": "https://www.eclipse.org/legal/epl-v10.html"
+            }
+        ],
+        "dependency": "org.junit:junit-engine-api:5.0.0-ALPHA"
+    },
+    {
+        "project": "org.junit:junit-launcher",
+        "description": "Module \"junit-launcher\" of JUnit 5.",
+        "version": "5.0.0-ALPHA",
+        "developers": [
+            "Stefan Bechtold",
+            "Johannes Link",
+            "Marc Philipp",
+            "Matthias Merdes",
+            "Sam Brannen"
+        ],
+        "url": "http://junit.org/junit-lambda.html",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Eclipse Public License 1.0",
+                "license_id": "EPL-1.0",
+                "license_url": "https://www.eclipse.org/legal/epl-v10.html"
+            }
+        ],
+        "dependency": "org.junit:junit-launcher:5.0.0-ALPHA"
+    },
+    {
+        "project": "org.junit:junit4-runner",
+        "description": "Module \"junit4-runner\" of JUnit 5.",
+        "version": "5.0.0-ALPHA",
+        "developers": [
+            "Stefan Bechtold",
+            "Johannes Link",
+            "Marc Philipp",
+            "Matthias Merdes",
+            "Sam Brannen"
+        ],
+        "url": "http://junit.org/junit-lambda.html",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Eclipse Public License 1.0",
+                "license_id": "EPL-1.0",
+                "license_url": "https://www.eclipse.org/legal/epl-v10.html"
+            }
+        ],
+        "dependency": "org.junit:junit4-runner:5.0.0-ALPHA"
+    },
+    {
+        "project": "org.opentest4j:opentest4j",
+        "description": "Open Test Alliance for the JVM",
+        "version": "1.0.0-ALPHA",
+        "developers": [
+            "Stefan Bechtold",
+            "Johannes Link",
+            "Marc Philipp",
+            "Matthias Merdes",
+            "Sam Brannen"
+        ],
+        "url": "https://github.com/ota4j-team/opentest4j",
+        "year": "",
+        "licenses": [
+            {
+                "license": "Apache License 2.0",
+                "license_id": "Apache-2.0",
+                "license_url": "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        ],
+        "dependency": "org.opentest4j:opentest4j:1.0.0-ALPHA"
+    }
+]

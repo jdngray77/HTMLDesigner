@@ -10,15 +10,26 @@ plugins {
     id("org.jetbrains.dokka") version "1.7.10"
     id("java")
     id("distribution")
+
+    `maven-publish`
+
+    // Plugin used to generate a report of every report used by the IDE.
+    // For some reason, it interferes with the spdx library, so it's commented out.
+    // Just uncomment it if you want to use it.
+
+    // NOTE : REMEMBER TO UNCOMMENT THE DNDTABPANE LIBRARY TO INCLUDE IT IN THE REPORT.
+//    id("io.cloudflight.license-gradle-plugin") version "1.0.3"
     application
 }
+
+
+
 
 val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
 
 
 java {
     sourceCompatibility = JavaVersion.VERSION_13
-    targetCompatibility = JavaVersion.VERSION_13
     withSourcesJar()
 }
 
@@ -33,16 +44,22 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     implementation("org.junit:junit4-runner:5.0.0-ALPHA")
-
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-test")
     implementation("org.controlsfx:controlsfx:11.1.1")
-    implementation("org.jetbrains.kotlin:kotlin-serialization:1.7.0")
+    implementation("org.jetbrains.kotlin:kotlin-serialization:1.7.10")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("org.jfxtras:jmetro:11.6.15")
-    implementation("org.jsoup:jsoup:1.14.3")
+    implementation("org.jsoup:jsoup:1.15.2")
     implementation("net.sourceforge.cssparser:cssparser:0.9.29")
     implementation("org.reflections:reflections:0.10.2")
+    implementation("org.spdx:spdx-tools:2.2.7")
+    implementation("se.michaelthelin.spotify:spotify-web-api-java:7.2.0")
+
+// Included only for license. This library is imported as source.
+//    implementation("com.sibvisions.external.jvxfx:dndtabpane:0.1")
+
 }
 
 javafx {
@@ -57,9 +74,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "16"
 }
 
-tasks.build {
-    dependsOn("generateProperties")
-}
+tasks.build { dependsOn("generateProperties") }
 
 tasks.withType<JavaExec>{
     dependsOn("generateProperties")
@@ -67,8 +82,7 @@ tasks.withType<JavaExec>{
 
 application {
     mainClass.set("HTMLDesignerKt")
-    applicationDefaultJvmArgs = listOf("-ea")
-    applicationDefaultJvmArgs
+    applicationDefaultJvmArgs = listOf("-ea", "--add-opens", "javafx.controls/javafx.scene.control.skin=ALL-UNNAMED")
 }
 
 /*
@@ -77,7 +91,7 @@ application {
 
 tasks.register("generateProperties") {
     doLast {
-        val propertiesFile = file("$buildDir/resources/main/com/jdngray77/htmldesigner/meta.properties")
+        val propertiesFile = file("$buildDir/resources/main/com/jdngray77/htmldesigner/frontend/meta.properties")
         propertiesFile.parentFile.mkdirs()
 
         val properties = Properties()
@@ -99,3 +113,13 @@ tasks.register("generateProperties") {
 }
 
 
+tasks.jar {
+    dependsOn("generateProperties")
+    manifest.attributes["Main-Class"] = "HTMLDesignerKt"
+    manifest.attributes["Class-Path"] = configurations
+//        .runtimeClasspath
+//        .get()
+//        .joinToString(separator = " ") { file ->
+//            "libs/${file.name}"
+//        }
+}

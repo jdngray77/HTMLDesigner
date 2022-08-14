@@ -68,8 +68,8 @@ fun Document.editor() =
  * If the document is open in an editor, notifies
  * the editor that the document has changed.
  */
-fun Document.changed()
-    = editor()?.documentChanged()
+fun Document.changed(reason: String)
+    = editor()?.documentChanged(reason)
 
 
 

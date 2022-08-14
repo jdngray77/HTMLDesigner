@@ -19,7 +19,10 @@ import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
-import com.jdngray77.htmldesigner.utility.*
+import com.jdngray77.htmldesigner.utility.applyToAll
+import com.jdngray77.htmldesigner.utility.asElement
+import com.jdngray77.htmldesigner.utility.clipboard
+import com.jdngray77.htmldesigner.utility.createPrefab
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -75,22 +78,25 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
         // Configure the tree.
 
-        tree.columns.setAll(
-            TreeTableColumn<Element, String>("Tag").also {
-                it.setCellValueFactory { p -> SimpleObjectProperty(p.value.value.tagName()) }
-            },
+        val col1 = TreeTableColumn<Element, String>("Tag").also {
+            it.setCellValueFactory { p -> SimpleObjectProperty(p.value.value.tagName()) }
+            it.prefWidth = 100.0
+        }
 
-            TreeTableColumn<Element, String>("Content").also {
-                it.setCellValueFactory { p -> SimpleStringProperty(p.value.value.ownText()) }
+        val col2 = TreeTableColumn<Element, String>("Content").also {
+            it.setCellValueFactory { p -> SimpleStringProperty(p.value.value.ownText()) }
 
-                it.setOnEditCommit {
-                    // TODO we can access the old value too. This will be useful for implementing undo.
-                    it.rowValue.value.text(it.newValue)
-                    mvc().currentEditor().reRender()
-                }
-                it.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn())
+            it.setOnEditCommit {
+                // TODO we can access the old value too. This will be useful for implementing undo.
+                it.rowValue.value.text(it.newValue)
+                mvc().currentEditor().documentChanged("Content of '${it.rowValue.value.tagName()}' changed to '${it.newValue}' ")
             }
-        )
+            it.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn())
+
+            it.prefWidthProperty().bind(widthProperty().subtract(col1.widthProperty().add(5)))
+        }
+
+        tree.columns.setAll(col1, col2)
 
 
         // When a new item is selected, display it in the editor.
@@ -165,9 +171,11 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
             menuItem("Paste above") {
                 selectedItem()?.before(
-                    clipboard().html.asElement()
+                    clipboard().html.asElement().let{
+                        mvc().currentEditor().documentChanged("${it.tagName()} pasted before ${selectedItem()!!.tagName()}")
+                        it
+                    }
                 )
-                mvc().currentDocumentModified()
             },
 
             menuItem("Paste inside") {
@@ -181,12 +189,14 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                 selectedItem()?.after(
                     clipboard().html.asElement()
                 )
-                mvc().currentDocumentModified()
+
+                // TODO
+                //mvc().currentDocumentModified()
             },
 
             menuItem("Wrap with clipboard") {
                 selectedItem()?.wrap(clipboard().html)
-                mvc().currentDocumentModified()
+//                mvc().currentDocumentModified()
             },
 
             SeparatorMenuItem(),
@@ -199,7 +209,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
                         it.insertChildren(index + 1, this)
 
-                        mvc().currentDocumentModified()
+//                        mvc().currentDocumentModified()
                     }
                 }
             },
@@ -212,7 +222,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
                         it.insertChildren(index + 2, this)
 
-                        mvc().currentDocumentModified()
+//                        mvc().currentDocumentModified()
                     }
                 }
             },
@@ -224,13 +234,11 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                     parent()?.let {
                         mvc().implDeleteTag(this)
                         it.before(this)
-                        mvc().currentDocumentModified()
+//                        mvc().currentDocumentModified()
                     }
                 }
             }
         )
-
-        tree.pack()
     }
 
     /**

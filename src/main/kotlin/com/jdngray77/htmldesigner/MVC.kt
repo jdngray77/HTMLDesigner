@@ -58,11 +58,11 @@ class MVC (
 ) : Subscriber {
 
     init {
-        EventNotifier.subscribe(this, EventType.EDITOR_LOADED)
+        EventNotifier.subscribe(this, EventType.IDE_FINISHED_LOADING)
     }
 
     override fun notify(e: EventType) {
-        if (e == EventType.EDITOR_LOADED && Project.documents().isNotEmpty())
+        if (e == EventType.IDE_FINISHED_LOADING && Project.documents().isNotEmpty())
             openDocument(Project.loadDocument(Project.documents().first()))
     }
 
@@ -218,6 +218,18 @@ class MVC (
         }
     }
 
+    /**
+     * @throws InterruptedException if the user refuses to close an editor.
+     */
+    fun closeAllEditors() {
+        getOpenEditors().forEach {
+            if (!it.requestClose()) {
+                showNotification("Shutdown or restart aborted", "An editor refused to close.")
+                throw InterruptedException("Shutdown or restart aborted. An editor refused to close.")
+            }
+        }
+    }
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                     Editors
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -245,7 +257,7 @@ class MVC (
     }
 
     fun implDeleteTag(vararg tag: Element) {
-        DocumentModificationTransaction().apply {
+        DocumentModificationTransaction("Deleted multiple tags.").apply {
             tag
                 .filterNot { it.parent() == null }
                 .forEach {
@@ -256,7 +268,6 @@ class MVC (
 
             finishedModifying()
         }
-        MainView.setAction("Deleted tag(s)")
     }
 
     fun delete(projectFile: File) {
@@ -273,13 +284,6 @@ class MVC (
         validateEditors()
     }
 
-    /**
-     * Marks the current document as dirty, and updates
-     * the GUI with the changes.
-     */
-    fun currentDocumentModified()
-        = currentEditor()?.documentChanged()
-
 
     /**
      * When making many changes at once, this can be used to delay the
@@ -291,7 +295,11 @@ class MVC (
      * Once all changes are made, call `finishedModifying`
      *
      */
-    inner class DocumentModificationTransaction : ArrayList<Document>() {
+    inner class DocumentModificationTransaction(
+
+        val batchDescription: String
+
+    ) : ArrayList<Document>() {
 
         private var done = false
 
@@ -301,7 +309,7 @@ class MVC (
         fun finishedModifying() {
             done = true
             distinct().forEach {
-                findEditorFor(it)!!.documentChanged()
+                findEditorFor(it)!!.documentChanged(batchDescription)
             }
         }
 

@@ -62,6 +62,7 @@ class TagProperties : Dock(), Subscriber {
         center = sheet
         EventNotifier.subscribe(this,
             EventType.EDITOR_SELECTED_TAG_CHANGED,
+            EventType.EDITOR_DOCUMENT_SWITCH,
             EventType.EDITOR_DOCUMENT_CLOSED
         )
     }

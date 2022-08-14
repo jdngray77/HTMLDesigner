@@ -15,21 +15,16 @@
 package com.jdngray77.htmldesigner.utility
 
 /**
- * When the IDE restarts, static systems are not unloaded, as the JVM is still running.
+ * An interface that is invoked at the beginning of boot up.
  *
- * Only instances of objects created within the [Editor] are unloaded and re-created.
+ * Since nothing has happened yet, nothing is able to subscribe to the standard
+ * event listener, so it can't be used early.
  *
- * This is for the cases where static systems or objects that need to clean up when the IDE:
- *  - unloads a project,
- *  - shuts down
- *  - or restarts.
+ * For systems that need to be loaded early, before the GUI, project and mvc exist.
+ * Specifically, for systems that the GUI, project or MVC requires to be able to load.
  *
- * When implemented, [restart] will automatically be invoked when the IDE's [Editor.stop] is invoked.
- *
- * Instances are located and invoked using reflection, so there no need to invoke or subscribe.
- *
- * @author Jordan T. Gray
+ * i.e the config registry. The registry is required by many parts of the boot up process.
  */
-interface Restartable {
-    fun restart()
+interface IDEEarlyBootListener {
+    fun onIDEBootEarly()
 }

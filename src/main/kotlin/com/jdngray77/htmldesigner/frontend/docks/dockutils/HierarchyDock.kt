@@ -17,12 +17,10 @@ package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.utility.StoringTreeItem
-import com.jdngray77.htmldesigner.utility.pack
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import javafx.scene.control.TreeTableRow
 import javafx.scene.control.TreeTableView
-import javafx.scene.layout.HBox
 
 /**
  * A dock which can display the hierarchy of anything.
@@ -48,7 +46,6 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
     fun setRoot(root: T) = setRoot(StoringTreeItem(root), root).apply {
         tree.root = this
         tree.root.isExpanded = true
-        tree.pack()
     }
 
 

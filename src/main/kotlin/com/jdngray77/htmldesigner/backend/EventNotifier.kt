@@ -15,38 +15,94 @@
 
 package com.jdngray77.htmldesigner.backend
 
+import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.frontend.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
-import com.jdngray77.htmldesigner.utility.Restartable
+import com.jdngray77.htmldesigner.frontend.MainViewController
 import com.jdngray77.htmldesigner.utility.addIfAbsent
+import com.jdngray77.htmldesigner.utility.createPrefab
 import javafx.application.Platform
+import org.jsoup.nodes.Element
 
 
 /**
  * Some examples of types of events.
  */
 enum class EventType {
+    /**
+     * Raised by a [DocumentEditor] when it saves a document.
+     */
     USER_SAVE,
-    EXIT,
 
+    /**
+     * Unused.
+     */
     AUTO_SAVE,
 
+    /**
+     * Unused.
+     */
     PROJECT_HTML_CHANGED,
-    PROJECT_PREFERENCES_CHANGED,
-    PROJECT_SAVED,
-    PROJECT_EXPORTED,
-    PROJECT_BACKEDUP,
-    PROJECT_NEW_DOCUMENT_CREATED,
 
-    EDITOR_DOCUMENT_SWITCH, // The editor has switched to show a different document.
-    EDITOR_DOCUMENT_EDITED,  // The editor has made a change to the open document.
+    /**
+     * Unused.
+     */
+    PROJECT_PREFERENCES_CHANGED,
+
+    /**
+     * Unused.
+     */
+    PROJECT_SAVED,
+
+    /**
+     * Unused.
+     */
+    PROJECT_EXPORTED,
+
+    /**
+     * Unused.
+     */
+    PROJECT_BACKEDUP,
+
+    /**
+     * Raised by the [Project] when it creates a new document.
+     */
+    PROJECT_CREATED,
+
+    /**
+     * Raised by the [Project] when a page is deleted
+     */
+    PROJECT_PAGE_DELETED,
+
+    /**
+     * Raised by the [MainViewController] when the user or the IDE changes between document tabs.
+     */
+    EDITOR_DOCUMENT_SWITCH,
+
+    /**
+     * Raised by the [DocumentEditor] when it is notified of the document being changed.
+     */
+    EDITOR_DOCUMENT_EDITED,
+
+    /**
+     * Raised by the [DocumentEditor] when it's containing tab is closed.
+     */
     EDITOR_DOCUMENT_CLOSED,
 
-    PROJECT_PAGE_DELETED,
-    PROJECT_PAGE_CREATED,
-    EDITOR_LOADED,
+    /**
+     * Raised by the [DocumentEditor] when it's selected tag property is changed.
+     */
     EDITOR_SELECTED_TAG_CHANGED,
-    PROJECT_PREFAB_CREATED
+
+    /**
+     * Raised by [Element.createPrefab] when creating a prefab from an existing element.
+     */
+    PROJECT_PREFAB_CREATED,
+
+    IDE_SHUTDOWN,
+
+    IDE_FINISHED_LOADING
 }
 
 fun EventType.notify() {
@@ -68,7 +124,7 @@ typealias SubscriberMap = HashMap<EventType, ArrayList<Subscriber>>
  * See [the documentation](https://github.com/jdngray77/HTMLDesigner/wiki/Technical-Systems)
  * for a full and simple guide on how to use this system.
  */
-object EventNotifier : Restartable {
+object EventNotifier {
 
     /**
      * Subscribers that are executed on background threads.
@@ -164,7 +220,7 @@ object EventNotifier : Restartable {
     /**
      * Removes all subscribed listeners.
      */
-    override fun restart() {
+    fun onIDEShutdown() {
         backgroundSubscribers.clear()
         FXSubscribers.clear()
     }
@@ -180,6 +236,16 @@ object EventNotifier : Restartable {
     fun unsubscribe(subscriber: Subscriber, vararg unsubFrom: EventType, map: SubscriberMap = backgroundSubscribers) {
         unsubFrom.forEach {
             map[it]?.remove(subscriber)
+        }
+    }
+
+    /**
+     * Removes a subscriber from any events that it's subscribed to.
+     */
+    fun unsubscribeFromAll(subscriber: Subscriber) {
+        EventType.values().map {
+            unsubscribe(subscriber, it)
+            unsubscribe(subscriber, it, map = FXSubscribers)
         }
     }
 }

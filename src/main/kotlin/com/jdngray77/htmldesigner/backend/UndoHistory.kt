@@ -4,7 +4,7 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import java.io.*
 import java.lang.System.gc
-import java.util.Stack
+import java.util.*
 
 /**
  * Represents the current state of some kind of object.
@@ -24,11 +24,11 @@ import java.util.Stack
  *
  * @author Jordan Gray
  */
-internal class DocumentState<T : Serializable>( _state: T) {
+class DocumentState<T : Serializable>(_state: T, val actionName: String) {
 
     var data: ByteArray
 
-    fun getState() : T {
+    fun getState(): T {
         ByteArrayInputStream(data).use {
             ObjectInputStream(it).use {
                 return it.readObject() as T
@@ -47,13 +47,15 @@ internal class DocumentState<T : Serializable>( _state: T) {
         baos.close()
     }
 
-    override fun toString() = getState().toString()
+    override fun toString() = actionName
 }
 
 /**
  * A stack of document states.
  */
 internal typealias Timeline<T> = Stack<DocumentState<T>>
+
+typealias DocumentChangeListener <T> = (after: T) -> Unit
 
 // TODO handle change of limit.
 
@@ -90,8 +92,10 @@ class DocumentUndoRedo<T : Serializable>(initialState: T) {
             field = value
         }
 
+    private var onChangeListener : DocumentChangeListener<T>? = null
+
     init {
-        pastStates.push(DocumentState(initialState))
+        pastStates.push(DocumentState(initialState, "Initial state"))
     }
 
     /**
@@ -114,19 +118,21 @@ class DocumentUndoRedo<T : Serializable>(initialState: T) {
      * If [pastStates] is larger than [Configs.UNDO_HISTORY_MAX_INT], then the
      * oldest state is deleted from the timeline.
      */
-    fun push(doc: T) {
+    fun push(doc: T, actionName: String = "Unknown change") {
         // Prevent duplicates.
         if (pastStates.peek() == doc) return
 
         futureStates.clear()
         gc()
 
-        pastStates.push(DocumentState(doc))
+        pastStates.push(DocumentState(doc, actionName))
 
         if (pastStates.size > historyLimit + 1) {
             pastStates.removeFirst()
             gc()
         }
+
+        changed(doc)
     }
 
     /**
@@ -137,13 +143,15 @@ class DocumentUndoRedo<T : Serializable>(initialState: T) {
      * until the next [push] ocours.
      */
     fun undo(): T {
-        if (pastStates.size == 1) return currentState()
+        if (pastStates.size == 1) return getDocument()
 
         pastStates.pop().apply {
             futureStates.push(this)
 //            println(this@DocumentUndoRedo.toString())
 
-            return pastStates.peek().getState()
+            return pastStates.peek().getState().also {
+                changed(it)
+            }
         }
     }
 
@@ -155,23 +163,127 @@ class DocumentUndoRedo<T : Serializable>(initialState: T) {
      * @return the current state of the document
      */
     fun redo(): T {
-        if (futureStates.isEmpty()) return currentState()
+        if (futureStates.isEmpty()) return getDocument()
 
         futureStates.pop().apply {
             pastStates.push(this)
 //            println(this@DocumentUndoRedo.toString())
-            return getState()
+            return getState().also {
+                changed(it);
+            }
         }
+
+
     }
 
     /**
      * Peeks the current state of the document.
-     *
-     * May be null, if no states have been added.
      */
-    fun currentState(): T =
-            pastStates.peek().getState()
+    fun getDocument(): T =
+        currentState().getState()
 
+    /**
+     * Returns the [DocumentState] in the timeline
+     * holding the current document.
+     *
+     * Use [getDocument] to fetch the current
+     * document.
+     */
+    fun currentState(): DocumentState<T> =
+        pastStates.peek()
+
+    /**
+     * Returns the entire timeline of previous and future states.
+     *
+     * The current state can be found using [currentState]
+     */
+    fun timeline() = pastStates + futureStates.reversed()
+
+    /**
+     * @return true if [state] appears anywhere in the the [timeline], future or past.
+     */
+    fun stateInTimeline(state: DocumentState<T>) =
+        timeline().contains(state)
+
+
+    /**
+     * Performs undo until the current state
+     *
+     * @throws NoSuchFileException if the [state] does not exist in the [timeline]. You can check for this prior with [stateInTimeline].
+     */
+    fun jumpTo(state: DocumentState<T>) {
+        if (!stateInTimeline(state))
+            _throwJumpNoSuchElement()
+
+        // For redundant safety, we'll check them again anyway.
+
+        if (futureStates.contains(state))
+            redoTo(state)
+        else if (pastStates.contains(state))
+            undoTo(state)
+        else
+            _throwJumpNoSuchElement()
+    }
+
+    /**
+     * Performs [undo] until the [currentState] is the first
+     * entry in the timeline.
+     */
+    fun undoAll() =
+        undoTo(pastStates.first())
+
+    /**
+     * Performs [redo] until the [currentState] is the last
+     * entry in the timeline.
+     */
+    fun redoAll() =
+        redoTo(futureStates.first())
+
+    /**
+     * Performs [undo] until the [currentState] is [state]
+     *
+     * @throws NoSuchElementException If [state] is not in timeline
+     */
+    fun undoTo(state: DocumentState<T>) {
+        if (!pastStates.contains(state))
+            _throwJumpNoSuchElement()
+
+        while (
+            currentState() != state &&
+            pastStates.size > 1   // For safety. Prevents infinite loops, just in case.
+        )
+            undo()
+
+    }
+
+    /**
+     * Performs [redo] until the [currentState] is [state]
+     *
+     * @throws NoSuchElementException If [state] is not in timeline
+     */
+    fun redoTo(state: DocumentState<T>) {
+        if (!futureStates.contains(state))
+            _throwJumpNoSuchElement()
+
+        while (
+            currentState() != state &&
+            futureStates.size > 0   // For safety. Prevents infinite loops, just in case.
+        )
+            redo()
+    }
+
+
+    private fun _throwJumpNoSuchElement() {
+        throw NoSuchElementException("Tried to jump to a document state, but the state does not exist in the timeline!")
+    }
 
     override fun toString() = "History : $pastStates\nFuture : $futureStates"
+
+    fun setOnChange(listener: DocumentChangeListener<T>) {
+        onChangeListener = listener
+    }
+
+    private fun changed(after: T) {
+        onChangeListener?.invoke(after)
+    }
 }

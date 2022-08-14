@@ -184,6 +184,8 @@ open class CSSPropertySheetItem(
 
     ) : PropertySheet.Item {
 
+    private var initalised = false
+
     /**
      * The styles obtained from the [element] at time
      * of creation of this item
@@ -249,7 +251,12 @@ open class CSSPropertySheetItem(
         observableProp.value = styles.toString()
 
         // Notify the IDE of the change
-        element.ownerDocument()?.changed()
+        if (initalised) {
+            element.ownerDocument()?.changed(_name + " of " + element.tagName() + "changed to " + value)
+        } else {
+            initalised = true
+        }
+
     }
 
     /**
@@ -336,7 +343,7 @@ abstract class CSSPropertyEditor<T>(
      * which updates the [_item] when the user changes the value in the editor.
      */
     protected fun <T> onUserEditedEditor() = ChangeListener<T> { _, _, c ->
-        property.value = getCSSValue()
+//        property.value = getCSSValue()
     }
 
     /**
@@ -505,7 +512,7 @@ class CSSColorPropertyEditor(
     }
 
     override fun setValue(value: Color?) {
-        (editor as ColorPicker).value = value
+        (editor as ColorPicker).value = value ?: Color.TRANSPARENT
     }
 
     override fun getValue() =
@@ -580,7 +587,7 @@ class CSSRangeEditor(
 ) : CSSPropertyEditor<String>(property, CSSUnitSlider(property.min, property.max, enableUnits = property.enableUnits)) {
 
     init {
-        (editor as CSSUnitSlider).observableValue.addListener(onUserEditedEditor())
+//        (editor as CSSUnitSlider).observableValue.addListener(onUserEditedEditor())
     }
 
     override fun setValue(value: String?) {

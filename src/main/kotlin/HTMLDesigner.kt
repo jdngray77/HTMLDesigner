@@ -2,10 +2,20 @@ import com.jdngray77.htmldesigner.backend.ExceptionListener
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.SplashScreen
 import javafx.application.Application
+import org.spdx.rdfparser.SPDXLicenseInfoFactory
 
 fun main() {
-    Thread.setDefaultUncaughtExceptionHandler(ExceptionListener)
-    Application.launch(SplashScreen::class.java)
+    println("Starting HTML Designer")
+    try {
+
+
+
+
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionListener)
+        Application.launch(SplashScreen::class.java)
+    } catch (e: Throwable) {
+        e.printStackTrace()
+    }
 }
 
 /**
