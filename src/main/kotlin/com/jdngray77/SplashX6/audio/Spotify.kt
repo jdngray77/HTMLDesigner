@@ -140,8 +140,8 @@ object Spotify {
      *
      * Call [create] again with the authentication code as an argument.
      *
-     * Returns true if and only if access data could be loaded from
-     * preferences, and was positively tested to be working.
+     * @returns true if and only if tokens were loaded from [Config],
+     * and the connection was positively tested to be working.
      **/
     fun create(autoOnly: Boolean = false) : Boolean {
         //  If data is stored, try and load it. If we can connect, treat connection as complete.
@@ -149,9 +149,8 @@ object Spotify {
             return true
 
         // Otherwise initiate two part auth, if enabled.
-
         if (!autoOnly) authoriseClient()
-        return true
+        return false
     }
 
     /**
@@ -798,7 +797,5 @@ internal object SpotifyAuthHelper {
         Config[Configs.SPOTIFY_TOKEN_REFRESH__DONT_MODIFY__STRING] = ""
         Config[Configs.SPOTIFY_LAST_REFRESH__DONT_MODIFY__LONG] = 0L
         Config[Configs.SPOTIFY_ACCESS_TTL__DONT_MODIFY__INT] = 0
-
-        Spotify.deleteData()
     }
 }

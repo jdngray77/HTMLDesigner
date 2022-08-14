@@ -509,7 +509,7 @@ class MainViewController {
                 val trackInfo = Spotify.aboutTrack(nowPlaying)
 
                 // Get the url to the song's album art.
-                trackInfo!!.album.images.last().url
+                trackInfo!!.album.images.first().url
             }
 
             // Display the album art.
