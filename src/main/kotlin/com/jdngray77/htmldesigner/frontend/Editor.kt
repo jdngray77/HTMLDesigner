@@ -33,6 +33,7 @@ import javafx.scene.control.MenuBar
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
+import java.io.File
 import java.lang.System.gc
 import java.util.*
 import kotlin.system.exitProcess
@@ -126,6 +127,14 @@ class Editor : Application() {
          * > ***NOTE WELL : CANNOT BE ACCESSED IF NOT [mvcIsAvail].***
          */
         fun maingui() = EDITOR.mvc!!.MainView
+
+        /**
+         * A directory in the user's home directory that is used to store files relating
+         * to the editor, such as it's settings.
+         */
+        val IDEDirectory: File = File(System.getProperty("user.home") + "/.HTMLDesigner/").also {
+            it.mkdir()
+        }
     }
 
     /**

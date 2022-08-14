@@ -14,6 +14,8 @@
 
 package com.jdngray77.htmldesigner.frontend
 
+import com.jdngray77.SplashX6.audio.Spotify
+import com.jdngray77.SplashX6.audio.SpotifyAuthHelper
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
@@ -33,6 +35,7 @@ import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.*
 import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
@@ -115,7 +118,7 @@ class MainViewController {
         dockLeftTop.skin = skin
         dockLeftBottom.skin = skin1
         dockRight.skin = skin2
-
+        anchorDockRight.children.add(albumTest)
 
 
 
@@ -341,6 +344,10 @@ class MainViewController {
         AboutWindow()
     }
 
+    fun menu_help_licences() {
+        LicencesWindow()
+    }
+
     fun menu_help_wiki() {
         openURL("https://github.com/jdngray77/HTMLDesigner/wiki/A-Users-Guide-To-Getting-Started")
     }
@@ -403,6 +410,119 @@ class MainViewController {
     fun menu_window_closeeditors() {
         mvc().closeAllEditors()
     }
+
+    fun menu_spotify_next() {
+        Spotify.next()
+        menu_spotify_nowplaying()
+    }
+
+    fun menu_spotify_previous() {
+        Spotify.previous()
+        menu_spotify_nowplaying()
+    }
+
+    fun menu_spotify_pause() {
+        Spotify.pause()
+    }
+
+    fun menu_spotify_play() {
+        Spotify.play()
+        menu_spotify_nowplaying()
+    }
+
+    fun menu_spotify_connect() {
+        SpotifyAuthHelper.create()
+    }
+
+    fun menu_spotify_help() {
+        openURL("https://www.github.com/Jdngray77/HTMLDesigner/wiki/Spotify")
+    }
+
+    fun menu_spotify_deletedata() {
+        if (userConfirm("Spotify will no longer work after deleting all info. Are you sure you want to delete your data?")) {
+            SpotifyAuthHelper.clearConfigData()
+            showInformationalAlert("Your spotify information has been cleared from the registry." +
+                    "\n\nYou can confirm this by searching for 'spotify' in the registry editor." +
+                    "\n\nSome information about your library may remain in RAM until the program is restarted.")
+        }
+    }
+
+    /**
+     * Shows a notification with some basic now playing information.
+     */
+    fun menu_spotify_nowplaying() {
+
+        // Sanity check connection. Not necessary, but nice for the user.
+        if (!Spotify.testConnection())
+            showWarningNotification("Spotify is not connected.", "Click 'Connect', and refer to the wiki.")
+
+
+        // Gets infomation about the current state of the player.
+        // i.e isPlaying, shuffle, volume, player, seek position, repeat, etc.
+        val clientInfo = Spotify.info()
+
+
+        // Gets information about the song that's currently playing, if any.
+        val songInfo = Spotify.nowPlaying()
+
+
+        // No spotify session.
+        if (clientInfo == null) {
+            showNotification("Spotify", "Unable to find an active session." +
+                    "\n\nOpen spotify and play something!")
+            return
+        }
+
+        if (clientInfo.device.is_private_session) {
+            showWarningNotification("Spotify", "Spotify is in a private session.\n\nWe cannot retrieve information about private playback.")
+            return
+        }
+
+
+        // Session connected, but is not playing.
+        if (clientInfo.is_playing != true) {
+            showNotification("Spotify", "No song is currently playing.")
+            return
+        }
+
+
+        // Unable to retrieve song info.
+        // This sometime occours for no reason, and maybe also when user is using spotify's private session.
+        if (songInfo == null) {
+            showNotification("Spotify", "Unable to retrieve the song that's playing." +
+                    "\n\nOpen spotify and play something!" +
+                    "\n\nBtw, if you're using a private session, we can't see what you're jamming to!")
+            return
+        }
+
+        else {
+            showNotification(
+                "Spotify - Now Playing",
+                "${songInfo.item.name} - ${Spotify.aboutTrack(songInfo.item.uri)!!.artists.first().name}"
+            )
+
+            val albumartURL = let {
+                // Fetch info about what the user is listening to.
+                val nowPlaying = Spotify.nowPlaying()!!.item.uri
+
+                // Fetch more detailed information about the song itself.
+                val trackInfo = Spotify.aboutTrack(nowPlaying)
+
+                // Get the url to the song's album art.
+                trackInfo!!.album.images.last().url
+            }
+
+            // Display the album art.
+            albumTest.image = Image(albumartURL)
+        }
+    }
+
+    /**
+     * Stupid image view in the GUI to view the album art.
+     *
+     * Added to [dockRight] in [initialize]
+     */
+    private val albumTest = ImageView()
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

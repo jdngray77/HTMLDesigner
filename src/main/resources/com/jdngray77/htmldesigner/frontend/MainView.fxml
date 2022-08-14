@@ -162,6 +162,22 @@
 
                     </items>
                 </Menu>
+                <Menu mnemonicParsing="false" text="Spotify">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_nowplaying" text="Now Playing" />
+                        <SeparatorMenuItem/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_next" text="Next" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_previous" text="Previous" />
+                        <SeparatorMenuItem/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_pause" text="Pause" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_play" text="Play" />
+                        <SeparatorMenuItem/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_connect" text="Connect" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_help" text="Help" />
+                        <SeparatorMenuItem/>
+                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_deletedata" text="Delete data" />
+                    </items>
+                </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#menu_help_wiki" text="Wiki" />
@@ -172,7 +188,7 @@
                         <MenuItem mnemonicParsing="false" onAction="#menu_help_dbrand" text="Co-Author" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="[WIP] About" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="[inop] Licenses" />
+                        <MenuItem mnemonicParsing="false" onAction="#menu_help_licences" text="[inop] Licenses" />
                     </items>
                 </Menu>
             </menus>
