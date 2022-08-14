@@ -56,14 +56,13 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 /**
- * # Spotify integration for Splash X6.
+ *  Spotify integration for Splash X6.
  *
  * This object handles authentication of this client with the Spotify API.
  *
  * Once authenticated, handles the compilation & execution of requests
  * between this application and the spotify API.
- *
- * TODO use refresh token. User has to reconnect every access token expires.
+
  *
  * @since PRE-ALPHA 0.0.2
  * @author [Jordan T Gray](https://shinkson47.in)
@@ -72,17 +71,25 @@ import java.time.ZoneOffset
 object Spotify {
 
     /**
-     *  # If true, prevents API requests from being made.
+     *   If true, prevents API requests from being made.
      */
     var DISABLE : Boolean = false
         private set
+
+    /**
+     * Permits requests to be made.
+     */
     fun enable () { DISABLE = false }
+
+    /**
+     * Prevents requests from being made.
+     */
     fun disable() { DISABLE = true }
 
     /**
-     * # If any request encountered an issue, it'll be stored here until the next request is made.
+     *  If any request encountered an issue, it'll be stored here until the next request is made.
      *
-     * Any exception thrown whilst [execute]ing a request will stored here.
+     * Any exception thrown whilst [execute]ing a request will be stored here.
      *
      * The lifetime of this error is until the execution next request, which will either replace
      * with a new error, or clear it to null if it encountered no error.
@@ -93,7 +100,7 @@ object Spotify {
         private set
 
     /**
-     * ## Spotify supported playback repeat modes
+     *  Spotify supported playback repeat modes
      *
      * enum value names match strings which spotify api expects, so you can use
      *
@@ -104,7 +111,7 @@ object Spotify {
     enum class RepeatMode { track, context, off }
 
     /**
-     * ## Types of sources from spotify that Splash can search for in the user's library.
+     *  Types of sources from spotify that Splash can search for in the user's library.
      */
     enum class SpotifySourceType { playlist, artist, album }
 
@@ -112,7 +119,7 @@ object Spotify {
 
 
     /**
-     * # Initalises connection from stored data.
+     *  Initalises connection from stored data.
      *
      * If a authentication data is stored, it's loaded. If it's valid, requests are built
      * and returns true.
@@ -126,13 +133,13 @@ object Spotify {
 
 
     /**
-     * # 1 of 2 - Builds API connection.
+     *  1 of 2 - Builds API connection.
      * - Authorizes this application via a web re-direct.
      *
      * This gives us our [cachedOTP] which authorises this application to perform actions on the user's account
      * We only need to do this once, after we can store it.
      *
-     * ## IMPORTANT API NOTE
+     *  IMPORTANT API NOTE
      * This call is not enough. It's 1 of 2.
      *
      * Once user has authenticated, the authentication code must be provided for the final stage of
@@ -154,7 +161,7 @@ object Spotify {
     }
 
     /**
-     * # 2 of 2 - Builds API connection.
+     *  2 of 2 - Builds API connection.
      * - Gets an api token and refresh token
      *
      * The api token is sent along with every request to authenticate it. This token is temporary, and will expire.
@@ -165,7 +172,7 @@ object Spotify {
      *
      * Now that we have an access token, we can build and store requests ready to [execute] them.
      *
-     * ## IMPORTANT API NOTE
+     *  IMPORTANT API NOTE
      * This call must be second. Call [create] with no arguments first to authenticate and
      * recieve an authentication code. THEN call this method with said auth code.
      */
@@ -180,12 +187,12 @@ object Spotify {
     }
 
     /**
-     * ## Once connected, builds API requests and caches data.
+     *  Once connected, builds API requests and caches data.
      */
     private fun build() { buildRequests(); buildCache() }
 
     /**
-     * ## Tests ability to perform an API request
+     *  Tests ability to perform an API request
      * By performing an [REQUEST_CATAGORIES] to test access to user's account via the API.
      *
      * returns true if access was successful.
@@ -196,7 +203,7 @@ object Spotify {
     }
 
     /**
-     * ## Performs a rudementary test with the api by [executing] [REQUEST_CATAGORIES].
+     *  Performs a rudementary test with the api by [executing] [REQUEST_CATAGORIES].
      *
      * @return true if the result of execution was not null.
      */
@@ -208,7 +215,7 @@ object Spotify {
     //=====================================================================
 
     /**
-     * # Permissions that this application is authenticated to use
+     *  Permissions that this application is authenticated to use
      * when performing [REQUEST_AUTHORIZATION].
      *
      * Determines what requests we may and may not make.
@@ -225,7 +232,7 @@ object Spotify {
                 " user-follow-read"
 
     /**
-     * # General connection to the spotify api.
+     *  General connection to the spotify api.
      *
      * Is the intermediary between this application and the spotify api.
      *
@@ -239,7 +246,7 @@ object Spotify {
         .build()
 
     /**
-     * # The OTP that the user provided after signing into Spotify.
+     *  The OTP that the user provided after signing into Spotify.
      * user to authenticate with spotify.
      *
      * Only valid after [create] (1 of 2), and for use with [create] 2 of 2.
@@ -256,7 +263,7 @@ object Spotify {
     //=====================================================================
 
     /**
-     * # Requests spotify to make an authentication for this app to access spotify.
+     *  Requests spotify to make an authentication for this app to access spotify.
      *
      * Request returns a URI which is opened in a browser. User signs in and gives access via this link.
      *
@@ -271,7 +278,7 @@ object Spotify {
         .build()
 
     /**
-     * # Requests spotify for an access token to use with api requests.
+     *  Requests spotify for an access token to use with api requests.
      *
      * Once we're authenticated, we may obtain a token to authenticate api requests. This requests does this.
      *
@@ -280,7 +287,7 @@ object Spotify {
     private var PREAUTH_REQUEST_TOKEN : AuthorizationCodeRequest? = null
 
     /**
-     * # Populates [PREAUTH_REQUEST_TOKEN] with a API request for a new token.
+     *  Populates [PREAUTH_REQUEST_TOKEN] with a API request for a new token.
      *
      * This exsists purely because this request must be built after we have an auth code.
      */
@@ -293,7 +300,7 @@ object Spotify {
     //=====================================================================
 
     /**
-     * # Builds all requests we can perform.
+     *  Builds all requests we can perform.
      *
      * Can only be performed after we have obtained an api token.
      *
@@ -387,7 +394,7 @@ object Spotify {
 
 
     /**
-     * # Requests user to authorize this client access to thier account.
+     *  Requests user to authorize this client access to thier account.
      * Part of [create] stage 1.
      *
      * Executes [PREAUTH_REQUEST_TOKEN], and opens the resulting url in the system browser.
@@ -399,7 +406,7 @@ object Spotify {
     }
 
     /**
-     * # Asks spotify for an access token
+     *  Asks spotify for an access token
      * Applies it to [spotifyApi], and saves it in preferences file.
      */
     private fun getToken() {
@@ -409,7 +416,7 @@ object Spotify {
     }
 
     /**
-     * # If the token has expired, requests a new token.
+     *  If the token has expired, requests a new token.
      *
      * Requests a new access token using the refresh token, and saves the result.
      */
@@ -430,7 +437,7 @@ object Spotify {
     }
 
     /**
-     * # Saves the token and expiry data after refreshing or obtaining an access token.
+     *  Saves the token and expiry data after refreshing or obtaining an access token.
      */
     private fun saveTokenFetchData(accessToken: String, expiresIn: Int, refreshToken: String = spotifyApi.refreshToken) {
         saveExpiry(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), expiresIn)
@@ -439,7 +446,7 @@ object Spotify {
     }
 
     /**
-     * # Stores the tokens in ram via [spotifyApi]
+     *  Stores the tokens in ram via [spotifyApi]
      */
     private fun cacheToken(accessToken: String, refreshToken: String) {
         spotifyApi.accessToken  = accessToken
@@ -464,7 +471,7 @@ object Spotify {
     }
 
     /**
-     * # Stores the tokens on disk via [com.badlogic.gdx.Preferences].
+     *  Stores the tokens on disk via [com.badlogic.gdx.Preferences].
      */
     private fun saveToken(accessToken: String, refreshToken: String) {
         with (Config) {
@@ -476,7 +483,7 @@ object Spotify {
     }
 
     /**
-     * # Loads tokens from disk from preferences and rebuilds all requests.
+     *  Loads tokens from disk from preferences and rebuilds all requests.
      *
      * Returns [testConnection] after loading.
      *
@@ -496,7 +503,7 @@ object Spotify {
     }
 
     /**
-     * # Performs a request.
+     *  Performs a request.
      *
      * Then returns it's result, according to it's [AbstractRequest] ([returnType]).
      *
@@ -522,28 +529,28 @@ object Spotify {
     //=====================================================================
 
     /**
-     * # Requests spotify to pause playback.
+     *  Requests spotify to pause playback.
      * If [create] was not called, or it failed to configure [spotifyApi], has
      * no effect.
      */
     fun pause()     = execute(REQUEST_PAUSE)
 
     /**
-     * # Requests spotify to skip to the next track.
+     *  Requests spotify to skip to the next track.
      * If [create] was not called, or it failed to configure [spotifyApi], has
      * no effect.
      */
     fun next()      = execute(REQUEST_NEXT)
 
     /**
-     * # Requests spotify to skip to the previous track.
+     *  Requests spotify to skip to the previous track.
      * If [create] was not called, or it failed to configure [spotifyApi], has
      * no effect.
      */
     fun previous()   = execute(REQUEST_PREVIOUS)
 
     /**
-     * # Gets data on the track that's currently playing.
+     *  Gets data on the track that's currently playing.
      */
     fun nowPlaying() = execute(REQUEST_NOW_PLAYING)
 
@@ -552,7 +559,7 @@ object Spotify {
     }
 
     /**
-     * # Gets a list of 50 of the user's saved playlists.
+     *  Gets a list of 50 of the user's saved playlists.
      */
     fun savedPlaylists() : Paging<PlaylistSimplified> {
         val paging = execute(REQUEST_SAVED_PLAYLISTS)!!
@@ -562,7 +569,7 @@ object Spotify {
     }
 
     /**
-     * # Gets all meta data for a given playlist.
+     *  Gets all meta data for a given playlist.
      *
      * @param playlistID The ID or the URI of the playlist.
      *                   (Either 'XXXXXXXXXXXX' OR 'spotify:playlist:XXXXXXXXXXXX'.)
@@ -571,7 +578,7 @@ object Spotify {
         execute(spotifyApi.getPlaylist(IDFromURI(playlistID)).build())
 
     /**
-     * # Gets all meta for a given artist.
+     *  Gets all meta for a given artist.
      *
      * @param playlistID The ID or the URI of the playlist.
      *                   (Either 'XXXXXXXXXXXX' OR 'spotify:playlist:XXXXXXXXXXXX'.)
@@ -580,7 +587,7 @@ object Spotify {
         execute(spotifyApi.getArtist(IDFromURI(artistID)).build())
 
     /**
-     * # Gets all meta for a given album.
+     *  Gets all meta for a given album.
      *
      * @param playlistID The ID or the URI of the playlist.
      *                   (Either 'XXXXXXXXXXXX' OR 'spotify:playlist:XXXXXXXXXXXX'.)
@@ -595,43 +602,43 @@ object Spotify {
         execute(spotifyApi.getTrack(IDFromURI(SongID)).build())
 
     /**
-     * # Gets a list of 50 of the user's saved songs.
+     *  Gets a list of 50 of the user's saved songs.
      */
     fun savedSongs()     = execute(REQUEST_SAVED_SONGS)
 
     /**
-     * # Gets a list of 50 of the user's saved albums.
+     *  Gets a list of 50 of the user's saved albums.
      */
     fun savedAlbums()    = execute(REQUEST_SAVED_ALBUMS)
 
     /**
-     * # Gets a list of 50 of the user's saved artists.
+     *  Gets a list of 50 of the user's saved artists.
      */
     fun savedArtists()   = execute(REQUEST_SAVED_ARTISTS)
 
     /**
-     * # Requests spotify to start or resume playback.
+     *  Requests spotify to start or resume playback.
      * If [create] was not called, or it failed to configure [spotifyApi], has
      * no effect.
      */
     fun play()      = execute(REQUEST_PLAY)
 
     /**
-     * # Begins playing from given context.
+     *  Begins playing from given context.
      *
      * [uri] - indicator for a spotify context to play, i.e a playlist or album.
      */
     fun play(uri : String) = execute(spotifyApi.startResumeUsersPlayback().context_uri(uri).build())
 
     /**
-     * # Fetches playback information.
+     *  Fetches playback information.
      */
     fun info() = execute(REQUEST_PLAYBACK_INFO);
 
 
 
     /**
-     * # Requests spotify to seek to a given time in ms in current playback.
+     *  Requests spotify to seek to a given time in ms in current playback.
      */
     fun seek(ms: Int) : String? {
         if (REQUEST_SEEK == null) return null
@@ -640,7 +647,7 @@ object Spotify {
     }
 
     /**
-     * # Sets the playback repeat mode to a [RepeatMode].
+     *  Sets the playback repeat mode to a [RepeatMode].
      * Either repeat a single track, the context (playlist, album, artist, etc)
      * or no repeat.
      */
@@ -651,7 +658,7 @@ object Spotify {
     }
 
     /**
-     * # Sets playback volume to the given [percent]
+     *  Sets playback volume to the given [percent]
      */
     fun setVolume(percent : Int) : String? {
         if (REQUEST_VOLUME == null) return null
@@ -660,7 +667,7 @@ object Spotify {
     }
 
     /**
-     * # Sets the state of playback [shuffle]
+     *  Sets the state of playback [shuffle]
      * Either true or false.
      */
     fun setShuffle(shuffle : Boolean) : String? {
@@ -675,7 +682,7 @@ object Spotify {
     //=====================================================================
 
     /**
-     * # Retrieves some static data from spotify and stores it.
+     *  Retrieves some static data from spotify and stores it.
      */
     private fun buildCache() {
         cache_Playlists = savedPlaylists()
@@ -708,7 +715,7 @@ object Spotify {
 //        private set
 
     /**
-     * # Extracts an ID from a spotify URI
+     *  Extracts an ID from a spotify URI
      * Expected format is 'spotify:`type`:XXXXXXXXXXXX'.
      *
      * @return the `XXXXXXXXXXXX` segment of the URI.
