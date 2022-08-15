@@ -196,12 +196,8 @@ class Editor : Application() {
         scene = loadFXMLScene("MainView.fxml") as Pair<Scene, MainViewController>
 
         // Fullscreen the window, and show it.
-        if (!System.getProperty("os.name").contains("Mac"))
-            stage.isFullScreen = true
-        else
-            if (Config[Configs.USE_MAC_MENU_BOOL] as Boolean)
-                (scene.first.lookup("#MenuBar") as MenuBar)
-                    .useSystemMenuBarProperty().set(true)
+        stage.isFullScreen = !System.getProperty("os.name").contains("Mac")
+
 
 
         // Put the main view we just loaded into the window, and show the window.

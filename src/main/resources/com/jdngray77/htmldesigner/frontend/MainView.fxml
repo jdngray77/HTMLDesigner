@@ -53,146 +53,19 @@
 <?import javafx.scene.web.*?>
 <?import org.eclipse.fx.ui.controls.tabpane.DndTabPane?>
 
-<VBox prefHeight="1108.0" prefWidth="1606.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.MainViewController">
-    <children>
-        <MenuBar fx:id="MenuBar" VBox.vgrow="NEVER">
-            <menus>
-                <Menu mnemonicParsing="false" text="HTML Designer">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_run_anything" text="Run a Task" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_registry" text="Registry..." />
-                        <Menu mnemonicParsing="false" text="Debug">
-                            <items>
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_eval" text="Evaluate..." />
-                                <Menu mnemonicParsing="false" text="IDE">
-                                    <items>
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_dirty" text="Mark current editor as dirty" />
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_config" text="Reset config registry" />
-                                    </items>
-                                </Menu>
-                                <Menu mnemonicParsing="false" text="Project">
-                                    <items>
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_showcache" text="Show Project File Cache Entires" />
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_showserial" text="Show and Copy Project Serial Version" />
-                                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_projprefs" text="Reset preferences registry" />
-                                    </items>
-                                </Menu>
-                            </items>
-                        </Menu>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_soft_restart" text="Soft Restart..." />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_exit" text="Exit" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Project">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="[inop] New..." />
-                        <MenuItem mnemonicParsing="false" text="[inop] Load..." />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_project_close" text="Close Project &amp; Restart" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <Menu mnemonicParsing="false" text="[inop] Backups">
-                            <items>
-                                <MenuItem mnemonicParsing="false" text="Backup now" />
-                                <MenuItem mnemonicParsing="false" text="Restore backup..." />
-                                <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
-                            </items>
-                        </Menu>
-                        <Menu mnemonicParsing="false" text="[inop] Open Recent" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Page">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert unsaved changes" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <Menu mnemonicParsing="false" text="[inop] Backups">
-                            <items>
-                                <MenuItem mnemonicParsing="false" text="Backup now" />
-                                <MenuItem mnemonicParsing="false" text="Restore backup..." />
-                                <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
-                            </items>
-                        </Menu>
-                        <Menu mnemonicParsing="false" text="[inop] Open Recent" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_edit_undo" text="Undo" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_edit_redo" text="Redo" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="[inop] Cut" />
-                        <MenuItem mnemonicParsing="false" text="[inop] Copy" />
-                        <MenuItem mnemonicParsing="false" text="[inop] Paste" />
-                        <MenuItem mnemonicParsing="false" text="[inop] Delete" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="[inop] Select All" />
-                        <MenuItem mnemonicParsing="false" text="[inop] Unselect All" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Tools">
-                    <items>
-                        <Menu mnemonicParsing="false" text="Live Server">
-                            <items>
-                                <MenuItem mnemonicParsing="false" onAction="#menu_server_start" text="Start" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_server_stop" text="Stop" />
-                                <SeparatorMenuItem mnemonicParsing="false" />
-                                <CheckMenuItem mnemonicParsing="false" onAction="#menu_server_tglauto" selected="true" text="Toggle auto-refresh" />
-                            </items>
-                        </Menu>
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <Menu mnemonicParsing="false" text="Git">
-                            <items>
-                                <MenuItem mnemonicParsing="false" text="[inop] Publish changes..." />
-                                <MenuItem mnemonicParsing="false" text="[inop] Update project..." />
-                                <MenuItem mnemonicParsing="false" text="[inop] Branches..." />
-                                <MenuItem mnemonicParsing="false" text="[inop] Delete changes..." />
-                            </items>
-                        </Menu>
-                    </items>
-                </Menu>
-                <Menu text="View">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_window_isolation" text="Toggle standalone edit mode" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_window_closeeditors" text="Close all open editors" />
-                        <SeparatorMenuItem/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_window_resetdocks" text="Reset docks" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_window_fs" text="Toggle Fullscreen" />
 
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Spotify">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_nowplaying" text="Now Playing" />
-                        <SeparatorMenuItem/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_next" text="Next" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_previous" text="Previous" />
-                        <SeparatorMenuItem/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_pause" text="Pause" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_play" text="Play" />
-                        <SeparatorMenuItem/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_connect" text="Connect" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_help" text="Help" />
-                        <SeparatorMenuItem/>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_spotify_deletedata" text="Delete data" />
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_wiki" text="Wiki" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_repo" text="Repository" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_issues" text="Report a problem" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_jdngray" text="Author" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_dbrand" text="Co-Author" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="[WIP] About" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_help_licences" text="[inop] Licenses" />
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
+<!--
+
+        Note : This file cannot be editied in gluon due to the DndTabPanes.
+
+
+        The three 'DndTabPane's may be changed to 'TabPane' in order to edit this
+        visually, but they must be replaced once you're done.
+
+-->
+
+<VBox fx:id="root" prefHeight="1108.0" prefWidth="1606.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.MainViewController">
+    <children>
         <BorderPane fx:id="mainBorderPane" VBox.vgrow="ALWAYS">
             <center>
                 <SplitPane dividerPositions="0.1745635910224439, 0.8341645885286783" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" BorderPane.alignment="CENTER">
