@@ -50,6 +50,7 @@ class MainViewController {
     //region                                                   UI References.
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    @FXML lateinit var capsHBox: HBox
     @FXML
     lateinit var root: VBox
     @FXML lateinit var capsHBox: HBox
