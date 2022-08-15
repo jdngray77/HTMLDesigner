@@ -22,6 +22,10 @@ import com.jdngray77.htmldesigner.utility.subFile
 import jfxtras.styles.jmetro.Style.*
 import jfxtras.styles.jmetro.JMetro
 import java.lang.Thread.UncaughtExceptionHandler
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
+import java.io.File
+import java.util.function.Predicate
 
 /**
  * Keys for the [config] registry.
@@ -191,11 +195,9 @@ enum class Configs {
      * Permits JsGraph validation to attempt to automatically fix major issues.
      */
     JS_GRAPH_AUTOFIX_MAJOR_BOOL,
-
     /**
      * If true, the ide will show a restart suggestion prompt
      * when [LARGE_ERROR_COUNT_THRESHOLD] unhandled exceptions have been caught.
-     */
     LARGE_ERROR_COUNT_PROMPT_BOOL,
 
     /**
@@ -210,6 +212,10 @@ enum class Configs {
      * Effectively ignoring the project's startup page preference.
      */
     IGNORE_PROJECT_STARTUP_PAGE_BOOL
+
+     */
+    KEY_BINDINGS_HASHMAP,
+    KEY_BINDINGS_CAPS_WARNING_BOOL,
 }
 
 /**
@@ -241,6 +247,7 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(Configs.AUTO_LOAD_PROJECT_BOOL, true)
         put(Configs.WEB_SERVER_PORT_INT, 8080)
         put(Configs.WEB_SERVER_REFRESH_DELAY_INT, 0)
+        put(Configs.KEY_BINDINGS_HASHMAP, hashMapOf<Predicate<KeyEvent>, Runnable>())
         put(Configs.UNDO_HISTORY_MAX_INT, 20)
         put(Configs.SPOTIFY_CLIENT_ID_STRING, "")
         put(Configs.SPOTIFY_CLIENT_SECRET_STRING, "")
@@ -256,6 +263,7 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(Configs.LARGE_ERROR_COUNT_PROMPT_BOOL, true)
         put(Configs.LARGE_ERROR_COUNT_STEP_THRESHOLD_INT, 10)
         put(Configs.IGNORE_PROJECT_STARTUP_PAGE_BOOL, false)
+        put(Configs.KEY_BINDINGS_CAPS_WARNING_BOOL, true)
     }
 
     /**

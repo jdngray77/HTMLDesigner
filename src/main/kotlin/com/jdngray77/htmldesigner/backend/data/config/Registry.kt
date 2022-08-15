@@ -339,6 +339,7 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
                 "STRING" -> String::class
                 "DOC" -> Document::class
                 "ARRAY" -> ArrayList::class
+                "HASHMAP" -> HashMap::class
                 else -> throw IllegalStateException("Preference key name is not suffixed with a permitted data type : $key")
             }
         }
