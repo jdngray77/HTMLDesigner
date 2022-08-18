@@ -12,32 +12,40 @@ import javafx.scene.text.Text
  *
  * Can recieve a connection
  */
-class JsNodeAttr: JsNodeProperty() {
+class JsNodeReceiver: JsNodeProperty() {
 
-    val attr: String
-        get() = name.text
+    lateinit var receiver: JsGraphReciever
 
-    fun setAttr(name: String) {
-        this.name.text = name
+    fun initReceiver(receiver: JsGraphReciever) {
+        this.receiver = receiver
+        this.name.text = receiver.name
     }
+
 
     @FXML
     fun initialize() {
 
         // Dim when dragging in a new connection
         socket.setOnMouseDragEntered {
+            if (emitterBeingDragged.emitter.type != receiver.type)
+                return@setOnMouseDragEntered
+
+
             socket.effect = socketDim
             it.consume()
         }
 
         // Commit a new connection. This is the reciever.
         socket.setOnMouseDragReleased {
+            if (emitterBeingDragged.emitter.type != receiver.type)
+                return@setOnMouseDragReleased
+
             socket.effect = null
 
             graphEditor.temporaryLine.isVisible = false
 
-            eventBeingDragged.guiNode.emitConnection(
-                eventBeingDragged, this
+            emitterBeingDragged.guiNode.emitConnection(
+                emitterBeingDragged, this
             )
 
             it.consume()
@@ -59,13 +67,13 @@ class JsNodeAttr: JsNodeProperty() {
  *
  * Emits events.
  */
-class JsNodeEvent : JsNodeProperty() {
+class JsNodeEmitter : JsNodeProperty() {
 
-    val event: String
-        get() = name.text
+    lateinit var emitter: JsGraphEmitter
 
-    fun setEvent(name: String) {
-        this.name.text = name
+    fun initEmitter(emitter: JsGraphEmitter) {
+        this.emitter = emitter
+        this.name.text = emitter.name
     }
 
     @FXML
@@ -83,7 +91,7 @@ class JsNodeEvent : JsNodeProperty() {
                 endY = it.sceneY
 
                 isVisible = true
-                eventBeingDragged = this@JsNodeEvent
+                emitterBeingDragged = this@JsNodeEmitter
             }
 
             socket.effect = socketDim
@@ -138,7 +146,7 @@ open class JsNodeProperty() {
 
     companion object {
 
-        internal lateinit var eventBeingDragged: JsNodeEvent
+        internal lateinit var emitterBeingDragged: JsNodeEmitter
 
         val socketDim =  ColorAdjust().also {
             it.brightness = -.3

@@ -1,47 +1,45 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
-import com.jdngray77.htmldesigner.backend.Javascript
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import javafx.scene.paint.Color
 import org.jsoup.nodes.Element
 import java.io.Serializable
-
+import java.lang.System.gc
 
 /**
- * A [JsDesigner] data model.
- *
- * Contains [JsGraphNode]s and [JsGraphConnection]s between them.
- *
- * When compiled, creates a javascript that can be placed used on a page.
+ * The data model for a javascript graph.
  */
-class JsGraph : Serializable {
+class JsGraph : Serializable{
 
     /**
      * Collection of nodes that exist in this graph.
      *
      * There is no hierarchy, all nodes are equal.
+     *
+     * The data structure is built with links between the nodes.
      */
-    private var nodes: MutableList<JsGraphNode> = mutableListOf()
+    private val nodes = mutableListOf<JsGraphNode>()
 
     /**
      * Returns a non-mutable copy of the nodes contained within this
      * graph.
      *
-     * To edit the nodes, use [addNode] and [removeNode].
+     * To edit the nodes, use [addElement] and [removeNode].
      */
     fun getNodes() = nodes.toList()
 
     /**
-     * Finds and returns a node in this graph by ID.
+     * Finds and returns an element in this graph by ID.
      */
-    fun getNode(id: String) = nodes.find { it.id == id }
+    fun getElementNode(id: String) = nodes.filterIsInstance<JsGraphElement>().find { it.name == id }
 
     /**
      * Checks to see if a node with the given ID exists in this graph.
      *
      * @throws IllegalArgumentException if the node does not exist.
      */
-    fun assertExists(id: String) {
-        if (getNode(id) == null)
+    fun assertElementExists(id: String) {
+        if (getElementNode(id) == null)
             throw IllegalArgumentException("Node with id '$id' does not exist")
     }
 
@@ -50,8 +48,8 @@ class JsGraph : Serializable {
      *
      * @throws IllegalArgumentException if the node already exists.
      */
-    fun assertDoesNotExist(id: String) {
-        if (getNode(id) != null)
+    fun assertElementDoesNotExist(id: String) {
+        if (getElementNode(id) != null)
             throw IllegalArgumentException("Node with id '$id' already exists in the script graph.")
     }
 
@@ -61,21 +59,21 @@ class JsGraph : Serializable {
      */
     init {
         val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
-        x.forEach { addNode(it) }
+        x.forEach { addElement(it) }
     }
-
+    
 
     //region model manipulation
     /**
      * Creates a new node in the data model.
      */
-    fun addNode(e: Element): JsGraphNode {
+    fun addElement(e: Element): JsGraphNode {
         if (e.id().isEmpty())
             throw IllegalArgumentException("Element must have an id in order to be scripted.")
 
-        assertDoesNotExist(e.id())
+        assertElementDoesNotExist(e.id())
 
-        JsGraphNode(e.id()).apply {
+        JsGraphElement(e.id()).apply {
             nodes.add(this)
             return this
         }
@@ -86,8 +84,8 @@ class JsGraph : Serializable {
      * from the graph.
      */
     fun removeNode(id: String) {
-        assertExists(id)
-        removeNode(getNode(id)!!)
+        assertElementExists(id)
+        removeNode(getElementNode(id)!!)
     }
 
     /**
@@ -95,103 +93,237 @@ class JsGraph : Serializable {
      * from the graph.
      */
     fun removeNode(node: JsGraphNode) {
-        with(node.connections){
-            forEach { it.taredown() }
-            clear()
-        }
-
+        node.removeAllConnections()
         nodes.remove(node)
     }
+}
+
+/**
+ * Root of all nodes within the graph.
+ *
+ * May be document elements, functions, or other
+ * types of nodes.
+ */
+abstract class JsGraphNode(
+
+    /**
+     * Name displayed in the GUI.
+     */
+    val name: String
+
+) {
+
 
 
     /**
-     * Creates a new connection between two nodes.
-     *
-     * TODO this is not invoked, even though connections are being made.
+     * Data that this node can provide.
      */
-    fun connect(fromID: String, event: String, toID: String, action: String) {
-        assertExists(fromID)
-        assertExists(toID)
-        getNode(fromID)?.connect(event, toID, action)
-    }
-    //endregion
+    protected val emitters = mutableListOf<JsGraphEmitter>()
+
+    fun emitters() = emitters.toList()
 
     /**
-     * Compiles the graph into a javascript string.
+     * Sockets to recieve data from emitters on other nodes.
      */
-    override fun toString(): String {
-        val js = Javascript()
+    protected val recievers = mutableListOf<JsGraphReciever>()
 
-        nodes.forEach {
-            node ->
-            node.connections.forEach {
-                connection ->
-                js.addListener(node.id, connection.localEvent, connection.foriegnProperty.second, connection.foriegnProperty.first)
+    fun recievers() = recievers.toList()
+
+    fun removeAllConnections() {
+        emitters.forEach {
+            it.emissions().forEach {
+                it.breakdown()
+            }
+        }
+        recievers.forEach {
+            it.admissions().forEach {
+                it.breakdown()
             }
         }
 
-        return js.toString()
+        gc()
     }
+
 }
 
 /**
- * A representation of an [Element] in a [JsGraph].
+ * A data emitter that
+ * can provide data to recievers of the
+ * same type on other nodes.
  */
-data class JsGraphNode(
+class JsGraphEmitter(
 
     /**
-     * The id of the [Element] this node represents.
+     * The type of data being emitted
      */
-    val id: String,
+    val type: Class<*>,
 
-    /**
-     * In the GUI editor, the location of the node.
-     *
-     * This is used to position the node in the GUI editor when loading
-     * the graph.
-     */
-    var x: Int = 0,
+    val name: String
 
-    /**
-     * In the GUI editor, the location of the node.
-     */
-    var y: Int = 0
-
-) : Serializable {
-
-    /**
-     * Connections that this node can trigger.
-     */
-    val connections = mutableListOf<JsGraphConnection>()
-
-    override fun toString() = "JsGraphNode(id='$id', x=$x, y=$y)"
-
-    fun connect(event: String, toID: String, attr: String) {
-        connections.add(JsGraphConnection(event, Pair(toID, attr)))
-    }
-}
-
-/**
- * A link between a [JsGraphNode]s event and another's property.
- *
- * Stored on the triggering [JsNode].
- */
-data class JsGraphConnection(
-
-    /**
-     * The event on this node that causes this connection to be triggered.
-     */
-    val localEvent: String,
-
-    /**
-     * The property on the other node that is set when this connection is triggered.
-     *
-     * first : The ID of the node to edit.
-     * second : The property to edit.
-     */
-    val foriegnProperty: Pair<String, String>
 ) {
-    fun taredown() {
-        TODO()
+
+    /**
+     * List of connections emitting from
+     * this emitter.
+     */
+    private val emissions: MutableList<JsGraphEmission> = mutableListOf()
+
+    fun emissions() = emissions.toList()
+
+    /**
+     * Creates a link between this emitter and a receiver.
+     *
+     * A reference to the connection is stored in both.
+     */
+    fun emit(reciever: JsGraphReciever) {
+        val it = JsGraphEmission(
+            this,
+            reciever
+        )
+
+        emit(it)
+        reciever.receive(it)
+    }
+
+
+    @Deprecated("Directly manipulates the data, without validation.")
+    fun emit(emission: JsGraphEmission) {
+        emissions.add(emission)
+    }
+
+    @Deprecated("Directly manipulates the data, without validation.")
+    fun revoke(jsGraphEmission: JsGraphEmission) {
+        emissions.remove(jsGraphEmission)
+    }
+
+}
+class JsGraphReciever(
+
+    /**
+     * The type of data being received
+     */
+    val type: Class<*>,
+
+    val name: String
+
+) {
+
+    /**
+     * Receiving connections.
+     */
+    private val admissions: MutableList<JsGraphEmission> = mutableListOf()
+
+    fun admissions() = admissions.toList()
+
+    /**
+     * Creates a data connection.
+     */
+    fun connectTo(emitter: JsGraphEmitter) {
+        val it = JsGraphEmission(
+            emitter,
+            this
+        )
+
+        emitter.emit(it)
+        receive(it)
+    }
+
+    fun receive(emission: JsGraphEmission) {
+        admissions.add(emission)
+    }
+
+    @Deprecated("Directly manipulates the data, without validation.")
+    fun revoke(jsGraphEmission: JsGraphEmission) {
+        admissions.remove(jsGraphEmission)
+    }
+
+}
+
+/**
+ * A data connection between an emitter and a reciever.
+ *
+ * @throws IncompatibleEmissionException if the emitter and receiver are not of the same type.
+ */
+class JsGraphEmission (
+
+    /**
+     * The emitter that is emitting data.
+     */
+    val emitter: JsGraphEmitter,
+
+    /**
+     * The reciever that is receiving data.
+     */
+    val receiver: JsGraphReciever
+) {
+
+    init {
+        if (receiver.type != emitter.type)
+            throw IncompatibleEmissionException(this)
+    }
+
+    /**
+     * Revokes the connection.
+     */
+    fun breakdown() {
+        emitter.revoke(this)
+        receiver.revoke(this)
     }
 }
+
+/**
+ * A [JsGraphNode] for a HTML document element.
+ */
+class JsGraphElement(id: String) : JsGraphNode(id) {
+
+    init {
+        emitters.add(
+            JsGraphEmitter(
+                Trigger::class.java,
+                "Click"
+            )
+        )
+
+        emitters.add(
+            JsGraphEmitter(
+                Trigger::class.java,
+                "Hover"
+            )
+        )
+
+        recievers.add(
+            JsGraphReciever(
+                Color::class.java,
+                "Back Color"
+            )
+        )
+
+        recievers.add(
+            JsGraphReciever(
+                Color::class.java,
+                "Text Color"
+            )
+        )
+
+        recievers.add(
+            JsGraphReciever(
+                Trigger::class.java,
+                "Visible"
+            )
+        )
+    }
+
+}
+
+/**
+ * A [JsGraphNode] for other code utilities..
+ */
+abstract class JsGraphFunction : JsGraphNode("Unknown Function.")
+
+class Trigger
+
+class IncompatibleEmissionException(emission: JsGraphEmission) : Exception(
+    "Receiver accepts ${emission.receiver.type.simpleName}, but emitter provides ${emission.emitter.type.simpleName}.\n" +
+    "Both must be of the same type to create a connection between them."
+)
+

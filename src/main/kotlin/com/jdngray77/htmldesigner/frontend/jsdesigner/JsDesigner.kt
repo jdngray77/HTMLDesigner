@@ -37,8 +37,7 @@ class JsDesigner {
      * Manipulated by the view, and compiles to js.
      *
      * This data model is serializable such that the graph can be
-     * saved, an the the JsDesigner view
-     * can be re-created from the graph.
+     * saved, and the JsDesigner view can be re-created from the graph.
      */
     lateinit var graph: JsGraph
 
@@ -54,6 +53,7 @@ class JsDesigner {
      */
     internal val temporaryLine = Line().also {
         themeLine(it)
+        it.isVisible = false
     }
 
     /**
@@ -95,7 +95,7 @@ class JsDesigner {
      * to represent it.
      */
     fun newNode(e: Element) {
-        implNewNode(graph.addNode(e))
+        implNewNode(graph.addElement(e))
     }
     //endregion
 

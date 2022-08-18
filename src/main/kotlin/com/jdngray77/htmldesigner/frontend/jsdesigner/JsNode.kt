@@ -13,7 +13,6 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Line
-import org.jsoup.nodes.Element
 import java.lang.System.gc
 
 /**
@@ -30,16 +29,16 @@ class JsNode {
     fun init(e: JsGraphNode, graphEditor: JsDesigner) {
         this.graphNode = e
         this.graphEditor = graphEditor
-        this.e = graphEditor.document.getElementById(e.id)!!
 
-        txtElementName.text = this.e.id()
+        txtElementName.text = e.name
 
-        // Test attributes.
-        addAttr("visible")
-        addAttr("color")
+        e.recievers().forEach {
+            addReceiver(it)
+        }
 
-        addEvent("Click")
-        addEvent("Mouse Over")
+        e.emitters().forEach {
+            addEmitter(it)
+        }
     }
 
     //#region GUI elements
@@ -62,11 +61,6 @@ class JsNode {
 
     //#region model
     /**
-     * The HTML element that this node represents.
-     */
-    private lateinit var e: Element
-
-    /**
      * The node within the JsGraph that this
      * represents.
      */
@@ -79,20 +73,27 @@ class JsNode {
 
     /**
      * Lines in the [graphEditor] that show the
-     * connections emminating from this
+     * connections on the right of this node.
      * [graphNode]'s events.
      */
-    private val connectionLines = mutableListOf<Triple<JsNodeEvent, JsNodeAttr, Line>>()
+    private val emittingLines = mutableListOf<Triple<JsNodeEmitter, JsNodeReceiver, Line>>()
+
+    /**
+     * Lines in the [graphEditor] that show the
+     * connections on the left of this node.
+     * [graphNode]'s events.
+     */
+    private val receivingLines = mutableListOf<Triple<JsNodeEmitter, JsNodeReceiver, Line>>()
     //#endregion
 
     /**
-     * Adds a [JsNodeEvent] to the GUI.
+     * Adds a [JsNodeEmitter] to the GUI.
      */
-    private fun addEvent(name: String) {
+    private fun addEmitter(_emitter: JsGraphEmitter) {
         loadFXMLComponent<AnchorPane>("JsNodeEvent.fxml", javaClass).apply {
             vboxEvents.children.add(this.first)
-            with ((second as JsNodeEvent)) {
-                setEvent(name)
+            with ((second as JsNodeEmitter)) {
+                initEmitter(_emitter)
                 this.graphEditor = this@JsNode.graphEditor
                 this.guiNode = this@JsNode
             }
@@ -100,13 +101,13 @@ class JsNode {
     }
 
     /**
-     * Adds a [JsNodeAttr] to the GUI.
+     * Adds a [JsNodeReceiver] to the GUI.
      */
-    fun addAttr(name: String) {
+    fun addReceiver(_receiver: JsGraphReciever) {
         loadFXMLComponent<AnchorPane>("JsNodeAttr.fxml", javaClass).apply {
             vboxAttrs.children.add(this.first)
-            with ((second as JsNodeAttr)) {
-                setAttr(name)
+            with ((second as JsNodeReceiver)) {
+                initReceiver(_receiver)
                 this.graphEditor = this@JsNode.graphEditor
                 this.guiNode = this@JsNode
             }
@@ -126,11 +127,14 @@ class JsNode {
         root.translateY = mouseEvent.y + root.translateY - 20
 
         // Update the lines being emitted
-        connectionLines.forEach {
+        emittingLines.forEach {
             it.evalPosition()
         }
 
-        // TODO update the lines being recieved. How?
+        receivingLines.forEach {
+            it.evalPosition()
+        }
+
 
         mouseEvent.consume()
     }
@@ -166,18 +170,19 @@ class JsNode {
     /**
      * Create a connection being emitted an event in this node.
      */
-    fun emitConnection(from: JsNodeEvent, to: JsNodeAttr) {
+    fun emitConnection(from: JsNodeEmitter, to: JsNodeReceiver) {
         // Edit the graph.
-        graphNode.connect(
-            from.event,
-            to.guiNode.graphNode.id,
-            to.attr
-        )
+        from.emitter.emit(to.receiver)
 
         // Create the line.
         with (graphEditor.temporaryLine) {
             Line(startX, startY, endX, endY).also {
-                connectionLines.add(Triple(from, to, it))
+
+                Triple(from, to, it).apply {
+                    emittingLines.add(this)
+                    to.guiNode.receivingLines.add(this)
+                }
+
                 graphEditor.root.children.add(it)
                 themeLine(it)
             }
@@ -193,11 +198,17 @@ class JsNode {
     fun delete() {
         graphEditor.graph.removeNode(this.graphNode)
 
-        connectionLines.forEach { (_, _, line) ->
-            graphEditor.root.children.remove(line)
+        emittingLines.forEach {
+            // it = Triple(fromNode, toNode, Line)
+            // Remove from remote node.
+            it.second.guiNode.receivingLines.remove(it)
+
+            // Remove from GUI.
+            graphEditor.root.children.remove(it.third)
         }
 
-        connectionLines.clear()
+        // Remove all from local node.
+        emittingLines.clear()
 
         gc()
     }
@@ -208,10 +219,10 @@ class JsNode {
 
         /**
          * Updates a lines position to match the position of the
-         * [JsNodeEvent] emitting the line, and the [JsNodeAttr]
+         * [JsNodeEmitter] emitting the line, and the [JsNodeReceiver]
          * receiving the line.
          */
-        fun Triple<JsNodeEvent, JsNodeAttr, Line>.evalPosition() {
+        fun Triple<JsNodeEmitter, JsNodeReceiver, Line>.evalPosition() {
             with(third) {
                 val startBounds: Bounds = first.socket.localToScene(first.socket.boundsInLocal)
                 startX = startBounds.centerX
