@@ -12,13 +12,17 @@ import com.jdngray77.htmldesigner.frontend.MainViewController.Companion.clearDoc
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
+import com.jdngray77.htmldesigner.utility.getTheme
+import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import com.jdngray77.htmldesigner.utility.openURL
 import javafx.application.Platform
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
+import javafx.scene.Scene
 import javafx.scene.control.CheckMenuItem
 import javafx.scene.control.MenuBar
 import javafx.scene.image.Image
+import javafx.scene.layout.Pane
 import java.io.File
 import javax.script.ScriptEngineManager
 
@@ -363,6 +367,11 @@ class menuBarController {
             // Display the album art.
             mvc().MainView.albumTest.image = Image(albumartURL)
         }
+    }
+
+    fun menu_debug_js() {
+        Editor.EDITOR.stage.scene = Scene(loadFXMLComponent<Pane>("jsdesigner/jsDesigner.fxml").first)
+        getTheme().scene = Editor.EDITOR.stage.scene
     }
 
 }

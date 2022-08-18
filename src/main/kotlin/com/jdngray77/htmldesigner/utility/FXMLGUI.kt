@@ -31,7 +31,6 @@ import javafx.scene.paint.Color
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import java.awt.Toolkit
-import java.util.*
 import kotlin.math.roundToInt
 
 /**
@@ -65,8 +64,8 @@ fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Pair<Sce
  *
  * i.e something that goes inside of the editor like a custom list item or dock.
  */
-fun <T : Parent> loadFXMLComponent(urlFromSrcRoot: String) =
-    FXMLLoader(Editor::class.java.getResource(urlFromSrcRoot)).let { loader ->
+fun <T : Parent> loadFXMLComponent(path: String, pathRelativeTo: Class<*> = Editor::class.java) =
+    FXMLLoader(pathRelativeTo.getResource(path)).let { loader ->
         loader.load<T>().let {
             Pair<T, Any>(it, loader.getController())
         }
