@@ -1,5 +1,6 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
+import com.jdngray77.htmldesigner.utility.classEquals
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
 import javafx.scene.effect.ColorAdjust
@@ -14,9 +15,9 @@ import javafx.scene.text.Text
  */
 class JsNodeReceiver: JsNodeProperty() {
 
-    lateinit var receiver: JsGraphReciever
+    lateinit var receiver: JsGraphReceiver
 
-    fun initReceiver(receiver: JsGraphReciever) {
+    fun initReceiver(receiver: JsGraphReceiver) {
         this.receiver = receiver
         this.name.text = receiver.name
     }
@@ -27,7 +28,7 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Dim when dragging in a new connection
         socket.setOnMouseDragEntered {
-            if (emitterBeingDragged.emitter.type != receiver.type)
+            if (!classEquals(emitterBeingDragged.emitter.type, receiver.type))
                 return@setOnMouseDragEntered
 
 

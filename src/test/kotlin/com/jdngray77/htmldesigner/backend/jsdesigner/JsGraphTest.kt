@@ -1,11 +1,16 @@
-package com.jdngray77.htmldesigner.frontend.jsdesigner
+package com.jdngray77.htmldesigner.backend.jsdesigner
 
+import com.jdngray77.htmldesigner.RequiresEditorGUI
+import com.jdngray77.htmldesigner.frontend.jsdesigner.JsGraph
 import org.jsoup.nodes.Element
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.ExtendWith
 
+
+@ExtendWith(RequiresEditorGUI::class)
 internal class JsGraphTest {
 
     lateinit var data: JsGraph

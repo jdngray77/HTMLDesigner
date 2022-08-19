@@ -1,15 +1,21 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
+import com.jdngray77.htmldesigner.backend.JsFunction
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.utility.classEquals
 import javafx.scene.paint.Color
 import org.jsoup.nodes.Element
 import java.io.Serializable
 import java.lang.System.gc
 
+
 /**
  * The data model for a javascript graph.
+ *
+ * TODO variables
+ * TODO value providers
  */
-class JsGraph : Serializable{
+class JsGraph : Serializable {
 
     /**
      * Collection of nodes that exist in this graph.
@@ -58,8 +64,64 @@ class JsGraph : Serializable{
      * it will represent the current document's scriptable elements.
      */
     init {
-        val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
-        x.forEach { addElement(it) }
+//        val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
+//        x.forEach { addElement(it) }
+
+
+        addFunction(
+            JsFunction(
+            "Color Factory",
+            Color::class.java,
+            Triple("r", Float::class.java, 0.0f),
+            Triple("g", Float::class.java, 0.0f),
+            Triple("b", Float::class.java, 0.0f),
+            Triple("a", Float::class.java, 1.0f),
+
+
+
+            javascript = "new Color(r, g, b, a);"
+            )
+        )
+
+        addFunction(
+            JsFunction(
+            "Random Float",
+            Float::class.java,
+            Triple("min", Float::class.java, 0.0f),
+            Triple("max", Float::class.java, 1.0f),
+            javascript = " Math.floor(Math.random() * max) + min"
+            )
+        )
+
+        addFunction(
+            JsFunction(
+                "Random Float",
+                Float::class.java,
+                Triple("min", Float::class.java, 0.0f),
+                Triple("max", Float::class.java, 1.0f),
+                javascript = " Math.floor(Math.random() * max) + min"
+            )
+        )
+
+        addFunction(
+            JsFunction(
+                "Random Float",
+                Float::class.java,
+                Triple("min", Float::class.java, 0.0f),
+                Triple("max", Float::class.java, 1.0f),
+                javascript = " Math.floor(Math.random() * max) + min"
+            )
+        )
+
+        addFunction(
+            JsFunction(
+                "Random Float",
+                Float::class.java,
+                Triple("min", Float::class.java, 0.0f),
+                Triple("max", Float::class.java, 1.0f),
+                javascript = " Math.floor(Math.random() * max) + min"
+            )
+        )
     }
     
 
@@ -79,6 +141,23 @@ class JsGraph : Serializable{
         }
     }
 
+    fun addFunction(jsFunction: JsFunction): JsGraphFunction {
+//        assertElementDoesNotExist(name)
+        JsGraphFunction(jsFunction).apply {
+            nodes.add(this)
+            return this
+        }
+    }
+
+    fun addValue() {
+        TODO()
+    }
+
+
+    fun getNode(name: String) =
+        nodes.find { it.name == name }
+
+
     /**
      * Breaks connections a node may have, and deletes the node
      * from the graph.
@@ -95,6 +174,61 @@ class JsGraph : Serializable{
     fun removeNode(node: JsGraphNode) {
         node.removeAllConnections()
         nodes.remove(node)
+    }
+
+    /**
+     * Compiles the graph into a javascript string.
+     */
+//    override fun toString() = ""
+
+}
+
+
+/**
+ * A [JsGraphNode] for other code utilities..
+ */
+class JsGraphFunction (
+    val function: JsFunction
+) : JsGraphNode(function.name) {
+    init {
+        with (function) {
+            if (returnType == Unit::class.java || returnType == Void::class.java)
+                throw IllegalArgumentException("Functions need to be able to provide a value. Void is not a value.")
+
+
+            args.forEach {
+                if (it.third != null && !classEquals(it.third!!::class.java, it.second))
+                    throw IllegalArgumentException("Argument ${it.first} must be of type ${it.second}")
+            }
+        }
+
+        emitters.add(
+            JsGraphEmitter(
+                function.returnType,
+                "output",
+                this
+            )
+        )
+
+        receivers.add(
+            JsGraphReceiver(
+                Trigger::class.java,
+                "trigger",
+                this
+            )
+        )
+
+
+
+        function.args.forEach {
+            receivers.add(
+                JsGraphReceiver(
+                    it.second,
+                    it.first,
+                    this
+                )
+            )
+        }
     }
 }
 
@@ -113,21 +247,21 @@ abstract class JsGraphNode(
 
 ) {
 
-
-
     /**
      * Data that this node can provide.
      */
-    protected val emitters = mutableListOf<JsGraphEmitter>()
+    @Deprecated("Directly modifies the data without validation. Connections will not be broken down.")
+    val emitters = mutableListOf<JsGraphEmitter>()
 
     fun emitters() = emitters.toList()
 
     /**
      * Sockets to recieve data from emitters on other nodes.
      */
-    protected val recievers = mutableListOf<JsGraphReciever>()
+    @Deprecated("Directly modifies the data without validation. Connections will not be broken down.")
+    val receivers = mutableListOf<JsGraphReceiver>()
 
-    fun recievers() = recievers.toList()
+    fun recievers() = receivers.toList()
 
     fun removeAllConnections() {
         emitters.forEach {
@@ -135,7 +269,7 @@ abstract class JsGraphNode(
                 it.breakdown()
             }
         }
-        recievers.forEach {
+        receivers.forEach {
             it.admissions().forEach {
                 it.breakdown()
             }
@@ -158,7 +292,9 @@ class JsGraphEmitter(
      */
     val type: Class<*>,
 
-    val name: String
+    val name: String,
+
+    val parent: JsGraphNode
 
 ) {
 
@@ -175,7 +311,7 @@ class JsGraphEmitter(
      *
      * A reference to the connection is stored in both.
      */
-    fun emit(reciever: JsGraphReciever) {
+    fun emit(reciever: JsGraphReceiver) {
         val it = JsGraphEmission(
             this,
             reciever
@@ -197,14 +333,16 @@ class JsGraphEmitter(
     }
 
 }
-class JsGraphReciever(
+class JsGraphReceiver(
 
     /**
      * The type of data being received
      */
     val type: Class<*>,
 
-    val name: String
+    val name: String,
+
+    val parent: JsGraphNode
 
 ) {
 
@@ -236,7 +374,6 @@ class JsGraphReciever(
     fun revoke(jsGraphEmission: JsGraphEmission) {
         admissions.remove(jsGraphEmission)
     }
-
 }
 
 /**
@@ -254,7 +391,7 @@ class JsGraphEmission (
     /**
      * The reciever that is receiving data.
      */
-    val receiver: JsGraphReciever
+    val receiver: JsGraphReceiver
 ) {
 
     init {
@@ -280,45 +417,45 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
         emitters.add(
             JsGraphEmitter(
                 Trigger::class.java,
-                "Click"
+                "Click",
+                this
             )
         )
 
         emitters.add(
             JsGraphEmitter(
                 Trigger::class.java,
-                "Hover"
+                "Hover",
+                this
             )
         )
 
-        recievers.add(
-            JsGraphReciever(
+        receivers.add(
+            JsGraphReceiver(
                 Color::class.java,
-                "Back Color"
+                "Back Color",
+                this
             )
         )
 
-        recievers.add(
-            JsGraphReciever(
+        receivers.add(
+            JsGraphReceiver(
                 Color::class.java,
-                "Text Color"
+                "Text Color",
+                this
             )
         )
 
-        recievers.add(
-            JsGraphReciever(
+        receivers.add(
+            JsGraphReceiver(
                 Trigger::class.java,
-                "Visible"
+                "Visible",
+                this
             )
         )
     }
 
 }
-
-/**
- * A [JsGraphNode] for other code utilities..
- */
-abstract class JsGraphFunction : JsGraphNode("Unknown Function.")
 
 class Trigger
 

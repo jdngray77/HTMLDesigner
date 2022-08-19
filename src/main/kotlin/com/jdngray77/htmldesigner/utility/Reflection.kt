@@ -66,3 +66,7 @@ fun getThreadByName(threadName: String): Thread? {
     }
     return null
 }
+
+
+fun classEquals(first: Class<*>, second: Class<*>) =
+    first.simpleName.lowercase() == second.simpleName.lowercase()

@@ -104,6 +104,10 @@ class JsDesigner {
     fun initialize() {
         loadGraph(JsGraph())
         root.children.add(temporaryLine)
+
+        root.setOnContextMenuRequested {
+            println(JsGraphCompiler.compileGraph(graph))
+        }
     }
 
     companion object {

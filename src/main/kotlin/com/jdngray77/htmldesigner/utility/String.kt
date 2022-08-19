@@ -53,6 +53,13 @@ fun String.camelToSentence() : String =
         .joinToString("")
         .capitaliseEveryWord()
 
+fun String.toCamel() : String =
+    this
+        .capitaliseEveryWord()
+        .replace(" ", "")
+        .replaceFirstChar { it.toLowerCase() }
+
+
 /**
  * Splits string by spaces, then capitalises each substring.
  *
@@ -61,7 +68,7 @@ fun String.camelToSentence() : String =
 fun String.capitaliseEveryWord() =
     this.split(" ").joinToString(" ") {
         // For some reason, [String.capitalize] says to use replace it with this. I hate it.
-        it.replaceFirstChar { (if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString())}
+        it.replaceFirstChar { it.uppercase() }
     }
 
 

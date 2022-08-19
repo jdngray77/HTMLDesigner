@@ -14,6 +14,8 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Line
 import java.lang.System.gc
+import kotlin.math.abs
+
 
 /**
  * Visual representation of a [JsGraphNode].
@@ -103,7 +105,7 @@ class JsNode {
     /**
      * Adds a [JsNodeReceiver] to the GUI.
      */
-    fun addReceiver(_receiver: JsGraphReciever) {
+    fun addReceiver(_receiver: JsGraphReceiver) {
         loadFXMLComponent<AnchorPane>("JsNodeAttr.fxml", javaClass).apply {
             vboxAttrs.children.add(this.first)
             with ((second as JsNodeReceiver)) {
@@ -118,19 +120,50 @@ class JsNode {
     //#region GUI events
 
     /**
+     * When the node has been dragged, this stores the
+     * original location prior to moving.
+     *
+     * Used to determine which direction the node has been
+     * dragged, such that the movement can be constrained to
+     * a single axis.
+     */
+    @Volatile
+    private var dragDownLocation: Pair<Double, Double> = Pair(0.0, 0.0)
+
+    /**
      * Handles the node being dragged within the [JsDesigner].
      */
     @FXML
     private fun drag(mouseEvent: MouseEvent) {
-        // Move the node.
-        root.translateX = mouseEvent.x + root.translateX - root.width / 2
-        root.translateY = mouseEvent.y + root.translateY - 20
+
+        // Determine new location for the node, including the mouses position.
+        // This new location aligns the center of node's label under the mouse.
+        var translatex = mouseEvent.x + root.translateX - root.width / 2
+        var translatey = mouseEvent.y + root.translateY - 20
+
+        // If holding shift, pin one axis to the original value.
+        if (mouseEvent.isShiftDown) {
+            if (abs(translatex - dragDownLocation.first) > abs(translatey - dragDownLocation.second))
+                translatey = dragDownLocation.second // Dragging x - Hold y.
+            else
+                translatex = dragDownLocation.first  // Dragging y = Hold x
+        } else {
+            dragDownLocation = Pair(mouseEvent.screenX, mouseEvent.sceneY)
+        }
+
+
+        // Commit the movement.
+        root.translateX = translatex
+        root.translateY = translatey
+
+
 
         // Update the lines being emitted
         emittingLines.forEach {
             it.evalPosition()
         }
 
+        // Update the lines being received.
         receivingLines.forEach {
             it.evalPosition()
         }
@@ -147,8 +180,9 @@ class JsNode {
         root.cursor = Cursor.DEFAULT
     }
 
-    fun mPress() {
+    fun mPress(mouseEvent: MouseEvent) {
         root.cursor = Cursor.MOVE
+        dragDownLocation = Pair(mouseEvent.sceneX, mouseEvent.sceneY)
     }
 
     fun mRelease() {
@@ -161,7 +195,7 @@ class JsNode {
                 MenuItem("Delete Node").also {
                     it.setOnAction { delete() }
                 })
-        }.show(this.root, mouseEvent.screenX, mouseEvent.screenY)
+        }.show(this.root, mouseEvent.x, mouseEvent.y)
     }
     //#endregion
 
