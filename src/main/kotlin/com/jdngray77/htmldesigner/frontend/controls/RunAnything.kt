@@ -44,7 +44,7 @@ class Task(val name: String, val script: () -> Unit) : Runnable {
         script()
 }
 
-object RunAnything : SearchableList<Task>(
+object RunAnything : SearchableList<Task> (
     arrayListOf(
         *RegistryTaskFactory("Project").createTasks(Config),
         *RegistryTaskFactory("IDE").createTasks(Config),
@@ -111,6 +111,14 @@ object RunAnything : SearchableList<Task>(
             searchBox.requestFocus()
         }
     }
+
+    /**
+     * Returns true if a task with the given name exists.
+     *
+     * 
+     */
+    fun hasTask(name: String) =
+        items.any { it.name == name }
 
 
     fun showDialog() =
