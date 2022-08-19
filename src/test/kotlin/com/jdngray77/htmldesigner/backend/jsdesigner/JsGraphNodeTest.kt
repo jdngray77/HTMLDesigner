@@ -1,8 +1,6 @@
 package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.RequiresEditorGUI
-import com.jdngray77.htmldesigner.frontend.jsdesigner.IncompatibleEmissionException
-import com.jdngray77.htmldesigner.frontend.jsdesigner.JsGraph
 import org.jsoup.nodes.Element
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -107,6 +107,9 @@ val ButtonType_SAVE: ButtonType = ButtonType("Save")
 
 val ButtonType_CLOSEWITHOUTSAVE: ButtonType = ButtonType("Don't save")
 
+/**
+ * Generates a hex representation of the color.
+ */
 fun Color.toHex(): String {
     return String.format(null, "#%02x%02x%02x",
             (red * 255).roundToInt(),

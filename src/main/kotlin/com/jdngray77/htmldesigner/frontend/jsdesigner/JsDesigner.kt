@@ -1,5 +1,8 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphCompiler
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML

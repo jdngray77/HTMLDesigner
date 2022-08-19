@@ -14,6 +14,10 @@ import java.nio.charset.StandardCharsets
  */
 object LibrariesAndLicenses {
 
+    /**
+     * A simple page that can be displayed when
+     * there is no licence to be shown.
+     */
     val page404 = Document("")
         .body()
         .attr("style", "background-color: #373737; color: white;")
@@ -41,17 +45,18 @@ object LibrariesAndLicenses {
      * A list of SPDX valid licence ID's.
      */
     var licenseIDs = arrayListOf<String>()
+        private set
 
     /**
      * A list of web URLs hosting the licences that couldn't be fetched
      * via SPDX.
      */
-    var licenseURLs = hashMapOf<String, String?>()
+    val licenseURLs = hashMapOf<String, String?>()
 
     /**
      * A list of names of the libraries used in the project.
      */
-    var libraries = hashMapOf<String, String?>()
+    val libraries = hashMapOf<String, String?>()
 
     fun idAndURLs() = licenseURLs.keys + licenseIDs
 
@@ -68,6 +73,11 @@ object LibrariesAndLicenses {
         else
             null
 
+    /**
+     * Fetches the URL provided by the report for the given license.
+     *
+     * @return the URL of the license, or null if none was provided by the report.
+     */
     fun fetchLicenceURL(LicenseName: String) = licenseURLs[LicenseName]
 
     init {

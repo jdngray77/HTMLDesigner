@@ -1,5 +1,7 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
 import com.jdngray77.htmldesigner.utility.classEquals
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
