@@ -270,9 +270,7 @@ abstract class JsGraphNode(
             }
         }
         receivers.forEach {
-            it.admissions().forEach {
-                it.breakdown()
-            }
+            it.admission?.breakdown()
         }
 
         gc()
@@ -354,9 +352,8 @@ class JsGraphReceiver(
     /**
      * Receiving connections.
      */
-    private val admissions: MutableList<JsGraphEmission> = mutableListOf()
-
-    fun admissions() = admissions.toList()
+    var admission: JsGraphEmission? = null
+        private set
 
     /**
      * Creates a data connection.
@@ -372,18 +369,27 @@ class JsGraphReceiver(
     }
 
     fun receive(emission: JsGraphEmission) {
-        admissions.add(emission)
+        if (hasAdmission())
+            admission?.breakdown()
+
+        admission = emission
     }
 
     @Deprecated("Directly manipulates the data, without validation.")
     fun revoke(jsGraphEmission: JsGraphEmission) {
-        admissions.remove(jsGraphEmission)
+        if (jsGraphEmission == admission)
+            admission = null
     }
 
     /**
      * Returns true if this receiver is connected to the given emitter.
      */
     fun isTrigger(): Boolean = classEquals(type, Trigger::class.java)
+
+    /**
+     * returns true if this receiver is connected to any emitters.
+     */
+    fun hasAdmission() = admission != null
 }
 
 /**

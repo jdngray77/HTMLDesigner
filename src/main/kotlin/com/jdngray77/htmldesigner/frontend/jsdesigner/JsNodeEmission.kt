@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.frontend.jsdesigner
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
 import com.jdngray77.htmldesigner.backend.jsdesigner.Trigger
+import com.jdngray77.htmldesigner.frontend.jsdesigner.JsNode.Companion.breakdown
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.classEquals
 import javafx.beans.InvalidationListener
@@ -37,7 +38,7 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Dim when dragging in a new connection
         socket.setOnMouseDragEntered {
-            if (!classEquals(emitterBeingDragged.emitter.type, receiver.type))
+            if (!classEquals(emitterBeingDragged.emitter.type, receiver.type) || receiver.hasAdmission())
                 return@setOnMouseDragEntered
 
 
@@ -66,6 +67,19 @@ class JsNodeReceiver: JsNodeProperty() {
             socket.styleClass.remove("populated")
             it.consume()
         }
+
+        socket.setOnContextMenuRequested {
+            if (receiver.hasAdmission())
+                breakdown()
+        }
+    }
+
+    /**
+     * Breaksdown the data connection AND
+     */
+    fun breakdown() {
+        receiver.admission!!.breakdown()
+        guiNode.receivingLines.find { it.second == this }!!.breakdown()
     }
 }
 

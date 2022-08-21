@@ -89,14 +89,14 @@ class JsNode {
      * connections on the right of this node.
      * [graphNode]'s events.
      */
-    private val emittingLines = mutableListOf<Triple<JsNodeEmitter, JsNodeReceiver, Line>>()
+    internal val emittingLines = mutableListOf<Triple<JsNodeEmitter, JsNodeReceiver, Line>>()
 
     /**
      * Lines in the [graphEditor] that show the
      * connections on the left of this node.
      * [graphNode]'s events.
      */
-    private val receivingLines = mutableListOf<Triple<JsNodeEmitter, JsNodeReceiver, Line>>()
+    internal val receivingLines = mutableListOf<Triple<JsNodeEmitter, JsNodeReceiver, Line>>()
     //#endregion
 
     /**
@@ -279,6 +279,23 @@ class JsNode {
             }
         }
 
+        /**
+         * Breaks down the visual line drawn over a connection.
+         *
+         * Does not modify the data.
+         */
+        fun Triple<JsNodeEmitter, JsNodeReceiver, Line>.breakdown() {
+            // Remove from sender and receiver.
+            first.guiNode.emittingLines.remove(this)
+            second.guiNode.receivingLines.remove(this)
+
+            // Remove from the scene.
+            first.guiNode.graphEditor.root.children.remove(third)
+            third.isVisible = false
+
+            // We want this fucker gone.
+            gc()
+        }
     }
 
 }

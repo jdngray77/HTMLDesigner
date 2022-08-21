@@ -47,13 +47,13 @@ internal class JsGraphNodeTest {
         val a = data.getNodes().last()
 
         val emissions = h1.emitters().first().emissions()
-        val admissions = a.recievers().last().admissions()
+        val admission = a.recievers().last().admission
         assertEquals(1, emissions.size)
-        assertEquals(1, admissions.size)
+        assertNotNull(admission)
 
         h1.removeAllConnections()
 
         assertEquals(0, h1.emitters().first().emissions().size)
-        assertEquals(0, a.recievers().first().admissions().size)
+        assert(a.recievers().first().hasAdmission())
     }
 }

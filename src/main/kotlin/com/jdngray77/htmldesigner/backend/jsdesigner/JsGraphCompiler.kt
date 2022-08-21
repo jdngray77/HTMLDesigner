@@ -128,7 +128,7 @@ object JsGraphCompiler {
      */
     private fun compileReceiver(js: JavascriptBuilder, receiver: JsGraphReceiver): String {
         // If there's no connections to provide a value, find a default value.
-        return if (receiver.admissions().isEmpty())
+        return if (!receiver.hasAdmission())
             when (receiver.parent) {
                 // TODO default values for all receivers.
                 is JsGraphFunction -> receiver.parent.function.args.find { it.first == receiver.name }!!.third.toString()
@@ -136,7 +136,7 @@ object JsGraphCompiler {
             }
 
         // Otherwise evaluate the incoming connection.
-        else when (receiver.admissions().first().emitter.parent) {
+        else when (receiver.admission!!.emitter.parent) {
 //            is JsGraphValueProvider -> {
 //                js.addValue(receiver.value)
 //            }
@@ -144,11 +144,11 @@ object JsGraphCompiler {
 //                js.addValue(receiver.value)
 //            }
             is JsGraphFunction -> {
-                compileFunctionInvocation(js, receiver.admissions().first().emitter.parent as JsGraphFunction)
+                compileFunctionInvocation(js, receiver.admission!!.emitter.parent as JsGraphFunction)
             }
 
             else -> {
-                throw JsGraphCompilationException("Unsupported receiver type: ${receiver.admissions().first().emitter.parent.javaClass.name}")
+                throw JsGraphCompilationException("Unsupported receiver type: ${receiver.admission!!.emitter.parent.javaClass.name}")
             }
         }
     }
