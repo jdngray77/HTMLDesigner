@@ -1,0 +1,93 @@
+
+/*All sockets.*/
+.socket {}
+
+/*
+Base emitter marker.
+May be overridden based on emitter type.
+*/
+.socket.emitter{
+    -fx-background-insets: 3;
+    -fx-border-color: limegreen;
+    -fx-background-color: transparent;
+    -fx-border-width: 3;
+    -fx-border-radius: 5;
+}
+
+
+/*
+Base receiver marker.
+May be overridden based on receiver type.
+*/
+.socket.receiver{
+    -fx-background-insets: 3;
+    -fx-background-color: transparent;
+    -fx-border-color: orange;
+    -fx-border-width: 3;
+    -fx-border-radius: 5;
+}
+
+
+/*All sockets that accept or emmit events.*/
+.socket.trigger {
+    -fx-border-radius: 10;
+}
+
+.socket.emitter.trigger {}
+.socket.receiver.trigger {}
+
+
+
+/*Sockets with connections.*/
+
+.socket.populated {}
+
+.socket.emitter.populated {
+    -fx-background-color: limegreen;
+}
+
+.socket.receiver.populated {
+    -fx-background-color: orange;
+}
+
+/*Nodes*/
+
+/*All ndoes*/
+.node {
+    -fx-background-color: #50505088;
+    -fx-border-radius: 10;
+
+    -fx-border-color: aqua;
+    -fx-border-width: 1;
+}
+
+.node .head-text {
+    -fx-background-color: #70707088;
+}
+
+/*Nodes that represent HTML elements in the webpage.*/
+.node.element {
+
+}
+
+/*Nodes that represent js functions*/
+.node.function {
+
+}
+
+/*Nodes that represent static values*/
+.node.value {
+
+}
+
+/*Nodes that are not compiled, and are thus useless.*/
+.node.uncompiled {
+
+}
+
+
+/*Background of the entire Js editor.*/
+.root {
+    -fx-background-image: url("webb-dark.png");
+    -fx-background-repeat: repeat;
+}

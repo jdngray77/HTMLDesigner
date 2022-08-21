@@ -6,9 +6,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="root"  prefHeight="96.0" prefWidth="200.0" style="-fx-background-color: #505050;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsNode">
+<AnchorPane styleClass="node" fx:id="root" prefHeight="96.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsNode">
    <children>
-      <Label fx:id="txtElementName" onContextMenuRequested="#mContext" onMouseDragged="#drag" onMouseEntered="#mEnter" onMouseExited="#mExit" onMousePressed="#mPress" onMouseReleased="#mRelease" alignment="CENTER" contentDisplay="CENTER" layoutX="66.0" layoutY="14.0" text="Label" textFill="WHITE" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="5.0" />
+      <Label styleClass="head-text" fx:id="txtElementName" onContextMenuRequested="#mContext" onMouseDragged="#drag" onMouseEntered="#mEnter" onMouseExited="#mExit" onMousePressed="#mPress" onMouseReleased="#mRelease" alignment="CENTER" contentDisplay="CENTER" layoutX="66.0" layoutY="14.0" text="Label" textFill="WHITE" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="5.0" />
       <ComboBox fx:id="cmbNewAttr" layoutX="7.0" layoutY="36.0" prefWidth="150.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="30.0" />
       <VBox fx:id="vboxAttrs" layoutY="68.0" prefHeight="61.0" prefWidth="164.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="60.0" />
       <VBox fx:id="vboxEvents" layoutX="11.0" layoutY="70.0" prefHeight="61.0" prefWidth="164.0" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="60.0" />

@@ -64,8 +64,8 @@ class JsGraph : Serializable {
      * it will represent the current document's scriptable elements.
      */
     init {
-//        val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
-//        x.forEach { addElement(it) }
+        val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
+        x.forEach { addElement(it) }
 
 
         addFunction(
@@ -332,6 +332,11 @@ class JsGraphEmitter(
         emissions.remove(jsGraphEmission)
     }
 
+    /**
+     * Returns true if this receiver is connected to the given emitter.
+     */
+    fun isTrigger(): Boolean = classEquals(type, Trigger::class.java)
+
 }
 class JsGraphReceiver(
 
@@ -374,6 +379,11 @@ class JsGraphReceiver(
     fun revoke(jsGraphEmission: JsGraphEmission) {
         admissions.remove(jsGraphEmission)
     }
+
+    /**
+     * Returns true if this receiver is connected to the given emitter.
+     */
+    fun isTrigger(): Boolean = classEquals(type, Trigger::class.java)
 }
 
 /**

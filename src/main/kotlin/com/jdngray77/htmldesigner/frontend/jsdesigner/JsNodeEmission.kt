@@ -2,7 +2,11 @@ package com.jdngray77.htmldesigner.frontend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
+import com.jdngray77.htmldesigner.backend.jsdesigner.Trigger
+import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.classEquals
+import javafx.beans.InvalidationListener
+import javafx.beans.Observable
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
 import javafx.scene.effect.ColorAdjust
@@ -22,6 +26,9 @@ class JsNodeReceiver: JsNodeProperty() {
     fun initReceiver(receiver: JsGraphReceiver) {
         this.receiver = receiver
         this.name.text = receiver.name
+
+        if (receiver.isTrigger())
+            socket.styleClass.addIfAbsent("trigger")
     }
 
 
@@ -34,7 +41,7 @@ class JsNodeReceiver: JsNodeProperty() {
                 return@setOnMouseDragEntered
 
 
-            socket.effect = socketDim
+            socket.styleClass.addIfAbsent("populated")
             it.consume()
         }
 
@@ -43,7 +50,7 @@ class JsNodeReceiver: JsNodeProperty() {
             if (emitterBeingDragged.emitter.type != receiver.type)
                 return@setOnMouseDragReleased
 
-            socket.effect = null
+            socket.styleClass.remove("populated")
 
             graphEditor.temporaryLine.isVisible = false
 
@@ -56,7 +63,7 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Drag did not commit.
         socket.setOnMouseDragExited {
-            socket.effect = null
+            socket.styleClass.remove("populated")
             it.consume()
         }
     }
@@ -77,6 +84,9 @@ class JsNodeEmitter : JsNodeProperty() {
     fun initEmitter(emitter: JsGraphEmitter) {
         this.emitter = emitter
         this.name.text = emitter.name
+
+        if (emitter.isTrigger())
+            socket.styleClass.addIfAbsent("trigger")
     }
 
     @FXML
@@ -97,14 +107,14 @@ class JsNodeEmitter : JsNodeProperty() {
                 emitterBeingDragged = this@JsNodeEmitter
             }
 
-            socket.effect = socketDim
+            socket.styleClass.addIfAbsent("populated")
         }
 
         // Configure drag, so that drag events occour on
         // recieving nodes.
         socket.setOnDragDetected {
             socket.startFullDrag()
-            socket.effect = null
+            socket.styleClass.remove("populated")
         }
 
         // TODO check which of these is triggered.
@@ -123,7 +133,7 @@ class JsNodeEmitter : JsNodeProperty() {
         }
 
         socket.setOnMouseReleased {
-            socket.effect = null
+            socket.styleClass.remove("populated")
             graphEditor.temporaryLine.isVisible = false
             it.consume()
         }
@@ -146,13 +156,8 @@ open class JsNodeProperty() {
 
     lateinit var graphEditor: JsDesigner
 
-
     companion object {
 
         internal lateinit var emitterBeingDragged: JsNodeEmitter
-
-        val socketDim =  ColorAdjust().also {
-            it.brightness = -.3
-        }
     }
 }

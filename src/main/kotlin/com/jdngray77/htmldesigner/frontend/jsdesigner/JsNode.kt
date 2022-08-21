@@ -1,8 +1,6 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
-import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
-import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
-import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
+import com.jdngray77.htmldesigner.backend.jsdesigner.*
 import com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner.Companion.themeLine
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
@@ -44,6 +42,16 @@ class JsNode {
         e.emitters().forEach {
             addEmitter(it)
         }
+
+        root.styleClass.add (
+            when (e) {
+                is JsGraphFunction -> "function"
+                is JsGraphElement -> "element"
+    //            is JsGraphVariable -> "variable"
+    //            is JsGraphValue -> "value"
+                else -> ""
+            }
+        )
     }
 
     //#region GUI elements
@@ -95,7 +103,7 @@ class JsNode {
      * Adds a [JsNodeEmitter] to the GUI.
      */
     private fun addEmitter(_emitter: JsGraphEmitter) {
-        loadFXMLComponent<AnchorPane>("JsNodeEvent.fxml", javaClass).apply {
+        loadFXMLComponent<AnchorPane>("JsNodeEmitter.fxml", javaClass).apply {
             vboxEvents.children.add(this.first)
             with ((second as JsNodeEmitter)) {
                 initEmitter(_emitter)
@@ -109,7 +117,7 @@ class JsNode {
      * Adds a [JsNodeReceiver] to the GUI.
      */
     fun addReceiver(_receiver: JsGraphReceiver) {
-        loadFXMLComponent<AnchorPane>("JsNodeAttr.fxml", javaClass).apply {
+        loadFXMLComponent<AnchorPane>("JsNodeReceiver.fxml", javaClass).apply {
             vboxAttrs.children.add(this.first)
             with ((second as JsNodeReceiver)) {
                 initReceiver(_receiver)

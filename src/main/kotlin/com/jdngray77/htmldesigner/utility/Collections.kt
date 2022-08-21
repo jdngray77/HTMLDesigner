@@ -15,6 +15,8 @@
 
 package com.jdngray77.htmldesigner.utility
 
+import javafx.beans.Observable
+import javafx.collections.ObservableList
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeTableView
 import java.util.function.Consumer
@@ -82,3 +84,6 @@ fun <T> TreeItem<T>.flatten(item : TreeItem<T>): Stream<TreeItem<T>> =
  */
 fun <V,K> HashMap<V,K>.reverseGet(value : V) =
     entries.find { it.value == value }?.key
+
+fun <T> ObservableList<T>.addIfAbsent(that: T) =
+    if (!this.contains(that)) this.add(that) else false
