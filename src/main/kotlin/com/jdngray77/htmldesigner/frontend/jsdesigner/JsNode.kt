@@ -7,7 +7,6 @@ import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
 import javafx.scene.Cursor
-import javafx.scene.control.ComboBox
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
@@ -68,9 +67,6 @@ class JsNode {
 
     @FXML
     private lateinit var vboxAttrs: VBox
-
-    @FXML
-    private lateinit var cmbNewAttr: ComboBox<Any>
 
     @FXML
     private lateinit var txtElementName: Label
@@ -271,17 +267,18 @@ class JsNode {
     fun delete() {
         graphEditor.graph.removeNode(this.graphNode)
 
-        emittingLines.forEach {
-            // it = Triple(fromNode, toNode, Line)
-            // Remove from remote node.
-            it.second.guiNode.receivingLines.remove(it)
+        emittingLines.toTypedArray().forEach {
+            it.breakdown()
+        }
 
-            // Remove from GUI.
-            graphEditor.root.children.remove(it.third)
+        receivingLines.toTypedArray().forEach {
+            it.breakdown()
         }
 
         // Remove all from local node.
+        // TODO is this redundant after the breakdown?
         emittingLines.clear()
+        receivingLines.clear()
 
         graphEditor.nodes.remove(this)
         graphEditor.root.children.remove(root)
@@ -290,7 +287,7 @@ class JsNode {
     }
 
     /**
-     * Updates the color of the header to match the [JsGraphNode.touched] state.
+     * Updates the color of the header to match the [JsGraphNode.touch] state.
      *
      * Notifies the user that a node is unused.
      */
@@ -331,7 +328,7 @@ class JsNode {
         fun EmissionLine.breakdown() {
 
             // Remove the connection in the data.
-            second.receiver.admission!!.breakdown()
+            second.receiver.admission?.breakdown()
 
             // Remove references to the graphical line from sender and receiver.
             first.guiNode.emittingLines.remove(this)

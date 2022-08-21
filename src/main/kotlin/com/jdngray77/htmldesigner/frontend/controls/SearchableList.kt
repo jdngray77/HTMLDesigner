@@ -26,7 +26,6 @@ open class SearchableList <T> (var items: Iterable<T> = arrayListOf()): VBox() {
     val list = ListView<T>()
 
     init {
-
         searchBox.setOnKeyPressed {
             if (it.code == KeyCode.ENTER && list.items.isNotEmpty()) {
                 list.selectionModel.selectedItem?.let {
@@ -63,6 +62,8 @@ open class SearchableList <T> (var items: Iterable<T> = arrayListOf()): VBox() {
     fun clearSearch() {
         searchBox.text = ""
     }
+
+    fun selectedItem() = list.selectionModel.selectedItem
 
     /**
      * Automatically invoked when the user presses enter.

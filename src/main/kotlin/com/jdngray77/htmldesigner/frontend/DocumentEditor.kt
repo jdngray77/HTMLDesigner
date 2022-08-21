@@ -22,10 +22,7 @@ import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
-import com.jdngray77.htmldesigner.utility.ButtonType_CLOSEWITHOUTSAVE
-import com.jdngray77.htmldesigner.utility.ButtonType_SAVE
-import com.jdngray77.htmldesigner.utility.SerializableDocument
-import com.jdngray77.htmldesigner.utility.toHex
+import com.jdngray77.htmldesigner.utility.*
 import javafx.application.Platform
 import javafx.event.Event
 import javafx.fxml.FXML
@@ -120,7 +117,7 @@ class DocumentEditor {
         // Breadcrumb only shows tag name
         breadCrumb.setCrumbFactory {
             BreadCrumbBar.BreadCrumbButton(
-                it.value.tagName() + if (it.value.id().isNotBlank()) "#${it.value.id()}" else ""
+                (it.value as Element).userString()
             )
         }
 

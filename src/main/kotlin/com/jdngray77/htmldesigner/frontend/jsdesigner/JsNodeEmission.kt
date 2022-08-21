@@ -33,7 +33,7 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Dim when dragging in a new connection
         socket.setOnMouseDragEntered {
-            if (!classEqualsOrSubclass(emitterBeingDragged.emitter.type, receiver.type) || receiver.hasAdmission())
+            if (!classEqualsOrSubclass(receiver.type, emitterBeingDragged.emitter.type) || receiver.hasAdmission())
                 return@setOnMouseDragEntered
 
 
@@ -43,7 +43,7 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Commit a new connection. This is the reciever.
         socket.setOnMouseDragReleased {
-            if (emitterBeingDragged.emitter.type != receiver.type)
+            if (!classEqualsOrSubclass(receiver.type, emitterBeingDragged.emitter.type) || receiver.hasAdmission())
                 return@setOnMouseDragReleased
 
             socket.styleClass.addIfAbsent("populated")
@@ -59,10 +59,10 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Drag did not commit (But also triggered when drag is committed)
         socket.setOnMouseDragExited {
-            if (it.isPrimaryButtonDown) {
+            if (receiver.hasAdmission()) {
+                socket.styleClass.addIfAbsent("populated")
+            } else
                 socket.styleClass.remove("populated")
-                it.consume()
-            }
         }
 
         socket.setOnContextMenuRequested {

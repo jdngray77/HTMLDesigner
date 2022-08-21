@@ -3,15 +3,20 @@ package com.jdngray77.htmldesigner.frontend.jsdesigner
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphCompiler
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
+import com.jdngray77.htmldesigner.backend.showErrorNotification
+import com.jdngray77.htmldesigner.backend.showWarningNotification
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
 import javafx.scene.control.ContextMenu
+import javafx.scene.control.MenuItem
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import java.lang.System.gc
 
 /**
@@ -56,6 +61,39 @@ class JsDesigner {
     val contextMenu: ContextMenu = ContextMenu()
 
     init {
+        contextMenu.items.add(
+            MenuItem("From Document").also {
+                it.setOnAction {
+                    action ->
+
+                    // Fuck this shit, man. Why can't i just put this in the brackets?
+                    val filter: (Element) -> Boolean = {
+                        it.tagName()!="style" && it.id().isNotEmpty()
+                    }
+
+                    document.getElementById(ItemSelectionDialog<String>(
+                        document.allElements.filter(filter).map { it.id() }.toList()
+                    ).showAndWait())?.let {
+                        try {
+                            implNewNode(
+                                graph.addElement(it),
+                                contextMenu.x,
+                                contextMenu.y
+                            )
+                        } catch (e: Exception) {
+                            if (e.message != null) {
+                                showWarningNotification("Failed to create the node.", e.message!!)
+                            } else {
+                                showErrorNotification(e, suppress = false)
+                            }
+
+
+                        }
+                    }
+                }
+            }
+        )
+
         contextMenu.items.addAll(*JsFunctionFactory.asMenus {
             // On user selecting an item, add the function to the graph
             // and create a new node for it.

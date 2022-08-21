@@ -115,6 +115,8 @@ fun Element.createPrefab(): Prefab? {
     return ret
 }
 
+fun Element.userString() = tagName() + " " + id()
+
 fun String.asElement(): Element =
     Jsoup.parse(this, "", xmlParser()).let {
         if (it.tagName() == "#root")

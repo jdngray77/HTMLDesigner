@@ -2,7 +2,6 @@ package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JavascriptBuilder
 import com.jdngray77.htmldesigner.utility.classEquals
-import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 
 /**
  * A non-comprehensive compiler for the [JsGraph].
@@ -81,6 +80,8 @@ object JsGraphCompiler {
         if (connection.receiver.parent !is JsGraphFunction)
             throw IllegalArgumentException("Connection does not lead to a function.")
 
+        connection.touch()
+
         js.addFunction(connection.receiver.parent.function)
 
         return "() => {\n\t${
@@ -101,6 +102,7 @@ object JsGraphCompiler {
      */
     private fun compileFunctionInvocation(js: JavascriptBuilder, function: JsGraphFunction): String {
         js.addFunction(function.function)
+        function.touch()
 
         // Evaluate the function's JS with argument
         return function.function.invoke(

@@ -2,9 +2,7 @@ package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JsFunction
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.jsdesigner.JsColorFactoryFunction
-import com.jdngray77.htmldesigner.frontend.jsdesigner.JsRandomFloatFunction
-import com.jdngray77.htmldesigner.utility.classEquals
+import com.jdngray77.htmldesigner.frontend.jsdesigner.JsNodeProperty
 import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 import javafx.scene.paint.Color
 import org.jsoup.nodes.Element
@@ -64,7 +62,7 @@ class JsGraph : Serializable {
     }
 
     /**
-     * Clears the [JsGraphNode.touched] flag on all [nodes].
+     * Clears the [JsGraphNode.touch] flag on all [nodes].
      *
      * Performed prior to compilation.
      */
@@ -212,6 +210,10 @@ abstract class JsGraphNode(
      * If not, then the node is not included in the output, and may be redundant.
      */
     var touched: Boolean = false
+
+    fun touch() {
+        touched = true
+    }
 
     /**
      * Data that this node can provide.
@@ -384,7 +386,7 @@ class JsGraphEmission (
 ) {
 
     init {
-        if (receiver.type != emitter.type)
+        if (!classEqualsOrSubclass(receiver.type, JsNodeProperty.emitterBeingDragged.emitter.type) || receiver.hasAdmission())
             throw IncompatibleEmissionException(this)
     }
 

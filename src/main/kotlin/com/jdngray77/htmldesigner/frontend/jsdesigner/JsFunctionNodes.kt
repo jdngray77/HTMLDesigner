@@ -39,6 +39,7 @@ object JsFunctionFactory {
         JsJoinFunction::class,
         JsLengthFunction::class,
         JsContainsFunction::class,
+        null,
         JsStartsWithFunction::class,
         JsEndsWithFunction::class,
         JsSubstringFunction::class,
@@ -49,6 +50,7 @@ object JsFunctionFactory {
         JsSubtractFunction::class,
         JsMultiplyFunction::class,
         JsDivideFunction::class,
+        null,
         JsAbsFunction::class,
         JsFloorFunction::class,
         JsCeilFunction::class,
@@ -57,9 +59,11 @@ object JsFunctionFactory {
     )
 
     val randomFunctions = listOf<KClass<*>?>(
-        JsRandomFloatFunction::class,
+//        JsRandomFloatFunction::class,
         JsRandomIntFunction::class,
+        null,
         JsRandomBooleanFunction::class,
+        null,
         JsRandomColorFunction::class,
         JsRandomColorWithAlphaFunction::class,
     )
@@ -145,16 +149,16 @@ class JsColorFactoryFunction : JsFunction (
         "r",
 
         // Type of data that can be accepted.
-        Float::class,
+        Number::class,
 
         // Default value used if no data is provided.
         0.0f
     ),
 
     // More inputs.
-    Triple("g", Float::class, 0.0f),
-    Triple("b", Float::class, 0.0f),
-    Triple("a", Float::class, 1.0f),
+    Triple("g", Number::class, 0.0f),
+    Triple("b", Number::class, 0.0f),
+    Triple("a", Number::class, 1.0f),
 
     // The javascript of the function.
     // Names used within must match the parameters.
@@ -342,26 +346,26 @@ class JsSubstringFunction : JsFunction (
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 
-
-/**
- * Generates a random float between 0 and 1.
- */
-class JsRandomFloatFunction : JsFunction (
-        "Random Float",
-        Float::class,
-        Triple("min", Float::class, 0.0f),
-        Triple("max", Float::class, 1.0f),
-        javascript = " Math.floor(Math.random() * max) + min"
-)
+//
+///**
+// * Generates a random float between 0 and 1.
+// */
+//class JsRandomFloatFunction : JsFunction (
+//        "Random Float",
+//        Number::class,
+//        Triple("min", Number::class, 0.0f),
+//        Triple("max", Number::class, 1.0f),
+//        javascript = " Math.floor(Math.random() * max) + min"
+//)
 
 /**
  * Generates a random integer between 0 and 1.
  */
 class JsRandomIntFunction : JsFunction (
-        "Random Int",
-        Int::class,
-        Triple("min", Int::class, Int.MIN_VALUE),
-        Triple("max", Int::class,  Int.MAX_VALUE),
+        "Random Number",
+        Number::class,
+        Triple("min", Number::class, Int.MIN_VALUE),
+        Triple("max", Number::class,  Int.MAX_VALUE),
         javascript = " Math.floor(Math.random() * max) + min"
 )
 
