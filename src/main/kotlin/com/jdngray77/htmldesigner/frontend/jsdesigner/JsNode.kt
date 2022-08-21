@@ -2,6 +2,7 @@ package com.jdngray77.htmldesigner.frontend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.*
 import com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner.Companion.themeLine
+import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
@@ -10,6 +11,7 @@ import javafx.scene.control.ComboBox
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
+import javafx.scene.input.ContextMenuEvent
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.VBox
@@ -17,6 +19,7 @@ import javafx.scene.shape.Line
 import java.lang.System.gc
 import kotlin.math.abs
 
+typealias EmissionLine = Triple<JsNodeEmitter, JsNodeReceiver, Line>
 
 /**
  * Visual representation of a [JsGraphNode].
@@ -32,6 +35,8 @@ class JsNode {
     fun init(e: JsGraphNode, graphEditor: JsDesigner) {
         this.graphNode = e
         this.graphEditor = graphEditor
+
+        root.relocate(e.x,e.y)
 
         txtElementName.text = e.name
 
@@ -89,14 +94,14 @@ class JsNode {
      * connections on the right of this node.
      * [graphNode]'s events.
      */
-    internal val emittingLines = mutableListOf<Triple<JsNodeEmitter, JsNodeReceiver, Line>>()
+    internal val emittingLines = mutableListOf<EmissionLine>()
 
     /**
      * Lines in the [graphEditor] that show the
      * connections on the left of this node.
      * [graphNode]'s events.
      */
-    internal val receivingLines = mutableListOf<Triple<JsNodeEmitter, JsNodeReceiver, Line>>()
+    internal val receivingLines = mutableListOf<EmissionLine>()
     //#endregion
 
     /**
@@ -147,10 +152,14 @@ class JsNode {
     @FXML
     private fun drag(mouseEvent: MouseEvent) {
 
+        // Sometimes the mouse drifts from the label and loses the correct state.
+        // This forces the mouse to stay closed.
+        root.cursor = Cursor.CLOSED_HAND
+
         // Determine new location for the node, including the mouses position.
         // This new location aligns the center of node's label under the mouse.
         var translatex = mouseEvent.x + root.translateX - root.width / 2
-        var translatey = mouseEvent.y + root.translateY - 20
+        var translatey = mouseEvent.y + root.translateY - 10
 
         // If holding shift, pin one axis to the original value.
         if (mouseEvent.isShiftDown) {
@@ -167,7 +176,19 @@ class JsNode {
         root.translateX = translatex
         root.translateY = translatey
 
+        invalidatePosition()
 
+        mouseEvent.consume()
+    }
+
+    fun breakdownConnection(emission: JsGraphEmission) {
+        (emittingLines + receivingLines).find {
+            it.first.emitter === emission.emitter && it.second.receiver === emission.receiver
+        }!!.breakdown()
+    }
+
+    private fun invalidatePosition() {
+        root.toFront()
 
         // Update the lines being emitted
         emittingLines.forEach {
@@ -179,8 +200,12 @@ class JsNode {
             it.evalPosition()
         }
 
+        with(root.boundsInParent) {
+            graphNode.x = minX
+            graphNode.y = minY
+        }
 
-        mouseEvent.consume()
+
     }
 
     fun mEnter() {
@@ -192,21 +217,24 @@ class JsNode {
     }
 
     fun mPress(mouseEvent: MouseEvent) {
-        root.cursor = Cursor.MOVE
+        root.cursor = Cursor.CLOSED_HAND
         dragDownLocation = Pair(mouseEvent.sceneX, mouseEvent.sceneY)
+        root.toFront()
     }
 
     fun mRelease() {
-        root.cursor = Cursor.DEFAULT
+        root.cursor = Cursor.HAND
     }
 
-    fun mContext(mouseEvent: MouseEvent) {
+    fun mContext(mouseEvent: ContextMenuEvent) {
         ContextMenu().apply {
             items.add(
                 MenuItem("Delete Node").also {
                     it.setOnAction { delete() }
                 })
-        }.show(this.root, mouseEvent.x, mouseEvent.y)
+        }.show(this.root, mouseEvent.sceneX, mouseEvent.sceneY)
+
+        mouseEvent.consume()
     }
     //#endregion
 
@@ -255,7 +283,22 @@ class JsNode {
         // Remove all from local node.
         emittingLines.clear()
 
+        graphEditor.nodes.remove(this)
+        graphEditor.root.children.remove(root)
+
         gc()
+    }
+
+    /**
+     * Updates the color of the header to match the [JsGraphNode.touched] state.
+     *
+     * Notifies the user that a node is unused.
+     */
+    fun invalidateTouched() {
+        if (graphNode.touched)
+            txtElementName.styleClass.addIfAbsent("touched")
+        else
+            txtElementName.styleClass.remove("touched")
     }
 
     //#endregion
@@ -276,18 +319,30 @@ class JsNode {
                 val endBounds: Bounds = second.socket.localToScene(second.socket.boundsInLocal)
                 endX = endBounds.centerX
                 endY = endBounds.centerY
+
+                toFront()
             }
         }
 
         /**
-         * Breaks down the visual line drawn over a connection.
-         *
-         * Does not modify the data.
+         * Breaks down the visual line drawn over a connection AND
+         * modifies the graph to reflect the change.
          */
-        fun Triple<JsNodeEmitter, JsNodeReceiver, Line>.breakdown() {
-            // Remove from sender and receiver.
+        fun EmissionLine.breakdown() {
+
+            // Remove the connection in the data.
+            second.receiver.admission!!.breakdown()
+
+            // Remove references to the graphical line from sender and receiver.
             first.guiNode.emittingLines.remove(this)
             second.guiNode.receivingLines.remove(this)
+
+            // Notify the emitter and reciever, which updates the 'populated' css class.
+            first.breakdown()
+            second.breakdown()
+
+            // Recompile to check for touches.
+            first.graphEditor.invalidateTouches()
 
             // Remove from the scene.
             first.guiNode.graphEditor.root.children.remove(third)

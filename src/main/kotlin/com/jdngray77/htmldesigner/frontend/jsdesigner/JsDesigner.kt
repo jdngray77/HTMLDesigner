@@ -6,12 +6,13 @@ import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
+import javafx.scene.control.ContextMenu
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
+import java.lang.System.gc
 
 /**
  * An advanced visual editor for designing Javascript events.
@@ -45,6 +46,29 @@ class JsDesigner {
     lateinit var graph: JsGraph
 
     /**
+     * List of all graphical representations of nodes in the [graph].
+     */
+    internal val nodes = mutableListOf<JsNode>()
+
+    /**
+     * Context menu used to create new nodes.
+     */
+    val contextMenu: ContextMenu = ContextMenu()
+
+    init {
+        contextMenu.items.addAll(*JsFunctionFactory.asMenus {
+            // On user selecting an item, add the function to the graph
+            // and create a new node for it.
+            implNewNode(
+                graph.addFunction(it),
+                contextMenu.x,
+                contextMenu.y
+            )
+        }.toTypedArray())
+    }
+
+
+    /**
      * The HTML Document that this script is targeted towards.
      */
     var document: Document = mvc().currentDocument()
@@ -56,7 +80,13 @@ class JsDesigner {
      */
     internal val temporaryLine = Line().also {
         themeLine(it)
+        it.styleClass.add("dragging")
         it.isVisible = false
+
+        it.visibleProperty().addListener {
+            _,_,_ ->
+            it.toFront()
+        }
     }
 
     /**
@@ -65,10 +95,14 @@ class JsDesigner {
      * re-creates the view from the graph.
      */
     fun loadGraph(g: JsGraph) {
-        this::graph.isInitialized.let {
+        if (this::graph.isInitialized)  {
+            nodes.clear()
+            root.children.clear()
+            gc()
 //                graph.unload()
             //  gc()
         }
+
 
         graph = g
         graph.getNodes().map { implNewNode(it) }
@@ -80,41 +114,65 @@ class JsDesigner {
      *
      * Does not modify the model.
      */
-    private fun implNewNode(e: JsGraphNode) {
+    private fun implNewNode(e: JsGraphNode, x: Double = 0.0, y: Double = 0.0): JsNode {
+        e.x=x
+        e.y=y
+
         loadFXMLComponent<AnchorPane>("JsNode.fxml", javaClass).apply {
             root.children.add(first)
             with((second as JsNode)) {
+                nodes.add(this)
                 init(e, this@JsDesigner)
+                return this
             }
         }
     }
 
 
-    //region MVC
     /**
-     * Creates a new node in the model.
-     *
-     * Also creates a new GUI node in the view
-     * to represent it.
+     * Initializes with a blank graph.
      */
-    fun newNode(e: Element) {
-        implNewNode(graph.addElement(e))
-    }
-    //endregion
-
-
     @FXML
     fun initialize() {
         loadGraph(JsGraph())
         root.children.add(temporaryLine)
 
         root.setOnContextMenuRequested {
-            println(JsGraphCompiler.compileGraph(graph))
+            invalidateTouches()
+            contextMenu.show(root, it.screenX, it.screenY)
+        }
+    }
+
+    /**
+     * Invoke when a connection between two nodes is created or
+     * destroyed.
+     *
+     * Compiles the entire graph, and invokes [invalidateTouched] on all nodes.
+     */
+    fun invalidateTouches() {
+        // Forget the previous compile touches.
+        graph.resetTouched()
+
+        // Compile and print.
+        println(JsGraphCompiler.compileGraph(graph))
+
+        // Update the CSS to show nodes that weren't touched.
+        invalidateTouched()
+    }
+
+    /**
+     * Invokes [JsNode.invalidateTouched] on all nodes in the GUI.
+     */
+    private fun invalidateTouched() {
+        nodes.forEach {
+            it.invalidateTouched()
         }
     }
 
     companion object {
-        fun themeLine (line: Line) {
+        fun themeLine(line: Line) {
+            line.styleClass.add("line")
+
             line.stroke = Color.WHITE
             line.strokeWidth = 5.0
         }

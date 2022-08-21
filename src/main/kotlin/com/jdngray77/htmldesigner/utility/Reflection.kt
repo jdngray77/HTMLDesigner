@@ -20,6 +20,7 @@ import org.reflections.Reflections
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -69,4 +70,7 @@ fun getThreadByName(threadName: String): Thread? {
 
 
 fun classEquals(first: Class<*>, second: Class<*>) =
-    first.simpleName.lowercase() == second.simpleName.lowercase()
+    first.equals(second)
+
+fun classEqualsOrSubclass(first: KClass<*>, second: KClass<*>) =
+    first.equals(second) || first.isSubclassOf(second)

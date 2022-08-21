@@ -40,7 +40,9 @@ May be overridden based on receiver type.
 
 /*Sockets with connections.*/
 
-.socket.populated {}
+.socket.populated {
+    /*-fx-border-color: white;*/
+}
 
 .socket.emitter.populated {
     -fx-background-color: limegreen;
@@ -61,9 +63,25 @@ May be overridden based on receiver type.
     -fx-border-width: 1;
 }
 
+/*
+Node head default color.
+It's yellow to indicate that it has not been touched
+on compile.
+
+(Request context menu in the JsEditor's root to compile.)
+*/
 .node .head-text {
-    -fx-background-color: #70707088;
+    -fx-background-color: rgba(255, 213, 0, 0.25);
 }
+
+/**
+Clear the above color when the node is compiled.
+ */
+.node .head-text.touched {
+    -fx-background-color: transparent;
+}
+
+
 
 /*Nodes that represent HTML elements in the webpage.*/
 .node.element {
@@ -83,6 +101,20 @@ May be overridden based on receiver type.
 /*Nodes that are not compiled, and are thus useless.*/
 .node.uncompiled {
 
+}
+
+
+/* Line between two connected nodes */
+.line {
+    -fx-stroke: gray;
+    -fx-stroke-width: 3;
+    -fx-stroke-type: dashed;
+}
+
+/* A line being dragged by the user, not yet committed to any connection. */
+.line.dragging {
+    -fx-stroke-type: dashed;
+    -fx-stroke: White;
 }
 
 

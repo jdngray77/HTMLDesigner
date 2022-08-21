@@ -2,7 +2,9 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.classEquals
+import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 import com.jdngray77.htmldesigner.utility.toCamel
+import kotlin.reflect.KClass
 
 /**
  * A non-comprehansive string builder for simple javascripts.
@@ -135,7 +137,7 @@ internal class JavascriptBuilder {
 /**
  * Simple wrapper for a javascript function.
  */
-class JsFunction(
+open class JsFunction(
 
     /**
      * The name of the function
@@ -153,7 +155,7 @@ class JsFunction(
      * emitters().first().type
      * ```
      */
-    val returnType: Class<*>,
+    val returnType: KClass<*>,
 
     /**
      * The function's arguments.
@@ -162,7 +164,7 @@ class JsFunction(
      * @param [Class<*>] The type of the argument.
      * @param [Any] The default value of the argument. Must match the arg type.
      */
-    vararg args: Triple<String, Class<*>, Any?>,
+    vararg args: Triple<String, KClass<*>, Any?>,
 
     val javascript: String
 ) {
@@ -173,10 +175,21 @@ class JsFunction(
      * @param [Class<*>] The type of the argument.
      * @param [Any] The default value of the argument. Must match the arg type.
      */
-    val args: List<Triple<String, Class<*>, Any?>>
+    val args: List<Triple<String, KClass<*>, Any?>>
 
     init {
         this.args = args.toList()
+
+
+        if (returnType == Unit::class.java || returnType == java.lang.Void::class.java)
+            throw IllegalArgumentException("Functions need to be able to provide a value. Void is not a value.")
+
+
+        args.forEach {
+            if (it.third != null && !classEqualsOrSubclass(it.third!!::class, it.second))
+                throw IllegalArgumentException("Default value for argument '${it.first}' is '${it.third!!::class.simpleName}', but must be must be of type '${it.second.simpleName}' in function '$name'")
+        }
+
     }
 
     fun invoke(vararg args: Any): String {

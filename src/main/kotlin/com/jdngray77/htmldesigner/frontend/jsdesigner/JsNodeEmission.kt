@@ -2,15 +2,10 @@ package com.jdngray77.htmldesigner.frontend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
-import com.jdngray77.htmldesigner.backend.jsdesigner.Trigger
-import com.jdngray77.htmldesigner.frontend.jsdesigner.JsNode.Companion.breakdown
 import com.jdngray77.htmldesigner.utility.addIfAbsent
-import com.jdngray77.htmldesigner.utility.classEquals
-import javafx.beans.InvalidationListener
-import javafx.beans.Observable
+import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
-import javafx.scene.effect.ColorAdjust
 import javafx.scene.layout.Pane
 import javafx.scene.text.Text
 
@@ -18,7 +13,7 @@ import javafx.scene.text.Text
 /**
  * A property of a [JsNode].
  *
- * Can recieve a connection
+ * Can receive a connection
  */
 class JsNodeReceiver: JsNodeProperty() {
 
@@ -38,7 +33,7 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Dim when dragging in a new connection
         socket.setOnMouseDragEntered {
-            if (!classEquals(emitterBeingDragged.emitter.type, receiver.type) || receiver.hasAdmission())
+            if (!classEqualsOrSubclass(emitterBeingDragged.emitter.type, receiver.type) || receiver.hasAdmission())
                 return@setOnMouseDragEntered
 
 
@@ -51,35 +46,39 @@ class JsNodeReceiver: JsNodeProperty() {
             if (emitterBeingDragged.emitter.type != receiver.type)
                 return@setOnMouseDragReleased
 
-            socket.styleClass.remove("populated")
+            socket.styleClass.addIfAbsent("populated")
+            emitterBeingDragged.socket.styleClass.addIfAbsent("populated")
 
             graphEditor.temporaryLine.isVisible = false
 
-            emitterBeingDragged.guiNode.emitConnection(
-                emitterBeingDragged, this
-            )
+            emitterBeingDragged.guiNode.emitConnection(emitterBeingDragged, this)
 
+            graphEditor.invalidateTouches()
             it.consume()
         }
 
-        // Drag did not commit.
+        // Drag did not commit (But also triggered when drag is committed)
         socket.setOnMouseDragExited {
-            socket.styleClass.remove("populated")
-            it.consume()
+            if (it.isPrimaryButtonDown) {
+                socket.styleClass.remove("populated")
+                it.consume()
+            }
         }
 
         socket.setOnContextMenuRequested {
             if (receiver.hasAdmission())
-                breakdown()
+                guiNode.breakdownConnection(receiver.admission!!)
+
+            it.consume()
         }
     }
 
     /**
      * Breaksdown the data connection AND
+     * updates the GUI - including the emitting node.
      */
     fun breakdown() {
-        receiver.admission!!.breakdown()
-        guiNode.receivingLines.find { it.second == this }!!.breakdown()
+        socket.styleClass.remove("populated")
     }
 }
 
@@ -128,7 +127,7 @@ class JsNodeEmitter : JsNodeProperty() {
         // recieving nodes.
         socket.setOnDragDetected {
             socket.startFullDrag()
-            socket.styleClass.remove("populated")
+            assertPopulationCss()
         }
 
         // TODO check which of these is triggered.
@@ -147,12 +146,29 @@ class JsNodeEmitter : JsNodeProperty() {
         }
 
         socket.setOnMouseReleased {
-            socket.styleClass.remove("populated")
+            assertPopulationCss()
+
             graphEditor.temporaryLine.isVisible = false
             it.consume()
         }
 
+        socket.setOnContextMenuRequested {
+            // TODO this isn't being triggered.
+            emitter.emissions().forEach {
+                guiNode.breakdownConnection(it)
+            }
+        }
+    }
 
+    private fun assertPopulationCss() {
+        if (emitter.emissions().isEmpty())
+            socket.styleClass.remove("populated")
+        else
+            socket.styleClass.addIfAbsent("populated")
+    }
+
+    fun breakdown() {
+        socket.styleClass.remove("populated")
     }
 }
 

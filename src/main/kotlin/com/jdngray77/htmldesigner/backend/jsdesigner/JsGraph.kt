@@ -2,11 +2,15 @@ package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JsFunction
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.jsdesigner.JsColorFactoryFunction
+import com.jdngray77.htmldesigner.frontend.jsdesigner.JsRandomFloatFunction
 import com.jdngray77.htmldesigner.utility.classEquals
+import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 import javafx.scene.paint.Color
 import org.jsoup.nodes.Element
 import java.io.Serializable
 import java.lang.System.gc
+import kotlin.reflect.KClass
 
 
 /**
@@ -60,68 +64,23 @@ class JsGraph : Serializable {
     }
 
     /**
+     * Clears the [JsGraphNode.touched] flag on all [nodes].
+     *
+     * Performed prior to compilation.
+     */
+    internal fun resetTouched() {
+        nodes.forEach {
+            it.touched = false
+        }
+    }
+
+    /**
      * When creating a new graph,
      * it will represent the current document's scriptable elements.
      */
     init {
         val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
         x.forEach { addElement(it) }
-
-
-        addFunction(
-            JsFunction(
-            "Color Factory",
-            Color::class.java,
-            Triple("r", Float::class.java, 0.0f),
-            Triple("g", Float::class.java, 0.0f),
-            Triple("b", Float::class.java, 0.0f),
-            Triple("a", Float::class.java, 1.0f),
-
-
-
-            javascript = "new Color(r, g, b, a);"
-            )
-        )
-
-        addFunction(
-            JsFunction(
-            "Random Float",
-            Float::class.java,
-            Triple("min", Float::class.java, 0.0f),
-            Triple("max", Float::class.java, 1.0f),
-            javascript = " Math.floor(Math.random() * max) + min"
-            )
-        )
-
-        addFunction(
-            JsFunction(
-                "Random Float",
-                Float::class.java,
-                Triple("min", Float::class.java, 0.0f),
-                Triple("max", Float::class.java, 1.0f),
-                javascript = " Math.floor(Math.random() * max) + min"
-            )
-        )
-
-        addFunction(
-            JsFunction(
-                "Random Float",
-                Float::class.java,
-                Triple("min", Float::class.java, 0.0f),
-                Triple("max", Float::class.java, 1.0f),
-                javascript = " Math.floor(Math.random() * max) + min"
-            )
-        )
-
-        addFunction(
-            JsFunction(
-                "Random Float",
-                Float::class.java,
-                Triple("min", Float::class.java, 0.0f),
-                Triple("max", Float::class.java, 1.0f),
-                javascript = " Math.floor(Math.random() * max) + min"
-            )
-        )
     }
     
 
@@ -191,16 +150,6 @@ class JsGraphFunction (
     val function: JsFunction
 ) : JsGraphNode(function.name) {
     init {
-        with (function) {
-            if (returnType == Unit::class.java || returnType == Void::class.java)
-                throw IllegalArgumentException("Functions need to be able to provide a value. Void is not a value.")
-
-
-            args.forEach {
-                if (it.third != null && !classEquals(it.third!!::class.java, it.second))
-                    throw IllegalArgumentException("Argument ${it.first} must be of type ${it.second}")
-            }
-        }
 
         emitters.add(
             JsGraphEmitter(
@@ -212,7 +161,7 @@ class JsGraphFunction (
 
         receivers.add(
             JsGraphReceiver(
-                Trigger::class.java,
+                Trigger::class,
                 "trigger",
                 this
             )
@@ -243,9 +192,26 @@ abstract class JsGraphNode(
     /**
      * Name displayed in the GUI.
      */
-    val name: String
+    val name: String,
+
+    /**
+     * Position of the node in the GUI.
+     */
+    var x: Double = 0.0,
+
+    /**
+     * Position of the node in the GUI.
+     */
+    var y: Double = 0.0
 
 ) {
+
+    /**
+     * True if this node was touched on the last compile.
+     *
+     * If not, then the node is not included in the output, and may be redundant.
+     */
+    var touched: Boolean = false
 
     /**
      * Data that this node can provide.
@@ -288,7 +254,7 @@ class JsGraphEmitter(
     /**
      * The type of data being emitted
      */
-    val type: Class<*>,
+    val type: KClass<*>,
 
     val name: String,
 
@@ -333,7 +299,7 @@ class JsGraphEmitter(
     /**
      * Returns true if this receiver is connected to the given emitter.
      */
-    fun isTrigger(): Boolean = classEquals(type, Trigger::class.java)
+    fun isTrigger(): Boolean = classEqualsOrSubclass(type, Trigger::class)
 
 }
 class JsGraphReceiver(
@@ -341,13 +307,20 @@ class JsGraphReceiver(
     /**
      * The type of data being received
      */
-    val type: Class<*>,
+    val type: KClass<*>,
 
     val name: String,
 
-    val parent: JsGraphNode
+    val parent: JsGraphNode,
+
+    val defaultValue: Any? = null
 
 ) {
+
+    init {
+        if (defaultValue != null && !classEqualsOrSubclass(defaultValue::class, type))
+            throw IllegalArgumentException("Default value must be of type $type")
+    }
 
     /**
      * Receiving connections.
@@ -384,7 +357,7 @@ class JsGraphReceiver(
     /**
      * Returns true if this receiver is connected to the given emitter.
      */
-    fun isTrigger(): Boolean = classEquals(type, Trigger::class.java)
+    fun isTrigger(): Boolean = classEqualsOrSubclass(type, Trigger::class)
 
     /**
      * returns true if this receiver is connected to any emitters.
@@ -422,6 +395,11 @@ class JsGraphEmission (
         emitter.revoke(this)
         receiver.revoke(this)
     }
+
+    fun touch() {
+        emitter.parent.touched = true
+        receiver.parent.touched = true
+    }
 }
 
 /**
@@ -432,7 +410,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
     init {
         emitters.add(
             JsGraphEmitter(
-                Trigger::class.java,
+                Trigger::class,
                 "Click",
                 this
             )
@@ -440,7 +418,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
         emitters.add(
             JsGraphEmitter(
-                Trigger::class.java,
+                Trigger::class,
                 "Hover",
                 this
             )
@@ -448,7 +426,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
         receivers.add(
             JsGraphReceiver(
-                Color::class.java,
+                Color::class,
                 "Back Color",
                 this
             )
@@ -456,7 +434,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
         receivers.add(
             JsGraphReceiver(
-                Color::class.java,
+                Color::class,
                 "Text Color",
                 this
             )
@@ -464,7 +442,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
         receivers.add(
             JsGraphReceiver(
-                Trigger::class.java,
+                Boolean::class,
                 "Visible",
                 this
             )

@@ -2,6 +2,7 @@ package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JavascriptBuilder
 import com.jdngray77.htmldesigner.utility.classEquals
+import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 
 /**
  * A non-comprehensive compiler for the [JsGraph].
@@ -29,7 +30,7 @@ object JsGraphCompiler {
                 it.emitters().forEach {
                     // For each link being emitted,
                     it.emissions().forEach { connection ->
-                        if (classEquals(connection.emitter.type, Trigger::class.java)) {
+                        if (classEquals(connection.emitter.type.java, Trigger::class.java)) {
                             compileTrigger(js, connection)
                         }
                     }
@@ -47,12 +48,13 @@ object JsGraphCompiler {
      * @param [connection] The [JsGraphConnection] being emitted by the trigger to compile.
      */
     private fun compileTrigger(js: JavascriptBuilder, connection: JsGraphEmission): String {
-
-        if (!classEquals(connection.emitter.type, Trigger::class.java))
+        if (!classEquals(connection.emitter.type.java, Trigger::class.java))
             throw IllegalArgumentException("Compiler is trying to create a trigger from a connection that's not emanating from a trigger.")
 
         if (connection.emitter.parent !is JsGraphElement)
             throw IllegalArgumentException("A event trigger can only be emitted by a html Element.")
+
+        connection.touch()
 
         return js.addListener(
             // From this element
