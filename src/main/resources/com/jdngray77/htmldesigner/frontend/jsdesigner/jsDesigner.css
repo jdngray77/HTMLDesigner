@@ -1,17 +1,18 @@
 
 /*All sockets.*/
-.socket {}
+.socket {
+}
 
 /*
 Base emitter marker.
 May be overridden based on emitter type.
 */
 .socket.emitter{
-    -fx-background-insets: 3;
     -fx-border-color: limegreen;
     -fx-background-color: transparent;
-    -fx-border-width: 3;
-    -fx-border-radius: 5;
+    -fx-border-width: 2;
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
 }
 
 
@@ -20,17 +21,17 @@ Base receiver marker.
 May be overridden based on receiver type.
 */
 .socket.receiver{
-    -fx-background-insets: 3;
     -fx-background-color: transparent;
     -fx-border-color: orange;
-    -fx-border-width: 3;
+    -fx-border-width: 2;
     -fx-border-radius: 5;
+    -fx-background-radius: 5;
 }
 
 
 /*All sockets that accept or emmit events.*/
 .socket.trigger {
-    -fx-border-radius: 10;
+    /*-fx-border-radius: 10;*/
 }
 
 .socket.emitter.trigger {}
@@ -52,15 +53,17 @@ May be overridden based on receiver type.
     -fx-background-color: orange;
 }
 
+/*.emitter, .receiver {*/
+/*    -fx-border-width: 3;*/
+/*    -fx-border-color: #282828;*/
+/*}*/
+
 /*Nodes*/
 
-/*All ndoes*/
+/*All nodes*/
 .node {
-    -fx-background-color: #50505088;
-    -fx-border-radius: 10;
-
-    -fx-border-color: aqua;
-    -fx-border-width: 1;
+    -fx-background-radius: 10;
+    -fx-background-color: #373737;
 }
 
 /*
@@ -71,14 +74,31 @@ on compile.
 (Request context menu in the JsEditor's root to compile.)
 */
 .node .head-text {
-    -fx-background-color: rgba(255, 213, 0, 0.25);
+    -fx-font-style: italic;
+    -fx-font-weight: bold;
+    -fx-font-size: 14;
+
+
+    -fx-background-color: rgba(13, 215, 20, 0.25);
+    -fx-background-radius: 10 10 0 0;
+}
+
+.node > VBox {
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-border-color: #1c1c1c;
+    -fx-border-width: 2;
+}
+
+.node > VBox > Pane {
+    -fx-background-color: #1c1c1c;
 }
 
 /**
 Clear the above color when the node is compiled.
  */
 .node .head-text.touched {
-    -fx-background-color: transparent;
+    /*-fx-background-color: transparent;*/
 }
 
 
@@ -104,16 +124,21 @@ Clear the above color when the node is compiled.
 }
 
 
-/* Line between two connected nodes */
-.line {
-    -fx-stroke: gray;
+/* connector-line between two connected nodes */
+.connector-line {
+    -fx-stroke: #c4c4c4;
     -fx-stroke-width: 3;
-    -fx-stroke-type: dashed;
+    -fx-border-width: 100;
+    -fx-border-color: White;
 }
 
-/* A line being dragged by the user, not yet committed to any connection. */
-.line.dragging {
-    -fx-stroke-type: dashed;
+.connector-line:hover, .connector-line.node-hover {
+    -fx-stroke: White;
+}
+
+/* A connector-line being dragged by the user, not yet committed to any connection. */
+.connector-line.dragging {
+    -fx-stroke-dash-array: 6 10;
     -fx-stroke: White;
 }
 

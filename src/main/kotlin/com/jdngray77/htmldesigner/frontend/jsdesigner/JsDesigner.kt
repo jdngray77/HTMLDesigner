@@ -218,7 +218,7 @@ class JsDesigner {
 
     companion object {
         fun themeLine(line: Line) {
-            line.styleClass.add("line")
+            line.styleClass.add("connector-line")
 
             line.stroke = Color.WHITE
             line.strokeWidth = 5.0

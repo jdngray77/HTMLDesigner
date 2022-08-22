@@ -1,14 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="root" prefHeight="96.0" prefWidth="200.0" styleClass="node" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsNode">
+<AnchorPane fx:id="root" styleClass="node" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsNode">
    <children>
-      <Label fx:id="txtElementName" alignment="CENTER" contentDisplay="CENTER" layoutX="66.0" layoutY="14.0" onContextMenuRequested="#mContext" onMouseDragged="#drag" onMouseEntered="#mEnter" onMouseExited="#mExit" onMousePressed="#mPress" onMouseReleased="#mRelease" styleClass="head-text" text="Label" textFill="WHITE" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="5.0" />
-      <VBox fx:id="vboxAttrs" layoutY="68.0" prefHeight="61.0" prefWidth="164.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="30.0" />
-      <VBox fx:id="vboxEvents" layoutX="11.0" layoutY="70.0" prefHeight="61.0" prefWidth="164.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="30.0" />
+      <VBox alignment="CENTER">
+         <children>
+            <Label fx:id="txtElementName" alignment="CENTER" contentDisplay="CENTER" onContextMenuRequested="#mContext" onMouseDragged="#drag" onMouseEntered="#mEnter" onMouseExited="#mExit" onMousePressed="#mPress" onMouseReleased="#mRelease" prefWidth="200.0" styleClass="head-text" text="Label" textFill="WHITE">
+               <padding>
+                  <Insets bottom="4.0" top="4.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </Label>
+            <Pane prefHeight="2.0" />
+            <HBox alignment="TOP_CENTER">
+               <children>
+                  <VBox fx:id="vboxAttrs" prefWidth="100.0" spacing="4.0">
+                     <HBox.margin>
+                        <Insets bottom="4.0" />
+                     </HBox.margin></VBox>
+                  <VBox fx:id="vboxEvents" alignment="TOP_RIGHT" prefWidth="100.0" spacing="4.0">
+                     <HBox.margin>
+                        <Insets bottom="4.0" />
+                     </HBox.margin></VBox>
+               </children>
+               <VBox.margin>
+                  <Insets bottom="2.0" top="6.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
    </children>
    <effect>
       <DropShadow blurType="GAUSSIAN" height="35.83" offsetX="3.0" offsetY="3.0" radius="17.415" width="35.83" />
