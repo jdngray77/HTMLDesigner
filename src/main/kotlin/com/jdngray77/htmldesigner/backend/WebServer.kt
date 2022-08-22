@@ -112,7 +112,7 @@ object WebServer : Subscriber {
      * Boots the server.
      */
     fun start() {
-        if (!mvc().editorAvail()) {
+        if (!mvc().documentAvail()) {
             showNotification("Web Server", "The server was not started.\nThere is no document open to host.")
             return
         }

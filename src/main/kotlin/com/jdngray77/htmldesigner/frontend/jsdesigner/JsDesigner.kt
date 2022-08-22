@@ -9,11 +9,7 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
-import com.jdngray77.htmldesigner.utility.loadFXMLScene
-import javafx.application.Application
-import javafx.application.Application.launch
 import javafx.fxml.FXML
-import javafx.scene.Scene
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import javafx.scene.input.MouseEvent
@@ -21,7 +17,6 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
-import javafx.stage.Stage
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.lang.System.gc
@@ -39,13 +34,27 @@ import java.lang.System.gc
 class JsDesigner {
 
     /**
-     * The root pane of this editor.
+     * The root pane of all nodes and lines.
+     *
+     * Sibling to [contextPane], which is placed below
+     * on the z axis.
      *
      * Fills the entire IDE, and contains [JsNode]'s
      * that can be dragged around within, and lines displaying
      * the connections.
      */
     lateinit var root: Pane
+
+    /**
+     * A pane that fills the [root], used for
+     * context menu events, such that context
+     * menus are only requestes when not moused
+     * over a node.
+     *
+     * Prior to this, context menu request on the [root]
+     * would consume secondary mouse clicks anywhere within the editor.
+     */
+    lateinit var contextPane: Pane
 
     /**
      * The data model that this view represents.
@@ -65,7 +74,7 @@ class JsDesigner {
     /**
      * Context menu used to create new nodes.
      */
-    val contextMenu: ContextMenu = ContextMenu()
+    private val contextMenu: ContextMenu = ContextMenu()
 
     init {
         contextMenu.items.add(
@@ -116,7 +125,17 @@ class JsDesigner {
     /**
      * The HTML Document that this script is targeted towards.
      */
-    var document: Document = mvc().currentDocument()
+    var document: Document
+
+    init {
+        with (mvc()) {
+            if (!documentAvail()) {
+                showWarningNotification("Unable to open Js Designer", "No document is open.")
+                throw Exception("No document is open.")
+            } else
+                document = currentDocument()
+        }
+    }
 
     /**
      * A re-usable line used to give feedback to the user
@@ -124,8 +143,8 @@ class JsDesigner {
      * have been created.
      */
     internal val temporaryLine = Line().also {
-        themeLine(it)
-        it.styleClass.add("dragging")
+        it.styleClass.addAll("dragging", "connection-line", "line")
+        // TODO remove 'line when merged.'
         it.isVisible = false
 
         it.visibleProperty().addListener {
@@ -182,12 +201,12 @@ class JsDesigner {
         loadGraph(JsGraph())
         root.children.add(temporaryLine)
 
-        root.setOnContextMenuRequested {
+        contextPane.setOnContextMenuRequested {
             invalidateTouches()
             contextMenu.show(root, it.screenX, it.screenY)
         }
 
-        root.addEventHandler(MouseEvent.MOUSE_PRESSED) { contextMenu.hide() }
+        contextPane.addEventHandler(MouseEvent.MOUSE_PRESSED) { contextMenu.hide() }
     }
 
     /**

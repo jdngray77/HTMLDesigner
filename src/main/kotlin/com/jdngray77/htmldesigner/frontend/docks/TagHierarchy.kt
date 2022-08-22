@@ -254,7 +254,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
     override fun notify(e: EventType) {
         with (mvc()) {
 
-            if (e == EventType.EDITOR_DOCUMENT_CLOSED && !editorAvail()) {
+            if (e == EventType.EDITOR_DOCUMENT_CLOSED && !documentAvail()) {
                 tree.root = null
                 return
             }

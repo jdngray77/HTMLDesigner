@@ -149,7 +149,6 @@ class JsNodeEmitter : JsNodeProperty() {
             assertPopulationCss()
 
             graphEditor.temporaryLine.isVisible = false
-            it.consume()
         }
 
         socket.setOnContextMenuRequested {

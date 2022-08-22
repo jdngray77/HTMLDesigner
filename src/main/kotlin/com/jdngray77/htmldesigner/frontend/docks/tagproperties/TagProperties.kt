@@ -22,7 +22,6 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.PlaceholderPropertySheetItem
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.CSSPropertySheetItem.Companion.colorCaster
-import com.jdngray77.htmldesigner.frontend.docks.tagproperties.CSSPropertySheetItem.Companion.doubleCaster
 import com.jdngray77.htmldesigner.utility.ReflectivePropertySheetItem
 import com.jdngray77.htmldesigner.utility.readPrivateProperty
 import impl.org.controlsfx.skin.PropertySheetSkin
@@ -74,7 +73,7 @@ class TagProperties : Dock(), Subscriber {
         with(mvc()) {
             sheet.items.clear()
 
-            if (e == EventType.EDITOR_DOCUMENT_CLOSED && !editorAvail())
+            if (e == EventType.EDITOR_DOCUMENT_CLOSED && !documentAvail())
                 return
 
             currentEditor().let { editor ->

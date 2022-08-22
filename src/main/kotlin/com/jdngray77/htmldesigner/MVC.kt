@@ -76,38 +76,55 @@ class MVC (
      */
     private val openEditors: ArrayList<DocumentEditor> = ArrayList()
 
+    /**
+     * Returns a complete list of every [DocumentEditor]
+     * currently open
+     */
     fun getOpenEditors() = (openEditors.clone() as ArrayList<DocumentEditor>)
 
     /**
-     * Event invoked when an editor tab is closed.
+     * An event invoked by an editor when it is closed by the user.
      */
-    fun onEditorClosed(documentEditor: DocumentEditor) {
+    internal fun onEditorClosed(documentEditor: DocumentEditor) {
         openEditors.remove(documentEditor)
         Project.removeFromCache(documentEditor.document)
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_CLOSED)
     }
 
-    fun editorAvail() = try {
-            currentEditor()
-            true
-        } catch (e: Exception) {
-            false
-        }
+    /**
+     * Determines if [currentDocument] can be used without failing.
+     *
+     * If returns false, [currentDocument] will throw an exception.
+     *
+     * @returns true if there are any documents open.
+     */
+    fun documentAvail() = openEditors.isNotEmpty()
 
     /**
-     * Returns the document of the current editor
+     * Returns the document of the current editor, if
+     * any are open.
+     *
+     * @throws [NullPointerException] if no documents are open.
+     * @see [documentAvail] to check if any are open.
      */
     fun currentDocument() =
         currentEditor().document
 
     /**
-     * It returns the current editor
+     * Returns the [DocumentEditor] currently in focus in the editor.
+     *
+     * @throws [NullPointerException] if no editors are open.
+     * @see [documentAvail] to check if any are open.
      */
     fun currentEditor() =
         this.findEditorFor(MainView.dockEditors.selectionModel.selectedItem)!!
 
+    /**
+     * @return the selected tag for the [currentDocument], or null if none are open.
+     * @see documentAvail to check if there is a document open to get the selected tag from.
+     */
     fun selectedTag() =
-        if (editorAvail())
+        if (documentAvail())
             currentEditor().selectedTag
         else
             null

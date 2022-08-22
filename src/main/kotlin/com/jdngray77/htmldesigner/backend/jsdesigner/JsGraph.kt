@@ -77,8 +77,8 @@ class JsGraph : Serializable {
      * it will represent the current document's scriptable elements.
      */
     init {
-        val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
-        x.forEach { addElement(it) }
+//        val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
+//        x.forEach { addElement(it) }
     }
     
 
