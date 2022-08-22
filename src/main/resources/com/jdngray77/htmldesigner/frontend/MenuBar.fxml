@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import javafx.scene.control.*?>
-<MenuBar fx:id="MenuBar"
-         xmlns="http://javafx.com/javafx"
-         xmlns:fx="http://javafx.com/fxml"
-         fx:controller="com.jdngray77.htmldesigner.frontend.menuBarController">
+
+<MenuBar fx:id="MenuBar" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.menuBarController">
 
     <menus>
         <Menu mnemonicParsing="false" text="HTML Designer">
@@ -20,7 +17,6 @@
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_dirty" text="Mark current editor as dirty" />
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_config" text="Reset config registry" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_js" text="Open test javascript designer" />
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Project">
@@ -93,6 +89,7 @@
                         <CheckMenuItem mnemonicParsing="false" onAction="#menu_server_tglauto" selected="true" text="Toggle auto-refresh" />
                     </items>
                 </Menu>
+                <MenuItem mnemonicParsing="false" onAction="#menu_debug_js" text="[WIP] Visual Script..." />
                 <SeparatorMenuItem mnemonicParsing="false" />
                 <Menu mnemonicParsing="false" text="Git">
                     <items>
@@ -108,7 +105,7 @@
             <items>
                 <MenuItem mnemonicParsing="false" onAction="#menu_window_isolation" text="Toggle standalone edit mode" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_window_closeeditors" text="Close all open editors" />
-                <SeparatorMenuItem/>
+                <SeparatorMenuItem />
                 <MenuItem mnemonicParsing="false" onAction="#menu_window_resetdocks" text="Reset docks" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_window_fs" text="Toggle Fullscreen" />
 
@@ -117,16 +114,16 @@
         <Menu mnemonicParsing="false" text="Spotify">
             <items>
                 <MenuItem mnemonicParsing="false" onAction="#menu_spotify_nowplaying" text="Now Playing" />
-                <SeparatorMenuItem/>
+                <SeparatorMenuItem />
                 <MenuItem mnemonicParsing="false" onAction="#menu_spotify_next" text="Next" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_spotify_previous" text="Previous" />
-                <SeparatorMenuItem/>
+                <SeparatorMenuItem />
                 <MenuItem mnemonicParsing="false" onAction="#menu_spotify_pause" text="Pause" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_spotify_play" text="Play" />
-                <SeparatorMenuItem/>
+                <SeparatorMenuItem />
                 <MenuItem mnemonicParsing="false" onAction="#menu_spotify_connect" text="Connect" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_spotify_help" text="Help" />
-                <SeparatorMenuItem/>
+                <SeparatorMenuItem />
                 <MenuItem mnemonicParsing="false" onAction="#menu_spotify_deletedata" text="Delete data" />
             </items>
         </Menu>

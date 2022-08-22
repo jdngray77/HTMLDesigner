@@ -11,6 +11,7 @@ import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
@@ -179,6 +180,8 @@ class JsDesigner {
             invalidateTouches()
             contextMenu.show(root, it.screenX, it.screenY)
         }
+
+        root.addEventHandler(MouseEvent.MOUSE_PRESSED) { contextMenu.hide() }
     }
 
     /**
