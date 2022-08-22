@@ -5,10 +5,15 @@ import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphCompiler
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
 import com.jdngray77.htmldesigner.backend.showErrorNotification
 import com.jdngray77.htmldesigner.backend.showWarningNotification
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
+import com.jdngray77.htmldesigner.utility.loadFXMLScene
+import javafx.application.Application
+import javafx.application.Application.launch
 import javafx.fxml.FXML
+import javafx.scene.Scene
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import javafx.scene.input.MouseEvent
@@ -16,6 +21,7 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
+import javafx.stage.Stage
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.lang.System.gc
@@ -100,8 +106,8 @@ class JsDesigner {
             // and create a new node for it.
             implNewNode(
                 graph.addFunction(it),
-                contextMenu.x,
-                contextMenu.y
+                contextMenu.x - EDITOR.stage.x,
+                contextMenu.y - EDITOR.stage.y
             )
         }.toTypedArray())
     }
