@@ -215,7 +215,8 @@ class JsNode {
     fun mPress(mouseEvent: MouseEvent) {
         root.cursor = Cursor.CLOSED_HAND
         dragDownLocation = Pair(mouseEvent.sceneX, mouseEvent.sceneY)
-        root.toFront()
+        invalidatePosition()
+
     }
 
     fun mRelease() {
