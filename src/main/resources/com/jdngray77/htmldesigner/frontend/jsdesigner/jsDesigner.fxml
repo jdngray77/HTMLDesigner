@@ -2,7 +2,8 @@
 
 <?import javafx.scene.layout.*?>
 
-
 <Pane fx:id="root" prefHeight="769.0" prefWidth="1273.0" stylesheets="@jsDesigner.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner">
-
+   <children>
+      <Pane fx:id="contextPane" prefHeight="999999999" prefWidth="999999999" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
+   </children>
 </Pane>

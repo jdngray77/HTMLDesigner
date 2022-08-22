@@ -73,6 +73,17 @@ class JsNode {
 
     //#endregion
 
+    @FXML
+    fun initialize() {
+        // TODO is one context menu per node memory safe?
+        txtElementName.contextMenu = ContextMenu().apply {
+            items.add(
+                MenuItem("Delete Node").also {
+                    it.setOnAction { delete() }
+                })
+        }
+    }
+
     //#region model
     /**
      * The node within the JsGraph that this
@@ -223,14 +234,7 @@ class JsNode {
     }
 
     fun mContext(mouseEvent: ContextMenuEvent) {
-        ContextMenu().apply {
-            items.add(
-                MenuItem("Delete Node").also {
-                    it.setOnAction { delete() }
-                })
-        }.show(this.root, mouseEvent.sceneX, mouseEvent.sceneY)
-
-        mouseEvent.consume()
+//        mouseEvent.consume()
     }
     //#endregion
 
@@ -246,14 +250,22 @@ class JsNode {
         // Create the line.
         with (graphEditor.temporaryLine) {
             Line(startX, startY, endX, endY).also {
+                line ->
 
-                Triple(from, to, it).apply {
+                Triple(from, to, line).apply {
                     emittingLines.add(this)
                     to.guiNode.receivingLines.add(this)
+
+                    line.setOnContextMenuRequested {
+                        breakdown()
+                        it.consume()
+                    }
                 }
 
-                graphEditor.root.children.add(it)
-                themeLine(it)
+                graphEditor.root.children.add(line)
+                themeLine(line)
+
+
             }
         }
 
