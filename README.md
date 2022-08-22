@@ -1,3 +1,5 @@
+> "It's cool how it works, it just doesn't work right now" - [Tom](https://github.com/birdie2016)
+
 # HTML Designer
 
 A startup HTML website / application GUI creator.
