@@ -5,10 +5,12 @@ import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphCompiler
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
 import com.jdngray77.htmldesigner.backend.showErrorNotification
 import com.jdngray77.htmldesigner.backend.showWarningNotification
+import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
-import com.jdngray77.htmldesigner.utility.loadFXMLComponent
+import com.jdngray77.htmldesigner.utility.*
+import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
@@ -19,6 +21,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import java.io.File
 import java.lang.System.gc
 
 /**
@@ -79,17 +82,18 @@ class JsDesigner {
     init {
         contextMenu.items.add(
             MenuItem("From Document").also {
-                it.setOnAction {
-                    action ->
+                it.setOnAction { action ->
 
                     // Fuck this shit, man. Why can't i just put this in the brackets?
                     val filter: (Element) -> Boolean = {
-                        it.tagName()!="style" && it.id().isNotEmpty()
+                        it.tagName() != "style" && it.id().isNotEmpty()
                     }
 
-                    document.getElementById(ItemSelectionDialog<String>(
-                        document.allElements.filter(filter).map { it.id() }.toList()
-                    ).showAndWait())?.let {
+                    document.getElementById(
+                        ItemSelectionDialog<String>(
+                            document.allElements.filter(filter).map { it.id() }.toList()
+                        ).showAndWait()
+                    )?.let {
                         try {
                             implNewNode(
                                 graph.addElement(it),
@@ -128,7 +132,7 @@ class JsDesigner {
     var document: Document
 
     init {
-        with (mvc()) {
+        with(mvc()) {
             if (!documentAvail()) {
                 showWarningNotification("Unable to open Js Designer", "No document is open.")
                 throw Exception("No document is open.")
@@ -143,12 +147,28 @@ class JsDesigner {
      * have been created.
      */
     internal val temporaryLine = Line().also {
-        it.styleClass.addAll("dragging", "connection-line", "line")
-        // TODO remove 'line when merged.'
+        it.styleClass.addAll(
+
+            // Unique class to this line.
+            // Differenciates this line from the comitted ones.
+            "dragging",
+
+            // Style for this line. Differenciates from the 'line' class used on
+            // menu seporator items.
+            "connection-line",
+
+            // Legacy, used on some branches.
+            // TODO remove 'line when merged.'
+            "line",
+
+            // Omit this line from being deleted when the scene is
+            // reset in [load] or [reset].
+            "important"
+        )
+
         it.isVisible = false
 
-        it.visibleProperty().addListener {
-            _,_,_ ->
+        it.visibleProperty().addListener { _, _, _ ->
             it.toFront()
         }
     }
@@ -159,17 +179,67 @@ class JsDesigner {
      * re-creates the view from the graph.
      */
     fun loadGraph(g: JsGraph) {
-        if (this::graph.isInitialized)  {
+        // Breakdown existing
+        if (this::graph.isInitialized) {
             nodes.clear()
-            root.children.clear()
+
+            // There is some stuff in the root that we don't want to delete.
+            // These are marked as 'important'.
+            // Filter these out, and delete the rest of the nodes and content.
+            root.children.filter {
+                !it.styleClass.contains("important")
+            }.map {
+                root.children.remove(it)
+            }
             gc()
-//                graph.unload()
-            //  gc()
         }
 
 
         graph = g
-        graph.getNodes().map { implNewNode(it) }
+        graph.getNodes().map {
+            implNewNode(it)
+                // JavaFX doesn't calculate the position of the node until sometime later.
+                // We need to force it to evaluate now so that the bounds are correct
+                // in order to position the lines correctly in the next step.
+                .root.layout()
+        }
+
+        // For every node
+        nodes.forEach { guinode ->
+            // For each of it's emitters
+            guinode.getEmitters().forEach { emitter ->
+                // For each emission coming from it
+                emitter.emitter.emissions().forEach { emission ->
+                    // Locate the receiver within the gui
+                    // TODO this isn't efficient.
+                    val receivingNode = nodes.find { it.getGraphNode() === emission.receiver.parent }!!
+                    val receiver = receivingNode.getReceivers().find { it.receiver.admission === emission }
+
+                    // Create a line.
+                    guinode.emitConnectionLine(emitter, receiver!!)
+                }
+            }
+        }
+
+        invalidateTouches()
+    }
+
+    /**
+     * Deletes every node from the graph.
+     */
+    fun reset() {
+        nodes.concmod().map {
+            it.delete()
+        }
+    }
+
+    /**
+     * Breaks down all connections on the entire graph.
+     */
+    fun resetConnections() {
+        nodes.map {
+            it.breakdownConnections()
+        }
     }
 
 
@@ -178,9 +248,9 @@ class JsDesigner {
      *
      * Does not modify the model.
      */
-    private fun implNewNode(e: JsGraphNode, x: Double = 0.0, y: Double = 0.0): JsNode {
-        e.x=x
-        e.y=y
+    internal fun implNewNode(e: JsGraphNode, x: Double = e.x, y: Double = e.y): JsNode {
+        e.x = x
+        e.y = y
 
         loadFXMLComponent<AnchorPane>("JsNode.fxml", javaClass).apply {
             root.children.add(first)
@@ -210,10 +280,14 @@ class JsDesigner {
     }
 
     /**
+     * Compiles the entire graph, and in turn evaluates which nodes
+     * were touched in the compile, and which were not.
+     *
+     * After, invokes [invalidateTouched] on all nodes to update them
+     * with the touch status.
+     *
      * Invoke when a connection between two nodes is created or
      * destroyed.
-     *
-     * Compiles the entire graph, and invokes [invalidateTouched] on all nodes.
      */
     fun invalidateTouches() {
         // Forget the previous compile touches.
@@ -227,13 +301,41 @@ class JsDesigner {
     }
 
     /**
-     * Invokes [JsNode.invalidateTouched] on all nodes in the GUI.
+     * Invokes [JsNode.invalidateTouched] on all nodes in the GUI
+     * to update them to the current touch status.
+     *
+     * Invoke after a compile.
      */
+    @Deprecated("Did you mean to use [invalidateTouches]?")
     private fun invalidateTouched() {
         nodes.forEach {
             it.invalidateTouched()
         }
     }
+
+    //region menu
+    fun menu_save() {
+        graph.saveObjectToDisk("./test.jvg")
+    }
+
+    fun menu_load() {
+        loadGraph(loadObjectFromDisk(File("./test.jvg")) as JsGraph)
+    }
+
+    fun menu_close() {
+        EDITOR.stage.scene = EDITOR.scene.first
+    }
+
+
+    fun menu_help() {
+//        openURL("")
+    }
+
+    fun menu_add_node() {
+        contextMenu.show(root, EDITOR.stage.x + 50.0, EDITOR.stage.y + 60.0)
+    }
+
+    //endregion menu
 
     companion object {
         fun themeLine(line: Line) {

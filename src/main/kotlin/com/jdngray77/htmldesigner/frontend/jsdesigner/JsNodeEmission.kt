@@ -25,7 +25,21 @@ class JsNodeReceiver: JsNodeProperty() {
 
         if (receiver.isTrigger())
             socket.styleClass.addIfAbsent("trigger")
+
+        assertPopulationCss()
     }
+
+    /**
+     * Ensures that the population css class
+     * matches the state of the receiver..
+     */
+    fun assertPopulationCss() {
+        if (receiver.hasAdmission())
+            socket.styleClass.addIfAbsent("populated")
+        else
+            socket.styleClass.remove("populated")
+    }
+
 
 
     @FXML
@@ -33,7 +47,7 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Dim when dragging in a new connection
         socket.setOnMouseDragEntered {
-            if (!classEqualsOrSubclass(receiver.type, emitterBeingDragged.emitter.type) || receiver.hasAdmission())
+            if (receiver.hasAdmission() || receiver.type != emitterBeingDragged.emitter.emits)
                 return@setOnMouseDragEntered
 
 
@@ -43,15 +57,16 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Commit a new connection. This is the reciever.
         socket.setOnMouseDragReleased {
-            if (!classEqualsOrSubclass(receiver.type, emitterBeingDragged.emitter.type) || receiver.hasAdmission())
+            if (receiver.hasAdmission() || receiver.type != emitterBeingDragged.emitter.emits)
                 return@setOnMouseDragReleased
-
-            socket.styleClass.addIfAbsent("populated")
-            emitterBeingDragged.socket.styleClass.addIfAbsent("populated")
 
             graphEditor.temporaryLine.isVisible = false
 
             emitterBeingDragged.guiNode.emitConnection(emitterBeingDragged, this)
+
+            assertPopulationCss()
+            emitterBeingDragged.assertPopulationCss()
+
 
             graphEditor.invalidateTouches()
             it.consume()
@@ -100,6 +115,8 @@ class JsNodeEmitter : JsNodeProperty() {
 
         if (emitter.isTrigger())
             socket.styleClass.addIfAbsent("trigger")
+
+        assertPopulationCss()
     }
 
     @FXML
@@ -159,7 +176,7 @@ class JsNodeEmitter : JsNodeProperty() {
         }
     }
 
-    private fun assertPopulationCss() {
+    internal fun assertPopulationCss() {
         if (emitter.emissions().isEmpty())
             socket.styleClass.remove("populated")
         else

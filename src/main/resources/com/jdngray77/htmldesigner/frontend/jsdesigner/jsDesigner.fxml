@@ -2,8 +2,30 @@
 
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.control.*?>
 <Pane fx:id="root" prefHeight="769.0" prefWidth="1273.0" stylesheets="@jsDesigner.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner">
    <children>
-      <Pane fx:id="contextPane" prefHeight="999999999" prefWidth="999999999" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
+
+      <!--  Scene builder crashed due to this pref size.    -->
+      <Pane styleClass="important" fx:id="contextPane" prefHeight="99999" prefWidth="9999" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
+
+      <!--  the important selector is used to retain these objects when deleting all content within the root.    -->
+
+      <MenuBar styleClass="important">
+         <Menu text="File">
+            <MenuItem onAction="#menu_save" text="Save"/>
+            <MenuItem onAction="#menu_load" text="Load..."/>
+            <MenuItem onAction="#menu_close" text="Close"/>
+         </Menu>
+         <Menu text="Graph">
+            <MenuItem onAction="#menu_add_node" text="Add Node"/>
+            <MenuItem onAction="#invalidateTouches" text="Compile"/>
+            <SeparatorMenuItem/>
+            <MenuItem onAction="#reset" text="Clear the slate..."/>
+            <MenuItem onAction="#resetConnections" text="Unlink everything"/>
+            <SeparatorMenuItem/>
+            <MenuItem onAction="#menu_help" text="[inop] Help"/>
+         </Menu>
+      </MenuBar>
    </children>
 </Pane>

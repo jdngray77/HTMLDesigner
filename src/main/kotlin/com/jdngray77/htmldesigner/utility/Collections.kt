@@ -87,3 +87,24 @@ fun <V,K> HashMap<V,K>.reverseGet(value : V) =
 
 fun <T> ObservableList<T>.addIfAbsent(that: T) =
     if (!this.contains(that)) this.add(that) else false
+
+/**
+ * To avoid concurrent modification exceptions.
+ *
+ * Simply place this before the itterative mutation function, and you'll be free to
+ * mutate the original array as you go.
+ *
+ * e.g
+ * ```
+ * list.concmod().forEach {
+ *    it.taredown()
+ *    list.remove(it)
+ * }
+ *
+ * ```
+ *
+ * > I also use this as a shortcut to create copies of arrays.
+ *
+ * @return a copy of the list, which can then be used to perform the itteration.
+ */
+fun <T> MutableCollection<T>.concmod() = map{it}

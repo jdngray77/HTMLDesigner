@@ -225,6 +225,11 @@ class menuBarController {
         openURL("https://www.jordantgray.uk/")
     }
 
+
+    fun menu_help_tbird() {
+        openURL("https://github.com/Birdie2016")
+    }
+
     fun menu_help_dbrand(actionEvent: ActionEvent) {
         openURL("https://dylanbrand.uk/")
     }
@@ -373,5 +378,4 @@ class menuBarController {
         Editor.EDITOR.stage.scene = Scene(loadFXMLComponent<Pane>("jsdesigner/jsDesigner.fxml").first)
         getTheme().scene = Editor.EDITOR.stage.scene
     }
-
 }

@@ -1,10 +1,10 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JsFunction
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataType
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuItem
 import javafx.scene.control.SeparatorMenuItem
-import javafx.scene.paint.Color
 import java.lang.System.gc
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -75,6 +75,15 @@ object JsFunctionFactory {
     val allFunctions = (objectFactories + stringFunctions + mathFunctions + randomFunctions).filterNotNull()
 
     /**
+     * Creates a new function instance by name.
+     *
+     * @throws [NullPointerException] is no function with the given name is found.
+     */
+    @Deprecated("Just know that this is horrendously inefficient.")
+    fun byName(name: String) =
+        allFunctions.find { nameOf(it) == name }!!.createInstance() as JsFunction
+
+    /**
      * Creates and returns a contenxt menu with every function
      * available.
      *
@@ -111,8 +120,7 @@ object JsFunctionFactory {
                         menu ->
                         menu.setOnAction {
                             onAction(
-                                // this is so ineffcient :(
-                                allFunctions.find { nameOf(it) == menu.text }!!.createInstance() as JsFunction
+                                byName(menu.text)
                             )
                             gc()
                         }
@@ -139,7 +147,7 @@ class JsColorFactoryFunction : JsFunction (
     "Color Factory",
 
     // The type of the output :
-    Color::class,
+    JsGraphDataType.Color,
 
     // The inputs :
 
@@ -149,16 +157,16 @@ class JsColorFactoryFunction : JsFunction (
         "r",
 
         // Type of data that can be accepted.
-        Number::class,
+        JsGraphDataType.Number,
 
         // Default value used if no data is provided.
         0.0f
     ),
 
     // More inputs.
-    Triple("g", Number::class, 0.0f),
-    Triple("b", Number::class, 0.0f),
-    Triple("a", Number::class, 1.0f),
+    Triple("g", JsGraphDataType.Number, 0.0f),
+    Triple("b", JsGraphDataType.Number, 0.0f),
+    Triple("a", JsGraphDataType.Number, 1.0f),
 
     // The javascript of the function.
     // Names used within must match the parameters.
@@ -177,9 +185,9 @@ class JsColorFactoryFunction : JsFunction (
  */
 class JsAddFunction : JsFunction (
     "Add",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
-    Triple("b", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
+    Triple("b", JsGraphDataType.Number, 0.0f),
     javascript = "a + b;"
 )
 
@@ -188,9 +196,9 @@ class JsAddFunction : JsFunction (
  */
 class JsSubtractFunction : JsFunction (
     "Subtract",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
-    Triple("b", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
+    Triple("b", JsGraphDataType.Number, 0.0f),
     javascript = "a - b;"
 )
 
@@ -199,9 +207,9 @@ class JsSubtractFunction : JsFunction (
  */
 class JsMultiplyFunction : JsFunction (
     "Multiply",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
-    Triple("b", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
+    Triple("b", JsGraphDataType.Number, 0.0f),
     javascript = "a * b;"
 )
 
@@ -210,9 +218,9 @@ class JsMultiplyFunction : JsFunction (
  */
 class JsDivideFunction : JsFunction (
     "Divide",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
-    Triple("b", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
+    Triple("b", JsGraphDataType.Number, 0.0f),
     javascript = "a / b;"
 )
 
@@ -223,8 +231,8 @@ class JsDivideFunction : JsFunction (
  */
 class JsAbsFunction : JsFunction (
     "Abs",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
     javascript = "Math.abs(a);"
 )
 
@@ -233,8 +241,8 @@ class JsAbsFunction : JsFunction (
  */
 class JsFloorFunction : JsFunction (
     "Round down",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
     javascript = "Math.floor(a);"
 )
 
@@ -243,8 +251,8 @@ class JsFloorFunction : JsFunction (
  */
 class JsCeilFunction : JsFunction (
     "Round up",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
     javascript = "Math.ceil(a);"
 )
 
@@ -253,8 +261,8 @@ class JsCeilFunction : JsFunction (
  */
 class JsSqrtFunction : JsFunction (
     "Square root",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
     javascript = "Math.sqrt(a);"
 )
 
@@ -263,8 +271,8 @@ class JsSqrtFunction : JsFunction (
  */
 class JsSquareFunction : JsFunction (
     "Square",
-    Number::class,
-    Triple("a", Number::class, 0.0f),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.Number, 0.0f),
     javascript = "a * a;"
 )
 
@@ -279,9 +287,9 @@ class JsSquareFunction : JsFunction (
  */
 class JsJoinFunction : JsFunction (
     "Join text",
-    String::class,
-    Triple("a", String::class, ""),
-    Triple("b", String::class, ""),
+    JsGraphDataType.String,
+    Triple("a", JsGraphDataType.String, ""),
+    Triple("b", JsGraphDataType.String, ""),
     javascript = "a + b;"
 )
 
@@ -290,8 +298,8 @@ class JsJoinFunction : JsFunction (
  */
 class JsLengthFunction : JsFunction (
     "Text length",
-    Number::class,
-    Triple("a", String::class, ""),
+    JsGraphDataType.Number,
+    Triple("a", JsGraphDataType.String, ""),
     javascript = "a.length;"
 )
 
@@ -300,9 +308,9 @@ class JsLengthFunction : JsFunction (
  */
 class JsContainsFunction : JsFunction (
     "Text contains...?",
-    Boolean::class,
-    Triple("a", String::class, ""),
-    Triple("b", String::class, ""),
+    JsGraphDataType.Boolean,
+    Triple("a", JsGraphDataType.String, ""),
+    Triple("b", JsGraphDataType.String, ""),
     javascript = "a.includes(b);"
 )
 
@@ -311,9 +319,9 @@ class JsContainsFunction : JsFunction (
  */
 class JsStartsWithFunction : JsFunction (
     "Text starts with...?",
-    Boolean::class,
-    Triple("a", String::class, ""),
-    Triple("b", String::class, ""),
+    JsGraphDataType.Boolean,
+    Triple("a", JsGraphDataType.String, ""),
+    Triple("b", JsGraphDataType.String, ""),
     javascript = "a.startsWith(b);"
 )
 
@@ -322,9 +330,9 @@ class JsStartsWithFunction : JsFunction (
  */
 class JsEndsWithFunction : JsFunction (
     "Text ends with...?",
-    Boolean::class,
-    Triple("a", String::class, ""),
-    Triple("b", String::class, ""),
+    JsGraphDataType.Boolean,
+    Triple("a", JsGraphDataType.String, ""),
+    Triple("b", JsGraphDataType.String, ""),
     javascript = "a.endsWith(b);"
 )
 
@@ -333,10 +341,10 @@ class JsEndsWithFunction : JsFunction (
  */
 class JsSubstringFunction : JsFunction (
     "Sub text",
-    String::class,
-    Triple("a", String::class, ""),
-    Triple("b", Number::class, 0.0f),
-    Triple("c", Number::class, 0.0f),
+    JsGraphDataType.String,
+    Triple("a", JsGraphDataType.String, ""),
+    Triple("b", JsGraphDataType.Number, 0.0f),
+    Triple("c", JsGraphDataType.Number, 0.0f),
     javascript = "a.substring(b, c);"
 )
 
@@ -352,9 +360,9 @@ class JsSubstringFunction : JsFunction (
 // */
 //class JsRandomFloatFunction : JsFunction (
 //        "Random Float",
-//        Number::class,
-//        Triple("min", Number::class, 0.0f),
-//        Triple("max", Number::class, 1.0f),
+//        _root_ide_package_.com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataType.Number,
+//        Triple("min", _root_ide_package_.com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataType.Number, 0.0f),
+//        Triple("max", _root_ide_package_.com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataType.Number, 1.0f),
 //        javascript = " Math.floor(Math.random() * max) + min"
 //)
 
@@ -363,9 +371,9 @@ class JsSubstringFunction : JsFunction (
  */
 class JsRandomIntFunction : JsFunction (
         "Random Number",
-        Number::class,
-        Triple("min", Number::class, Int.MIN_VALUE),
-        Triple("max", Number::class,  Int.MAX_VALUE),
+        JsGraphDataType.Number,
+        Triple("min", JsGraphDataType.Number, Int.MIN_VALUE),
+        Triple("max", JsGraphDataType.Number,  Int.MAX_VALUE),
         javascript = " Math.floor(Math.random() * max) + min"
 )
 
@@ -374,7 +382,7 @@ class JsRandomIntFunction : JsFunction (
  */
 class JsRandomBooleanFunction : JsFunction (
         "Random Boolean",
-        Boolean::class,
+        JsGraphDataType.Boolean,
         javascript = " Math.floor(Math.random() * 2) == 1"
 )
 
@@ -383,7 +391,7 @@ class JsRandomBooleanFunction : JsFunction (
  */
 class JsRandomColorFunction : JsFunction (
         "Random Color",
-        Color::class,
+        JsGraphDataType.Color,
         javascript = "Color.rgb(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
 )
 
@@ -392,11 +400,10 @@ class JsRandomColorFunction : JsFunction (
  */
 class JsRandomColorWithAlphaFunction : JsFunction (
         "Random Color With Alpha",
-        Color::class,
+        JsGraphDataType.Color,
         javascript = "Color.rgb(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
 )
 
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 //endregion                                                  Random functions
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-

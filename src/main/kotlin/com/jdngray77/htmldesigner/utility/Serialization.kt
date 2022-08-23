@@ -15,6 +15,7 @@
 
 package com.jdngray77.htmldesigner.utility
 
+import javafx.scene.paint.Color
 import java.io.*
 
 /**
@@ -52,3 +53,33 @@ fun loadObjectFromDisk(f: File): Any? {
         fos.close()
     }
 }
+
+/**
+ * JavaFX Colors aren't serializable, so this wraps the
+ * rgba to serialize and re-create them.
+ */
+class SerializableColor (
+
+    val red: Double,
+
+    val green: Double,
+
+    val blue: Double,
+
+    val opacity: Double = 1.0
+
+) : Serializable {
+
+    @Transient
+    private var color: Color? = null
+
+    fun get() : Color {
+        if (color == null)
+            color = Color(red, green, blue, opacity)
+
+        return color!!
+    }
+
+}
+
+fun Color.toSerializable() = SerializableColor(red, green, blue, opacity)

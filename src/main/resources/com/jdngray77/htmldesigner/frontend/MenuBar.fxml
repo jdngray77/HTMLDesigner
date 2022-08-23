@@ -53,13 +53,13 @@
         <Menu mnemonicParsing="false" text="Page">
             <items>
                 <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save" />
+                <!--        TODO confirm this one with the user, my fucking god          -->
                 <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert unsaved changes" />
                 <SeparatorMenuItem mnemonicParsing="false" />
                 <Menu mnemonicParsing="false" text="[inop] Backups">
                     <items>
                         <MenuItem mnemonicParsing="false" text="Backup now" />
                         <MenuItem mnemonicParsing="false" text="Restore backup..." />
-                        <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="[inop] Open Recent" />
@@ -132,12 +132,13 @@
                 <MenuItem mnemonicParsing="false" onAction="#menu_help_wiki" text="Wiki" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_help_repo" text="Repository" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_help_issues" text="Report a problem" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_jdngray" text="Author" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_dbrand" text="Co-Author" />
+                <SeparatorMenuItem mnemonicParsing="false" text="Developers"/>
+                <MenuItem mnemonicParsing="false" onAction="#menu_help_jdngray" text="Author      -   Jordan Gray" />
+                <MenuItem mnemonicParsing="false" onAction="#menu_help_dbrand"  text="Junior       -   Dylan Brand" />
+                <MenuItem mnemonicParsing="false" onAction="#menu_help_tbird"  text="Designer  -   Tom Bird" />
                 <SeparatorMenuItem mnemonicParsing="false" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="[WIP] About" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_licences" text="[inop] Licenses" />
+                <MenuItem mnemonicParsing="false" onAction="#menu_help_licences" text="Licenses" />
             </items>
         </Menu>
     </menus>

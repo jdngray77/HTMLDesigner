@@ -1,9 +1,10 @@
 package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JsFunction
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.jsdesigner.JsNodeProperty
+import com.jdngray77.htmldesigner.utility.SerializableColor
 import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
+import com.jdngray77.htmldesigner.utility.toSerializable
 import javafx.scene.paint.Color
 import org.jsoup.nodes.Element
 import java.io.Serializable
@@ -145,7 +146,9 @@ class JsGraph : Serializable {
  * A [JsGraphNode] for other code utilities..
  */
 class JsGraphFunction (
+
     val function: JsFunction
+
 ) : JsGraphNode(function.name) {
     init {
 
@@ -159,7 +162,8 @@ class JsGraphFunction (
 
         receivers.add(
             JsGraphReceiver(
-                Trigger::class,
+                null,
+                JsGraphDataType.Trigger,
                 "trigger",
                 this
             )
@@ -170,6 +174,7 @@ class JsGraphFunction (
         function.args.forEach {
             receivers.add(
                 JsGraphReceiver(
+                    it.third,
                     it.second,
                     it.first,
                     this
@@ -202,7 +207,7 @@ abstract class JsGraphNode(
      */
     var y: Double = 0.0
 
-) {
+) : Serializable {
 
     /**
      * True if this node was touched on the last compile.
@@ -246,6 +251,9 @@ abstract class JsGraphNode(
 
 }
 
+// TODO abstract these similiarities
+//      in the  emitter and receiver.
+
 /**
  * A data emitter that
  * can provide data to recievers of the
@@ -254,15 +262,23 @@ abstract class JsGraphNode(
 class JsGraphEmitter(
 
     /**
-     * The type of data being emitted
+     * Minimal example of data that may be
+     * transmitted from this emitter.
+     *
+     * Used to determine the data type of the emitter.
+     *
+     * Specifically, the [KClass] of this value determines
+     * the type constraints of the emitter.
+     *
+     * @see getType
      */
-    val type: KClass<*>,
+    val emits: JsGraphDataType,
 
     val name: String,
 
     val parent: JsGraphNode
 
-) {
+) : Serializable {
 
     /**
      * List of connections emitting from
@@ -301,28 +317,23 @@ class JsGraphEmitter(
     /**
      * Returns true if this receiver is connected to the given emitter.
      */
-    fun isTrigger(): Boolean = classEqualsOrSubclass(type, Trigger::class)
+    fun isTrigger(): Boolean = emits == JsGraphDataType.Trigger
 
 }
 class JsGraphReceiver(
 
-    /**
-     * The type of data being received
-     */
-    val type: KClass<*>,
+    // TODO this can't be validated. Create a map?
+    val defaultValue: Serializable?,
+
+    val type: JsGraphDataType,
 
     val name: String,
 
-    val parent: JsGraphNode,
+    val parent: JsGraphNode
 
-    val defaultValue: Any? = null
 
-) {
+) : Serializable {
 
-    init {
-        if (defaultValue != null && !classEqualsOrSubclass(defaultValue::class, type))
-            throw IllegalArgumentException("Default value must be of type $type")
-    }
 
     /**
      * Receiving connections.
@@ -359,7 +370,7 @@ class JsGraphReceiver(
     /**
      * Returns true if this receiver is connected to the given emitter.
      */
-    fun isTrigger(): Boolean = classEqualsOrSubclass(type, Trigger::class)
+    fun isTrigger(): Boolean = type == JsGraphDataType.Trigger
 
     /**
      * returns true if this receiver is connected to any emitters.
@@ -383,12 +394,12 @@ class JsGraphEmission (
      * The reciever that is receiving data.
      */
     val receiver: JsGraphReceiver
-) {
+) : Serializable {
 
-    init {
-        if (!classEqualsOrSubclass(receiver.type, JsNodeProperty.emitterBeingDragged.emitter.type) || receiver.hasAdmission())
-            throw IncompatibleEmissionException(this)
-    }
+//    init {
+//        if (!classEqualsOrSubclass(receiver.getType(), JsNodeProperty.emitterBeingDragged.emitter.getType()) || receiver.hasAdmission())
+//            throw IncompatibleEmissionException(this)
+//    }
 
     /**
      * Revokes the connection.
@@ -412,7 +423,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
     init {
         emitters.add(
             JsGraphEmitter(
-                Trigger::class,
+                JsGraphDataType.Trigger,
                 "Click",
                 this
             )
@@ -420,7 +431,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
         emitters.add(
             JsGraphEmitter(
-                Trigger::class,
+                JsGraphDataType.Trigger,
                 "Hover",
                 this
             )
@@ -428,7 +439,8 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
         receivers.add(
             JsGraphReceiver(
-                Color::class,
+                Color.BLACK.toSerializable(),
+                JsGraphDataType.Color,
                 "Back Color",
                 this
             )
@@ -436,7 +448,8 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
         receivers.add(
             JsGraphReceiver(
-                Color::class,
+                Color.BLACK.toSerializable(),
+                JsGraphDataType.Color,
                 "Text Color",
                 this
             )
@@ -444,7 +457,8 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
         receivers.add(
             JsGraphReceiver(
-                Boolean::class,
+                false,
+                JsGraphDataType.Boolean,
                 "Visible",
                 this
             )
@@ -453,10 +467,29 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
 
 }
 
-class Trigger
+enum class JsGraphDataType {
+    Number,
+    String,
+    Boolean,
+    Color,
+    Trigger,
+
+    void
+}
+
+fun JsGraphDataTypeOf(value: Serializable?) =
+    when (value) {
+        is Number ->  JsGraphDataType.Number
+        is SerializableColor -> JsGraphDataType.Color
+        is String -> JsGraphDataType.String
+        is Boolean -> JsGraphDataType.Boolean
+        is JsGraphDataType -> value
+        else -> JsGraphDataType.void
+    }
+
 
 class IncompatibleEmissionException(emission: JsGraphEmission) : Exception(
-    "Receiver accepts ${emission.receiver.type.simpleName}, but emitter provides ${emission.emitter.type.simpleName}.\n" +
+    "Receiver accepts ${emission.receiver.type.name}, but emitter provides ${emission.emitter.emits.name}.\n" +
     "Both must be of the same type to create a connection between them."
 )
 

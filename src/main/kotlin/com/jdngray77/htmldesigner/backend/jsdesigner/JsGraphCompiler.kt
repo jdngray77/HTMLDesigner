@@ -29,9 +29,8 @@ object JsGraphCompiler {
                 it.emitters().forEach {
                     // For each link being emitted,
                     it.emissions().forEach { connection ->
-                        if (classEquals(connection.emitter.type.java, Trigger::class.java)) {
+                        if (connection.emitter.isTrigger())
                             compileTrigger(js, connection)
-                        }
                     }
                 }
             }
@@ -47,7 +46,7 @@ object JsGraphCompiler {
      * @param [connection] The [JsGraphConnection] being emitted by the trigger to compile.
      */
     private fun compileTrigger(js: JavascriptBuilder, connection: JsGraphEmission): String {
-        if (!classEquals(connection.emitter.type.java, Trigger::class.java))
+        if (!connection.emitter.isTrigger())
             throw IllegalArgumentException("Compiler is trying to create a trigger from a connection that's not emanating from a trigger.")
 
         if (connection.emitter.parent !is JsGraphElement)

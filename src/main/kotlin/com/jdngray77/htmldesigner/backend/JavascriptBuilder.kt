@@ -1,10 +1,14 @@
 package com.jdngray77.htmldesigner.backend
 
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataType
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataTypeOf
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphFunction
+import com.jdngray77.htmldesigner.frontend.jsdesigner.JsFunctionFactory
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.classEquals
 import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 import com.jdngray77.htmldesigner.utility.toCamel
-import kotlin.reflect.KClass
+import java.io.Serializable
 
 /**
  * A non-comprehansive string builder for simple javascripts.
@@ -137,7 +141,7 @@ internal class JavascriptBuilder {
 /**
  * Simple wrapper for a javascript function.
  */
-open class JsFunction(
+open class JsFunction (
 
     /**
      * The name of the function
@@ -155,7 +159,7 @@ open class JsFunction(
      * emitters().first().type
      * ```
      */
-    val returnType: KClass<*>,
+    val returnType: JsGraphDataType,
 
     /**
      * The function's arguments.
@@ -164,10 +168,10 @@ open class JsFunction(
      * @param [Class<*>] The type of the argument.
      * @param [Any] The default value of the argument. Must match the arg type.
      */
-    vararg args: Triple<String, KClass<*>, Any?>,
+    vararg args: Triple<String, JsGraphDataType, Serializable?>,
 
     val javascript: String
-) {
+) : Serializable {
     /**
      * The function's arguments.
      *
@@ -175,19 +179,14 @@ open class JsFunction(
      * @param [Class<*>] The type of the argument.
      * @param [Any] The default value of the argument. Must match the arg type.
      */
-    val args: List<Triple<String, KClass<*>, Any?>>
+    val args: List<Triple<String, JsGraphDataType, Serializable?>>
 
     init {
         this.args = args.toList()
 
-
-        if (returnType == Unit::class.java || returnType == java.lang.Void::class.java)
-            throw IllegalArgumentException("Functions need to be able to provide a value. Void is not a value.")
-
-
         args.forEach {
-            if (it.third != null && !classEqualsOrSubclass(it.third!!::class, it.second))
-                throw IllegalArgumentException("Default value for argument '${it.first}' is '${it.third!!::class.simpleName}', but must be must be of type '${it.second.simpleName}' in function '$name'")
+            if (it.second != JsGraphDataTypeOf(it.third))
+                throw IllegalArgumentException("Default value for argument '${it.first}' is '${it.third!!::class.simpleName}', but must be must be of type '${it.second.name}' in function '$name'")
         }
 
     }
@@ -212,6 +211,12 @@ open class JsFunction(
     override fun equals(other: Any?): Boolean {
         return other is JsFunction && other.name == name
     }
+
+    /**
+     * Creates and returns a new [JsGraphFunction] of the same class.
+     */
+    fun clone() = JsFunctionFactory.byName(name)
+
 
     /**
      * Auto generated hashcode for efficient use of [equals]

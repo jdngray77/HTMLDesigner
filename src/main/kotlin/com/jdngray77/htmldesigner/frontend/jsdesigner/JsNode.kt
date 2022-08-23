@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.frontend.jsdesigner
 import com.jdngray77.htmldesigner.backend.jsdesigner.*
 import com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner.Companion.themeLine
 import com.jdngray77.htmldesigner.utility.addIfAbsent
+import com.jdngray77.htmldesigner.utility.concmod
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
@@ -10,11 +11,13 @@ import javafx.scene.Cursor
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
+import javafx.scene.control.SeparatorMenuItem
 import javafx.scene.input.ContextMenuEvent
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Line
+import java.lang.Exception
 import java.lang.System.gc
 import kotlin.math.abs
 
@@ -28,39 +31,51 @@ typealias EmissionLine = Triple<JsNodeEmitter, JsNodeReceiver, Line>
 class JsNode {
 
     /**
-     * Configures this node with the information
-     * it needs to display.
+     * Configures this node with the information it needs to display.
+     *
+     * Performed by the [JsDesigner] after the JavaFX [initialize] is all complete.
      */
     fun init(e: JsGraphNode, graphEditor: JsDesigner) {
+        // Store graph info.
         this.graphNode = e
         this.graphEditor = graphEditor
 
-        root.relocate(e.x,e.y)
+        // Move the node to match the graph node.
+        // This is mostly for reloading existing saved
+        // graphs, so the nodes stay in the same place.
+        root.relocate(e.x, e.y)
 
         txtElementName.text = e.name
 
-        e.recievers().forEach {
-            addReceiver(it)
-        }
+        e.recievers().map { addReceiver(it) }
+        e.emitters().map { addEmitter(it) }
 
-        e.emitters().forEach {
-            addEmitter(it)
-        }
-
-        root.styleClass.add (
+        root.styleClass.add(
             when (e) {
                 is JsGraphFunction -> "function"
                 is JsGraphElement -> "element"
-    //            is JsGraphVariable -> "variable"
-    //            is JsGraphValue -> "value"
+                //            is JsGraphVariable -> "variable"
+                //            is JsGraphValue -> "value"
                 else -> ""
             }
         )
+
+
+        // If the node can be duplicated, add a dupe item to the context menu.
+        if (graphNode !is JsGraphElement) {
+            txtElementName.contextMenu!!.items.addAll(
+                SeparatorMenuItem(),
+
+                MenuItem("Duplicate").also {
+                    it.setOnAction { dupeNode() }
+                }
+            )
+        }
     }
 
     //#region GUI elements
     @FXML
-    private lateinit var root: AnchorPane
+    internal lateinit var root: AnchorPane
 
     @FXML
     private lateinit var vboxEvents: VBox
@@ -77,10 +92,11 @@ class JsNode {
     fun initialize() {
         // TODO is one context menu per node memory safe?
         txtElementName.contextMenu = ContextMenu().apply {
-            items.add(
-                MenuItem("Delete Node").also {
+            items.addAll(
+                MenuItem("Delete").also {
                     it.setOnAction { delete() }
-                })
+                }
+            )
         }
     }
 
@@ -89,12 +105,41 @@ class JsNode {
      * The node within the JsGraph that this
      * represents.
      */
-    lateinit var graphNode: JsGraphNode
+    private lateinit var graphNode: JsGraphNode
 
     /**
      * The GUI editor that this node is a child of.
      */
     private lateinit var graphEditor: JsDesigner
+
+    /**
+     * Controllers for each of emitter within this node.
+     */
+    private val emitters: MutableList<JsNodeEmitter> = mutableListOf()
+
+    fun getEmitters(): List<JsNodeEmitter> = emitters.concmod()
+
+    /**
+     * Controllers for each of receiver within this node.
+     */
+    private val receivers: MutableList<JsNodeReceiver> = mutableListOf()
+
+    fun getReceivers(): List<JsNodeReceiver> = receivers.concmod()
+
+
+    /**
+     * The GUI editor that this node is a child of.
+     */
+    fun getGraphNode(): JsGraphNode {
+        return graphNode
+    }
+
+    /**
+     * The GUI editor that this node is a child of.
+     */
+    fun getGraphEditor(): JsDesigner {
+        return graphEditor
+    }
 
     /**
      * Lines in the [graphEditor] that show the
@@ -117,7 +162,8 @@ class JsNode {
     private fun addEmitter(_emitter: JsGraphEmitter) {
         loadFXMLComponent<AnchorPane>("JsNodeEmitter.fxml", javaClass).apply {
             vboxEvents.children.add(this.first)
-            with ((second as JsNodeEmitter)) {
+            with((second as JsNodeEmitter)) {
+                emitters.add(this)
                 initEmitter(_emitter)
                 this.graphEditor = this@JsNode.graphEditor
                 this.guiNode = this@JsNode
@@ -131,7 +177,8 @@ class JsNode {
     fun addReceiver(_receiver: JsGraphReceiver) {
         loadFXMLComponent<AnchorPane>("JsNodeReceiver.fxml", javaClass).apply {
             vboxAttrs.children.add(this.first)
-            with ((second as JsNodeReceiver)) {
+            with((second as JsNodeReceiver)) {
+                receivers.add(this)
                 initReceiver(_receiver)
                 this.graphEditor = this@JsNode.graphEditor
                 this.guiNode = this@JsNode
@@ -241,35 +288,44 @@ class JsNode {
     //#region MVC
 
     /**
-     * Create a connection being emitted an event in this node.
+     * Commits a brand new connection. Modifies the data.
      */
     fun emitConnection(from: JsNodeEmitter, to: JsNodeReceiver) {
         // Edit the graph.
         from.emitter.emit(to.receiver)
 
         // Create the line.
-        with (graphEditor.temporaryLine) {
-            Line(startX, startY, endX, endY).also {
-                line ->
-
-                Triple(from, to, line).apply {
-                    emittingLines.add(this)
-                    to.guiNode.receivingLines.add(this)
-
-                    line.setOnContextMenuRequested {
-                        breakdown()
-                        it.consume()
-                    }
-                }
-
-                graphEditor.root.children.add(line)
-                themeLine(line)
-
-
-            }
-        }
+        emitConnectionLine(from, to)
 
         println(graphEditor.graph.toString())
+    }
+
+    /**
+     * Draws a line between two nodes to represent a connection.
+     */
+    fun emitConnectionLine(from: JsNodeEmitter, to: JsNodeReceiver) {
+//        // FIXME bounds in parent won't transfer well if JsDesigner is later placed
+//        //       in a tab pane in the main view later on.
+//        val start: Bounds = from.socket.localToScene(from.socket.boundsInLocal)
+//        val end: Bounds = to.socket.localToScene(to.socket.boundsInLocal)
+
+        Line(0.0,0.0,0.0,0.0).also { line ->
+            graphEditor.root.children.add(line)
+            Triple(from, to, line).apply {
+                emittingLines.add(this)
+                to.guiNode.receivingLines.add(this)
+
+                line.setOnContextMenuRequested {
+                    breakdown()
+                    it.consume()
+                }
+
+                evalPosition()
+            }
+
+
+            themeLine(line)
+        }
     }
 
     /**
@@ -279,13 +335,7 @@ class JsNode {
     fun delete() {
         graphEditor.graph.removeNode(this.graphNode)
 
-        emittingLines.toTypedArray().forEach {
-            it.breakdown()
-        }
-
-        receivingLines.toTypedArray().forEach {
-            it.breakdown()
-        }
+        breakdownConnections()
 
         // Remove all from local node.
         // TODO is this redundant after the breakdown?
@@ -297,6 +347,43 @@ class JsNode {
 
         gc()
     }
+
+    /**
+     * Disconnects all connections being received and emitted.
+     */
+    fun breakdownConnections() {
+        emittingLines.toTypedArray().forEach {
+            it.breakdown()
+        }
+
+        receivingLines.toTypedArray().forEach {
+            it.breakdown()
+        }
+    }
+
+    /**
+     * Creates a new node in the graph of the same type and value,
+     * then adds it to the editor.
+     *
+     * For elements, the new nodes contain the same Element ID's,
+     * for functions, the new nodes contain a new instance of the same class of function.
+     * @see JsFunctionFactory.byName
+     */
+    fun dupeNode() =
+        graphEditor.implNewNode(
+            when (graphNode) {
+                is JsGraphFunction -> graphEditor.graph.addFunction((graphNode as JsGraphFunction).function.clone())
+                is JsGraphElement -> {
+                    graphEditor.graph.addElement(
+                        graphEditor.document.getElementById((graphNode as JsGraphElement).name)!!
+                    )
+                }
+
+                else -> throw Exception("Not equipped to duplicate a node of type ${graphNode::class.simpleName}")
+            },
+            root.boundsInParent.minX,
+            root.boundsInParent.minY
+        )
 
     /**
      * Updates the color of the header to match the [JsGraphNode.touch] state.
