@@ -5,12 +5,12 @@ import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphCompiler
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
 import com.jdngray77.htmldesigner.backend.showErrorNotification
 import com.jdngray77.htmldesigner.backend.showWarningNotification
+import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.utility.*
-import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
@@ -36,6 +36,11 @@ import java.lang.System.gc
  */
 class JsDesigner {
 
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //region                                       FXML Controls & GUI components.
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
     /**
      * The root pane of all nodes and lines.
      *
@@ -45,8 +50,11 @@ class JsDesigner {
      * Fills the entire IDE, and contains [JsNode]'s
      * that can be dragged around within, and lines displaying
      * the connections.
+     *
+     * @see clearScreen to remove all nodes and lines from the screen.
      */
-    lateinit var root: Pane
+    @FXML
+    internal lateinit var root: Pane
 
     /**
      * A pane that fills the [root], used for
@@ -57,28 +65,18 @@ class JsDesigner {
      * Prior to this, context menu request on the [root]
      * would consume secondary mouse clicks anywhere within the editor.
      */
-    lateinit var contextPane: Pane
+    @FXML
+    private lateinit var contextPane: Pane
 
-    /**
-     * The data model that this view represents.
-     *
-     * Manipulated by the view, and compiles to js.
-     *
-     * This data model is serializable such that the graph can be
-     * saved, and the JsDesigner view can be re-created from the graph.
-     */
-    lateinit var graph: JsGraph
-
-    /**
-     * List of all graphical representations of nodes in the [graph].
-     */
-    internal val nodes = mutableListOf<JsNode>()
 
     /**
      * Context menu used to create new nodes.
      */
     private val contextMenu: ContextMenu = ContextMenu()
 
+    /**
+     * Constructor for the [contextMenu] only.
+     */
     init {
         contextMenu.items.add(
             MenuItem("From Document").also {
@@ -127,10 +125,86 @@ class JsDesigner {
 
 
     /**
-     * The HTML Document that this script is targeted towards.
+     * A re-usable line used to give feedback to the user
+     * when dragging [JsGraphConnection]s, before they
+     * have been committed.
+     */
+    internal val uncommittedLine = Line()
+
+    /**
+     * Constructor for the [uncommittedLine] only.
+     */
+    init {
+        with(uncommittedLine) {
+            styleClass.addAll(
+
+                // Unique class to this line.
+                // Differenciates this line from the comitted ones.
+                "dragging",
+
+                // Style for this line. Differenciates from the 'line' class used on
+                // menu seporator items.
+                "connection-line",
+
+                // Legacy, used on some branches.
+                // TODO remove 'line when merged.'
+                "line",
+
+                // Omit this line from being deleted when the scene is
+                // reset in [load] or [reset].
+                "important"
+            )
+
+            isVisible = false
+
+            visibleProperty().addListener { _, _, _ ->
+                toFront()
+            }
+        }
+    }
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                         FXML Controls & GUI components.
+    //region                                                    Graph data
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+    /**
+     * The data model that this view represents.
+     *
+     * When the view is manipulated, this is the model that is modified.
+     * When compiling, this is the model compiled.
+     *
+     * This data model is serializable such that the graph can be
+     * saved, and the JsDesigner view can be re-created from the graph.
+     *
+     * @see loadGraph
+     */
+    @Deprecated("Don't set this. Use loadGraph instead.")
+    lateinit var graph: JsGraph
+
+    /**
+     * List of all graphical representations of nodes in the [graph].
+     *
+     * These are essentially the controllers for the node panes in the [root].
+     */
+    internal val guiNodes = mutableListOf<JsNode>()
+
+    /**
+     * The HTML Document that this graph is targeted towards.
+     *
+     * TODO this should be a property of the graph, not the view.
+     *      Although that may not be possible. The graphs may have
+     *      to be stored with the document somehow, so we can determine the target.
      */
     var document: Document
 
+    /**
+     * Constructor for the [document] only.
+     *
+     * For now, just fetches the current document.
+     */
     init {
         with(mvc()) {
             if (!documentAvail()) {
@@ -141,78 +215,53 @@ class JsDesigner {
         }
     }
 
-    /**
-     * A re-usable line used to give feedback to the user
-     * when dragging [JsGraphConnection]s, before they
-     * have been created.
-     */
-    internal val temporaryLine = Line().also {
-        it.styleClass.addAll(
 
-            // Unique class to this line.
-            // Differenciates this line from the comitted ones.
-            "dragging",
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               graph data
+    //region                                                    set-up
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-            // Style for this line. Differenciates from the 'line' class used on
-            // menu seporator items.
-            "connection-line",
-
-            // Legacy, used on some branches.
-            // TODO remove 'line when merged.'
-            "line",
-
-            // Omit this line from being deleted when the scene is
-            // reset in [load] or [reset].
-            "important"
-        )
-
-        it.isVisible = false
-
-        it.visibleProperty().addListener { _, _, _ ->
-            it.toFront()
-        }
-    }
 
     /**
-     * Loads a [JsGraph] into the editor.
+     * Loads an existing [JsGraph] into the editor.
      *
-     * re-creates the view from the graph.
+     * Re-creates the view from the graph.
+     *
+     * > FIXME Note that this is currently unable to determine the [document]
+     *    that the graph may have been targeted towards. If the document differs,
+     *    the graph will likely not be able to load.
      */
     fun loadGraph(g: JsGraph) {
-        // Breakdown existing
-        if (this::graph.isInitialized) {
-            nodes.clear()
 
-            // There is some stuff in the root that we don't want to delete.
-            // These are marked as 'important'.
-            // Filter these out, and delete the rest of the nodes and content.
-            root.children.filter {
-                !it.styleClass.contains("important")
-            }.map {
-                root.children.remove(it)
-            }
-            gc()
-        }
-
+        // Breakdown existing graph.
+        if (this::graph.isInitialized)
+            reset()
 
         graph = g
+
+        // Re-create all nodes.
         graph.getNodes().map {
             implNewNode(it)
                 // JavaFX doesn't calculate the position of the node until sometime later.
                 // We need to force it to evaluate now so that the bounds are correct
                 // in order to position the lines correctly in the next step.
+
+                // This is actually still mildly inaccurate, and causes the nodes to be just
+                // pixels away from thier original position.
                 .root.layout()
         }
 
+        // Re-create all the connection lines.
+
         // For every node
-        nodes.forEach { guinode ->
+        guiNodes.forEach { guinode ->
             // For each of it's emitters
             guinode.getEmitters().forEach { emitter ->
                 // For each emission coming from it
                 emitter.emitter.emissions().forEach { emission ->
                     // Locate the receiver within the gui
                     // TODO this isn't efficient.
-                    val receivingNode = nodes.find { it.getGraphNode() === emission.receiver.parent }!!
+                    val receivingNode = guiNodes.find { it.getGraphNode() === emission.receiver.parent }!!
                     val receiver = receivingNode.getReceivers().find { it.receiver.admission === emission }
 
                     // Create a line.
@@ -221,25 +270,8 @@ class JsDesigner {
             }
         }
 
+        // Check what nodes are touched.
         invalidateTouches()
-    }
-
-    /**
-     * Deletes every node from the graph.
-     */
-    fun reset() {
-        nodes.concmod().map {
-            it.delete()
-        }
-    }
-
-    /**
-     * Breaks down all connections on the entire graph.
-     */
-    fun resetConnections() {
-        nodes.map {
-            it.breakdownConnections()
-        }
     }
 
 
@@ -247,16 +279,24 @@ class JsDesigner {
      * Creates a new GUI Node for the view.
      *
      * Does not modify the model.
+     *
+     * @param graphNode The node in the graph to create a GUI for.
+     * @param x The x position of the node, within the scene.
+     * @param y The y position of the node, within the scene.
+     * @return The newly created GUI node.
+     * @throws Exception If [graphNode] does not exist within the [graph]
      */
-    internal fun implNewNode(e: JsGraphNode, x: Double = e.x, y: Double = e.y): JsNode {
-        e.x = x
-        e.y = y
+    internal fun implNewNode(graphNode: JsGraphNode, x: Double = graphNode.x, y: Double = graphNode.y): JsNode {
+        graph.assertExists(graphNode)
+
+        graphNode.x = x
+        graphNode.y = y
 
         loadFXMLComponent<AnchorPane>("JsNode.fxml", javaClass).apply {
             root.children.add(first)
             with((second as JsNode)) {
-                nodes.add(this)
-                init(e, this@JsDesigner)
+                guiNodes.add(this)
+                init(graphNode, this@JsDesigner)
                 return this
             }
         }
@@ -264,20 +304,151 @@ class JsDesigner {
 
 
     /**
-     * Initializes with a blank graph.
+     * After FXML has loaded, initializes the editor with a
+     * blank graph.
      */
     @FXML
     fun initialize() {
-        loadGraph(JsGraph())
-        root.children.add(temporaryLine)
+        root.children.add(uncommittedLine)
+
+        contextPane.addEventHandler(MouseEvent.MOUSE_PRESSED) { contextMenu.hide() }
 
         contextPane.setOnContextMenuRequested {
             invalidateTouches()
             contextMenu.show(root, it.screenX, it.screenY)
         }
 
-        contextPane.addEventHandler(MouseEvent.MOUSE_PRESSED) { contextMenu.hide() }
+        tryLoadTestGraph()
     }
+
+    /**
+     * Loads the [TEST_GRAPH] from disk.
+     */
+    fun loadTestGraph() {
+        loadGraph(loadObjectFromDisk(TEST_GRAPH) as JsGraph)
+    }
+
+    /**
+     * Attempts to load the [TEST_GRAPH], if it exists.
+     *
+     * If it doesn't exist, a blank graph will be loaded instead.
+     */
+    fun tryLoadTestGraph() {
+        if (TEST_GRAPH.exists())
+            loadTestGraph()
+        else
+            loadGraph(JsGraph())
+    }
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                                 set-up
+    //region                                                  breakdowns
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    /**
+     * Removes all children from the scene, except the important
+     * stuff.
+     *
+     * i.e removes all nodes and lines, but retains containers and the menu bar.
+     *
+     * Achieved with css class called 'important', which is applied to
+     * contents that should not be removed.
+     *
+     * Due to the layout requirements of the nodes and lines, all contents within
+     * the scene are siblings, making it impossible to just clear all
+     * children from the [root].
+     *
+     * > Note that this does not clear the graph, and as such should only be
+     *      invoked when clearing the graph.
+     *
+     * @author Jordan T. Gray
+     */
+    private fun clearScreen() {
+        root.children.filter {
+            !it.styleClass.contains("important")
+        }.map {
+            root.children.remove(it)
+        }
+    }
+
+
+    /**
+     * Clears the screen, and loads a blank graph.
+     *
+     * Doesn't break down the current graph.
+     * TODO confirm with the user.
+     */
+    fun reset() {
+        if (!userConfirm("Any unsaved changes will be lost.\n\nContinue?"))
+            return
+
+
+        // Remove everything from the screen.
+        clearScreen()
+
+        // Forget everything we were tracking.
+        guiNodes.clear()
+
+        // Create a fresh, clear graph.
+        graph = JsGraph()
+
+        // TODO check for memory leaks.
+        //      I don't trust that all components of the view and the graph
+        //      are properly disposed of, since they're interconnected with many references.
+        gc()
+    }
+
+    /**
+     * Modifies the [graph] to breakdown every single connection that
+     * exists within it.
+     *
+     * TODO confirm with the user.
+     */
+    fun resetConnections() {
+        if (!userConfirm("This will destroy ALL connections in the graph.\n\nContinue?"))
+            return
+
+        guiNodes.map {
+            it.breakdownConnections()
+        }
+    }
+
+    /**
+     * Deletes a given node from the graph.
+     *
+     * Confirms with the user before deleting.
+     *
+     * Breaks down all connections and thier gui lines,
+     * then removes the node from the data and the screen.
+     *
+     * @param node The node to delete.
+     */
+    fun deleteNode(node: JsNode) {
+        if (!userConfirm("This will '${node.getGraphNode().name}',and destroy all connections it.\n\nContinue?"))
+            return
+
+        // Disconnect and delete all connections.
+        // This also removes the lines from [emittingLines] and [receivingLines]
+        node.breakdownConnections()
+
+        // Remove node from data.
+        graph.removeNode(node.getGraphNode())
+
+        // Remove from GUI
+        guiNodes.remove(node)
+        root.children.remove(root)
+
+
+        gc()
+    }
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               breakdowns
+    //region                                                update events
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
 
     /**
      * Compiles the entire graph, and in turn evaluates which nodes
@@ -308,39 +479,55 @@ class JsDesigner {
      */
     @Deprecated("Did you mean to use [invalidateTouches]?")
     private fun invalidateTouched() {
-        nodes.forEach {
+        guiNodes.forEach {
             it.invalidateTouched()
         }
     }
 
-    //region menu
-    fun menu_save() {
-        graph.saveObjectToDisk("./test.jvg")
-    }
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               update events
+    //region                                                  menu events
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    fun menu_load() {
-        loadGraph(loadObjectFromDisk(File("./test.jvg")) as JsGraph)
-    }
+    @FXML
+    private fun menu_save() = graph.saveObjectToDisk("./test.jvg")
 
-    fun menu_close() {
+    @FXML
+    private fun menu_load() = loadTestGraph()
+
+    @FXML
+    private fun menu_close() {
+        // TODO check for memory leak, as this scene is not broken down at all.
         EDITOR.stage.scene = EDITOR.scene.first
     }
 
-
-    fun menu_help() {
+    @FXML
+    private fun menu_help() {
 //        openURL("")
     }
 
-    fun menu_add_node() {
+    @FXML
+    private fun menu_add_node() =
         contextMenu.show(root, EDITOR.stage.x + 50.0, EDITOR.stage.y + 60.0)
-    }
 
-    //endregion menu
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               menu events
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
 
     companion object {
-        fun themeLine(line: Line) {
-            line.styleClass.add("line")
 
+        /**
+         * A local file that may be used
+         */
+        internal val TEST_GRAPH = Editor.IDEDirectory.subFile("testgraph.jvg")
+
+        /**
+         * When creating a new line, this adds
+         * the appropriate css classes to it.
+         */
+        internal fun themeLine(line: Line) {
+            line.styleClass.add("line")
             line.stroke = Color.WHITE
             line.strokeWidth = 5.0
         }

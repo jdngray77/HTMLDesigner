@@ -9,25 +9,45 @@ import java.lang.System.gc
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-// This file defines a range of functions that can be used by the javascript designer.
-// It is essentially it's SDK.
 
-// Github copilot basically wrote all of these.
+
+//░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+//
+//
+//
+//
+// This file defines a range of functions that can be used by the javascript designer.
+//
+// It is essentially the js designer's SDK.
+//
+//
+//
+//
+//░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+
 
 // TODO STOPSHIP: These functions were generated with copilot. They need to be compiled and tested in a javascript runtime.
-
-//TODO delay
+// TODO delay function
 // TODO logical test functions (Greater than, AND, OR, etc)
 
+
+
 /**
- * Used to create new function objects, and find what functions are available.
+ * A factory used to new function objects, and find what functions are available.
+ *
+ * Also constructs the context menu used by the designer to add new functions.
  */
 object JsFunctionFactory {
 
     /*
+     *
      * These lists below are constructed into context menus for the jsdesigner.
      *
      * Order the items as you'd like them to appear in the UI, and use [null] to indicate a menu separator.
+     *
      */
 
 
@@ -60,7 +80,7 @@ object JsFunctionFactory {
 
     val randomFunctions = listOf<KClass<*>?>(
 //        JsRandomFloatFunction::class,
-        JsRandomIntFunction::class,
+        JsRandomNumberFunction::class,
         null,
         JsRandomBooleanFunction::class,
         null,
@@ -369,7 +389,7 @@ class JsSubstringFunction : JsFunction (
 /**
  * Generates a random integer between 0 and 1.
  */
-class JsRandomIntFunction : JsFunction (
+class JsRandomNumberFunction : JsFunction (
         "Random Number",
         JsGraphDataType.Number,
         Triple("min", JsGraphDataType.Number, Int.MIN_VALUE),

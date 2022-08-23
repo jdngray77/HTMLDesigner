@@ -62,6 +62,12 @@ class JsGraph : Serializable {
             throw IllegalArgumentException("Node with id '$id' already exists in the script graph.")
     }
 
+    fun assertExists(node: JsGraphNode) {
+        if (!nodes.contains(node))
+            throw Exception("Node does not exist in this graph : $node")
+    }
+
+
     /**
      * Clears the [JsGraphNode.touch] flag on all [nodes].
      *
@@ -133,6 +139,7 @@ class JsGraph : Serializable {
         node.removeAllConnections()
         nodes.remove(node)
     }
+
 
     /**
      * Compiles the graph into a javascript string.

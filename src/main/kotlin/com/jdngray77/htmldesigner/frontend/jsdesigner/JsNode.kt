@@ -6,36 +6,62 @@ import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.concmod
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
-import javafx.geometry.Bounds
 import javafx.scene.Cursor
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import javafx.scene.control.SeparatorMenuItem
-import javafx.scene.input.ContextMenuEvent
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Line
 import java.lang.Exception
-import java.lang.System.gc
 import kotlin.math.abs
 
-typealias EmissionLine = Triple<JsNodeEmitter, JsNodeReceiver, Line>
 
 /**
  * Visual representation of a [JsGraphNode].
  *
+ * Contains [JsNodeReceiver]'s and [JsNodeEmitter]'s to represent and manipulate
+ * the corresponding [JsGraphNode]'s [JsGraphReceiver]'s and [JsGraphEmitter]'s.
+ *
+ * Controller to the jsNode.fxml
+ *
  * @author Jordan T. Gray
  */
 class JsNode {
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //region                                                FXML GUI controls
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    @FXML
+    internal lateinit var root: AnchorPane
+
+    @FXML
+    private lateinit var vboxEvents: VBox
+
+    @FXML
+    private lateinit var vboxAttrs: VBox
+
+    @FXML
+    private lateinit var txtElementName: Label
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               FXML GUI controls
+    //region                                                   Constructions
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     /**
      * Configures this node with the information it needs to display.
      *
      * Performed by the [JsDesigner] after the JavaFX [initialize] is all complete.
      */
-    fun init(e: JsGraphNode, graphEditor: JsDesigner) {
+    internal fun init(e: JsGraphNode, graphEditor: JsDesigner) {
+        if (this::graphNode.isInitialized)
+            throw Exception("Attempted to re-initialize a JsNode.")
+
+
         // Store graph info.
         this.graphNode = e
         this.graphEditor = graphEditor
@@ -50,6 +76,7 @@ class JsNode {
         e.recievers().map { addReceiver(it) }
         e.emitters().map { addEmitter(it) }
 
+        // Add css class to identify the type of node.
         root.styleClass.add(
             when (e) {
                 is JsGraphFunction -> "function"
@@ -73,88 +100,6 @@ class JsNode {
         }
     }
 
-    //#region GUI elements
-    @FXML
-    internal lateinit var root: AnchorPane
-
-    @FXML
-    private lateinit var vboxEvents: VBox
-
-    @FXML
-    private lateinit var vboxAttrs: VBox
-
-    @FXML
-    private lateinit var txtElementName: Label
-
-    //#endregion
-
-    @FXML
-    fun initialize() {
-        // TODO is one context menu per node memory safe?
-        txtElementName.contextMenu = ContextMenu().apply {
-            items.addAll(
-                MenuItem("Delete").also {
-                    it.setOnAction { delete() }
-                }
-            )
-        }
-    }
-
-    //#region model
-    /**
-     * The node within the JsGraph that this
-     * represents.
-     */
-    private lateinit var graphNode: JsGraphNode
-
-    /**
-     * The GUI editor that this node is a child of.
-     */
-    private lateinit var graphEditor: JsDesigner
-
-    /**
-     * Controllers for each of emitter within this node.
-     */
-    private val emitters: MutableList<JsNodeEmitter> = mutableListOf()
-
-    fun getEmitters(): List<JsNodeEmitter> = emitters.concmod()
-
-    /**
-     * Controllers for each of receiver within this node.
-     */
-    private val receivers: MutableList<JsNodeReceiver> = mutableListOf()
-
-    fun getReceivers(): List<JsNodeReceiver> = receivers.concmod()
-
-
-    /**
-     * The GUI editor that this node is a child of.
-     */
-    fun getGraphNode(): JsGraphNode {
-        return graphNode
-    }
-
-    /**
-     * The GUI editor that this node is a child of.
-     */
-    fun getGraphEditor(): JsDesigner {
-        return graphEditor
-    }
-
-    /**
-     * Lines in the [graphEditor] that show the
-     * connections on the right of this node.
-     * [graphNode]'s events.
-     */
-    internal val emittingLines = mutableListOf<EmissionLine>()
-
-    /**
-     * Lines in the [graphEditor] that show the
-     * connections on the left of this node.
-     * [graphNode]'s events.
-     */
-    internal val receivingLines = mutableListOf<EmissionLine>()
-    //#endregion
 
     /**
      * Adds a [JsNodeEmitter] to the GUI.
@@ -174,7 +119,7 @@ class JsNode {
     /**
      * Adds a [JsNodeReceiver] to the GUI.
      */
-    fun addReceiver(_receiver: JsGraphReceiver) {
+    private fun addReceiver(_receiver: JsGraphReceiver) {
         loadFXMLComponent<AnchorPane>("JsNodeReceiver.fxml", javaClass).apply {
             vboxAttrs.children.add(this.first)
             with((second as JsNodeReceiver)) {
@@ -187,7 +132,83 @@ class JsNode {
     }
 
 
-    //#region GUI events
+
+    @FXML
+    fun initialize() {
+        // TODO is one context menu per node memory safe?
+        txtElementName.contextMenu = ContextMenu().apply {
+            items.addAll(
+                MenuItem("Delete").also {
+                    it.setOnAction { delete() }
+                }
+            )
+        }
+    }
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                                Constructions
+    //region                                                    Graph data
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    /**
+     * The node within the JsGraph that this represents.
+     */
+    private lateinit var graphNode: JsGraphNode
+
+    /**
+     * The GUI editor that this node is a child of.
+     */
+    fun getGraphNode() = graphNode
+
+    /**
+     * The GUI editor that this node is a child of.
+     */
+    private lateinit var graphEditor: JsDesigner
+
+    /**
+     * The GUI editor that this node is a child of.
+     */
+    fun getGraphEditor() = graphEditor
+
+    /**
+     * Controllers for each of emitter within this node.
+     */
+    private val emitters: MutableList<JsNodeEmitter> = mutableListOf()
+
+    /**
+     * Controllers for each of emitter within this node.
+     */
+    fun getEmitters(): List<JsNodeEmitter> = emitters.concmod()
+
+    /**
+     * Controllers for each of receiver within this node.
+     */
+    private val receivers: MutableList<JsNodeReceiver> = mutableListOf()
+
+    /**
+     * Controllers for each of receiver within this node.
+     */
+    fun getReceivers(): List<JsNodeReceiver> = receivers.concmod()
+
+    /**
+     * Lines in the [graphEditor] that show the
+     * connections on the right of this node.
+     * [graphNode]'s events.
+     */
+    internal val emittingLines = mutableListOf<EmissionLine>()
+
+    /**
+     * Lines in the [graphEditor] that show the
+     * connections on the left of this node.
+     * [graphNode]'s events.
+     */
+    internal val receivingLines = mutableListOf<EmissionLine>()
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                                Graph data
+    //region                                                   GUI events
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
 
     /**
      * When the node has been dragged, this stores the
@@ -202,6 +223,10 @@ class JsNode {
 
     /**
      * Handles the node being dragged within the [JsDesigner].
+     *
+     * Keeps the mouse hand closed, moves the node, updates the
+     * connected lines, and snaps to an axis if the user
+     * holds down the shift key.
      */
     @FXML
     private fun drag(mouseEvent: MouseEvent) {
@@ -235,12 +260,11 @@ class JsNode {
         mouseEvent.consume()
     }
 
-    fun breakdownConnection(emission: JsGraphEmission) {
-        (emittingLines + receivingLines).find {
-            it.first.emitter === emission.emitter && it.second.receiver === emission.receiver
-        }!!.breakdown()
-    }
-
+    /**
+     * Updates the position of the node, and the connected lines.
+     *
+     * Also stores the current position in the underlying [graphNode]
+     */
     private fun invalidatePosition() {
         root.toFront()
 
@@ -258,8 +282,6 @@ class JsNode {
             graphNode.x = minX
             graphNode.y = minY
         }
-
-
     }
 
     fun mEnter() {
@@ -280,15 +302,31 @@ class JsNode {
         root.cursor = Cursor.HAND
     }
 
-    fun mContext(mouseEvent: ContextMenuEvent) {
-//        mouseEvent.consume()
-    }
-    //#endregion
 
-    //#region MVC
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                                GUI events
+    //region                                                 MVC operations
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     /**
-     * Commits a brand new connection. Modifies the data.
+     * Breaks down a single connection, either being emitted or received
+     * by this node.
+     *
+     * Removes the [Emission] within the data, and the corresponding [EmissionLine] within the gui.
+     *
+     * @param emission The data link within the graph to break down.
+     */
+    fun breakdownConnection(emission: JsGraphEmission) {
+        (emittingLines + receivingLines).find {
+            it.emitter.emitter === emission.emitter && it.receiver.receiver === emission.receiver
+        }!!.breakdown()
+    }
+
+
+    /**
+     * Commits a brand-new connection.
+     *
+     * Creates a new [Emission] within the data, and an [EmissionLine] within the gui.
      */
     fun emitConnection(from: JsNodeEmitter, to: JsNodeReceiver) {
         // Edit the graph.
@@ -296,22 +334,22 @@ class JsNode {
 
         // Create the line.
         emitConnectionLine(from, to)
-
-        println(graphEditor.graph.toString())
     }
 
     /**
-     * Draws a line between two nodes to represent a connection.
+     * Creates the GUI lines to represent the connection between [from] and [to]
+     * within the [graphEditor].
+     *
+     * Does not modify the data. the parameters should already be connected - but this
+     * is not validated.
      */
     fun emitConnectionLine(from: JsNodeEmitter, to: JsNodeReceiver) {
-//        // FIXME bounds in parent won't transfer well if JsDesigner is later placed
-//        //       in a tab pane in the main view later on.
-//        val start: Bounds = from.socket.localToScene(from.socket.boundsInLocal)
-//        val end: Bounds = to.socket.localToScene(to.socket.boundsInLocal)
+
+        // Line is given no position, as it's set in the evalPosition() method.
 
         Line(0.0,0.0,0.0,0.0).also { line ->
             graphEditor.root.children.add(line)
-            Triple(from, to, line).apply {
+            EmissionLine(from, to, line).apply {
                 emittingLines.add(this)
                 to.guiNode.receivingLines.add(this)
 
@@ -329,37 +367,31 @@ class JsNode {
     }
 
     /**
-     * Deletes this node from the graph,
-     * and removes the GUI elements.
+     * Disconnects all connections being received and emitted.
+     *
+     * Lines are removed from [emittingLines] and [receivingLines]
      */
-    fun delete() {
-        graphEditor.graph.removeNode(this.graphNode)
+    fun breakdownConnections() {
+        emittingLines.concmod().forEach {
+            it.breakdown()
+        }
 
-        breakdownConnections()
-
-        // Remove all from local node.
-        // TODO is this redundant after the breakdown?
-        emittingLines.clear()
-        receivingLines.clear()
-
-        graphEditor.nodes.remove(this)
-        graphEditor.root.children.remove(root)
-
-        gc()
+        receivingLines.concmod().forEach {
+            it.breakdown()
+        }
     }
 
     /**
-     * Disconnects all connections being received and emitted.
+     * Deletes this node from the graph, and removes the GUI elements.
+     *
+     * All connections being received and emitted are broken down.
+     *
+     * Alias for [JsDesigner.deleteNode].
      */
-    fun breakdownConnections() {
-        emittingLines.toTypedArray().forEach {
-            it.breakdown()
-        }
-
-        receivingLines.toTypedArray().forEach {
-            it.breakdown()
-        }
+    fun delete() {
+        graphEditor.deleteNode(this)
     }
+
 
     /**
      * Creates a new node in the graph of the same type and value,
@@ -385,6 +417,12 @@ class JsNode {
             root.boundsInParent.minY
         )
 
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                                GUI events
+    //region                                                 MVC operations
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
     /**
      * Updates the color of the header to match the [JsGraphNode.touch] state.
      *
@@ -397,56 +435,10 @@ class JsNode {
             txtElementName.styleClass.remove("touched")
     }
 
-    //#endregion
 
-    companion object {
-
-        /**
-         * Updates a lines position to match the position of the
-         * [JsNodeEmitter] emitting the line, and the [JsNodeReceiver]
-         * receiving the line.
-         */
-        fun Triple<JsNodeEmitter, JsNodeReceiver, Line>.evalPosition() {
-            with(third) {
-                val startBounds: Bounds = first.socket.localToScene(first.socket.boundsInLocal)
-                startX = startBounds.centerX
-                startY = startBounds.centerY
-
-                val endBounds: Bounds = second.socket.localToScene(second.socket.boundsInLocal)
-                endX = endBounds.centerX
-                endY = endBounds.centerY
-
-                toFront()
-            }
-        }
-
-        /**
-         * Breaks down the visual line drawn over a connection AND
-         * modifies the graph to reflect the change.
-         */
-        fun EmissionLine.breakdown() {
-
-            // Remove the connection in the data.
-            second.receiver.admission?.breakdown()
-
-            // Remove references to the graphical line from sender and receiver.
-            first.guiNode.emittingLines.remove(this)
-            second.guiNode.receivingLines.remove(this)
-
-            // Notify the emitter and reciever, which updates the 'populated' css class.
-            first.breakdown()
-            second.breakdown()
-
-            // Recompile to check for touches.
-            first.graphEditor.invalidateTouches()
-
-            // Remove from the scene.
-            first.guiNode.graphEditor.root.children.remove(third)
-            third.isVisible = false
-
-            // We want this fucker gone.
-            gc()
-        }
-    }
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                              MVC operations
+    //region                                               Node Line Helpers
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 }
