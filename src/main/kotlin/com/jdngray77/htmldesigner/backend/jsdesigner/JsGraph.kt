@@ -279,13 +279,13 @@ class JsGraphEmitter(
      *
      * @see getType
      */
-    val emits: JsGraphDataType,
+    emits: JsGraphDataType,
 
-    val name: String,
+    name: String,
 
-    val parent: JsGraphNode
+    parent: JsGraphNode
 
-) : Serializable {
+) : JsGraphProperty(emits, name, parent), Serializable {
 
     /**
      * List of connections emitting from
@@ -320,26 +320,20 @@ class JsGraphEmitter(
     fun revoke(jsGraphEmission: JsGraphEmission) {
         emissions.remove(jsGraphEmission)
     }
-
-    /**
-     * Returns true if this receiver is connected to the given emitter.
-     */
-    fun isTrigger(): Boolean = emits == JsGraphDataType.Trigger
-
 }
 class JsGraphReceiver(
 
     // TODO this can't be validated. Create a map?
     val defaultValue: Serializable?,
 
-    val type: JsGraphDataType,
+    type: JsGraphDataType,
 
-    val name: String,
+    name: String,
 
-    val parent: JsGraphNode
+    parent: JsGraphNode
 
 
-) : Serializable {
+) : JsGraphProperty(type, name, parent), Serializable {
 
 
     /**
@@ -375,14 +369,31 @@ class JsGraphReceiver(
     }
 
     /**
+     * returns true if this receiver is connected to any emitters.
+     */
+    fun hasAdmission() = admission != null
+}
+
+/**
+ * Abstraction of [JsGraphReceiver] and [JsGraphEmitter].
+ */
+abstract class JsGraphProperty(
+
+    val type: JsGraphDataType,
+
+    val name: String,
+
+    val parent: JsGraphNode
+
+) : Serializable {
+    override fun toString() = name
+
+
+    /**
      * Returns true if this receiver is connected to the given emitter.
      */
     fun isTrigger(): Boolean = type == JsGraphDataType.Trigger
 
-    /**
-     * returns true if this receiver is connected to any emitters.
-     */
-    fun hasAdmission() = admission != null
 }
 
 /**

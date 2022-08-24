@@ -7,26 +7,21 @@ import javafx.geometry.Bounds
 
 
 /**
- * A property of a [JsNode].
+ * A gui [JsNodeProperty] of a [JsNode] that can emit connections.
  *
- * Can be used by the user to create [JsGraphConnection]'s.
- *
- * Emits events.
+ * Represents a [JsGraphEmitter].
  */
-class JsNodeEmitter : JsNodeProperty() {
+class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
 
-    lateinit var emitter: JsGraphEmitter
-
-    fun initEmitter(emitter: JsGraphEmitter) {
-        this.emitter = emitter
-        this.name.text = emitter.name
-
-        if (emitter.isTrigger())
-            socket.styleClass.addIfAbsent("trigger")
-
-        assertPopulationCss()
-    }
-
+    /**
+     * FXML init.
+     *
+     * Configures listeners for drag events,
+     * handling dragging of connections.
+     *
+     * This begins the dragging of connections,
+     * but does not handle the creation of the connections.
+     */
     @FXML
     fun initialize() {
 
@@ -49,7 +44,7 @@ class JsNodeEmitter : JsNodeProperty() {
         }
 
         // Configure drag, so that drag events occour on
-        // recieving nodes.
+        // receiving nodes.
         socket.setOnDragDetected {
             socket.startFullDrag()
             assertPopulationCss()
@@ -78,20 +73,9 @@ class JsNodeEmitter : JsNodeProperty() {
 
         socket.setOnContextMenuRequested {
             // TODO this isn't being triggered.
-            emitter.emissions().forEach {
+            emitter().emissions().forEach {
                 guiNode.breakdownConnection(it)
             }
         }
-    }
-
-    internal fun assertPopulationCss() {
-        if (emitter.emissions().isEmpty())
-            socket.styleClass.remove("populated")
-        else
-            socket.styleClass.addIfAbsent("populated")
-    }
-
-    fun breakdown() {
-        socket.styleClass.remove("populated")
     }
 }

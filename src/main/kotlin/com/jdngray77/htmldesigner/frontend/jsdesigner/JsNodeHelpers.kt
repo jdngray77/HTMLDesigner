@@ -1,5 +1,9 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphProperty
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
+import com.jdngray77.htmldesigner.utility.addIfAbsent
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
 import javafx.scene.layout.Pane
@@ -10,7 +14,35 @@ import java.lang.System.gc
 /**
  * Root content for [JsNodeReceiver] and [JsNodeEmitter]'s.
  */
-open class JsNodeProperty() {
+open class JsNodeProperty<T : JsGraphProperty>() {
+
+    /**
+     * The [JsGraphProperty] that this represents.
+     *
+     * As the graph stands currently, this can only be a
+     * [JsGraphReceiver] or [JsGraphEmitter].
+     */
+    private lateinit var property: T
+
+    /**
+     * Attempts to return this property casted as an emitter.
+     */
+    fun emitter() = property as JsGraphEmitter
+
+    /**
+     * Attempts to return this property casted as a receiver.
+     */
+    fun receiver() = property as JsGraphReceiver
+
+    /**
+     * Returns the property without casting.
+     */
+    fun property() = property
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //region                                       FXML Controls & GUI components.
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
 
     /**
      * Text displayed to the user of the property.
@@ -24,6 +56,11 @@ open class JsNodeProperty() {
     @FXML
     lateinit var socket: Pane
 
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                    FXML Controls & GUI components.
+    //region                                       JsDesigner references
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
     /**
      * The node that this property belongs to.
      */
@@ -33,6 +70,66 @@ open class JsNodeProperty() {
      * The editor that this property belongs to.
      */
     lateinit var graphEditor: JsDesigner
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                    JsDesigner references
+    //region                                       Construction
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    /**
+     * Late initializer.
+     *
+     * Configures the property that this represents.
+     *
+     * Is invoked by loading class after the fxml has been loaded.
+     */
+    fun initProperty(property: T) {
+        this.property = property
+        this.name.text = property.name
+
+        if (property.isTrigger())
+            socket.styleClass.addIfAbsent("trigger")
+
+        assertPopulationCss()
+    }
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                    Construction
+    //region                                       CSS
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+    /**
+     * Ensures that the population css class
+     * matches the state of the [property].
+     */
+    internal fun assertPopulationCss() {
+        if (property is JsGraphReceiver && (property as JsGraphReceiver).hasAdmission())
+                return markPopulated()
+        else if (property is JsGraphEmitter && (property as JsGraphEmitter).emissions().isNotEmpty())
+                return markPopulated()
+
+        markUnpopulated()
+    }
+
+    private fun markPopulated() {
+        socket.styleClass.addIfAbsent("populated")
+    }
+
+    private fun markUnpopulated() {
+        socket.styleClass.remove("populated")
+    }
+
+
+    fun breakdown() {
+        markUnpopulated()
+    }
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                    CSS
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     companion object {
 
@@ -58,10 +155,19 @@ open class JsNodeProperty() {
  */
 class EmissionLine(
 
+    /**
+     * The emitter property this line is originating from.
+     */
     val emitter: JsNodeEmitter,
 
+    /**
+     * The receiver property this line is terminating at.
+     */
     val receiver: JsNodeReceiver,
 
+    /**
+     * The line itself.
+     */
     val line: Line
 
 )  {
@@ -92,7 +198,7 @@ class EmissionLine(
     fun breakdown() {
 
         // Remove the connection in the data.
-        receiver.receiver.admission?.breakdown()
+        receiver.receiver() .admission?.breakdown()
 
         // Remove references to the graphical line from sender and receiver.
         emitter.guiNode.emittingLines.remove(this)

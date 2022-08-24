@@ -1,5 +1,6 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphProperty
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import javafx.fxml.FXML
@@ -8,43 +9,26 @@ import javafx.scene.text.Text
 
 
 /**
- * A property of a [JsNode].
+ * A gui [JsNodeProperty] of a [JsNode] that can receive a connection.
  *
- * Can receive a connection
+ * Represents a [JsGraphReceiver].
  */
-class JsNodeReceiver: JsNodeProperty() {
-
-    lateinit var receiver: JsGraphReceiver
-
-    fun initReceiver(receiver: JsGraphReceiver) {
-        this.receiver = receiver
-        this.name.text = receiver.name
-
-        if (receiver.isTrigger())
-            socket.styleClass.addIfAbsent("trigger")
-
-        assertPopulationCss()
-    }
+class JsNodeReceiver: JsNodeProperty<JsGraphReceiver>() {
 
     /**
-     * Ensures that the population css class
-     * matches the state of the receiver..
+     * FXML init.
+     *
+     * Configures listeners for drag events,
+     * handling dragging of connections.
+     *
+     * Committing of new connections occurs here.
      */
-    fun assertPopulationCss() {
-        if (receiver.hasAdmission())
-            socket.styleClass.addIfAbsent("populated")
-        else
-            socket.styleClass.remove("populated")
-    }
-
-
-
     @FXML
     fun initialize() {
 
         // Dim when dragging in a new connection
         socket.setOnMouseDragEntered {
-            if (receiver.hasAdmission() || receiver.type != emitterBeingDragged.emitter.emits)
+            if (receiver().hasAdmission() || receiver().type != emitterBeingDragged.property().type)
                 return@setOnMouseDragEntered
 
 
@@ -54,7 +38,7 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Commit a new connection. This is the reciever.
         socket.setOnMouseDragReleased {
-            if (receiver.hasAdmission() || receiver.type != emitterBeingDragged.emitter.emits)
+            if (receiver().hasAdmission() || receiver().type != emitterBeingDragged.property().type)
                 return@setOnMouseDragReleased
 
             graphEditor.uncommittedLine.isVisible = false
@@ -71,26 +55,18 @@ class JsNodeReceiver: JsNodeProperty() {
 
         // Drag did not commit (But also triggered when drag is committed)
         socket.setOnMouseDragExited {
-            if (receiver.hasAdmission()) {
+            if (receiver().hasAdmission()) {
                 socket.styleClass.addIfAbsent("populated")
             } else
                 socket.styleClass.remove("populated")
         }
 
         socket.setOnContextMenuRequested {
-            if (receiver.hasAdmission())
-                guiNode.breakdownConnection(receiver.admission!!)
+            if (receiver().hasAdmission())
+                guiNode.breakdownConnection(receiver().admission!!)
 
             it.consume()
         }
-    }
-
-    /**
-     * Breaksdown the data connection AND
-     * updates the GUI - including the emitting node.
-     */
-    fun breakdown() {
-        socket.styleClass.remove("populated")
     }
 }
 

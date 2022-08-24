@@ -109,7 +109,7 @@ class JsNode {
             vboxEvents.children.add(this.first)
             with((second as JsNodeEmitter)) {
                 emitters.add(this)
-                initEmitter(_emitter)
+                initProperty(_emitter)
                 this.graphEditor = this@JsNode.graphEditor
                 this.guiNode = this@JsNode
             }
