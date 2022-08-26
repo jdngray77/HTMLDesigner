@@ -23,7 +23,10 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.control.Button
 import javafx.scene.control.ButtonType
+import javafx.scene.control.Control
+import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -125,3 +128,11 @@ fun Node.grow() { growH(); growV() }
 fun openURL(url: String) {
     java.awt.Desktop.getDesktop().browse(java.net.URI(url))
 }
+
+fun Control.setTooltip(text: String) {
+    tooltip = Tooltip(text)
+}
+fun Node.setTooltip(text: String) =
+    Tooltip(text).also {
+        Tooltip.install(this, it)
+    }

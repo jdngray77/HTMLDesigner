@@ -24,7 +24,6 @@ class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
      */
     @FXML
     fun initialize() {
-
         // Start a new emission.
         socket.setOnMousePressed {
             with(graphEditor.uncommittedLine) {

@@ -124,7 +124,7 @@ class JsNode {
             vboxAttrs.children.add(this.first)
             with((second as JsNodeReceiver)) {
                 receivers.add(this)
-                initReceiver(_receiver)
+                initProperty(_receiver)
                 this.graphEditor = this@JsNode.graphEditor
                 this.guiNode = this@JsNode
             }
@@ -318,7 +318,7 @@ class JsNode {
      */
     fun breakdownConnection(emission: JsGraphEmission) {
         (emittingLines + receivingLines).find {
-            it.emitter.emitter === emission.emitter && it.receiver.receiver === emission.receiver
+            it.emitter.emitter() === emission.emitter && it.receiver.receiver() === emission.receiver
         }!!.breakdown()
     }
 
@@ -330,7 +330,7 @@ class JsNode {
      */
     fun emitConnection(from: JsNodeEmitter, to: JsNodeReceiver) {
         // Edit the graph.
-        from.emitter.emit(to.receiver)
+        from.emitter().emit(to.receiver())
 
         // Create the line.
         emitConnectionLine(from, to)
@@ -347,22 +347,11 @@ class JsNode {
 
         // Line is given no position, as it's set in the evalPosition() method.
 
-        Line(0.0,0.0,0.0,0.0).also { line ->
+        EmissionLine(from, to).apply {
             graphEditor.root.children.add(line)
-            EmissionLine(from, to, line).apply {
-                emittingLines.add(this)
-                to.guiNode.receivingLines.add(this)
 
-                line.setOnContextMenuRequested {
-                    breakdown()
-                    it.consume()
-                }
-
-                evalPosition()
-            }
-
-
-            themeLine(line)
+            emittingLines.add(this)
+            to.guiNode.receivingLines.add(this)
         }
     }
 

@@ -507,7 +507,7 @@ fun JsGraphDataTypeOf(value: Serializable?) =
 
 
 class IncompatibleEmissionException(emission: JsGraphEmission) : Exception(
-    "Receiver accepts ${emission.receiver.type.name}, but emitter provides ${emission.emitter.emits.name}.\n" +
+    "Receiver accepts ${emission.receiver.type.name}, but emitter provides ${emission.emitter.type.name}.\n" +
     "Both must be of the same type to create a connection between them."
 )
 

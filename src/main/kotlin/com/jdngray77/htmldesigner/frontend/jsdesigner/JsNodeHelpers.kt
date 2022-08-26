@@ -4,11 +4,13 @@ import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphProperty
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
 import com.jdngray77.htmldesigner.utility.addIfAbsent
+import com.jdngray77.htmldesigner.utility.setTooltip
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
 import javafx.scene.layout.Pane
 import javafx.scene.shape.Line
 import javafx.scene.text.Text
+import javafx.util.Duration
 import java.lang.System.gc
 
 /**
@@ -48,13 +50,18 @@ open class JsNodeProperty<T : JsGraphProperty>() {
      * Text displayed to the user of the property.
      */
     @FXML
-    lateinit var name: Text
+    lateinit var lblName: Text
+
+    fun name() = lblName.text
 
     /**
      * The pane which is used to connect this property to another.
      */
     @FXML
     lateinit var socket: Pane
+
+    @FXML
+    private lateinit var root: Pane
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                    FXML Controls & GUI components.
@@ -85,10 +92,17 @@ open class JsNodeProperty<T : JsGraphProperty>() {
      */
     fun initProperty(property: T) {
         this.property = property
-        this.name.text = property.name
+        this.lblName.text = property.name
 
         if (property.isTrigger())
             socket.styleClass.addIfAbsent("trigger")
+
+        root.setTooltip("Name : ${property.name}\n" +
+                ((if (property() is JsGraphEmitter) "Emits" else "Receives") + " : ${property.type}") + "\n" +
+                (if (property() is JsGraphReceiver)
+                    ((property as JsGraphReceiver).defaultValue?.let{ "Default : $it" } ?: "Has no default value") + "\n"
+                 else ""))
+
 
         assertPopulationCss()
     }
@@ -165,12 +179,25 @@ class EmissionLine(
      */
     val receiver: JsNodeReceiver,
 
+)  {
+
     /**
      * The line itself.
      */
-    val line: Line
+    val line: Line = Line()
 
-)  {
+    init {
+        evalPosition()
+
+        line.setOnContextMenuRequested {
+            breakdown()
+            it.consume()
+        }
+
+        line.setTooltip("${emitter.property().parent.name}'s ${emitter.name()} sends ${emitter.property().type} to ${receiver.property().parent.name}'s ${receiver.name()}")
+
+        JsDesigner.themeLine(line)
+    }
 
     /**
      * Updates a lines position to match the position of the

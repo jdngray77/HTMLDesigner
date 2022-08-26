@@ -258,11 +258,11 @@ class JsDesigner {
             // For each of it's emitters
             guinode.getEmitters().forEach { emitter ->
                 // For each emission coming from it
-                emitter.emitter.emissions().forEach { emission ->
+                emitter.emitter().emissions().forEach { emission ->
                     // Locate the receiver within the gui
                     // TODO this isn't efficient.
                     val receivingNode = guiNodes.find { it.getGraphNode() === emission.receiver.parent }!!
-                    val receiver = receivingNode.getReceivers().find { it.receiver.admission === emission }
+                    val receiver = receivingNode.getReceivers().find { it.receiver().admission === emission }
 
                     // Create a line.
                     guinode.emitConnectionLine(emitter, receiver!!)
@@ -326,6 +326,10 @@ class JsDesigner {
      */
     fun loadTestGraph() {
         loadGraph(loadObjectFromDisk(TEST_GRAPH) as JsGraph)
+    }
+
+    fun saveTestGraph() {
+        graph.saveObjectToDisk(TEST_GRAPH)
     }
 
     /**
@@ -490,7 +494,7 @@ class JsDesigner {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     @FXML
-    private fun menu_save() = graph.saveObjectToDisk("./test.jvg")
+    private fun menu_save() = saveTestGraph()
 
     @FXML
     private fun menu_load() = loadTestGraph()
