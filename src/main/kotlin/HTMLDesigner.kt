@@ -1,8 +1,19 @@
 import com.jdngray77.htmldesigner.backend.ExceptionListener
-import com.jdngray77.htmldesigner.frontend.Editor
-import com.jdngray77.htmldesigner.frontend.SplashScreen
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.TESTING
+import com.jdngray77.htmldesigner.frontend.splash.SplashScreen
 import javafx.application.Application
-import org.spdx.rdfparser.SPDXLicenseInfoFactory
+
+/**
+ * Entry point with command line arguments.
+ *
+ *  - `-tm` : test mode. Raises the [TESTING] flag.
+ */
+fun main(args: Array<String>) {
+    if (args.getOrNull(0) == "-tm") {
+        testMain()
+    } else
+        main()
+}
 
 fun main() {
     println("Starting HTML Designer")
@@ -15,13 +26,15 @@ fun main() {
 }
 
 /**
+ * An alternate main method that is used to start the editor at runtime in testing mode.
+ *
  * The test helper uses this method to start the editor.
  *
  * This could be used to tell that when the editor has been started for testing,
  * as opposed to booted by a user.
  */
 fun testMain() {
-    Editor.TESTING = true
+    TESTING = true
     main()
 }
 
