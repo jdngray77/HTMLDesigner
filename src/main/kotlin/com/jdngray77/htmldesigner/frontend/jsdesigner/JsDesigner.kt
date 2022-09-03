@@ -11,9 +11,9 @@ import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.utility.*
+import javafx.event.ActionEvent
 import javafx.fxml.FXML
-import javafx.scene.control.ContextMenu
-import javafx.scene.control.MenuItem
+import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
@@ -40,6 +40,13 @@ class JsDesigner {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                       FXML Controls & GUI components.
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+    @FXML
+    lateinit var split: SplitPane
+
+    @FXML
+    private lateinit var compileOutput: TextArea
 
     /**
      * The root pane of all nodes and lines.
@@ -311,6 +318,9 @@ class JsDesigner {
     fun initialize() {
         root.children.add(uncommittedLine)
 
+        // Hide this by default. It's added by the menu item.
+        split.items.remove(compileOutput)
+
         contextPane.addEventHandler(MouseEvent.MOUSE_PRESSED) { contextMenu.hide() }
 
         contextPane.setOnContextMenuRequested {
@@ -469,7 +479,7 @@ class JsDesigner {
         graph.resetTouched()
 
         // Compile and print.
-        println(JsGraphCompiler.compileGraph(graph))
+        compileOutput.text = JsGraphCompiler.compileGraph(graph)
 
         // Update the CSS to show nodes that weren't touched.
         invalidateTouched()
@@ -513,6 +523,14 @@ class JsDesigner {
     @FXML
     private fun menu_add_node() =
         contextMenu.show(root, EDITOR.stage.x + 50.0, EDITOR.stage.y + 60.0)
+
+    fun menu_showCompile(actionEvent: ActionEvent) {
+        if ((actionEvent.source as CheckMenuItem).isSelected)
+            split.items.addIfAbsent(compileOutput)
+        else
+            split.items.remove(compileOutput)
+    }
+
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                               menu events

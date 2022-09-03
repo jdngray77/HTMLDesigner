@@ -3,29 +3,34 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.control.*?>
-<Pane fx:id="root" prefHeight="769.0" prefWidth="1273.0" stylesheets="@jsDesigner.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner">
-   <children>
+<SplitPane fx:id="split" orientation="VERTICAL" dividerPositions="0.9" stylesheets="@jsDesigner.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner">
+   <Pane fx:id="root">
+      <children>
+         <Pane styleClass="important" fx:id="contextPane" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
 
-      <!--  Scene builder crashed due to this pref size.    -->
-      <Pane styleClass="important" fx:id="contextPane" prefHeight="99999" prefWidth="9999" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
+         <!--  the important selector is used to retain these objects when deleting all content within the root.    -->
 
-      <!--  the important selector is used to retain these objects when deleting all content within the root.    -->
+         <MenuBar styleClass="important">
+            <Menu text="File">
+               <MenuItem onAction="#menu_save" text="Save"/>
+               <MenuItem onAction="#menu_load" text="Load..."/>
+               <MenuItem onAction="#menu_close" text="Close"/>
+               <SeparatorMenuItem/>
+               <CheckMenuItem onAction="#menu_showCompile" text="Display compiled output"/>
+            </Menu>
+            <Menu text="Graph">
+               <MenuItem onAction="#menu_add_node" text="Add Node"/>
+               <MenuItem onAction="#invalidateTouches" text="Compile"/>
+               <SeparatorMenuItem/>
+               <MenuItem onAction="#reset" text="Clear the slate..."/>
+               <MenuItem onAction="#resetConnections" text="Unlink everything"/>
+               <SeparatorMenuItem/>
+               <MenuItem onAction="#menu_help" text="[inop] Help"/>
+            </Menu>
+         </MenuBar>
+      </children>
+   </Pane>
 
-      <MenuBar styleClass="important">
-         <Menu text="File">
-            <MenuItem onAction="#menu_save" text="Save"/>
-            <MenuItem onAction="#menu_load" text="Load..."/>
-            <MenuItem onAction="#menu_close" text="Close"/>
-         </Menu>
-         <Menu text="Graph">
-            <MenuItem onAction="#menu_add_node" text="Add Node"/>
-            <MenuItem onAction="#invalidateTouches" text="Compile"/>
-            <SeparatorMenuItem/>
-            <MenuItem onAction="#reset" text="Clear the slate..."/>
-            <MenuItem onAction="#resetConnections" text="Unlink everything"/>
-            <SeparatorMenuItem/>
-            <MenuItem onAction="#menu_help" text="[inop] Help"/>
-         </Menu>
-      </MenuBar>
-   </children>
-</Pane>
+ <TextArea fx:id="compileOutput" editable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"> </TextArea>
+
+</SplitPane>

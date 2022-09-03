@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<StackPane minHeight="400.0" minWidth="600.0" prefHeight="457.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.splash.SplashScreenController">
+<StackPane minHeight="400.0" minWidth="600.0" prefHeight="457.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.splash.SplashScreenController">
    <children>
       <ImageView fx:id="img" fitHeight="457.0" fitWidth="690.0" layoutY="6.0" pickOnBounds="true" preserveRatio="false" AnchorPane.bottomAnchor="-57.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-90.0" AnchorPane.topAnchor="0.0">
          <image>

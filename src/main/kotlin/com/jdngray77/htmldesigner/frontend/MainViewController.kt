@@ -125,14 +125,11 @@ class MainViewController {
         // Load the menu bar - It's now stored in a seperate file.
         root.children.add(0, loadFXMLComponent<MenuBar>("MenuBar.fxml").first)
 
-        // We need to create the skin manually, could also be your custom skin.
-
         val skin = DnDTabPaneSkin(dockLeftTop)
         val skin1 = DnDTabPaneSkin(dockLeftBottom)
         val skin2 = DnDTabPaneSkin(dockRight)
 
         // Setup the dragging.
-        //DndTabPaneFactory.setup(FeedbackType.MARKER, containerPane, skin2)
         DndTabPaneFactory.setup(FeedbackType.MARKER, anchorDockLeftTop, skin)
         DndTabPaneFactory.setup(FeedbackType.MARKER, anchorDockLeftBottom, skin1)
         DndTabPaneFactory.setup(FeedbackType.MARKER, anchorDockRight, skin2)
