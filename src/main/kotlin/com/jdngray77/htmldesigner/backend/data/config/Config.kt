@@ -167,6 +167,13 @@ enum class Configs {
      * The last time the [SPOTIFY_TOKEN_ACCESS__DONT_MODIFY__STRING] token was refreshed.
      */
     SPOTIFY_LAST_REFRESH__DONT_MODIFY__LONG,
+
+    /**
+     * When a user attempts to clear an [JsNodeEmitter] with more emitters than
+     * this threshold, the user will be prompted to confirm the action as it'll
+     * more of a pain-in-the-ass for them to undo.
+     */
+    JSDESIGNER_EMITTER_BREAKDOWN_CONFIRM_THRESHOLD_INT,
 }
 
 /**
@@ -206,6 +213,7 @@ object Config : Registry<Configs>(Editor.IDEDirectory.subFile("./config.registry
         put(Configs.SPOTIFY_ACCESS_TTL__DONT_MODIFY__INT, 0)
         put(Configs.SPOTIFY_AUTH_OTP__DONT_MODIFY__STRING, "")
         put(Configs.SPOTIFY_LAST_REFRESH__DONT_MODIFY__LONG, 0L)
+        put(Configs.JSDESIGNER_EMITTER_BREAKDOWN_CONFIRM_THRESHOLD_INT, 2)
     }
 
     /**

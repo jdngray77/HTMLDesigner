@@ -1,6 +1,9 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
+import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
@@ -24,8 +27,13 @@ class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
      */
     @FXML
     fun initialize() {
+
         // Start a new emission.
         socket.setOnMousePressed {
+            // Reject right clicks, otherwise the context request is not invoked.
+            if (!it.isPrimaryButtonDown) return@setOnMousePressed
+
+            // Move the feedback line
             with(graphEditor.uncommittedLine) {
                 val screenBounds: Bounds = socket.localToScene(socket.boundsInLocal)
 
@@ -55,7 +63,6 @@ class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
             it.consume()
         }
 
-
         // Provide feedback when moving the mouse around.
         socket.setOnMouseDragged {
             with(graphEditor.uncommittedLine) {
@@ -66,15 +73,28 @@ class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
 
         socket.setOnMouseReleased {
             assertPopulationCss()
-
             graphEditor.uncommittedLine.isVisible = false
         }
 
         socket.setOnContextMenuRequested {
-            // TODO this isn't being triggered.
-            emitter().emissions().forEach {
-                guiNode.breakdownConnection(it)
-            }
+            breakdownAllEmissions()
         }
+    }
+
+    /**
+     * Breaks down all emissions from the underlying emitter.
+     *
+     * If the unerlying emitter contains more emissions than [JSDESIGNER_EMITTER_BREAKDOWN_CONFIRM_THRESHOLD],
+     * the user is prompted to confirm the breakdown.
+     *
+     */
+    fun breakdownAllEmissions() {
+        if (
+            emitter().emissions().size > Config[Configs.JSDESIGNER_EMITTER_BREAKDOWN_CONFIRM_THRESHOLD_INT] as Int &&
+            !userConfirm("You're about to delete many connections. Are you sure?")
+        )
+            return
+
+        emitter().breakdownAllEmissions()
     }
 }

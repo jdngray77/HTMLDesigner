@@ -22,6 +22,7 @@ import javafx.scene.shape.Line
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
+import java.io.InvalidClassException
 import java.lang.System.gc
 
 /**
@@ -348,9 +349,14 @@ class JsDesigner {
      * If it doesn't exist, a blank graph will be loaded instead.
      */
     fun tryLoadTestGraph() {
-        if (TEST_GRAPH.exists())
-            loadTestGraph()
-        else
+        if (TEST_GRAPH.exists()) {
+            try {
+                loadTestGraph()
+            } catch (e: InvalidClassException) {
+                showWarningNotification("Unable to load test graph from file", "It's incompatible with the current version.")
+                loadGraph(JsGraph())
+            }
+        } else
             loadGraph(JsGraph())
     }
 

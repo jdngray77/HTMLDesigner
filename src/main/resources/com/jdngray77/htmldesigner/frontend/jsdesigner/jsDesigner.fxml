@@ -6,7 +6,7 @@
 <SplitPane fx:id="split" orientation="VERTICAL" dividerPositions="0.9" stylesheets="@jsDesigner.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner">
    <Pane fx:id="root">
       <children>
-         <Pane styleClass="important" fx:id="contextPane" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
+         <Pane styleClass="important" prefHeight="99999" prefWidth="99999" fx:id="contextPane" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
 
          <!--  the important selector is used to retain these objects when deleting all content within the root.    -->
 
@@ -31,6 +31,6 @@
       </children>
    </Pane>
 
- <TextArea fx:id="compileOutput" editable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"> </TextArea>
+ <TextArea styleClass="important" fx:id="compileOutput" editable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"> </TextArea>
 
 </SplitPane>

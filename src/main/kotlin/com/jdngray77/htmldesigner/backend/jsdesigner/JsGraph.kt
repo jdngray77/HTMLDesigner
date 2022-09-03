@@ -320,6 +320,12 @@ class JsGraphEmitter(
     fun revoke(jsGraphEmission: JsGraphEmission) {
         emissions.remove(jsGraphEmission)
     }
+
+    fun breakdownAllEmissions() {
+        emissions.forEach {
+            it.breakdown()
+        }
+    }
 }
 class JsGraphReceiver(
 
