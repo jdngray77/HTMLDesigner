@@ -153,7 +153,7 @@ class JsNode {
     /**
      * The node within the JsGraph that this represents.
      */
-    private lateinit var graphNode: JsGraphNode
+    internal lateinit var graphNode: JsGraphNode
 
     /**
      * The GUI editor that this node is a child of.
@@ -252,10 +252,14 @@ class JsNode {
 
 
         // Commit the movement.
-        root.translateX = translatex
-        root.translateY = translatey
+        root.layoutX += translatex
+        root.layoutY += translatey
 
         invalidatePosition()
+
+        graphEditor.getGroupsContaining(this).forEach {
+            it.invalidatePosition()
+        }
 
         mouseEvent.consume()
     }
@@ -265,7 +269,7 @@ class JsNode {
      *
      * Also stores the current position in the underlying [graphNode]
      */
-    private fun invalidatePosition() {
+    internal fun invalidatePosition() {
         root.toFront()
 
         // Update the lines being emitted
@@ -282,6 +286,11 @@ class JsNode {
             graphNode.x = minX
             graphNode.y = minY
         }
+    }
+
+
+    fun toFront() {
+        invalidatePosition()
     }
 
     fun mEnter() {
@@ -395,18 +404,7 @@ class JsNode {
      */
     fun dupeNode() =
         graphEditor.implNewNode(
-            when (graphNode) {
-                is JsGraphFunction -> graphEditor.graph.addFunction((graphNode as JsGraphFunction).function.clone())
-                is JsGraphElement -> {
-                    graphEditor.graph.addElement(
-                        graphEditor.document.getElementById((graphNode as JsGraphElement).name)!!
-                    )
-                }
-
-                else -> throw Exception("Not equipped to duplicate a node of type ${graphNode::class.simpleName}")
-            },
-            root.boundsInParent.minX,
-            root.boundsInParent.minY
+            graphEditor.graph.cloneNode(graphNode),
         )
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -426,6 +424,7 @@ class JsNode {
         else
             txtElementName.styleClass.remove("touched")
     }
+
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

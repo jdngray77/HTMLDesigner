@@ -19,6 +19,7 @@ import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import java.lang.System.gc
 import java.util.concurrent.*
+import kotlin.reflect.KFunction
 
 /**
  * ## Executes tasks in the background
@@ -96,6 +97,22 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
         gc()
     }
 
+    /**
+     * A nice wrapper function that will execute function in the background.
+     *
+     * e.g :
+     *
+     * executeInBackground(this::functionName, arg1, arg2, arg3)
+     *
+     *
+     * @param function The function to execute in the background.
+     * @param args The arguments to pass to the function, if any.
+     */
+    fun executeInBackground(function: KFunction<*>, vararg args: Any?) {
+        submit {
+            function.call(args)
+        }
+    }
 
 
     override fun notify(e: EventType) {

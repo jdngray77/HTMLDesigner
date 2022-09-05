@@ -1,9 +1,7 @@
 package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JsFunction
-import com.jdngray77.htmldesigner.frontend.jsdesigner.JsNodeProperty
 import com.jdngray77.htmldesigner.utility.SerializableColor
-import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 import com.jdngray77.htmldesigner.utility.toSerializable
 import javafx.scene.paint.Color
 import org.jsoup.nodes.Element
@@ -28,6 +26,11 @@ class JsGraph : Serializable {
      * The data structure is built with links between the nodes.
      */
     private val nodes = mutableListOf<JsGraphNode>()
+
+    /**
+     * Collection node groups.
+     */
+    private val groups = mutableListOf<JsGraphNodeGroup>()
 
     /**
      * Returns a non-mutable copy of the nodes contained within this
@@ -134,12 +137,89 @@ class JsGraph : Serializable {
     /**
      * Breaks connections a node may have, and deletes the node
      * from the graph.
+     *
+     * Also removes the node from any groups that the node is a member of.
      */
     fun removeNode(node: JsGraphNode) {
         node.removeAllConnections()
         nodes.remove(node)
+
+        // Remove the node from any groups that it may have
+        // been in.
+        groups.forEach {
+            it.remove(node)
+        }
     }
 
+    /**
+     * Creates a copy of the given node.
+     */
+    fun cloneNode(node: JsGraphNode) =
+        when (node) {
+
+            is JsGraphFunction -> addFunction(node.function.clone())
+
+            is JsGraphElement -> throw java.lang.Exception("Elements can only exist once.")
+
+            else -> throw java.lang.Exception("Not equipped to duplicate a node of type ${node::class.simpleName}")
+        }.let {
+            it.x = node.x + 10
+            it.y = node.y + 10
+            it
+        }
+
+    /**
+     * Clones all nodes in a group, then adds
+     * them to a new group.
+     *
+     * The new group is returned.
+     */
+    fun cloneGroup(group : JsGraphNodeGroup) : JsGraphNodeGroup {
+        val newGroup = JsGraphNodeGroup(group.name, group.color)
+
+        group.forEach {
+            newGroup.add(cloneNode(it))
+        }
+
+        return newGroup
+    }
+
+    /**
+     * Erradicates a group from the graph, without removing
+     * any nodes that may be contained with it.
+     * TODO membership assertions
+     */
+    fun dumpGroup(group: JsGraphNodeGroup){
+        group.clear()
+        groups.remove(group)
+    }
+
+    /**
+     * Deletes a group of nodes from the graph.
+     *
+     * All nodes are broken down and deleted from the graph.
+     *
+     * The group is also them removed from the graph.
+     *
+     * * TODO membership assertions
+     */
+    fun deleteGroup(group: JsGraphNodeGroup) {
+        group.forEach(this::removeNode)
+        dumpGroup(group)
+    }
+
+    /**
+     * TODO membership assertion
+     */
+    fun addGroup(group: JsGraphNodeGroup) {
+        groups.add(group)
+    }
+
+    fun hasGroup(graphGroup: JsGraphNodeGroup): Boolean {
+        return groups.contains(graphGroup)
+    }
+
+    fun getGroups() = groups.toList()
 
     /**
      * Compiles the graph into a javascript string.
@@ -488,6 +568,33 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
             )
         )
     }
+
+}
+
+/**
+ * Specifies a group of [JsGraphNode]s.
+ *
+ * These nodes may be operated on as a group,
+ * such as dragged, deleted, or copied.
+ *
+ * This also labels the group, as to create a
+ * better visualisation.
+ *
+ * The GUI places a labeled box around the nodes.
+ */
+class JsGraphNodeGroup(
+
+    var name: String,
+
+    /**
+     * A personalised color used in the GUI, if the user chooses to use it.
+     */
+    var color: SerializableColor,
+
+    vararg nodes: JsGraphNode
+
+) : ArrayList<JsGraphNode>(nodes.size), Serializable {
+    init { addAll(nodes) }
 
 }
 

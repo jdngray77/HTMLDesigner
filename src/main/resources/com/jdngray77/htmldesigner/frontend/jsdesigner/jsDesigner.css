@@ -1,4 +1,25 @@
 
+/*Nodes that are actively selected in the ui.*/
+.node.selection {
+    -fx-border-width: 1px;
+    -fx-border-color: white;
+    -fx-border-radius: 5px;
+}
+
+/*A square the user drags in the background to select multiple nodes, just like you would on your desktop.*/
+.drag-selection {
+    /*TODO this is a rect. i'm not sure if rects supports most fx classes. Check 'shape' or 'rectangle' on the javafx css reference.*/
+    -fx-border-width: 1px;
+    -fx-border-color: white;
+    -fx-border-radius: 5px;
+}
+
+/*A square kept on screen below a group of nodes that have been grouped together.*/
+.node-group {
+    -fx-background-color: rgba(72, 179, 255, 0.84)
+}
+
+
 /*All sockets.*/
 .socket {}
 

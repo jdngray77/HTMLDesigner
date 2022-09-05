@@ -13,6 +13,7 @@ import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.utility.*
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
+import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
@@ -21,7 +22,6 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import java.io.File
 import java.io.InvalidClassException
 import java.lang.System.gc
 
@@ -156,11 +156,7 @@ class JsDesigner {
 
                 // Legacy, used on some branches.
                 // TODO remove 'line when merged.'
-                "line",
-
-                // Omit this line from being deleted when the scene is
-                // reset in [load] or [reset].
-                "important"
+                "line"
             )
 
             isVisible = false
@@ -170,6 +166,13 @@ class JsDesigner {
             }
         }
     }
+
+    /**
+     * Manager for selecting and grouping multiple nodes.
+     *
+     * Added via [addImportant] in [initialize]
+     */
+    internal val grouper = JsNodeGrouper(this)
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -222,6 +225,33 @@ class JsDesigner {
                 document = currentDocument()
         }
     }
+
+    /**
+     * Adds some FXML component to the editor that is ***NOT*** a part of the graph.
+     *
+     * This will be marked as important GUI, and thus will be retained when the editor
+     * is cleared via [clearScreen]
+     */
+    fun addImportant(it: Node) {
+        root.children.add(it)
+        it.styleClass.add("important")
+    }
+
+    /**
+     * Returns the GUI Node that represents the given [JsGraphNode].
+     */
+    fun getGUINodeFor(node: JsGraphNode) =
+        guiNodes.firstOrNull { it.graphNode == node }
+
+    /**
+     * Returns a list of all GUI node groups that contain the given gui node.
+     */
+    fun getGroupsContaining(node: JsNode) = getGroups().filter { it.getNodes().contains(node) }
+
+    /**
+     * Returns all GUI node groups in the editor.
+     */
+    fun getGroups() = root.children.filterIsInstance<JsNodeGroup>()
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -278,6 +308,10 @@ class JsDesigner {
             }
         }
 
+        graph.getGroups().forEach {
+            JsNodeGroup(this, it)
+        }
+
         // Check what nodes are touched.
         invalidateTouches()
     }
@@ -317,17 +351,45 @@ class JsDesigner {
      */
     @FXML
     fun initialize() {
-        root.children.add(uncommittedLine)
+        addImportant(uncommittedLine)
+        addImportant(grouper)
 
         // Hide this by default. It's added by the menu item.
         split.items.remove(compileOutput)
 
+
+        // Context menu
         contextPane.addEventHandler(MouseEvent.MOUSE_PRESSED) { contextMenu.hide() }
 
         contextPane.setOnContextMenuRequested {
+            // FIXME this invalidate is temporary. It's here to compile on right click.
             invalidateTouches()
             contextMenu.show(root, it.screenX, it.screenY)
         }
+
+
+        // Group selection dragging
+
+        contextPane.setOnMousePressed {
+            if (it.isPrimaryButtonDown ) {
+                grouper.deleteIfUncommitted()
+            }
+        }
+
+        contextPane.setOnDragDetected {
+            if (!it.isPrimaryButtonDown) return@setOnDragDetected
+            grouper.startSelection(it.sceneX, it.sceneY)
+        }
+
+        contextPane.setOnMouseDragged {
+            grouper.updateSelection(it.sceneX, it.sceneY)
+        }
+
+        contextPane.setOnMouseReleased {
+            grouper.endSelection()
+        }
+
+
 
         tryLoadTestGraph()
     }
@@ -381,6 +443,8 @@ class JsDesigner {
      *
      * > Note that this does not clear the graph, and as such should only be
      *      invoked when clearing the graph.
+     *
+     * @see addImportant for adding GUI at runtime.
      *
      * @author Jordan T. Gray
      */
@@ -501,6 +565,18 @@ class JsDesigner {
     private fun invalidateTouched() {
         guiNodes.forEach {
             it.invalidateTouched()
+        }
+    }
+
+    fun invalidateGroupPositions() {
+        getGroups().forEach {
+            it.invalidatePosition()
+        }
+    }
+
+    fun invalidateGroupData() {
+        getGroups().forEach {
+            it.invalidateData()
         }
     }
 
