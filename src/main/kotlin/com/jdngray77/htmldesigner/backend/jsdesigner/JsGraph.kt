@@ -672,7 +672,7 @@ class JsGraphNodeGroup(
     /**
      * A personalised color used in the GUI, if the user chooses to use it.
      */
-    var color: SerializableColor,
+    var color: SerializableColor = SerializableColor(1.0,1.0,1.0,0.5),
 
     vararg nodes: JsGraphNode
 

@@ -8,11 +8,10 @@ import com.jdngray77.htmldesigner.backend.setAction
 import com.jdngray77.htmldesigner.backend.showWarningNotification
 import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.backend.userInput
-import com.jdngray77.htmldesigner.utility.SerializableColor
 import com.jdngray77.htmldesigner.utility.addIfAbsent
-import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.scene.Cursor
+import javafx.scene.Node
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
@@ -32,9 +31,6 @@ import java.lang.System.gc
  *
  * Create and added to the [JsDesigner]
  *
- * // TODO fun to config listeners.
- * //TODO move listeners here
- * // TODO logs
  */
 class JsNodeGrouper(
 
@@ -46,6 +42,12 @@ class JsNodeGrouper(
 ) : Rectangle() {
 
     companion object {
+
+        /**
+         * The fill color of the drag selection.
+         *
+         * TODO move this to CSS.
+         */
         val GROUPER_FILL: Color = Color.rgb(72, 179, 255, 0.45)
     }
 
@@ -89,7 +91,7 @@ class JsNodeGrouper(
     /**
      * Begins dragging.
      *
-     * Occours on 'DRAG_DETECTED' event.
+     * Occurs on 'DRAG_DETECTED' event.
      *
      * Cancels any existing temp group with [deleteIfUncommitted]
      *
@@ -202,11 +204,9 @@ class JsNodeGrouper(
      * Sets mouse listeners of the [editor]'s context pane
      * to trigger the appropriate functions above.
      */
-    fun setupListeners() {
-        //TODO Perform these functions in the background.
+    internal fun setupListeners() {
         val layout = editor.contextPane
 
-        // TODO transfer these to adds, not sets.
         layout.addEventHandler(MouseEvent.MOUSE_PRESSED) {
             if (it.isPrimaryButtonDown ) {
                 invokeInBackground(this::deleteIfUncommitted)
@@ -242,7 +242,6 @@ class JsNodeGrouper(
  *
  * A group may be commited to a graph by calling [commitToGraph], which
  * will make the group permanent
- * TODO re-create on loading
  *
  * @constructor primary constructor used to create a brand new group in the data. See alternate constructor for loading existing groups.
  */
@@ -253,20 +252,34 @@ class JsNodeGroup (
      */
     val editor: JsDesigner,
 
+    /**
+     * The group this is to represent.
+     *
+     * If you're providing this, then it should be
+     * because you're loading an existing group from the
+     * graph into the GUI
+     *
+     * See the alternate constructor for the alternative,
+     * creating new groups from the GUI.
+     */
     val graphGroup: JsGraphNodeGroup,
 
+    /**
+     * The GUI nodes of the [graphGroup]
+     *
+     * TODO validate matches graphGroup
+     */
     vararg nodes: JsNode
 
 ) : Pane() {
 
-    /**
-     * @constructor used to load an existing group from the graph.
-     *
-     * Skips committable phase, if the existing group is already in the [editor's graph.]
-     */
-    constructor(editor: JsDesigner, vararg nodes: JsNode) :
-            this(editor, JsGraphNodeGroup("", SerializableColor(1.0,1.0,1.0,0.5), *nodes.map { it.graphNode }.toTypedArray()), *nodes) {
+    companion object {
+        val PADDING = 50
     }
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //region                                                  Properties
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     /**
      * For safety, raised when the user has disposed of this group of nodes.
@@ -359,9 +372,30 @@ class JsNodeGroup (
     }
 
 
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               Properties
+    //region                                                  Constructor
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    /**
+     * @constructor used to create a new group from existing GUI nodes.
+     *
+     * This will create a new [graphGroup] and add the nodes to it, but it will not
+     * be added to the data graph yet, so it may be used temporarily.
+     *
+     * To commit to the data graph, call [commitToGraph]
+     */
+    constructor(editor: JsDesigner, vararg nodes: JsNode) :
+            this(editor, JsGraphNodeGroup("", nodes = nodes.map { it.graphNode }.toTypedArray()), *nodes) {
+    }
+
+
     init {
         if (nodes.isEmpty())
             throw IllegalArgumentException("Cannot create a group with no nodes")
+
+
+        // TODO check nodes against [graphGroup]
 
         // Own control over placement of the rectangle.
         isManaged = true
@@ -372,9 +406,23 @@ class JsNodeGroup (
         lblHeader.padding = Insets(20.0)
         children.add(lblHeader)
 
+        setCommitState()
+        setupListeners()
+        addToEditor()
+        invalidatePosition()
+    }
 
-
-        // If already committed, skip commit phase of the group.
+    /**
+     * Alters state depending on whether the [graphGroup] exists within the data graph
+     *
+     * if the group already exists in the graph (i.e we're loading an existing group,
+     * not creating one.) then we'll load the name, color, etc. and remove
+     * the ability to commit the graph again.
+     *
+     * Otherwise we'll indicate to the user that the graph has not been committed
+     * and indicate that they can commit it.
+     */
+    private fun setCommitState() {
         if (isCommitted()) {
             commitConfirmed()
             setName(graphGroup.name)
@@ -384,7 +432,14 @@ class JsNodeGroup (
 
             setName("Click to save group.")
         }
+    }
 
+    /**
+     * Adds various mouse listeners to the rect for
+     * user interaction, such as the context menu and
+     * dragging.
+     */
+    private fun setupListeners() {
 
         setOnMousePressed {
             if (!it.isPrimaryButtonDown) return@setOnMousePressed
@@ -402,7 +457,7 @@ class JsNodeGroup (
         }
 
         setOnMouseReleased {
-            finalizeDrag(it)
+            finalizeDrag()
 
             if (onMouseClicked == null)
                 cursor = Cursor.OPEN_HAND
@@ -420,12 +475,6 @@ class JsNodeGroup (
                 return@setOnMouseClicked
             }
 
-
-            println(it.eventType)
-            println(dragOriginX)
-            println(dragOriginY)
-            println(translateX)
-            println(translateY)
             if (it.button != MouseButton.PRIMARY) {
                 return@setOnMouseClicked
             }
@@ -445,58 +494,101 @@ class JsNodeGroup (
             contextMenu.show(this, it.screenX, it.screenY)
             it.consume()
         }
-
-        addToEditor()
-        invalidatePosition()
     }
 
 
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               Constructor
+    //region                                                  Dragging
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    // position of the mouse at drag start.
+
+    /**
+     * Position of the mouse at drag start
+     */
     private var dragOriginX = 0.0
+
+    /**
+     * Position of the mouse at drag start
+     */
     private var dragOriginY = 0.0
 
+    /**
+     * Updates the position of the group based on the current mouse position.
+     *
+     * Delta's **translation** of the group and [nodes], based on mouse position in
+     * screen space because it's easier
+     * as we don't have to worry about co-ordinate spaces, and faster
+     * since we don't have to invalidate node positions. We just make them *appear* to
+     * have moved.
+     *
+     * When finalized, the translations will be added to the node positions, which will
+     * find us a perfect co-ordinate in the given space with no effort.
+     *
+     * Also due to the lack of validation, the connection lines aren't moved.
+     * This is mildly annoying, but not a big deal. They'll be updated on [finalizeDrag].
+     */
     private fun updateDrag(mouseEvent: MouseEvent) {
-        val dx = mouseEvent.screenX - dragOriginX
-        val dy = mouseEvent.screenY - dragOriginY
-        translateX = dx
-        translateY = dy
+        // Find how far the mouse has moved since starting drag
+        val deltaX = mouseEvent.screenX - dragOriginX
+        val deltaY = mouseEvent.screenY - dragOriginY
 
+        // Apply that delta to the rect
+        translateX = deltaX
+        translateY = deltaY
+
+        // Apply to all nodes
         nodes.forEach {
             with (it.root) {
-                translateX = dx
-                translateY = dy
+                translateX = deltaX
+                translateY = deltaY
             }
         }
     }
 
-    private fun finalizeDrag(mouseEvent: MouseEvent) {
+    /**
+     * Finishes dragging.
+     *
+     * Transfers translation into position,
+     * invalidates positions (updating connection lines and stuff),
+     * and stores the new positions of nodes in the data graph.
+     */
+    private fun finalizeDrag() {
         if (translateX == 0.0 && translateY == 0.0) {
             return
         }
 
-        layoutX += translateX
-        layoutY += translateY
-        translateX = 0.0
-        translateY = 0.0
+        finalizeTranslation(this)
 
         nodes.forEach {
-            // TODO it.relocate
             with (it.root) {
-                layoutX += translateX
-                layoutY += translateY
-                translateX = 0.0
-                translateY = 0.0
-
+                finalizeTranslation(this)
                 it.relocate(layoutX, layoutY)
             }
         }
 
+        // Nodes may also be in other groups, so
+        // We'll update them all - just to be safe.
         editor.invalidateGroupPositions()
     }
 
+    /**
+     * Transfers translation into position
+     */
+    private fun finalizeTranslation(node : Node) {
+        with(node) {
+            layoutX += translateX
+            layoutY += translateY
+            translateX = 0.0
+            translateY = 0.0
+        }
+    }
 
 
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               Dragging
+    //region                                                  mvc
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     /**
      * Sets the name of the group, and displays it in the label.
@@ -506,76 +598,7 @@ class JsNodeGroup (
         lblHeader.text = name
     }
 
-    /**
-     * Updates this group to match the backend data.
-     *
-     * If the graph has been modified, i.e if some nodes have been deleted
-     * or removed from the group without us knowing, then this will
-     * update the group.
-     *
-     * Recommend doing this in a background thread.
-     */
-    fun invalidateData() {
-        nodes.clear()
 
-        graphGroup.forEach {
-            nodes.add(editor.getGUINodeFor(it)!!)
-        }
-
-        gc()
-    }
-
-    /**
-     * Calculates graphical bounds of the group.
-     *
-     * A box is expanded to fit all members of the group,
-     * and a padding is added.
-     */
-    fun invalidatePosition() {
-        // TODO test this
-        // TODO would this be better as just adding the nodes as children?
-        with (nodes.first()) {
-            super.relocate(root.layoutX, root.layoutY)
-        }
-
-        toFront()
-
-        for (node in nodes) {
-            // Not required, but it's good to make sure that the
-            // node is in the right place first.
-            node.invalidatePosition()
-
-//            super.relocate(
-//                layoutX.coerceAtLeast(node.root.layoutX),
-//                layoutY.coerceAtLeast(node.root.layoutY)
-//            )
-//
-//            if (!boundsInParent.contains(node.root.boundsInParent)) {
-//                prefWidth = prefWidth.coerceAtLeast(node.root.boundsInParent.maxX - layoutX)
-//                prefHeight = prefHeight.coerceAtLeast(node.root.boundsInParent.maxY - layoutY)
-//            }
-
-            node.toFront()
-        }
-
-
-        val minx = nodes.minBy { it.root.layoutX }.root.layoutX
-        val miny = nodes.minBy { it.root.layoutY }.root.layoutY
-        val maxx = nodes.maxBy { it.root.boundsInParent.maxX }.root.boundsInParent.maxX
-        val maxy = nodes.maxBy { it.root.boundsInParent.maxY }.root.boundsInParent.maxY
-
-        super.relocate(minx, miny)
-        prefWidth = maxx - minx
-        prefHeight = maxy - miny
-
-        // Padding
-        val tempPaddingVal = 50
-        prefWidth += tempPaddingVal * 2
-        prefHeight += tempPaddingVal * 2
-        layoutX -= tempPaddingVal
-        layoutY -= tempPaddingVal
-
-    }
 
     /**
      * Groups made in the GUI are temporary until the user commits them.
@@ -588,6 +611,7 @@ class JsNodeGroup (
         graph.addGroup(graphGroup)
         setAction("Group '${graphGroup.name}' created with ${graphGroup.size} nodes")
     }
+
 
     /**
      * Removes this group from the [editor], iff the graph does not exist in the
@@ -692,6 +716,77 @@ class JsNodeGroup (
         disposed = true
     }
 
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                               mvc
+    //region                                                  Validation
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+    /**
+     * Updates this group to match the backend data.
+     *
+     * If the graph has been modified, i.e if some nodes have been deleted
+     * or removed from the group without us knowing, then this will
+     * update the group.
+     *
+     * Recommend doing this in a background thread.
+     */
+    fun invalidateData() {
+        nodes.clear()
+
+        graphGroup.forEach {
+            nodes.add(editor.getGUINodeFor(it)!!)
+        }
+
+        gc()
+    }
+
+
+    /**
+     * Calculates graphical bounds of the group.
+     *
+     * A box is expanded to fit all members of the group,
+     * and a padding is added.
+     */
+    fun invalidatePosition() {
+        // TODO test this
+        // TODO would this be better as just adding the nodes as children?
+        with (nodes.first()) {
+            super.relocate(root.layoutX, root.layoutY)
+        }
+
+        toFront()
+
+        for (node in nodes) {
+            // Not required, but it's good to make sure that the
+            // node is in the right place first.
+            node.invalidatePosition()
+
+            node.toFront()
+        }
+
+        val minx = nodes.minBy { it.root.layoutX }.root.layoutX
+        val miny = nodes.minBy { it.root.layoutY }.root.layoutY
+        val maxx = nodes.maxBy { it.root.boundsInParent.maxX }.root.boundsInParent.maxX
+        val maxy = nodes.maxBy { it.root.boundsInParent.maxY }.root.boundsInParent.maxY
+
+        super.relocate(minx, miny)
+
+        prefWidth = maxx - minx
+        prefHeight = maxy - miny
+
+        // Padding
+
+
+        prefWidth += PADDING * 2
+        prefHeight += PADDING * 2
+        layoutX -= PADDING
+        layoutY -= PADDING
+    }
+
+
     /**
      * @throws [IllegalStateException] If [dispose] via invokation of [dispose]
      */
@@ -766,9 +861,4 @@ class JsNodeGroup (
             editor.grouper.lastCreatedGroup = it
             setAction("Cloned group '${graphGroup.name}', and duplicated all nodes contained within.")
         }
-
-
-    // TODO show name
-    // TODO edit name
-    // TODO selection class on nodes
 }
