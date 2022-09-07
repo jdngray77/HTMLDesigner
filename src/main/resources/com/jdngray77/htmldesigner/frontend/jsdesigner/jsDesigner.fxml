@@ -21,6 +21,7 @@
             <Menu text="Graph">
                <MenuItem onAction="#menu_add_node" text="Add Node"/>
                <MenuItem onAction="#invalidateTouches" text="Compile"/>
+               <MenuItem onAction="#validateGraph" text="Validate"/>
                <SeparatorMenuItem/>
                <MenuItem onAction="#reset" text="Clear the slate..."/>
                <MenuItem onAction="#resetConnections" text="Unlink everything"/>

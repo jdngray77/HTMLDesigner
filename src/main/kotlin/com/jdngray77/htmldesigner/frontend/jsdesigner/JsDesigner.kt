@@ -1,11 +1,10 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
+import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.BackgroundTask.submitToUI
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphCompiler
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
-import com.jdngray77.htmldesigner.backend.showErrorNotification
-import com.jdngray77.htmldesigner.backend.showWarningNotification
-import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
@@ -74,13 +73,26 @@ class JsDesigner {
      * would consume secondary mouse clicks anywhere within the editor.
      */
     @FXML
-    private lateinit var contextPane: Pane
+    internal lateinit var contextPane: Pane
 
 
     /**
      * Context menu used to create new nodes.
      */
     private val contextMenu: ContextMenu = ContextMenu()
+
+    /**
+     * [JsDesigner] automatically re-compiles on changes to represent the data,
+     * however when performing large oporations this feature only serve
+     * to exponentially slow the programme down.
+     *
+     * Temporarily raise this flag whilst performing large operations
+     * to prevent multiple re-compiles during.
+     *
+     * ***Remember to lower again after!***
+     *
+     */
+    internal var disableCompile = false
 
     /**
      * Constructor for the [contextMenu] only.
@@ -270,12 +282,16 @@ class JsDesigner {
      *    the graph will likely not be able to load.
      */
     fun loadGraph(g: JsGraph) {
-
         // Breakdown existing graph.
         if (this::graph.isInitialized)
             reset()
 
         graph = g
+        reloadGraph()
+    }
+
+    fun reloadGraph() {
+        clearScreen()
 
         // Re-create all nodes.
         graph.getNodes().map {
@@ -308,12 +324,21 @@ class JsDesigner {
             }
         }
 
+        // Re-create all groups
         graph.getGroups().forEach {
-            JsNodeGroup(this, it)
+            if (it.isEmpty()) {
+                graph.deleteGroup(it)
+                return@forEach
+            }
+
+            JsNodeGroup(this, it, *it.map { getGUINodeFor(it)!! }.toTypedArray())
+
+            // TODO check for groups with identical contents
         }
 
         // Check what nodes are touched.
         invalidateTouches()
+        gc()
     }
 
 
@@ -353,6 +378,7 @@ class JsDesigner {
     fun initialize() {
         addImportant(uncommittedLine)
         addImportant(grouper)
+        grouper.setupListeners()
 
         // Hide this by default. It's added by the menu item.
         split.items.remove(compileOutput)
@@ -370,24 +396,6 @@ class JsDesigner {
 
         // Group selection dragging
 
-        contextPane.setOnMousePressed {
-            if (it.isPrimaryButtonDown ) {
-                grouper.deleteIfUncommitted()
-            }
-        }
-
-        contextPane.setOnDragDetected {
-            if (!it.isPrimaryButtonDown) return@setOnDragDetected
-            grouper.startSelection(it.sceneX, it.sceneY)
-        }
-
-        contextPane.setOnMouseDragged {
-            grouper.updateSelection(it.sceneX, it.sceneY)
-        }
-
-        contextPane.setOnMouseReleased {
-            grouper.endSelection()
-        }
 
 
 
@@ -454,6 +462,9 @@ class JsDesigner {
         }.map {
             root.children.remove(it)
         }
+
+        // Forget everything we were tracking.
+        guiNodes.clear()
     }
 
 
@@ -467,12 +478,8 @@ class JsDesigner {
         if (!userConfirm("Any unsaved changes will be lost.\n\nContinue?"))
             return
 
-
         // Remove everything from the screen.
         clearScreen()
-
-        // Forget everything we were tracking.
-        guiNodes.clear()
 
         // Create a fresh, clear graph.
         graph = JsGraph()
@@ -512,6 +519,14 @@ class JsDesigner {
         if (!userConfirm("This will '${node.getGraphNode().name}',and destroy all connections it.\n\nContinue?"))
             return
 
+        implDeleteNode(node)
+    }
+
+    /**
+     * Deletes a given node without questioning the user.
+     */
+    fun implDeleteNode(node: JsNode) {
+
         // Disconnect and delete all connections.
         // This also removes the lines from [emittingLines] and [receivingLines]
         node.breakdownConnections()
@@ -521,8 +536,10 @@ class JsDesigner {
 
         // Remove from GUI
         guiNodes.remove(node)
-        root.children.remove(root)
 
+        submitToUI {
+            root.children.remove(node.root)
+        }
 
         gc()
     }
@@ -545,14 +562,38 @@ class JsDesigner {
      * destroyed.
      */
     fun invalidateTouches() {
+        if (disableCompile) return
+
         // Forget the previous compile touches.
         graph.resetTouched()
 
-        // Compile and print.
-        compileOutput.text = JsGraphCompiler.compileGraph(graph)
+        validateAndCompile()
 
         // Update the CSS to show nodes that weren't touched.
         invalidateTouched()
+    }
+
+    fun validateAndCompile(quiet: Boolean = true) {
+        if (disableCompile) return
+
+        graph.validate()?.let {
+            if (quiet) {
+                showNotification("We detected some issues with your graph.", "" +
+                        (if (it.size <= 5) it.joinToString("\n") else "There are ${it.size} warnings.") +
+                        "\n\n" +
+                        "Click here to view warnings.") {
+                    showListOfStrings("There are some integrity issue(s) with your graph." , it)
+                }
+            } else
+                showListOfStrings("There are some integrity issue(s) with your graph." , it)
+        } ?: run {
+            if (!quiet) {
+                    showNotification("Graph Validation", "No problems were found with the data!")
+            }
+        }
+
+        // Compile and print.
+        compileOutput.text = JsGraphCompiler.compileGraph(graph)
     }
 
     /**
@@ -574,6 +615,21 @@ class JsDesigner {
         }
     }
 
+    /**
+     * Re-creates the GUI from the data.
+     *
+     * Ensures that the GUI is in sync with the data, at cost
+     * of performance.
+     */
+    fun invalidateData() {
+        reloadGraph()
+    }
+
+    /**
+     * Updates all groups to reflect groups in the data.
+     *
+     * Invoke after adding or removing nodes from groups.
+     */
     fun invalidateGroupData() {
         getGroups().forEach {
             it.invalidateData()
@@ -611,6 +667,10 @@ class JsDesigner {
             split.items.addIfAbsent(compileOutput)
         else
             split.items.remove(compileOutput)
+    }
+
+    fun validateGraph() {
+        validateAndCompile()
     }
 
 

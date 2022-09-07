@@ -1,11 +1,8 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
-import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphProperty
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import javafx.fxml.FXML
-import javafx.scene.layout.Pane
-import javafx.scene.text.Text
 
 
 /**

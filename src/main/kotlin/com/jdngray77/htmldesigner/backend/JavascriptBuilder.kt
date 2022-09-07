@@ -96,20 +96,25 @@ internal class JavascriptBuilder {
 
         with (StringBuilder()) {
 
-            appendLine("// Document Objects")
-            elementIDs.forEach{
-                appendLine(buildVariable("document.getElementById(\"$it\")", it))
+            if (elementIDs.isNotEmpty()) {
+                appendLine("// Document Objects")
+                elementIDs.forEach {
+                    appendLine(buildVariable("document.getElementById(\"$it\")", it))
+                }
             }
 
-            appendLine("\n\n// Functions")
-            jsFunctions.forEach {
-                appendLine("let ${it.name.toCamel()} = (${it.args.joinToString(", ") { it.first.toCamel() }}) => { \n\t${it.javascript} \n}" )
+            if (jsFunctions.isNotEmpty()) {
+                appendLine("\n\n// Functions")
+                jsFunctions.forEach {
+                    appendLine("let ${it.name.toCamel()} = (${it.args.joinToString(", ") { it.first.toCamel() }}) => { \n\t${it.javascript} \n}")
+                }
             }
 
-
-            appendLine("\n\n// Event listeners")
-            statements.forEach {
-                appendLine(it)
+            if (statements.isNotEmpty()) {
+                appendLine("\n\n// Event listeners")
+                statements.forEach {
+                    appendLine(it)
+                }
             }
 
             cachedCompilation = this.toString()

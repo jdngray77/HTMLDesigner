@@ -19,19 +19,19 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
+import com.jdngray77.htmldesigner.frontend.controls.RunAnything
+import com.jdngray77.htmldesigner.frontend.controls.SearchableList
 import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.control.Alert
-import javafx.scene.control.Button
-import javafx.scene.control.ButtonType
-import javafx.scene.control.Label
-import javafx.scene.control.TextInputDialog
+import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.text.Text
+import jfxtras.styles.jmetro.JMetro
+import jfxtras.styles.jmetro.Style
 import org.controlsfx.control.NotificationPane
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.PopOver
@@ -82,12 +82,34 @@ fun showWarningNotification(title: String = "", message: String = "") {
     }
 }
 
-fun showNotification(title: String = "", message: String = "") {
+fun showNotification(title: String = "", message: String = "", onAction: () -> Unit = {}) {
     onUIThread() {
         Notifications.create()
             .title(title)
             .text(message)
+            .onAction { onAction() }
             .showInformation()
+    }
+}
+
+fun showListOfStrings(title: String = "", strings: List<String>) {
+    onUIThread {
+        Dialog<ButtonType>().apply {
+            this.title = title
+            dialogPane.content = SearchableList(strings)
+            dialogPane.setPrefSize(800.0, 500.0)
+            isResizable = true
+
+            dialogPane.buttonTypes.addAll(ButtonType.CLOSE)
+
+            JMetro(Style.LIGHT).scene = dialogPane.scene
+
+            setOnShown {
+                RunAnything.clearSearch()
+                RunAnything.searchBox.requestFocus()
+            }
+            show()
+        }
     }
 }
 
@@ -135,6 +157,7 @@ fun onUIThread(runnable: Runnable) {
  * Displays the last action took by the IDE.
  *
  * This displays any status message that is not a direct result of the user's action.
+ * @see setAction for logging actions that were directly caused by the user.
  *
  * i.e event notifications, backups, builds, etc.
  *

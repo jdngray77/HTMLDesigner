@@ -135,6 +135,8 @@ class JsNode {
 
     @FXML
     fun initialize() {
+        txtElementName.cursor = Cursor.HAND
+
         // TODO is one context menu per node memory safe?
         txtElementName.contextMenu = ContextMenu().apply {
             items.addAll(
@@ -231,9 +233,7 @@ class JsNode {
     @FXML
     private fun drag(mouseEvent: MouseEvent) {
 
-        // Sometimes the mouse drifts from the label and loses the correct state.
-        // This forces the mouse to stay closed.
-        root.cursor = Cursor.CLOSED_HAND
+        
 
         // Determine new location for the node, including the mouses position.
         // This new location aligns the center of node's label under the mouse.
@@ -282,10 +282,25 @@ class JsNode {
             it.evalPosition()
         }
 
+        stowPosition()
+    }
+
+    /**
+     * Stores the current position in the underlying [graphNode]
+     */
+    private fun stowPosition() {
         with(root.boundsInParent) {
             graphNode.x = minX
             graphNode.y = minY
         }
+    }
+
+    /**
+     * Programmatically moves this node.
+     */
+    fun relocate(x: Double, y: Double) {
+        root.relocate(x, y)
+        invalidatePosition()
     }
 
 
@@ -294,15 +309,15 @@ class JsNode {
     }
 
     fun mEnter() {
-        root.cursor = Cursor.HAND
+
     }
 
     fun mExit() {
-        root.cursor = Cursor.DEFAULT
+//        root.cursor = Cursor.DEFAULT
     }
 
     fun mPress(mouseEvent: MouseEvent) {
-        root.cursor = Cursor.CLOSED_HAND
+        txtElementName.cursor = Cursor.CLOSED_HAND
         dragDownLocation = Pair(mouseEvent.sceneX, mouseEvent.sceneY)
         invalidatePosition()
 
@@ -310,7 +325,7 @@ class JsNode {
     }
 
     fun mRelease() {
-        root.cursor = Cursor.HAND
+        txtElementName.cursor = Cursor.HAND
         root.styleClass.remove("in-motion")
     }
 
@@ -390,7 +405,7 @@ class JsNode {
      * Alias for [JsDesigner.deleteNode].
      */
     fun delete() {
-        graphEditor.deleteNode(this)
+        graphEditor.implDeleteNode(this)
     }
 
 

@@ -49,6 +49,7 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
     @Synchronized
     fun submit(runnable: Runnable): Future<*>? {
 
+        // TODO if the runnable crashes, there's no logs printed. Need to find a way to print the stack trace.
         if (!threadPool.isShutdown && !threadPool.isTerminating)
             return threadPool.submit(runnable)
 
@@ -107,10 +108,17 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
      *
      * @param function The function to execute in the background.
      * @param args The arguments to pass to the function, if any.
+     * @param applyResult A function that is called when the function has finished executing, with its result
+     * @param R the return type of the function
      */
-    fun executeInBackground(function: KFunction<*>, vararg args: Any?) {
+    fun <R> invokeInBackground(function: KFunction<R>, vararg args: Any?, applyResult: ((R) -> Unit)? = null) {
         submit {
-            function.call(args)
+            try {
+                val r = function.call(*args)
+                applyResult?.invoke(r)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

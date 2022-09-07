@@ -107,4 +107,4 @@ fun <T> ObservableList<T>.addIfAbsent(that: T) =
  *
  * @return a copy of the list, which can then be used to perform the itteration.
  */
-fun <T> MutableCollection<T>.concmod() = map{it}
+fun <T> MutableCollection<T>.concmod() = toList()

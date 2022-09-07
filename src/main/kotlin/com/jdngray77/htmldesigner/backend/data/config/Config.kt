@@ -174,6 +174,13 @@ enum class Configs {
      * more of a pain-in-the-ass for them to undo.
      */
     JSDESIGNER_EMITTER_BREAKDOWN_CONFIRM_THRESHOLD_INT,
+
+    /**
+     * When validating a jsgraph, this determines if nodes
+     * not reached during compile are to be kept or
+     * automatically removed.
+     */
+    JSDESIGNER_GRAPH_AUTO_DELETE_UNCOMPILABLE_NODES_BOOL,
 }
 
 /**
@@ -214,6 +221,7 @@ object Config : Registry<Configs>(Editor.IDEDirectory.subFile("./config.registry
         put(Configs.SPOTIFY_AUTH_OTP__DONT_MODIFY__STRING, "")
         put(Configs.SPOTIFY_LAST_REFRESH__DONT_MODIFY__LONG, 0L)
         put(Configs.JSDESIGNER_EMITTER_BREAKDOWN_CONFIRM_THRESHOLD_INT, 2)
+        put(Configs.JSDESIGNER_GRAPH_AUTO_DELETE_UNCOMPILABLE_NODES_BOOL, false)
     }
 
     /**

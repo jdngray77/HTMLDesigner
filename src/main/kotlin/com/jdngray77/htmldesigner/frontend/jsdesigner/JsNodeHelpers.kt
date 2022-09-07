@@ -1,7 +1,7 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
-import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphProperty
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNodeProperty
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.setTooltip
@@ -10,16 +10,15 @@ import javafx.geometry.Bounds
 import javafx.scene.layout.Pane
 import javafx.scene.shape.Line
 import javafx.scene.text.Text
-import javafx.util.Duration
 import java.lang.System.gc
 
 /**
  * Root content for [JsNodeReceiver] and [JsNodeEmitter]'s.
  */
-open class JsNodeProperty<T : JsGraphProperty>() {
+open class JsNodeProperty<T : JsGraphNodeProperty>() {
 
     /**
-     * The [JsGraphProperty] that this represents.
+     * The [JsGraphNodeProperty] that this represents.
      *
      * As the graph stands currently, this can only be a
      * [JsGraphReceiver] or [JsGraphEmitter].

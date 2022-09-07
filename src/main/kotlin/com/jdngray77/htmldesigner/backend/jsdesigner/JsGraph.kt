@@ -1,7 +1,10 @@
 package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JsFunction
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.utility.SerializableColor
+import com.jdngray77.htmldesigner.utility.concmod
 import com.jdngray77.htmldesigner.utility.toSerializable
 import javafx.scene.paint.Color
 import org.jsoup.nodes.Element
@@ -83,12 +86,89 @@ class JsGraph : Serializable {
     }
 
     /**
-     * When creating a new graph,
-     * it will represent the current document's scriptable elements.
+     * Checks the data for integrity, attempts to fix anything that appears invalid.
+     * // TODO unit test this
+     * // TODO Check for dupe element nodes
+     * @returns a list of warnings of the problems and fixes, or null if there was none.
      */
-    init {
-//        val x = mvc().currentDocument().allElements.filter{ it -> it.tagName() != "style" && it.id().isNotEmpty() }
-//        x.forEach { addElement(it) }
+    fun validate() : List<String>? {
+        val problems = mutableListOf<String>()
+        val wasEmpty = nodes.isEmpty()
+
+        if (wasEmpty) {
+            problems.add("Graph contains no nodes.")
+        }
+
+        // Test compile to check for nodes not being touched.
+        // Also check if there's actually any output
+        JsGraphCompiler.compileGraph(this).ifBlank {
+            problems.add("This graph does not generate any output.")
+        }
+
+
+        groups.concmod().forEach {
+            if (it.isEmpty()) {
+                problems.add("The group '${it.name}' has no nodes, so it was deleted.")
+                deleteGroup(it)
+            }
+
+            it.concmod().forEach {
+                node ->
+                if (!nodes.contains(node)) {
+                    problems.add("The group '${it.name}' contains '${node.name}', a node that does not exist within the graph, so the node was removed from the group.")
+                    it.remove(node)
+                }
+            }
+
+            // Check for nodes that are not in the graph.
+        }
+
+        nodes.concmod().forEach {
+
+            // Check for signals being emitted, but not being received
+            it.emitters().forEach {
+                emitter ->
+                emitter.emissions().forEach {
+                    emission ->
+
+                    if (!emission.receiver.hasAdmission()) {
+                        problems.add("'$emission' was being emitted but the receiver didn't know about the connection, so the connection was re-attached to the emitter.")
+                        emission.receiver.receive(emission)
+                    }
+
+                    if (emission.receiver.admission !== emission) {
+                        problems.add("'$emission' was being emitted but the receiver was accepting a different connection, so the connection deleted.")
+                        emission.breakdown()
+                    }
+                }
+            }
+
+
+            // Check for signals being received, but not being emitted
+            it.recievers().forEach {
+                receiver ->
+                receiver.admission?.let {
+                    if (!it.emitter.emissions().contains(it)) {
+                        problems.add("'$it' was being received but not emitted, so the connection was deleted.")
+                        it.breakdown()
+                    }
+                }
+            }
+
+            // Check if included in the output
+            if (!it.touched) {
+                if (Config[Configs.JSDESIGNER_GRAPH_AUTO_DELETE_UNCOMPILABLE_NODES_BOOL] as Boolean) {
+                    problems.add("The node '${it.name}' was not included in the output, so it was deleted as specified by the auto-delete setting.")
+                    removeNode(it)
+                } else
+                    problems.add("The node '${it.name}' was not included in the output, but it was preserved by the auto-delete setting.")
+            }
+        }
+
+        if (!wasEmpty && nodes.isEmpty())
+            problems.add("Validation deleted all nodes.")
+
+        return if (problems.isEmpty()) null else problems
     }
     
 
@@ -135,8 +215,9 @@ class JsGraph : Serializable {
     }
 
     /**
-     * Breaks connections a node may have, and deletes the node
-     * from the graph.
+     * Deletes a node from the graph.
+     *
+     * Remove all connections first.
      *
      * Also removes the node from any groups that the node is a member of.
      */
@@ -204,7 +285,7 @@ class JsGraph : Serializable {
      * * TODO membership assertions
      */
     fun deleteGroup(group: JsGraphNodeGroup) {
-        group.forEach(this::removeNode)
+        group.concmod().forEach(this::removeNode)
         dumpGroup(group)
     }
 
@@ -365,7 +446,7 @@ class JsGraphEmitter(
 
     parent: JsGraphNode
 
-) : JsGraphProperty(emits, name, parent), Serializable {
+) : JsGraphNodeProperty(emits, name, parent), Serializable {
 
     /**
      * List of connections emitting from
@@ -419,7 +500,7 @@ class JsGraphReceiver(
     parent: JsGraphNode
 
 
-) : JsGraphProperty(type, name, parent), Serializable {
+) : JsGraphNodeProperty(type, name, parent), Serializable {
 
 
     /**
@@ -463,7 +544,7 @@ class JsGraphReceiver(
 /**
  * Abstraction of [JsGraphReceiver] and [JsGraphEmitter].
  */
-abstract class JsGraphProperty(
+abstract class JsGraphNodeProperty(
 
     val type: JsGraphDataType,
 
@@ -517,6 +598,8 @@ class JsGraphEmission (
         emitter.parent.touched = true
         receiver.parent.touched = true
     }
+
+    override fun toString() = "${emitter.parent.name}#${emitter.name} -> ${receiver.parent.name}#${receiver.name}"
 }
 
 /**
@@ -596,6 +679,14 @@ class JsGraphNodeGroup(
 ) : ArrayList<JsGraphNode>(nodes.size), Serializable {
     init { addAll(nodes) }
 
+    /**
+     * Groups are not considered to be the same
+     * if they contain the same set of nodes.
+     *
+     * Equality is only true if both groups are the exact
+     * same group instance.
+     */
+    override fun equals(other: Any?) = this === other
 }
 
 enum class JsGraphDataType {
