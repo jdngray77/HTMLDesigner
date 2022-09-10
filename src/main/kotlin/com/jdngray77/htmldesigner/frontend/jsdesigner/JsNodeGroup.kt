@@ -9,6 +9,7 @@ import com.jdngray77.htmldesigner.backend.showWarningNotification
 import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.backend.userInput
 import com.jdngray77.htmldesigner.utility.addIfAbsent
+import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.scene.Cursor
 import javafx.scene.Node
@@ -208,7 +209,7 @@ class JsNodeGrouper(
         val layout = editor.contextPane
 
         layout.addEventHandler(MouseEvent.MOUSE_PRESSED) {
-            if (it.isPrimaryButtonDown ) {
+            if (it.isPrimaryButtonDown) {
                 invokeInBackground(this::deleteIfUncommitted)
                 it.consume()
             }
@@ -245,7 +246,7 @@ class JsNodeGrouper(
  *
  * @constructor primary constructor used to create a brand new group in the data. See alternate constructor for loading existing groups.
  */
-class JsNodeGroup (
+class JsNodeGroup(
 
     /**
      * The editor in which this group will be displayed
@@ -328,7 +329,7 @@ class JsNodeGroup (
 
             MenuItem("Delete group...").also { item ->
                 item.setOnAction {
-                    if (!isCommitted()){
+                    if (!isCommitted()) {
                         deleteIfUncommitted()
                         return@setOnAction
                     }
@@ -370,6 +371,25 @@ class JsNodeGroup (
             },
         )
     }
+
+
+    private val collapseManager = DoubleClickCollapseManager(
+        this,
+        {
+            lblHeader.text = "↓ ${graphGroup.name} ↓"
+            editor.root.children.removeAll(nodes.map { it.root })
+
+            collapseWidthFix = false
+
+            // TODO remove lines where both ends are in this group
+            invalidatePosition()
+        },
+        {
+            editor.root.children.addAll(nodes.map { it.root })
+            lblHeader.text = graphGroup.name
+            invalidatePosition()
+        }
+    )
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -464,6 +484,7 @@ class JsNodeGroup (
             it.consume()
         }
 
+        //but this one is removed when the group is committed.
         setOnMouseClicked {
 
             it.consume()
@@ -539,9 +560,13 @@ class JsNodeGroup (
 
         // Apply to all nodes
         nodes.forEach {
-            with (it.root) {
+            with(it.root) {
                 translateX = deltaX
                 translateY = deltaY
+            }
+
+            Platform.runLater {
+                it.invalidateLinePositions()
             }
         }
     }
@@ -561,7 +586,7 @@ class JsNodeGroup (
         finalizeTranslation(this)
 
         nodes.forEach {
-            with (it.root) {
+            with(it.root) {
                 finalizeTranslation(this)
                 it.relocate(layoutX, layoutY)
             }
@@ -575,7 +600,7 @@ class JsNodeGroup (
     /**
      * Transfers translation into position
      */
-    private fun finalizeTranslation(node : Node) {
+    private fun finalizeTranslation(node: Node) {
         with(node) {
             layoutX += translateX
             layoutY += translateY
@@ -597,7 +622,6 @@ class JsNodeGroup (
         graphGroup.name = name
         lblHeader.text = name
     }
-
 
 
     /**
@@ -717,7 +741,6 @@ class JsNodeGroup (
     }
 
 
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                               mvc
     //region                                                  Validation
@@ -743,6 +766,16 @@ class JsNodeGroup (
         gc()
     }
 
+    /**
+     * Work around for a stupid javafx issue.
+     *
+     * For the first invalidation after changing children,
+     * javafx's co-ordinate spaces are not up-to-date.
+     *
+     * We compensate by adding some extra padding for the first
+     * update, where we know the values will be wrong.
+     */
+    private var collapseWidthFix = false
 
     /**
      * Calculates graphical bounds of the group.
@@ -751,9 +784,23 @@ class JsNodeGroup (
      * and a padding is added.
      */
     fun invalidatePosition() {
+
+        if (collapseManager.isCollapsed) {
+            Platform.runLater {
+                prefWidth = lblHeader.width + if (!collapseWidthFix) {
+                                                collapseWidthFix = true
+                                                30.0
+                                            } else
+                                                0.0
+
+                prefHeight = lblHeader.height
+            }
+            return
+        }
+
         // TODO test this
         // TODO would this be better as just adding the nodes as children?
-        with (nodes.first()) {
+        with(nodes.first()) {
             super.relocate(root.layoutX, root.layoutY)
         }
 
@@ -790,7 +837,7 @@ class JsNodeGroup (
     /**
      * @throws [IllegalStateException] If [dispose] via invokation of [dispose]
      */
-    private fun checkDisposeMod () {
+    private fun checkDisposeMod() {
         if (disposed)
             throw IllegalStateException("Cannot add modify a disposed group")
     }

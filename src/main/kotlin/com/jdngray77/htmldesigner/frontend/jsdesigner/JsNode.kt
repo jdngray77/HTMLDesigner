@@ -5,14 +5,17 @@ import com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner.Companion.theme
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.concmod
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
+import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.scene.Cursor
+import javafx.scene.Parent
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import javafx.scene.control.SeparatorMenuItem
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
+import javafx.scene.layout.Region.USE_COMPUTED_SIZE
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Line
 import java.lang.Exception
@@ -31,6 +34,9 @@ import kotlin.math.abs
  */
 class JsNode {
 
+    private lateinit var collapseManager : DoubleClickCollapseManager
+    fun isCollapsed() = collapseManager.isCollapsed
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                                FXML GUI controls
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -45,7 +51,7 @@ class JsNode {
     private lateinit var vboxAttrs: VBox
 
     @FXML
-    private lateinit var txtElementName: Label
+    lateinit var txtElementName: Label
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                               FXML GUI controls
@@ -145,6 +151,33 @@ class JsNode {
                 }
             )
         }
+
+
+        collapseManager = DoubleClickCollapseManager(
+            // When the label is double clicked
+            txtElementName,
+
+            // And expand the node
+            {
+                root.maxHeight = txtElementName.height + 15
+                txtElementName.text = "↓ ${graphNode.name} ↓"
+                root.children.remove(vboxEvents)
+                root.children.remove(vboxAttrs)
+            },
+
+            // Collapse the node
+            {
+                root.maxHeight = USE_COMPUTED_SIZE
+                txtElementName.text = graphNode.name
+                root.children.add(vboxEvents)
+                root.children.add(vboxAttrs)
+
+
+                Platform.runLater {
+                    invalidatePosition()
+                }
+            }
+            )
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -270,8 +303,18 @@ class JsNode {
      * Also stores the current position in the underlying [graphNode]
      */
     internal fun invalidatePosition() {
+
+        // Skip if not being displayed in editor (i.e in a collapsed group.)
+        if (root.parent == null) return
+
         root.toFront()
 
+        invalidateLinePositions()
+
+        stowPosition()
+    }
+
+    fun invalidateLinePositions() {
         // Update the lines being emitted
         emittingLines.forEach {
             it.evalPosition()
@@ -281,8 +324,6 @@ class JsNode {
         receivingLines.forEach {
             it.evalPosition()
         }
-
-        stowPosition()
     }
 
     /**
@@ -328,7 +369,6 @@ class JsNode {
         txtElementName.cursor = Cursor.HAND
         root.styleClass.remove("in-motion")
     }
-
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                GUI events
@@ -422,12 +462,6 @@ class JsNode {
             graphEditor.graph.cloneNode(graphNode),
         )
 
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                                GUI events
-    //region                                                 MVC operations
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
     /**
      * Updates the color of the header to match the [JsGraphNode.touch] state.
      *
@@ -441,10 +475,8 @@ class JsNode {
     }
 
 
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                              MVC operations
-    //region                                               Node Line Helpers
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 }

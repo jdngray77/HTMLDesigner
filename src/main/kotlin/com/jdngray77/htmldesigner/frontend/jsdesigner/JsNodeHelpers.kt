@@ -11,6 +11,7 @@ import javafx.scene.layout.Pane
 import javafx.scene.shape.Line
 import javafx.scene.text.Text
 import java.lang.System.gc
+import javax.swing.Painter
 
 /**
  * Root content for [JsNodeReceiver] and [JsNodeEmitter]'s.
@@ -99,8 +100,9 @@ open class JsNodeProperty<T : JsGraphNodeProperty>() {
         root.setTooltip("Name : ${property.name}\n" +
                 ((if (property() is JsGraphEmitter) "Emits" else "Receives") + " : ${property.type}") + "\n" +
                 (if (property() is JsGraphReceiver)
-                    ((property as JsGraphReceiver).defaultValue?.let{ "Default : $it" } ?: "Has no default value") + "\n"
-                 else ""))
+                    ((property as JsGraphReceiver).defaultValue?.let { "Default : $it" }
+                        ?: "Has no default value") + "\n"
+                else ""))
 
 
         assertPopulationCss()
@@ -113,16 +115,15 @@ open class JsNodeProperty<T : JsGraphNodeProperty>() {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 
-
     /**
      * Ensures that the population css class
      * matches the state of the [property].
      */
     internal fun assertPopulationCss() {
         if (property is JsGraphReceiver && (property as JsGraphReceiver).hasAdmission())
-                return markPopulated()
+            return markPopulated()
         else if (property is JsGraphEmitter && (property as JsGraphEmitter).emissions().isNotEmpty())
-                return markPopulated()
+            return markPopulated()
 
         markUnpopulated()
     }
@@ -143,6 +144,23 @@ open class JsNodeProperty<T : JsGraphNodeProperty>() {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                    CSS
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    fun evalLinePosition(): Pair<Double, Double> {
+        root.parent.requestLayout()
+
+        return if (guiNode.isCollapsed())
+            guiNode.txtElementName.localToScene(guiNode.txtElementName.boundsInLocal).let {
+                Pair(
+                    if (this is JsNodeReceiver)
+                        it.minX + 15
+                    else
+                        it.maxX - 15,
+                    it.centerY
+                )
+            }
+        else
+            socket.localToScene(socket.boundsInLocal).let { Pair(it.centerX, it.centerY) }
+    }
 
     companion object {
 
@@ -205,13 +223,16 @@ class EmissionLine(
      */
     fun evalPosition() {
         with(line) {
-            val startBounds: Bounds = emitter.socket.localToScene(emitter.socket.boundsInLocal)
-            startX = startBounds.centerX
-            startY = startBounds.centerY
 
-            val endBounds: Bounds = receiver.socket.localToScene(receiver.socket.boundsInLocal)
-            endX = endBounds.centerX
-            endY = endBounds.centerY
+            emitter.evalLinePosition().apply {
+                startX = first
+                startY = second
+            }
+
+            receiver.evalLinePosition().apply {
+                endX = first
+                endY = second
+            }
 
             toFront()
         }
