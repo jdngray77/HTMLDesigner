@@ -36,7 +36,7 @@ import java.lang.System.gc
  */
 class JsDesigner {
 
-
+    // TODO store the js builder in here. Reuse it?
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                       FXML Controls & GUI components.
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -561,13 +561,10 @@ class JsDesigner {
      * Invoke when a connection between two nodes is created or
      * destroyed.
      */
-    fun invalidateTouches() {
+    fun invalidateTouches(quietValidation : Boolean = true) {
         if (disableCompile) return
 
-        // Forget the previous compile touches.
-        graph.resetTouched()
-
-        validateAndCompile()
+        validateAndCompile(quietValidation)
 
         // Update the CSS to show nodes that weren't touched.
         invalidateTouched()
@@ -576,24 +573,40 @@ class JsDesigner {
     fun validateAndCompile(quiet: Boolean = true) {
         if (disableCompile) return
 
-        graph.validate()?.let {
-            if (quiet) {
-                showNotification("We detected some issues with your graph.", "" +
-                        (if (it.size <= 5) it.joinToString("\n") else "There are ${it.size} warnings.") +
-                        "\n\n" +
-                        "Click here to view warnings.") {
-                    showListOfStrings("There are some integrity issue(s) with your graph." , it)
-                }
-            } else
-                showListOfStrings("There are some integrity issue(s) with your graph." , it)
-        } ?: run {
-            if (!quiet) {
-                    showNotification("Graph Validation", "No problems were found with the data!")
-            }
-        }
+        var compiled = graph.validate()
 
         // Compile and print.
-        compileOutput.text = JsGraphCompiler.compileGraph(graph)
+        compileOutput.text = compiled.javascript
+
+
+
+        if (!quiet) {
+            if (compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.SUCCESS)
+                showNotification("Graph Validation", "No problems were found with the data!")
+            else {
+                showNotification(
+                    // Title
+                    if (compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.ERROR)
+                        "The graph could not be compiled."
+                    else
+                        "The graph was compiled, but with warnings."
+                    , "" +
+
+                    // Message
+                    // Concat if there's too many warnings.
+                    (if (compiled.warnings.size <= 5)
+                        compiled.warnings.joinToString("\n")
+                    else
+                        "There are ${compiled.warnings.size} warnings.") +
+
+                    "\n\n" +
+                    "Click here to view warnings."
+                ) {
+                    // When the notification is clicked, show all warnings in a dialog.
+                    showListOfStrings("There are some integrity issue(s) with your graph.", compiled.warnings)
+                }
+            }
+        }
     }
 
     /**
@@ -614,6 +627,7 @@ class JsDesigner {
             it.invalidatePosition()
         }
     }
+
 
     /**
      * Re-creates the GUI from the data.
@@ -670,7 +684,7 @@ class JsDesigner {
     }
 
     fun validateGraph() {
-        validateAndCompile()
+        validateAndCompile(false)
     }
 
 

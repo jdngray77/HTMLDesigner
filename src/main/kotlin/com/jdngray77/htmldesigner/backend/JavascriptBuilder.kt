@@ -6,7 +6,6 @@ import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphFunction
 import com.jdngray77.htmldesigner.frontend.jsdesigner.JsFunctionFactory
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.classEquals
-import com.jdngray77.htmldesigner.utility.classEqualsOrSubclass
 import com.jdngray77.htmldesigner.utility.toCamel
 import java.io.Serializable
 
@@ -58,8 +57,8 @@ internal class JavascriptBuilder {
      * @param functionLocation Target of the [functionInvocation], if any. i.e if supplied, [functionInvocation] will be invoked on [functionLocation].
      */
     fun addListener(elementID: String, eventName: String, functionInvocation: String, functionLocation: String? = null): String {
-        addID(elementID)
-        functionLocation?.let { addID(it) }
+        addElementID(elementID)
+        functionLocation?.let { addElementID(it) }
 
         val toAdd = "$elementID.addEventListener(\"$eventName\", ${functionLocation?.let { "$it." } ?: ""}$functionInvocation);"
 
@@ -75,14 +74,14 @@ internal class JavascriptBuilder {
      */
     fun addFunction (jsFunction: JsFunction) {
         jsFunctions.addIfAbsent(jsFunction)
+        dirty()
     }
 
     /**
      * Adds an element ID to [elementIDs]
      */
-    private fun addID(id: String) {
-        elementIDs.add(id)
-        elementIDs = arrayListOf(*elementIDs.distinct().toTypedArray())
+    fun addElementID(id: String) {
+        elementIDs.addIfAbsent(id)
         dirty()
     }
 
@@ -123,6 +122,23 @@ internal class JavascriptBuilder {
     }
 
     companion object {
+
+        /**
+         * Wraps a code block in an anonymous function, which
+         * can be used as a callback.
+         *
+         * i.e
+         *
+         * `...myCode...`
+         *
+         * becomes
+         *
+         *
+         * ```
+         * () => { ...myCode... }
+         * ```
+         */
+        fun wrapAnonFunction(jsBody : String) = "() => {\n\t${jsBody}\n}"
 
 
         /**

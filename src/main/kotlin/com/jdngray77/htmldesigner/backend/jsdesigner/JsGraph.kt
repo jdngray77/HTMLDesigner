@@ -91,7 +91,7 @@ class JsGraph : Serializable {
      * // TODO Check for dupe element nodes
      * @returns a list of warnings of the problems and fixes, or null if there was none.
      */
-    fun validate() : List<String>? {
+    fun validate() : JsGraphCompiler.JsGraphCompilationResult {
         val problems = mutableListOf<String>()
         val wasEmpty = nodes.isEmpty()
 
@@ -101,10 +101,13 @@ class JsGraph : Serializable {
 
         // Test compile to check for nodes not being touched.
         // Also check if there's actually any output
-        JsGraphCompiler.compileGraph(this).ifBlank {
+        val compiled = JsGraphCompiler.compileGraph(this)
+
+        compiled.javascript.ifBlank {
             problems.add("This graph does not generate any output.")
         }
 
+        problems.addAll(0, compiled.warnings)
 
         groups.concmod().forEach {
             if (it.isEmpty()) {
@@ -168,7 +171,7 @@ class JsGraph : Serializable {
         if (!wasEmpty && nodes.isEmpty())
             problems.add("Validation deleted all nodes.")
 
-        return if (problems.isEmpty()) null else problems
+        return JsGraphCompiler.JsGraphCompilationResult(compiled.javascript, problems)
     }
     
 
@@ -331,6 +334,7 @@ class JsGraphFunction (
         receivers.add(
             JsGraphReceiver(
                 null,
+                null,
                 JsGraphDataType.Trigger,
                 "trigger",
                 this
@@ -343,6 +347,7 @@ class JsGraphFunction (
             receivers.add(
                 JsGraphReceiver(
                     it.third,
+                    null,
                     it.second,
                     it.first,
                     this
@@ -483,15 +488,35 @@ class JsGraphEmitter(
     }
 
     fun breakdownAllEmissions() {
-        emissions.forEach {
+        emissions.concmod().forEach {
             it.breakdown()
         }
     }
 }
-class JsGraphReceiver(
+class JsGraphReceiver (
 
-    // TODO this can't be validated. Create a map?
+    /**
+     * When being evaluated (especially on functions) but has no incoming data
+     * provided from an [admission], this value is used
+     * instead.
+     *
+     * Optional.
+     *
+     * If not provided, an incoming connection will be required.
+     */
     val defaultValue: Serializable?,
+
+    /**
+     * When being evaluated (especially on Elements) this determines
+     * how incoming data is handled.
+     *
+     * for example, on an element incomming data may be set into the background color :
+     *
+     * ```
+     * { "$parent.name.style.backgroundColor = $it" },
+     * ```
+     */
+    val setter: ((String) -> String)?,
 
     type: JsGraphDataType,
 
@@ -539,6 +564,8 @@ class JsGraphReceiver(
      * returns true if this receiver is connected to any emitters.
      */
     fun hasAdmission() = admission != null
+
+    override fun toString() = "${parent.name}.$name"
 }
 
 /**
@@ -627,6 +654,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
         receivers.add(
             JsGraphReceiver(
                 Color.BLACK.toSerializable(),
+                { "$name.style.backgroundColor = $it" },
                 JsGraphDataType.Color,
                 "Back Color",
                 this
@@ -636,6 +664,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
         receivers.add(
             JsGraphReceiver(
                 Color.BLACK.toSerializable(),
+                { "$name.style.color = $it" },
                 JsGraphDataType.Color,
                 "Text Color",
                 this
@@ -645,6 +674,12 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
         receivers.add(
             JsGraphReceiver(
                 false,
+                { "$name.style.visibility = ${
+                    if (it.toBoolean()) 
+                        "visible"
+                    else 
+                        "hidden"
+                }" },
                 JsGraphDataType.Boolean,
                 "Visible",
                 this
