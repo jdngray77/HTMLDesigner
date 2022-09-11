@@ -80,6 +80,9 @@ class SerializableColor (
         return color!!
     }
 
+    override fun toString(): String {
+        return "rgba($red, $green, $blue, $opacity)"
+    }
 }
 
 fun Color.toSerializable() = SerializableColor(red, green, blue, opacity)

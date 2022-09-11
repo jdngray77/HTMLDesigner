@@ -388,8 +388,6 @@ class JsDesigner {
         contextPane.addEventHandler(MouseEvent.MOUSE_PRESSED) { contextMenu.hide() }
 
         contextPane.setOnContextMenuRequested {
-            // FIXME this invalidate is temporary. It's here to compile on right click.
-            invalidateTouches()
             contextMenu.show(root, it.screenX, it.screenY)
         }
 
