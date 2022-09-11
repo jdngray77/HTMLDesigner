@@ -358,12 +358,6 @@ class JsNodeGroup(
                 }
             },
 
-            MenuItem("Commit to graph").also { item ->
-                item.setOnAction {
-                    requireIsNotCommitted()
-                    invokeInBackground(this::commitToGraph)
-                }
-            },
 
             MenuItem("Send group to back").also { item ->
                 item.setOnAction {
@@ -463,7 +457,9 @@ class JsNodeGroup(
     private fun setupListeners() {
 
         setOnMousePressed {
-            if (!it.isPrimaryButtonDown) return@setOnMousePressed
+            if (it.button != MouseButton.PRIMARY)
+                return@setOnMousePressed
+
             invalidatePosition()
             dragOriginX = it.screenX
             dragOriginY = it.screenY
@@ -472,12 +468,18 @@ class JsNodeGroup(
         }
 
         setOnMouseDragged {
+            if (it.button != MouseButton.PRIMARY)
+                return@setOnMouseDragged
+
             updateDrag(it)
             cursor = Cursor.CROSSHAIR
             it.consume()
         }
 
         setOnMouseReleased {
+            if (it.button == MouseButton.SECONDARY)
+                return@setOnMouseReleased
+
             finalizeDrag()
 
             if (onMouseClicked == null)
@@ -485,8 +487,19 @@ class JsNodeGroup(
             it.consume()
         }
 
+        addEventHandler(MouseEvent.MOUSE_PRESSED) {
+            if (it.isPrimaryButtonDown) {
+                contextMenu.hide()
+                editor.hideContextMenu()
+
+                it.consume()
+            }
+        }
+
         //but this one is removed when the group is committed.
         setOnMouseClicked {
+            if (it.isSecondaryButtonDown)
+                return@setOnMouseClicked
 
             it.consume()
 
@@ -507,12 +520,17 @@ class JsNodeGroup(
             }
 
 
-            setName(userInput("Enter a name for this group"))
+            setName(userInput("Enter a name for this group") { if (it.isBlank()) "Name cannot be blank" else null })
             commitToGraph(nodes.first().getGraphEditor().graph)
             commitConfirmed()
         }
 
         setOnContextMenuRequested {
+            // Reject context menu during drag.
+            if (translateX != 0.0 || translateY != 0.0)
+                return@setOnContextMenuRequested
+
+
             contextMenu.show(this, it.screenX, it.screenY)
             it.consume()
         }
@@ -769,6 +787,8 @@ class JsNodeGroup(
             nodes.add(editor.getGUINodeFor(it)!!)
         }
 
+        checkNotEmpty()
+
         gc()
     }
 
@@ -838,6 +858,8 @@ class JsNodeGroup(
         prefHeight += PADDING * 2
         layoutX -= PADDING
         layoutY -= PADDING
+
+        editor.invalidateRootSize()
     }
 
 
@@ -858,7 +880,7 @@ class JsNodeGroup(
      */
     private fun checkNotEmpty() : Boolean {
         if (nodes.isEmpty()) {
-            deleteGroup()
+            dumpGroup()
             setAction("Auto-deleted group '${graphGroup.name}' because all nodes were removed.")
             return false
         }

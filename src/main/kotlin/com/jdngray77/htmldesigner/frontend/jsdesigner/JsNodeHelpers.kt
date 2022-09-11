@@ -138,7 +138,13 @@ open class JsNodeProperty<T : JsGraphNodeProperty>() {
 
 
     fun breakdown() {
-        markUnpopulated()
+        if (property is JsGraphEmitter && (property as JsGraphEmitter).emissions().isEmpty()) {
+            markUnpopulated()
+        } else if (property is JsGraphReceiver && !(property as JsGraphReceiver).hasAdmission()) {
+            markUnpopulated()
+        }
+
+
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

@@ -95,6 +95,8 @@ class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
         )
             return
 
-        emitter().breakdownAllEmissions()
+        emitter().emissions().forEach {
+            guiNode.breakdownConnection(it)
+        }
     }
 }

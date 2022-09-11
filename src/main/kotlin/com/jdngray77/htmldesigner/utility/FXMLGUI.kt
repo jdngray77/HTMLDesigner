@@ -27,6 +27,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Control
 import javafx.scene.control.Tooltip
+import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent.MOUSE_CLICKED
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
@@ -140,7 +141,10 @@ fun Node.setTooltip(text: String) =
 
 fun Node.setOnDoubleClick(r: Runnable) {
     addEventHandler(MOUSE_CLICKED) {
-        if (it.clickCount == 2) {
+        if (it.button != MouseButton.PRIMARY)
+            return@addEventHandler
+
+        if (it.clickCount >= 2) {
             r.run()
         }
     }
