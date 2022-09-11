@@ -251,7 +251,7 @@ object JsGraphCompiler {
         // Check the inputs
 
         function.recievers().forEach {
-            if (it.defaultValue == null && !it.hasAdmission()) {
+            if (!it.isTrigger() && it.defaultValue == null && !it.hasAdmission()) {
                 throw JsGraphCompilationException("$it requires a value, but none is provided.")
             }
         }

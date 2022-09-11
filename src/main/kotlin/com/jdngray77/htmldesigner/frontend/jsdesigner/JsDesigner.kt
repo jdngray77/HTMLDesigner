@@ -578,18 +578,25 @@ class JsDesigner {
         // Compile and print.
         compileOutput.text = compiled.javascript
 
+        val isError = compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.ERROR
 
+        if (isError)
+            showWarningNotification(
+                // Title
+                "The graph could not be compiled."
+            , compiled.warnings.first()
+        )
 
-        if (!quiet) {
+        if (!quiet || isError) {
             if (compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.SUCCESS)
                 showNotification("Graph Validation", "No problems were found with the data!")
             else {
                 showNotification(
                     // Title
-                    if (compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.ERROR)
+                    if (isError)
                         "The graph could not be compiled."
                     else
-                        "The graph was compiled, but with warnings."
+                        "We've detected some minor issues with the graph."
                     , "" +
 
                     // Message
@@ -597,7 +604,7 @@ class JsDesigner {
                     (if (compiled.warnings.size <= 5)
                         compiled.warnings.joinToString("\n")
                     else
-                        "There are ${compiled.warnings.size} warnings.") +
+                        "There are ${compiled.warnings.size} messages.") +
 
                     "\n\n" +
                     "Click here to view warnings."

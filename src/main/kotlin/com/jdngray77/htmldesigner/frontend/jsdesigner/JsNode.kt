@@ -1,14 +1,12 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.*
-import com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner.Companion.themeLine
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.concmod
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.application.Platform
 import javafx.fxml.FXML
 import javafx.scene.Cursor
-import javafx.scene.Parent
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
@@ -17,7 +15,6 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Region.USE_COMPUTED_SIZE
 import javafx.scene.layout.VBox
-import javafx.scene.shape.Line
 import java.lang.Exception
 import kotlin.math.abs
 
@@ -34,22 +31,47 @@ import kotlin.math.abs
  */
 class JsNode {
 
+    /**
+     * Logic controller that manages
+     * the collapsing of this node.
+     *
+     * Configured in [initialize]
+     */
     private lateinit var collapseManager : DoubleClickCollapseManager
+
+    /**
+     * @return true if this node is collapsed
+     * to show less information
+     */
     fun isCollapsed() = collapseManager.isCollapsed
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                                FXML GUI controls
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    /**
+     * The root of the node.
+     */
     @FXML
     internal lateinit var root: AnchorPane
 
+    /**
+     * Vbox containing emitters
+     */
     @FXML
-    private lateinit var vboxEvents: VBox
+    private lateinit var vboxEmitters: VBox
 
+    /**
+     * Vbox containing receivers
+     */
     @FXML
-    private lateinit var vboxAttrs: VBox
+    private lateinit var vboxReceivers: VBox
 
+    /**
+     * Label containing the name of the node.
+     *
+     * Used to drag, collapse, and get the context menu.
+     */
     @FXML
     lateinit var txtElementName: Label
 
@@ -66,6 +88,9 @@ class JsNode {
     internal fun init(e: JsGraphNode, graphEditor: JsDesigner) {
         if (this::graphNode.isInitialized)
             throw Exception("Attempted to re-initialize a JsNode.")
+
+        assert(this::vboxReceivers.isInitialized)
+        assert(this::vboxEmitters.isInitialized)
 
 
         // Store graph info.
@@ -112,7 +137,7 @@ class JsNode {
      */
     private fun addEmitter(_emitter: JsGraphEmitter) {
         loadFXMLComponent<AnchorPane>("JsNodeEmitter.fxml", javaClass).apply {
-            vboxEvents.children.add(this.first)
+            vboxEmitters.children.add(this.first)
             with((second as JsNodeEmitter)) {
                 emitters.add(this)
                 initProperty(_emitter)
@@ -127,7 +152,7 @@ class JsNode {
      */
     private fun addReceiver(_receiver: JsGraphReceiver) {
         loadFXMLComponent<AnchorPane>("JsNodeReceiver.fxml", javaClass).apply {
-            vboxAttrs.children.add(this.first)
+            vboxReceivers.children.add(this.first)
             with((second as JsNodeReceiver)) {
                 receivers.add(this)
                 initProperty(_receiver)
@@ -161,16 +186,16 @@ class JsNode {
             {
                 root.maxHeight = txtElementName.height + 15
                 txtElementName.text = "↓ ${graphNode.name} ↓"
-                root.children.remove(vboxEvents)
-                root.children.remove(vboxAttrs)
+                root.children.remove(vboxEmitters)
+                root.children.remove(vboxReceivers)
             },
 
             // Collapse the node
             {
                 root.maxHeight = USE_COMPUTED_SIZE
                 txtElementName.text = graphNode.name
-                root.children.add(vboxEvents)
-                root.children.add(vboxAttrs)
+                root.children.add(vboxEmitters)
+                root.children.add(vboxReceivers)
 
 
                 Platform.runLater {
