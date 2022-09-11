@@ -15,9 +15,9 @@
 }
 
 /*A square kept on screen below a group of nodes that have been grouped together.*/
-.node-group {
-    -fx-background-color: rgba(72, 179, 255, 0.84)
-}
+/*.node-group {*/
+/*    -fx-background-color: rgba(72, 179, 255, 0.84)*/
+/*}*/
 
 
 /*All sockets.*/

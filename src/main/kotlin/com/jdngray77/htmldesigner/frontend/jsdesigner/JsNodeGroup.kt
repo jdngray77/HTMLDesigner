@@ -426,10 +426,10 @@ class JsNodeGroup(
         lblHeader.padding = Insets(20.0)
         children.add(lblHeader)
 
-        setCommitState()
         setupListeners()
         addToEditor()
         invalidatePosition()
+        setCommitState()
     }
 
     /**
