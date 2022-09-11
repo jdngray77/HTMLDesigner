@@ -11,6 +11,6 @@
       <VBox fx:id="vboxEmitters" layoutX="11.0" layoutY="70.0" prefHeight="61.0" prefWidth="164.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="30.0" />
    </children>
    <effect>
-      <DropShadow blurType="GAUSSIAN" height="35.83" offsetX="3.0" offsetY="3.0" radius="17.415" width="35.83" />
+      <DropShadow blurType="GAUSSIAN" height="35.83" offsetX="10.0" offsetY="10.0" radius="17.415" width="35.83" />
    </effect>
 </AnchorPane>

@@ -19,6 +19,14 @@
 /*    -fx-background-color: rgba(72, 179, 255, 0.84)*/
 /*}*/
 
+/*
+A shadow added to a node when it is dragged into or out of a group.
+ */
+.enter-exit {
+    -fx-border-color: orange !important;
+    -fx-effect: dropshadow(gaussian, black, 10, 0, 15, 15);
+}
+
 
 /*All sockets.*/
 .socket {}

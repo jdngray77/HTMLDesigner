@@ -182,7 +182,7 @@ class JsNode {
             // When the label is double clicked
             txtElementName,
 
-            // And expand the node
+            // Collapse the node
             {
                 root.maxHeight = txtElementName.height + 15
                 txtElementName.text = "↓ ${graphNode.name} ↓"
@@ -190,19 +190,19 @@ class JsNode {
                 root.children.remove(vboxReceivers)
             },
 
-            // Collapse the node
+            // and expand the node
             {
                 root.maxHeight = USE_COMPUTED_SIZE
                 txtElementName.text = graphNode.name
                 root.children.add(vboxEmitters)
                 root.children.add(vboxReceivers)
 
-
                 Platform.runLater {
                     invalidatePosition()
+                    graphEditor.invalidateGroupPositions()
                 }
             }
-            )
+        )
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -291,8 +291,6 @@ class JsNode {
     @FXML
     private fun drag(mouseEvent: MouseEvent) {
 
-        
-
         // Determine new location for the node, including the mouses position.
         // This new location aligns the center of node's label under the mouse.
         var translatex = mouseEvent.x + root.translateX - root.width / 2
@@ -308,15 +306,43 @@ class JsNode {
             dragDownLocation = Pair(mouseEvent.screenX, mouseEvent.sceneY)
         }
 
-
         // Commit the movement.
         root.layoutX += translatex
         root.layoutY += translatey
 
         invalidatePosition()
 
-        graphEditor.getGroupsContaining(this).forEach {
-            it.invalidatePosition()
+        // This section is critical for dragging into and out of groups.
+        // See [mRelease] for committing of adding/removing nodes.
+
+        graphEditor.getGroups().forEach {
+            it.styleClass.remove("enter-exit")
+            root.styleClass.remove("enter-exit")
+
+            // If this is a group we're a member of,
+            // we may either move or exit it.
+            if (it.getNodes().contains(this)) {
+
+                if (!mouseEvent.isAltDown)
+                    // Move the node and group.
+                    it.invalidatePosition()
+                else {
+                    // Otherwise suggest exiting the group.
+                    if (!it.boundsInParent.intersects(root.boundsInParent)) {
+                        it.styleClass.add("enter-exit")
+                        root.styleClass.add("enter-exit")
+                    }
+                }
+            } else {
+                // This is not a group we're a member of, we may only
+                // enter it.
+
+                if (it.boundsInParent.intersects(root.boundsInParent)) {
+                    it.styleClass.add("enter-exit")
+                    root.styleClass.add("enter-exit")
+                }
+            }
+
         }
 
         mouseEvent.consume()
@@ -392,7 +418,22 @@ class JsNode {
 
     fun mRelease() {
         txtElementName.cursor = Cursor.HAND
-        root.styleClass.remove("in-motion")
+        root.styleClass.removeAll("in-motion", "enter-exit")
+
+        graphEditor.getGroups().forEach {
+            it.styleClass.remove("enter-exit")
+
+            if (!it.getNodes().contains(this)) {
+                if (it.boundsInParent.intersects(root.boundsInParent)) {
+                    it.addNode(this)
+                }
+            } else{
+                if (!it.boundsInParent.intersects(root.boundsInParent)) {
+                    it.removeNode(this)
+                } else
+                    it.invalidatePosition()
+            }
+        }
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

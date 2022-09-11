@@ -3,6 +3,7 @@ package com.jdngray77.htmldesigner.frontend.jsdesigner
 import com.jdngray77.htmldesigner.backend.BackgroundTask.invokeInBackground
 import com.jdngray77.htmldesigner.backend.BackgroundTask.submitToUI
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphElement
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNodeGroup
 import com.jdngray77.htmldesigner.backend.setAction
 import com.jdngray77.htmldesigner.backend.showWarningNotification
@@ -677,11 +678,12 @@ class JsNodeGroup(
         graphGroup.add(node.graphNode)
 
         setAction("Added node '${node.graphNode.name}' to group '${graphGroup.name}'")
+
+        invalidatePosition()
     }
 
     /**
      * Removes a node from the group.
-     * // TODO listener for drag out
      */
     fun removeNode(node: JsNode) {
         checkDisposeMod()
@@ -690,6 +692,10 @@ class JsNodeGroup(
         graphGroup.remove(node.graphNode)
 
         setAction("Removed node '${node.graphNode.name}' from group '${graphGroup.name}'")
+
+        if (checkNotEmpty()) {
+            invalidatePosition()
+        }
     }
 
 
@@ -785,6 +791,7 @@ class JsNodeGroup(
      */
     fun invalidatePosition() {
 
+
         if (collapseManager.isCollapsed) {
             Platform.runLater {
                 prefWidth = lblHeader.width + if (!collapseWidthFix) {
@@ -840,6 +847,23 @@ class JsNodeGroup(
     private fun checkDisposeMod() {
         if (disposed)
             throw IllegalStateException("Cannot add modify a disposed group")
+    }
+
+    /**
+     * Checks that the group is not empty.
+     *
+     * If the group is empty, it is deleted.
+     *
+     * @return true if the group is valid and has not been deleted. False if invalid and deleted.
+     */
+    private fun checkNotEmpty() : Boolean {
+        if (nodes.isEmpty()) {
+            deleteGroup()
+            setAction("Auto-deleted group '${graphGroup.name}' because all nodes were removed.")
+            return false
+        }
+
+        return true
     }
 
     private fun requireIsCommitted() {
@@ -898,14 +922,27 @@ class JsNodeGroup(
     /**
      * Creates and returns a new [JsNodeGroup], with the same name and nodes
      */
-    fun clone() =
-        JsNodeGroup(
+    fun clone(): JsNodeGroup? {
+        val dupedNodes = nodes.filterNot { it.graphNode is JsGraphElement }.apply {
+            if (size != nodes.size) {
+                showWarningNotification("Some nodes not duplicated.", "Document elements are unique, and cannot be duplicated.")
+            }
+            map {
+                it.dupeNode()
+            }
+        }
+
+        if (dupedNodes.isEmpty()){
+            showWarningNotification("No nodes duplicated.", "No nodes were duplicated, so no new group was created.")
+            return null
+        }
+
+        return JsNodeGroup(
             editor,
-            *nodes.map {
-                it.dupeNode() // FIXME i don't want this to crash if the group contains a non-dupeable node.
-            }.toTypedArray()
-        ).also {
+            *dupedNodes.toTypedArray()
+            ).also {
             editor.grouper.lastCreatedGroup = it
             setAction("Cloned group '${graphGroup.name}', and duplicated all nodes contained within.")
         }
+    }
 }
