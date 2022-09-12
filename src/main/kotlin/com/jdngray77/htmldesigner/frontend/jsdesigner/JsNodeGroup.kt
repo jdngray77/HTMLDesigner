@@ -490,7 +490,6 @@ class JsNodeGroup(
         addEventHandler(MouseEvent.MOUSE_PRESSED) {
             if (it.isPrimaryButtonDown) {
                 contextMenu.hide()
-                editor.hideContextMenu()
 
                 it.consume()
             }
@@ -858,8 +857,6 @@ class JsNodeGroup(
         prefHeight += PADDING * 2
         layoutX -= PADDING
         layoutY -= PADDING
-
-        editor.invalidateRootSize()
     }
 
 

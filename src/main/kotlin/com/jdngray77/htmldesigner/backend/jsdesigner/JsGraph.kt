@@ -81,7 +81,7 @@ class JsGraph : Serializable {
      */
     internal fun resetTouched() {
         nodes.forEach {
-            it.touched = false
+            it.resetTouched()
         }
     }
 
@@ -196,6 +196,16 @@ class JsGraph : Serializable {
         JsGraphFunction(jsFunction).apply {
             nodes.add(this)
             return this
+        }
+    }
+
+    fun addNote(note: String): JsGraphNoteNode {
+        if (note.isBlank()) {
+            throw IllegalArgumentException("Note cannot be blank.")
+        }
+
+        return JsGraphNoteNode(note).apply {
+            nodes.add(this)
         }
     }
 
@@ -357,6 +367,11 @@ class JsGraphFunction (
     }
 }
 
+class JsGraphNoteNode(note: String) : JsGraphNode(note) {
+    override fun resetTouched() = touch()
+
+}
+
 /**
  * Root of all nodes within the graph.
  *
@@ -388,8 +403,13 @@ abstract class JsGraphNode(
      * If not, then the node is not included in the output, and may be redundant.
      */
     var touched: Boolean = false
+        private set
 
-    fun touch() {
+    open fun resetTouched() {
+        touched = false
+    }
+
+    open fun touch() {
         touched = true
     }
 
@@ -622,8 +642,8 @@ class JsGraphEmission (
     }
 
     fun touch() {
-        emitter.parent.touched = true
-        receiver.parent.touched = true
+        emitter.parent.touch()
+        receiver.parent.touch()
     }
 
     override fun toString() = "${emitter.parent.name}#${emitter.name} -> ${receiver.parent.name}#${receiver.name}"

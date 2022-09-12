@@ -37,13 +37,13 @@ class JsNode {
      *
      * Configured in [initialize]
      */
-    private lateinit var collapseManager : DoubleClickCollapseManager
+    private var collapseManager : DoubleClickCollapseManager? = null
 
     /**
      * @return true if this node is collapsed
      * to show less information
      */
-    fun isCollapsed() = collapseManager.isCollapsed
+    fun isCollapsed() = collapseManager?.isCollapsed == true
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                                FXML GUI controls
@@ -177,6 +177,10 @@ class JsNode {
             )
         }
 
+        if (graphNode is JsGraphNoteNode) {
+            // Don't create a collapse manager.
+            return
+        }
 
         collapseManager = DoubleClickCollapseManager(
             // When the label is double clicked

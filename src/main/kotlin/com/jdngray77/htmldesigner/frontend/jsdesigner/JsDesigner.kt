@@ -98,49 +98,75 @@ class JsDesigner {
      * Constructor for the [contextMenu] only.
      */
     init {
-        contextMenu.items.add(
-            MenuItem("From Document").also {
-                it.setOnAction { action ->
+        with(contextMenu.items) {
 
-                    // Fuck this shit, man. Why can't i just put this in the brackets?
-                    val filter: (Element) -> Boolean = {
-                        it.tagName() != "style" && it.id().isNotEmpty()
-                    }
+            addAll(
+                MenuItem("Add a new node :").apply {
+                    isDisable = true
+                },
+                SeparatorMenuItem(),
 
-                    document.getElementById(
-                        ItemSelectionDialog<String>(
-                            document.allElements.filter(filter).map { it.id() }.toList()
-                        ).showAndWait()
-                    )?.let {
-                        try {
-                            implNewNode(
-                                graph.addElement(it),
-                                contextMenu.x,
-                                contextMenu.y
-                            )
-                        } catch (e: Exception) {
-                            if (e.message != null) {
-                                showWarningNotification("Failed to create the node.", e.message!!)
-                            } else {
-                                showErrorNotification(e, suppress = false)
+
+                MenuItem("Element from Web Page").also {
+                    it.setOnAction { action ->
+
+                        // Fuck this shit, man. Why can't i just put this in the brackets?
+                        val filter: (Element) -> Boolean = {
+                            it.tagName() != "style" && it.id().isNotEmpty()
+                        }
+
+                        document.getElementById(
+                            ItemSelectionDialog<String>(
+                                document.allElements.filter(filter).map { it.id() }.toList()
+                            ).showAndWait()
+                        )?.let {
+                            try {
+                                implNewNode(
+                                    graph.addElement(it),
+                                    contextMenu.x,
+                                    contextMenu.y
+                                )
+                            } catch (e: Exception) {
+                                if (e.message != null) {
+                                    showWarningNotification("Failed to create the node.", e.message!!)
+                                } else {
+                                    showErrorNotification(e, suppress = false)
+                                }
+
+
                             }
-
-
                         }
                     }
-                }
-            }
-        )
+                },
 
-        contextMenu.items.addAll(*JsFunctionFactory.asMenus {
-            // On user selecting an item, add the function to the graph
-            // and create a new node for it.
-            implNewNode(
-                graph.addFunction(it),
-                contextMenu.x - EDITOR.stage.x,
-                contextMenu.y - EDITOR.stage.y
+                MenuItem("[WIP] Note").apply {
+                    setOnAction {
+                        implNewNode(
+                            graph.addNote(
+                                userInput("Enter the note text")
+                            ),
+                            contextMenu.x,
+                            contextMenu.y
+                        )
+                    }
+                },
+
+                SeparatorMenuItem()
             )
-        }.toTypedArray())
+
+            // All other nodes
+            addAll(
+                *JsFunctionFactory.asMenus {
+                    // On user selecting an item, add the function to the graph
+                    // and create a new node for it.
+                    implNewNode(
+                        graph.addFunction(it),
+                        contextMenu.x - EDITOR.stage.x,
+                        contextMenu.y - EDITOR.stage.y
+                    )
+                }.toTypedArray()
+            )
+        }
     }
 
 
@@ -395,8 +421,6 @@ class JsDesigner {
         // Group selection dragging
 
 
-
-
         tryLoadTestGraph()
     }
 
@@ -421,7 +445,10 @@ class JsDesigner {
             try {
                 loadTestGraph()
             } catch (e: InvalidClassException) {
-                showWarningNotification("Unable to load test graph from file", "It's incompatible with the current version.")
+                showWarningNotification(
+                    "Unable to load test graph from file",
+                    "It's incompatible with the current version."
+                )
                 loadGraph(JsGraph())
             }
         } else
@@ -559,7 +586,7 @@ class JsDesigner {
      * Invoke when a connection between two nodes is created or
      * destroyed.
      */
-    fun invalidateTouches(quietValidation : Boolean = true) {
+    fun invalidateTouches(quietValidation: Boolean = true) {
         if (disableCompile) return
 
         validateAndCompile(quietValidation)
@@ -581,9 +608,8 @@ class JsDesigner {
         if (isError)
             showWarningNotification(
                 // Title
-                "The graph could not be compiled."
-            , compiled.warnings.first()
-        )
+                "The graph could not be compiled.", compiled.warnings.first()
+            )
 
         if (!quiet || isError) {
             if (compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.SUCCESS)
@@ -594,18 +620,17 @@ class JsDesigner {
                     if (isError)
                         "The graph could not be compiled."
                     else
-                        "We've detected some minor issues with the graph."
-                    , "" +
+                        "We've detected some minor issues with the graph.", "" +
 
-                    // Message
-                    // Concat if there's too many warnings.
-                    (if (compiled.warnings.size <= 5)
-                        compiled.warnings.joinToString("\n")
-                    else
-                        "There are ${compiled.warnings.size} messages.") +
+                            // Message
+                            // Concat if there's too many warnings.
+                            (if (compiled.warnings.size <= 5)
+                                compiled.warnings.joinToString("\n")
+                            else
+                                "There are ${compiled.warnings.size} messages.") +
 
-                    "\n\n" +
-                    "Click here to view warnings."
+                            "\n\n" +
+                            "Click here to view warnings."
                 ) {
                     // When the notification is clicked, show all warnings in a dialog.
                     showListOfStrings("There are some integrity issue(s) with your graph.", compiled.warnings)
