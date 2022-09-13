@@ -78,6 +78,14 @@ fun CopyToClipboard(string: String) {
 }
 
 
+/**
+ * Returns true if this string does not exactly match any of
+ * the provided strings.
+ */
+fun String.doesNotEqual(vararg these: String) : Boolean =
+    these.none { this == it }
+
+
 
 
 

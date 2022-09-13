@@ -38,7 +38,7 @@ class JsNodeReceiver: JsNodeProperty<JsGraphReceiver>() {
             if (receiver().hasAdmission() || receiver().type != emitterBeingDragged.property().type)
                 return@setOnMouseDragReleased
 
-            graphEditor.uncommittedLine.isVisible = false
+            graphEditor.draggingLine.isVisible = false
 
             emitterBeingDragged.guiNode.emitConnection(emitterBeingDragged, this)
 

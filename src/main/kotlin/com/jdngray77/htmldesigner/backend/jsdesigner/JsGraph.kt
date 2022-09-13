@@ -19,7 +19,16 @@ import kotlin.reflect.KClass
  * TODO variables
  * TODO value providers
  */
-class JsGraph : Serializable {
+class JsGraph(
+
+    /**
+     * A name that identifies the graph.
+     *
+     * Used to name the file that this is saved in.
+     */
+    val scriptName: String
+
+) : Serializable {
 
     /**
      * Collection of nodes that exist in this graph.

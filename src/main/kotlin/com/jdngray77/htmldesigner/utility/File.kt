@@ -90,3 +90,8 @@ fun File.flattenTree(): ArrayList<File> {
         .forEach{ x.add(it.toFile()) }
     return x
 }
+
+fun File.createNewFileAndParentDirs()  {
+    parentFile.mkdirs()
+    createNewFile()
+}

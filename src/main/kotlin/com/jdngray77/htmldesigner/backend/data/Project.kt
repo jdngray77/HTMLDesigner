@@ -21,7 +21,9 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
 import com.jdngray77.htmldesigner.backend.html.DefaultDocument
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -439,6 +441,21 @@ class Project(
     }
 
     /**
+     * Attempts to fetch a file from the [CACHE], but if it doesn't exist
+     * invokes a function that provides it instead.
+     *
+     * @param path The file path to load.
+     * @param otherwise The default value provider invoked if the [path] does not exist in the [CACHE].
+     */
+    private fun <T: Any> tryGetCached(directory: String, subpath: String, otherwise : () -> T) : T = subPath("$directory/$subpath").let {
+        path ->
+        getCached<T>(path) ?: let {
+            CACHE[path] = otherwise()
+            return CACHE[path] as T
+        }
+    }
+
+    /**
      * Finds this document in the [CACHE], and returns the file
      * that it was loaded from.
      *
@@ -553,6 +570,34 @@ class Project(
         }
     }
 
+
+    /**
+     * Loads a visual javascript data file from [PROJECT_PATH_JS].
+     *
+     * These can be edited and compiled with the [VisualScriptEditor]
+     */
+    fun loadJsGraph(name: String): JsGraph = tryGetCached(PROJECT_PATH_JS, "$name.jvg") {
+        loadObjectFromDisk(
+            javascripts().find {
+                it.name == "$name.jvg"
+            }!!
+        ) as JsGraph
+    }
+
+    fun saveJsGraph(jsGraph: JsGraph) {
+        // TODO const val jvg
+        // TODO test
+        val f = subPath("$PROJECT_PATH_JS${mvc().currentDocument().projectFile().nameWithoutExtension + "/"}${jsGraph.scriptName}.jvg")
+        jsGraph.saveObjectToDisk(f)
+        CACHE[f] = jsGraph
+    }
+
+    fun newJsGraph(name: String) : JsGraph {
+        val graph = JsGraph(name)
+        saveJsGraph(graph)
+        return graph
+    }
+
 //    /**
 //     * Creates a new stylesheet
 //     */
@@ -646,6 +691,8 @@ class Project(
      * in the project.
      */
     fun media() = MEDIA.flattenTree()
+
+
 
     companion object {
         /**

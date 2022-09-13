@@ -31,7 +31,7 @@ import java.lang.System.gc
  * An advanced drag listener that uses a drag selection to group multiple
  * nodes into a [JsNodeGroup].
  *
- * Create and added to the [JsDesigner]
+ * Create and added to the [VisualScriptEditor]
  *
  */
 class JsNodeGrouper(
@@ -39,7 +39,7 @@ class JsNodeGrouper(
     /**
      * Reference to the editor on which this grouper is active.
      */
-    val editor: JsDesigner
+    val editor: VisualScriptEditor
 
 ) : Rectangle() {
 
@@ -101,13 +101,15 @@ class JsNodeGrouper(
      *
      * Resets the size to 0, then finally makes the rectangle visible.
      */
-    fun startSelection(x: Double, y: Double) {
+    fun startSelection(MouseSceneX: Double, MouseSceneY: Double) {
         // If the last selection was not committed, get rid. Replace with new selection.
         deleteIfUncommitted()
 
-        relocate(x, y)
-        originX = x
-        originY = y
+        val local = editor.sceneToLocal(MouseSceneX, MouseSceneY)
+
+        relocate(local.x, local.y)
+        originX = local.x
+        originY = local.y
 
         width = 0.0
         height = 0.0
@@ -124,14 +126,16 @@ class JsNodeGrouper(
      * Updates the size of the rectangle to match the current position of the mouse.
      */
     // Not perfect. seems to drift. Not sure why. cba to fix.
-    fun updateSelection(mousex: Double, mousey: Double) {
+    fun updateSelection(MouseSceneX: Double, MouseSceneY: Double) {
         if (!isVisible) return
+
+        val local = editor.editorRootPane.sceneToLocal(MouseSceneX, MouseSceneY)
 
         // Determine the size of the rectangle from how far the mouse
         // has travelled from the origin.
-        width = mousex - originX
-        height = mousey - originY
-
+        width = local.x - originX
+        height = local.y - originY
+x
         // Handle negative width/height by relocating the rectangle.
 
         // Typically, the rectagles origin matches the mouse origin, however
@@ -235,7 +239,7 @@ class JsNodeGrouper(
 }
 
 /**
- * Front end to represent a [JsGraphNodeGroup] in [JsDesigner]
+ * Front end to represent a [JsGraphNodeGroup] in [VisualScriptEditor]
  *
  * A group may or may not have been commited to a graph.
  *
@@ -252,7 +256,7 @@ class JsNodeGroup(
     /**
      * The editor in which this group will be displayed
      */
-    val editor: JsDesigner,
+    val editor: VisualScriptEditor,
 
     /**
      * The group this is to represent.
@@ -372,7 +376,7 @@ class JsNodeGroup(
         this,
         {
             lblHeader.text = "↓ ${graphGroup.name} ↓"
-            editor.root.children.removeAll(nodes.map { it.root })
+            editor.editorRootPane.children.removeAll(nodes.map { it.root })
 
             collapseWidthFix = false
 
@@ -380,7 +384,7 @@ class JsNodeGroup(
             invalidatePosition()
         },
         {
-            editor.root.children.addAll(nodes.map { it.root })
+            editor.editorRootPane.children.addAll(nodes.map { it.root })
             lblHeader.text = graphGroup.name
             invalidatePosition()
         }
@@ -400,7 +404,7 @@ class JsNodeGroup(
      *
      * To commit to the data graph, call [commitToGraph]
      */
-    constructor(editor: JsDesigner, vararg nodes: JsNode) :
+    constructor(editor: VisualScriptEditor, vararg nodes: JsNode) :
             this(editor, JsGraphNodeGroup("", nodes = nodes.map { it.graphNode }.toTypedArray()), *nodes) {
     }
 
@@ -904,7 +908,7 @@ class JsNodeGroup(
      */
     private fun removeFromEditor() {
         submitToUI {
-            editor.root.children.remove(this)
+            editor.editorRootPane.children.remove(this)
         }
     }
 
@@ -913,7 +917,7 @@ class JsNodeGroup(
      */
     private fun addToEditor() {
         submitToUI {
-            editor.root.children.addIfAbsent(this)
+            editor.editorRootPane.children.addIfAbsent(this)
             invalidatePosition()
         }
     }

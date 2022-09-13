@@ -137,7 +137,7 @@ object JsGraphCompiler {
      * i.e
      *
      * ```
-     * MainContent.addEventListener("Click", () => {
+     * MainContent.addEventListener("click", () => {
      *   ...
      * });
      * ```
@@ -164,7 +164,8 @@ object JsGraphCompiler {
             connection.emitter.parent.name,
 
             // On this event
-            connection.emitter.name,
+            // TODO hover seems to still be click?
+            connection.emitter.name.lowercase(),
 
             // Call this function
             wrapAnonFunction(

@@ -34,14 +34,14 @@ class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
             if (!it.isPrimaryButtonDown) return@setOnMousePressed
 
             // Move the feedback line
-            with(graphEditor.uncommittedLine) {
-                val screenBounds: Bounds = socket.localToScene(socket.boundsInLocal)
+            with(graphEditor.draggingLine) {
+                val localToEditor: Bounds = graphEditor.childToLocal(socket)
 
-                startX = screenBounds.centerX
-                startY = screenBounds.centerY
+                startX = localToEditor.centerX
+                startY = localToEditor.centerY
 
-                endX = it.sceneX
-                endY = it.sceneY
+                endX = startX
+                endY = startY
 
                 isVisible = true
                 emitterBeingDragged = this@JsNodeEmitter
@@ -59,21 +59,23 @@ class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
 
         // TODO check which of these is triggered.
         socket.setOnMouseReleased {
-            graphEditor.uncommittedLine.isVisible = false
+            graphEditor.draggingLine.isVisible = false
             it.consume()
         }
 
         // Provide feedback when moving the mouse around.
         socket.setOnMouseDragged {
-            with(graphEditor.uncommittedLine) {
-                endX = it.sceneX - 5
-                endY = it.sceneY - 5
+            with(graphEditor.draggingLine) {
+                graphEditor.sceneToLocal(it.sceneX, it.sceneY).let {
+                    endX = it.x - 5
+                    endY = it.y - 5
+                }
             }
         }
 
         socket.setOnMouseReleased {
             assertPopulationCss()
-            graphEditor.uncommittedLine.isVisible = false
+            graphEditor.draggingLine.isVisible = false
         }
 
         socket.setOnContextMenuRequested {

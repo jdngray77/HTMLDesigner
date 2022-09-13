@@ -3,27 +3,23 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.control.*?>
-<SplitPane fx:id="split" orientation="VERTICAL" dividerPositions="0.9" stylesheets="@jsDesigner.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.JsDesigner">
-   <Pane fx:id="root">
+<SplitPane fx:id="split" orientation="VERTICAL" dividerPositions="0.9" stylesheets="@jsDesigner.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.VisualScriptEditor">
+   <Pane fx:id="editorRootPane">
       <children>
          <Pane styleClass="important" prefHeight="99999" prefWidth="99999" fx:id="contextPane" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
 
          <!--  the important selector is used to retain these objects when deleting all content within the root.    -->
 
          <MenuBar styleClass="important">
-            <Menu text="File">
-               <MenuItem onAction="#menu_save" text="Save"/>
-               <MenuItem onAction="#menu_load" text="Load..."/>
-               <MenuItem onAction="#menu_close" text="Close"/>
+            <Menu text="Script">
+               <MenuItem onAction="#menu_new_script" text="Create a script"/>
                <SeparatorMenuItem/>
-               <CheckMenuItem onAction="#menu_showCompile" text="Display compiled output"/>
-            </Menu>
-            <Menu text="Graph">
                <MenuItem onAction="#menu_add_node" text="Add Node"/>
                <MenuItem onAction="#validateGraph" text="Validate and Compile"/>
+                <CheckMenuItem onAction="#menu_toggleCompileVisible" text="Display the code being generated"/>
                <SeparatorMenuItem/>
-               <MenuItem onAction="#reset" text="Clear the slate..."/>
-               <MenuItem onAction="#resetConnections" text="Unlink everything"/>
+               <MenuItem onAction="#resetEditor" text="Delete everything..."/>
+               <MenuItem onAction="#resetConnections" text="Unlink everything..."/>
                <SeparatorMenuItem/>
                <MenuItem onAction="#menu_help" text="[inop] Help"/>
             </Menu>

@@ -112,7 +112,6 @@ object JsFunctionFactory {
      */
     fun asMenus(onAction : (JsFunction) -> Unit ): List<MenuItem> {
         val menu = mutableListOf<MenuItem>()
-
         with(menu) {
             add(constructSubMenu(onAction, "Maths", mathFunctions))
             add(constructSubMenu(onAction, "Strings", stringFunctions))

@@ -6,12 +6,10 @@ import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.setTooltip
 import javafx.fxml.FXML
-import javafx.geometry.Bounds
 import javafx.scene.layout.Pane
 import javafx.scene.shape.Line
 import javafx.scene.text.Text
 import java.lang.System.gc
-import javax.swing.Painter
 
 /**
  * Root content for [JsNodeReceiver] and [JsNodeEmitter]'s.
@@ -76,7 +74,7 @@ open class JsNodeProperty<T : JsGraphNodeProperty>() {
     /**
      * The editor that this property belongs to.
      */
-    lateinit var graphEditor: JsDesigner
+    lateinit var graphEditor: VisualScriptEditor
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                    JsDesigner references
@@ -148,14 +146,15 @@ open class JsNodeProperty<T : JsGraphNodeProperty>() {
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                    CSS
+    //endregion                                                     CSS
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    // TODO this should be point 2d not pair
     fun evalLinePosition(): Pair<Double, Double> {
         root.parent.requestLayout()
 
         return if (guiNode.isCollapsed())
-            guiNode.txtElementName.localToScene(guiNode.txtElementName.boundsInLocal).let {
+            graphEditor.childToLocal(guiNode.txtElementName).let {
                 Pair(
                     if (this is JsNodeReceiver)
                         it.minX + 15
@@ -165,7 +164,7 @@ open class JsNodeProperty<T : JsGraphNodeProperty>() {
                 )
             }
         else
-            socket.localToScene(socket.boundsInLocal).let { Pair(it.centerX, it.centerY) }
+            graphEditor.childToLocal(socket).let { Pair(it.centerX, it.centerY) }
     }
 
     companion object {
@@ -219,7 +218,7 @@ class EmissionLine(
 
         line.setTooltip("${emitter.property().parent.name}'s ${emitter.name()} sends ${emitter.property().type} to ${receiver.property().parent.name}'s ${receiver.name()}")
 
-        JsDesigner.themeLine(line)
+        VisualScriptEditor.themeLine(line)
     }
 
     /**
@@ -265,7 +264,7 @@ class EmissionLine(
         emitter.graphEditor.invalidateTouches()
 
         // Remove from the scene.
-        emitter.guiNode.getGraphEditor().root.children.remove(line)
+        emitter.guiNode.getGraphEditor().editorRootPane.children.remove(line)
         line.isVisible = false
 
         // We want this fucker gone.

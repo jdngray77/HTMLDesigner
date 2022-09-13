@@ -19,14 +19,13 @@ package com.jdngray77.htmldesigner.utility
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
-import javafx.scene.control.Button
-import javafx.scene.control.ButtonType
-import javafx.scene.control.Control
-import javafx.scene.control.Tooltip
+import javafx.scene.control.*
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent.MOUSE_CLICKED
 import javafx.scene.layout.HBox
@@ -68,9 +67,14 @@ fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Pair<Sce
  * Loads an FXML document that contains something that isn't a whole scene,
  *
  * i.e something that goes inside of the editor like a custom list item or dock.
+ *
+ * @param path Relative path to the FXML file to load.
+ * @param pathRelativeTo The class that the path is relative to.
+ * @param controller Optional. An existing controller instance to use. If not provided, once will be created using the FXML.
  */
-fun <T : Parent> loadFXMLComponent(path: String, pathRelativeTo: Class<*> = Editor::class.java) =
+fun <T : Parent> loadFXMLComponent(path: String, pathRelativeTo: Class<*> = Editor::class.java, controller: Any? = null) =
     FXMLLoader(pathRelativeTo.getResource(path)).let { loader ->
+        controller?.let { loader.setController(it) }
         loader.load<T>().let {
             Pair<T, Any>(it, loader.getController())
         }
@@ -149,3 +153,160 @@ fun Node.setOnDoubleClick(r: Runnable) {
         }
     }
 }
+
+
+/**
+ * A helper class for the [menu] method.
+ *
+ * Creates menus with simple method calls, in a much more readable way.
+ * // TODO usage example
+ * @param menu The menu that this instance is editing.
+ * @param parent The parent menu of this menu, if there is one.
+ */
+class IdiomaticMenuFactory(
+
+    private val parent : IdiomaticMenuFactory? = null,
+
+    private val menu: Menu
+
+) {
+
+    /**
+     * Creates a menu within this menu.
+     *
+     * Further chained calls will apply to this sub-menu, until
+     * [menuDone] is called, at which point the context
+     * will drop back to [this] menu.
+     *
+     * @param text The text to display on the menu.
+     * @param _onAction Optional. An action to perform when the menu is clicked.
+     * @return this
+     */
+    fun subMenu(text: String, _onAction : EventHandler<ActionEvent>? = null): IdiomaticMenuFactory {
+        return IdiomaticMenuFactory(
+            this,
+            Menu(text).let {
+            // If there's an action, store add it to the menu.
+            _onAction?.apply {it.onAction = this}
+
+            // Add the menu to the context menu.
+            menu.items.add(it)
+            it
+            }
+        )
+    }
+
+    /**
+     * Adds a new [MenuItem] to this menu.
+     *
+     * @param text The text to display on the menu item.
+     * @param disabled Optional. Overrides whether the menu item is disabled.
+     * @param _onAction Optional. An action to perform when the menu item is clicked.
+     *
+     * Note that if [disabled] is not provided, the menu item will be disabled
+     * automatically if _onAction is null.
+     *
+     * @return this
+     */
+    fun item(text: String, disabled: Boolean? = null, _onAction : EventHandler<ActionEvent>? = null) : IdiomaticMenuFactory {
+        MenuItem(text).let {
+            // If there's an action, store add it to the menu.
+            _onAction?.apply {it.onAction = this}
+
+            if (disabled != null && disabled) {
+                it.isDisable = disabled
+            } else {
+                it.isDisable = _onAction == null
+            }
+
+            // Add the menu to the context menu.
+            menu.items.add(it)
+        }
+
+        return this
+    }
+
+    /**
+     * Creates a new checkbox menu item within this menu.
+     *
+     * @param text The text to display on the menu item.
+     * @param selected Whether the checkbox is selected by default.
+     * @param onCheckChanged A function invoked when the check is changed, with the state of the check.
+     * @return this
+     */
+    fun checkItem(text: String, selected: Boolean = false, onCheckChanged: (Boolean) -> Unit) : IdiomaticMenuFactory {
+        CheckMenuItem(text).let {
+            it.isSelected = selected
+            it.setOnAction {
+                ae->
+                onCheckChanged(it.isSelected)
+            }
+
+            // Add the menu to the context menu.
+            menu.items.add(it)
+        }
+
+        return this
+    }
+
+    /**
+     * Adds a new [SeparatorMenuItem] to this menu.
+     *
+     * @return this
+     */
+    fun separator() : IdiomaticMenuFactory {
+        menu.items.add(SeparatorMenuItem())
+        return this
+    }
+
+    fun add(item : MenuItem) = this.also { menu.items.add(item) }
+
+    fun addAll(vararg items : MenuItem) = this.also { menu.items.addAll(items) }
+
+    /**
+     * For use on sub-menus only.
+     *
+     * Returns idiomatic context the parent menu.
+     *
+     * If there is no parent, i.e this wasn't called
+     * on a sub-menu, this will throw an npe.
+     */
+    fun menuDone() : IdiomaticMenuFactory {
+        return parent!!
+    }
+
+    /**
+     * When you're happy with your menu,
+     * calling this will convert this [menu]
+     * and it's children into a [ContextMenu].
+     */
+    fun toContextMenu() : ContextMenu {
+        return ContextMenu().also {
+            it.items.addAll(menu.items)
+        }
+    }
+}
+
+
+fun menu(text: String = "", _onAction : EventHandler<ActionEvent>? = null) = IdiomaticMenuFactory (
+    menu = Menu(text).also {
+        it.onAction = _onAction
+    }
+)
+
+fun Parent.addContext(menu: ContextMenu) {
+    setOnContextMenuRequested {
+        menu.show(this, it.screenX, it.screenY)
+    }
+
+    addEventHandler(MOUSE_CLICKED) {
+        if (it.button == MouseButton.PRIMARY)
+            menu.hide()
+    }
+}
+
+fun Control.addContext(menu: ContextMenu) {
+    contextMenu = menu
+}
+
+fun Node.boundsInScene() = localToScene(boundsInLocal)

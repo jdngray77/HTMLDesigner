@@ -16,7 +16,7 @@ internal class JsGraphTest {
 
     @BeforeEach
     internal fun setUp() {
-        data = JsGraph()
+        data = JsGraph("TEST")
 
         data.addElement(Element("h1").id("h1"))
         data.addElement(Element("a").id("a"))

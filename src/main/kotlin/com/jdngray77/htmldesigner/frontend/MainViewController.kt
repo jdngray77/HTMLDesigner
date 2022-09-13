@@ -27,6 +27,7 @@ import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
+import com.jdngray77.htmldesigner.frontend.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.utility.camelToSentence
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
@@ -180,6 +181,7 @@ class MainViewController {
 
         // BOTTOM LEFT
         implAddDock(dockLeftBottom, Pages(), TagHierarchy(), ProjectDock())
+        implAddDock(dockBottom, VisualScriptEditor.new().second)
 
         // RIGHT
         implAddDock(dockRight, TagProperties())

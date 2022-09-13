@@ -32,6 +32,7 @@ import org.jsoup.nodes.Element
 enum class EventType {
     /**
      * Raised by a [DocumentEditor] when it saves a document.
+     * // TODO this should be document change
      */
     USER_SAVE,
 
@@ -102,7 +103,10 @@ enum class EventType {
 
     IDE_SHUTDOWN,
 
-    IDE_FINISHED_LOADING
+    IDE_FINISHED_LOADING,
+
+    TAG_CREATED,
+    TAG_DELETED,
 }
 
 fun EventType.notify() {

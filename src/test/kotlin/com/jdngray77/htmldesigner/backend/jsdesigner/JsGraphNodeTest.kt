@@ -15,7 +15,7 @@ internal class JsGraphNodeTest {
 
     @BeforeEach
     fun setUp() {
-        data = JsGraph()
+        data = JsGraph("TEST")
 
         val h1 = data.addElement(Element("h1").id("h1"))
         val clickEmitter = h1.emitters().first()

@@ -83,9 +83,9 @@ class JsNode {
     /**
      * Configures this node with the information it needs to display.
      *
-     * Performed by the [JsDesigner] after the JavaFX [initialize] is all complete.
+     * Performed by the [VisualScriptEditor] after the JavaFX [initialize] is all complete.
      */
-    internal fun init(e: JsGraphNode, graphEditor: JsDesigner) {
+    internal fun initNodeController(e: JsGraphNode, graphEditor: VisualScriptEditor) {
         if (this::graphNode.isInitialized)
             throw Exception("Attempted to re-initialize a JsNode.")
 
@@ -126,6 +126,36 @@ class JsNode {
 
                 MenuItem("Duplicate").also {
                     it.setOnAction { dupeNode() }
+                }
+            )
+        }
+
+
+        // Don't create a collapse manager if the node is a function.
+        if (graphNode !is JsGraphNoteNode) {
+            collapseManager = DoubleClickCollapseManager(
+                // When the label is double clicked
+                txtElementName,
+
+                // Collapse the node
+                {
+                    root.maxHeight = txtElementName.height + 15
+                    txtElementName.text = "↓ ${graphNode.name} ↓"
+                    root.children.remove(vboxEmitters)
+                    root.children.remove(vboxReceivers)
+                },
+
+                // and expand the node
+                {
+                    root.maxHeight = USE_COMPUTED_SIZE
+                    txtElementName.text = graphNode.name
+                    root.children.add(vboxEmitters)
+                    root.children.add(vboxReceivers)
+
+                    Platform.runLater {
+                        invalidatePosition()
+                        graphEditor.invalidateGroupPositions()
+                    }
                 }
             )
         }
@@ -176,37 +206,6 @@ class JsNode {
                 }
             )
         }
-
-        if (graphNode is JsGraphNoteNode) {
-            // Don't create a collapse manager.
-            return
-        }
-
-        collapseManager = DoubleClickCollapseManager(
-            // When the label is double clicked
-            txtElementName,
-
-            // Collapse the node
-            {
-                root.maxHeight = txtElementName.height + 15
-                txtElementName.text = "↓ ${graphNode.name} ↓"
-                root.children.remove(vboxEmitters)
-                root.children.remove(vboxReceivers)
-            },
-
-            // and expand the node
-            {
-                root.maxHeight = USE_COMPUTED_SIZE
-                txtElementName.text = graphNode.name
-                root.children.add(vboxEmitters)
-                root.children.add(vboxReceivers)
-
-                Platform.runLater {
-                    invalidatePosition()
-                    graphEditor.invalidateGroupPositions()
-                }
-            }
-        )
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -227,7 +226,7 @@ class JsNode {
     /**
      * The GUI editor that this node is a child of.
      */
-    private lateinit var graphEditor: JsDesigner
+    private lateinit var graphEditor: VisualScriptEditor
 
     /**
      * The GUI editor that this node is a child of.
@@ -286,7 +285,7 @@ class JsNode {
     private var dragDownLocation: Pair<Double, Double> = Pair(0.0, 0.0)
 
     /**
-     * Handles the node being dragged within the [JsDesigner].
+     * Handles the node being dragged within the [VisualScriptEditor].
      *
      * Keeps the mouse hand closed, moves the node, updates the
      * connected lines, and snaps to an axis if the user
@@ -485,7 +484,7 @@ class JsNode {
         // Line is given no position, as it's set in the evalPosition() method.
 
         EmissionLine(from, to).apply {
-            graphEditor.root.children.add(line)
+            graphEditor.editorRootPane.children.add(line)
 
             emittingLines.add(this)
             to.guiNode.receivingLines.add(this)
@@ -512,7 +511,7 @@ class JsNode {
      *
      * All connections being received and emitted are broken down.
      *
-     * Alias for [JsDesigner.deleteNode].
+     * Alias for [VisualScriptEditor.deleteNode].
      */
     fun delete() {
         graphEditor.implDeleteNode(this)

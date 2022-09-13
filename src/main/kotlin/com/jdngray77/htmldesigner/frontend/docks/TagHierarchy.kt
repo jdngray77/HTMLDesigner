@@ -53,7 +53,8 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
             this,
             EventType.EDITOR_DOCUMENT_SWITCH,
             EventType.EDITOR_DOCUMENT_EDITED,
-            EventType.EDITOR_SELECTED_TAG_CHANGED
+            EventType.EDITOR_SELECTED_TAG_CHANGED,
+            EventType.TAG_CREATED
         )
 
 
@@ -110,7 +111,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                             ""
                         } else {
                             it.currentEditor().selectTag(first())
-                            first().toString()
+                            (first() as TreeItem<Element>).value.toString()
                         }
                     )
                 }
@@ -248,36 +249,27 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
      */
     fun showDocument(doc: Document) {
         document = doc
+        setRoot(Element("a"))
         setRoot(doc.body())
     }
 
     override fun notify(e: EventType) {
         with (mvc()) {
-
             if (e == EventType.EDITOR_DOCUMENT_CLOSED && !documentAvail()) {
                 tree.root = null
                 return
             }
 
+            showDocument(currentDocument())
+
             // Saves refreshing if there is no change.
             // Ignore tag changes, if the item selected in the hierarchy already matches the one selected in the editor.
             if (e == EventType.EDITOR_SELECTED_TAG_CHANGED && selectedItem() == currentEditor().selectedTag)
                 return
-
-            showDocument(currentDocument())
         }
     }
 
 
-//        if (e == EventType.EDITOR_SELECTED_TAG_CHANGED)
-//            document.editor()?.selectedTag?.let {
-//                tree.selectionModel.clearSelection()
-//                tree.findItem(it).apply {
-//                    tree.selectionModel.select(this)
-//                    tree.focusModel.focus(tree.selectionModel.selectedIndex)
-//                }
-//
-//            }
 
     override fun getChildrenFor(el: Element): Iterable<Element> = el.children()
 

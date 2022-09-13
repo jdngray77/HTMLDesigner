@@ -30,7 +30,7 @@ fun Serializable.saveObjectToDisk(path: String) =
  * object serialization.
  */
 fun Serializable.saveObjectToDisk(file: File) {
-    file.createNewFile()
+    file.createNewFileAndParentDirs()
 
     val fos = FileOutputStream(file)
     val os = ObjectOutputStream(fos)
