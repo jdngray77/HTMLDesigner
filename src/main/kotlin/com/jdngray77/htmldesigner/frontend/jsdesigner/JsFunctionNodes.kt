@@ -189,7 +189,7 @@ class JsColorFactoryFunction : JsFunction (
 
     // The javascript of the function.
     // Names used within must match the parameters.
-    javascript = "new Color(r, g, b, a);"
+    javascript = "rgba(r, g, b, a);"
 )
 
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -411,7 +411,7 @@ class JsRandomBooleanFunction : JsFunction (
 class JsRandomColorFunction : JsFunction (
         "Random Color",
         JsGraphDataType.Color,
-        javascript = "Color.rgb(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
+        javascript = "rgb(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
 )
 
 /**
@@ -420,7 +420,7 @@ class JsRandomColorFunction : JsFunction (
 class JsRandomColorWithAlphaFunction : JsFunction (
         "Random Color With Alpha",
         JsGraphDataType.Color,
-        javascript = "Color.rgb(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
+        javascript = "rgba(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
 )
 
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

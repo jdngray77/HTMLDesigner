@@ -25,10 +25,7 @@ import com.jdngray77.htmldesigner.utility.StoringTreeItem
 import com.jdngray77.htmldesigner.utility.assertEndsWith
 import com.jdngray77.htmldesigner.utility.open
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.MenuItem
-import javafx.scene.control.SeparatorMenuItem
-import javafx.scene.control.TextInputDialog
-import javafx.scene.control.TreeTableColumn
+import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import java.io.File
 import java.sql.Time
@@ -86,7 +83,9 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         tree.columns.setAll(col1, col2)
 
         // Configure the context menu.
+        // TODO update to new api
         setContextMenu(
+            ContextMenu(
             MenuItem("New Page").also {
                 it.setOnAction {
                     implCreateNewPage()
@@ -115,7 +114,7 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
             MenuItem("「TODO」Paste clipboard as below"),
             SeparatorMenuItem(),
             MenuItem("「TODO」New folder with selected items"),
-        )
+        ))
     }
 
     override fun notify(e: EventType) {

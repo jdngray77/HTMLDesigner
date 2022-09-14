@@ -66,11 +66,9 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      */
     protected var contextItem : T? = null
 
-    /**
-     *
-     */
-    protected fun setContextMenu(vararg items : MenuItem) {
-        tree.contextMenu = ContextMenu(*items)
+
+    protected fun setContextMenu(menu : ContextMenu) {
+        tree.contextMenu = menu
 
         tree.setRowFactory {
             TreeTableRow<T>().apply {

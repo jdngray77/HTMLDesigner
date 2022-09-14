@@ -36,9 +36,10 @@ import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import java.awt.Toolkit
 import kotlin.math.roundToInt
+import kotlin.reflect.KCallable
 
 /**
- * Loads a FXML file as a scene, and initalises it's controllers and stylesheets.
+ * Loads a FXML file as a scene, and initializes it's controllers and stylesheets.
  *
  * @param urlFromSrcRoot The url to the FXML relative to the root of the
  *        frontend package.
@@ -112,12 +113,22 @@ fun getTheme() = JMetro(
 //      ALSO this won't work if you have to use getters.
 //           The instance returned must be exact, effectively final.
 
+/**
+ * Static button type for a save button.
+ *
+ * For use in dialogs that return a button type.
+ */
 val ButtonType_SAVE: ButtonType = ButtonType("Save")
 
+/**
+ * Static button type for a cancel button.
+ *
+ * For use in dialogs that return a button type.
+ */
 val ButtonType_CLOSEWITHOUTSAVE: ButtonType = ButtonType("Don't save")
 
 /**
- * Generates a hex representation of the color.
+ * Generates a hex representation of a JavaFX the color.
  */
 fun Color.toHex(): String {
     return String.format(null, "#%02x%02x%02x",
@@ -127,22 +138,50 @@ fun Color.toHex(): String {
         )
 }
 
+/**
+ * Short hand methods for setting [HBox] grow priority.
+ */
 fun Node.growH() = HBox.setHgrow(this, Priority.ALWAYS)
+
+/**
+ * Short hand methods for setting [VBox] grow priority.
+ */
 fun Node.growV() = VBox.setVgrow(this, Priority.ALWAYS)
+
+/**
+ * Short hand methods for setting [HBox] and [VBox] grow priority.
+ */
 fun Node.grow() { growH(); growV() }
 
+/**
+ * Launches a url in the system's default browser.
+ */
 fun openURL(url: String) {
     java.awt.Desktop.getDesktop().browse(java.net.URI(url))
 }
 
+/**
+ * Creates a tooltip on a control with the given [text]
+ */
 fun Control.setTooltip(text: String) {
     tooltip = Tooltip(text)
 }
+
+/**
+ * Creates a tooltip on a node with the given [text]
+ *
+ * Allows tooltips to be installed onto *any* ui component,
+ * not just controls.
+ */
 fun Node.setTooltip(text: String) =
     Tooltip(text).also {
         Tooltip.install(this, it)
     }
 
+/**
+ * Adds a double click listener to a any node,
+ * and runs the given [r] when it is twice or more.
+ */
 fun Node.setOnDoubleClick(r: Runnable) {
     addEventHandler(MOUSE_CLICKED) {
         if (it.button != MouseButton.PRIMARY)
@@ -227,6 +266,35 @@ class IdiomaticMenuFactory(
     }
 
     /**
+     * Performs a function from this class, if the given [iff] is met.
+     *
+     * This way, items and menus can be added only if a condition is met.
+     *
+     * Down side is that *all* paremeters must be provided, even the optional ones,
+     * and the event handlers must be explicit, not lambda.
+     *
+     * e.g.
+     * ```
+     * .iff( {contidion}, {thenCall}, arguments...)
+     *
+     *
+     * .iff( { selectedTag.tagName() == "script" } , {it::item}, "Edit Script", null, EventHandler<ActionEvent> {  })
+     * ```
+     *
+     * @param iff Lazy boolean. Evaluated, and if true, the given [thenCall] is run.
+     * @param thenCall The function from this class to run.
+     * @param withThese Arguments that will be given to the function. Must match exactly what the function requires.
+     * @throws Exception if [withThese] are not valid for the given [thenCall].
+     */
+    fun iff(iff: () -> Boolean, thenCall : (IdiomaticMenuFactory) -> KCallable<*>, vararg withThese: Any?) : IdiomaticMenuFactory {
+        if (iff()) {
+            thenCall(this).call( *withThese)
+        }
+        return this
+    }
+
+
+    /**
      * Creates a new checkbox menu item within this menu.
      *
      * @param text The text to display on the menu item.
@@ -287,13 +355,19 @@ class IdiomaticMenuFactory(
     }
 }
 
-
+/**
+ * Starts creating a new menu via the [IdiomaticMenuFactory] API.
+ */
 fun menu(text: String = "", _onAction : EventHandler<ActionEvent>? = null) = IdiomaticMenuFactory (
     menu = Menu(text).also {
         it.onAction = _onAction
     }
 )
 
+/**
+ * Adds an existing context menu to any parent using click
+ * listeners.
+ */
 fun Parent.addContext(menu: ContextMenu) {
     setOnContextMenuRequested {
         menu.show(this, it.screenX, it.screenY)
@@ -305,8 +379,17 @@ fun Parent.addContext(menu: ContextMenu) {
     }
 }
 
-fun Control.addContext(menu: ContextMenu) {
-    contextMenu = menu
-}
-
+/**
+ * Gets the scene bounds of any node.
+ */
 fun Node.boundsInScene() = localToScene(boundsInLocal)
+
+/**
+ * Gets the
+ */
+fun Node.boundsInScreen() = localToScreen(boundsInLocal)
+
+/**
+ *
+ */
+fun Node.boundsInParent() = localToParent(boundsInLocal)
