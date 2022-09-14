@@ -4,7 +4,7 @@
 
 <?import javafx.scene.control.*?>
 <SplitPane fx:id="split" orientation="VERTICAL" dividerPositions="0.9" stylesheets="@jsDesigner.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.jsdesigner.VisualScriptEditor">
-   <Pane fx:id="editorRootPane">
+   <Pane fx:id="editorRootPane" styleClass="root">
       <children>
          <Pane styleClass="important" prefHeight="99999" prefWidth="99999" fx:id="contextPane" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" />
 
