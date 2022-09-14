@@ -4,6 +4,7 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.Restartable
 import javafx.event.EventType
 import javafx.scene.control.Labeled
@@ -51,12 +52,13 @@ object KeyBindings : Restartable {
         // Keyboard shortcuts
         val metaS = KeyCharacterCombination("s", KeyCombination.META_DOWN)
         val metaZ = KeyCharacterCombination("z", KeyCombination.META_DOWN)
-        val metaR = KeyCharacterCombination("r", KeyCombination.META_DOWN)
+        val metaR = KeyCharacterCombination("y", KeyCombination.CONTROL_ANY)
         val caps = KeyCodeCombination(KeyCode.CAPS)
+
 
         // initialise the bindings
         bind(metaS) { mvc().currentEditor().save() }
-        bind(metaZ) { mvc().currentEditor().redo() }
+        bind(metaZ) { mvc().currentEditor().undo() }
         bind(caps) { capsActive() }
 
         for (i in array[0].indices) {

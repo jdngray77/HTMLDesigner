@@ -113,6 +113,7 @@ enum class Configs {
      */
     WEB_SERVER_REFRESH_DELAY_INT,
 
+    KEY_BINDINGS_STRING,
     /**
      * Determines the maximum number of document states
      * that can be held in RAM for undo/redo.
@@ -247,7 +248,13 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(Configs.AUTO_LOAD_PROJECT_BOOL, true)
         put(Configs.WEB_SERVER_PORT_INT, 8080)
         put(Configs.WEB_SERVER_REFRESH_DELAY_INT, 0)
-        put(Configs.KEY_BINDINGS_HASHMAP, hashMapOf<Predicate<KeyEvent>, Runnable>())
+        put(
+            Configs.KEY_BINDINGS_STRING,
+            """
+            Menu > Edit > [WIP] Undo,Meta+Z,Ctrl+Z,Ctrl+Z
+            Menu > Edit > [WIP] Redo,Meta+shift+Z,Ctrl+Y,Ctrl+Y
+            """.trimIndent()
+        )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)
         put(Configs.SPOTIFY_CLIENT_ID_STRING, "")
         put(Configs.SPOTIFY_CLIENT_SECRET_STRING, "")
