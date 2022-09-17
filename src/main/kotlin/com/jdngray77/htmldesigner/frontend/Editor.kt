@@ -227,6 +227,16 @@ class Editor : Application() {
             // Starts up the remaining systems that depend on the GUI or a project.
             EventType.IDE_FINISHED_LOADING.notify()
         }
+
+        stage.setOnCloseRequest {
+            try {
+                stop()
+            } catch (e: Exception) {
+                // Shutdown routine failed or rejected.
+                // Cancel close request.
+                it.consume()
+            }
+        }
     }
 
     /**
