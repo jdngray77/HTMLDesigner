@@ -20,8 +20,8 @@ import kotlin.reflect.full.createInstance
 //
 // It is essentially the js designer's SDK.
 //
-//
-//
+// Note that changing nodes here will not take effect on nodes that were already created and saved in an existing graph.
+// When nodes are saved, they save their values.
 //
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
@@ -189,7 +189,7 @@ class JsColorFactoryFunction : JsFunction (
 
     // The javascript of the function.
     // Names used within must match the parameters.
-    javascript = "rgba(r, g, b, a);"
+    returnValue = "\"rgba(\" + r + \", \" + g, + \", \" + b, + \", \" + a +\")\";"
 )
 
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -207,7 +207,7 @@ class JsAddFunction : JsFunction (
     JsGraphDataType.Number,
     Triple("a", JsGraphDataType.Number, 0.0f),
     Triple("b", JsGraphDataType.Number, 0.0f),
-    javascript = "a + b;"
+    returnValue = "a + b;"
 )
 
 /**
@@ -218,7 +218,7 @@ class JsSubtractFunction : JsFunction (
     JsGraphDataType.Number,
     Triple("a", JsGraphDataType.Number, 0.0f),
     Triple("b", JsGraphDataType.Number, 0.0f),
-    javascript = "a - b;"
+    returnValue = "a - b;"
 )
 
 /**
@@ -229,7 +229,7 @@ class JsMultiplyFunction : JsFunction (
     JsGraphDataType.Number,
     Triple("a", JsGraphDataType.Number, 0.0f),
     Triple("b", JsGraphDataType.Number, 0.0f),
-    javascript = "a * b;"
+    returnValue = "a * b;"
 )
 
 /**
@@ -240,7 +240,7 @@ class JsDivideFunction : JsFunction (
     JsGraphDataType.Number,
     Triple("a", JsGraphDataType.Number, 0.0f),
     Triple("b", JsGraphDataType.Number, 0.0f),
-    javascript = "a / b;"
+    returnValue = "a / b;"
 )
 
 // TODO mod, abs, floor, ceil, round, etc
@@ -251,8 +251,8 @@ class JsDivideFunction : JsFunction (
 class JsAbsFunction : JsFunction (
     "Abs",
     JsGraphDataType.Number,
-    Triple("a", JsGraphDataType.Number, 0.0f),
-    javascript = "Math.abs(a);"
+    Triple("a", JsGraphDataType.Number, null),
+    returnValue = "Math.abs(a);"
 )
 
 /**
@@ -261,8 +261,8 @@ class JsAbsFunction : JsFunction (
 class JsFloorFunction : JsFunction (
     "Round down",
     JsGraphDataType.Number,
-    Triple("a", JsGraphDataType.Number, 0.0f),
-    javascript = "Math.floor(a);"
+    Triple("a", JsGraphDataType.Number, null),
+    returnValue = "Math.floor(a);"
 )
 
 /**
@@ -271,8 +271,8 @@ class JsFloorFunction : JsFunction (
 class JsCeilFunction : JsFunction (
     "Round up",
     JsGraphDataType.Number,
-    Triple("a", JsGraphDataType.Number, 0.0f),
-    javascript = "Math.ceil(a);"
+    Triple("a", JsGraphDataType.Number, null),
+    returnValue = "Math.ceil(a);"
 )
 
 /**
@@ -281,8 +281,8 @@ class JsCeilFunction : JsFunction (
 class JsSqrtFunction : JsFunction (
     "Square root",
     JsGraphDataType.Number,
-    Triple("a", JsGraphDataType.Number, 0.0f),
-    javascript = "Math.sqrt(a);"
+    Triple("a", JsGraphDataType.Number, null),
+    returnValue = "Math.sqrt(a);"
 )
 
 /**
@@ -291,8 +291,8 @@ class JsSqrtFunction : JsFunction (
 class JsSquareFunction : JsFunction (
     "Square",
     JsGraphDataType.Number,
-    Triple("a", JsGraphDataType.Number, 0.0f),
-    javascript = "a * a;"
+    Triple("a", JsGraphDataType.Number, null),
+    returnValue = "a * a;"
 )
 
 
@@ -309,7 +309,7 @@ class JsJoinFunction : JsFunction (
     JsGraphDataType.String,
     Triple("a", JsGraphDataType.String, ""),
     Triple("b", JsGraphDataType.String, ""),
-    javascript = "a + b;"
+    returnValue = "a + b;"
 )
 
 /**
@@ -318,8 +318,8 @@ class JsJoinFunction : JsFunction (
 class JsLengthFunction : JsFunction (
     "Text length",
     JsGraphDataType.Number,
-    Triple("a", JsGraphDataType.String, ""),
-    javascript = "a.length;"
+    Triple("a", JsGraphDataType.String, null),
+    returnValue = "a.length;"
 )
 
 /**
@@ -328,9 +328,9 @@ class JsLengthFunction : JsFunction (
 class JsContainsFunction : JsFunction (
     "Text contains...?",
     JsGraphDataType.Boolean,
-    Triple("a", JsGraphDataType.String, ""),
-    Triple("b", JsGraphDataType.String, ""),
-    javascript = "a.includes(b);"
+    Triple("a", JsGraphDataType.String, null),
+    Triple("b", JsGraphDataType.String, null),
+    returnValue = "a.includes(b);"
 )
 
 /**
@@ -339,9 +339,9 @@ class JsContainsFunction : JsFunction (
 class JsStartsWithFunction : JsFunction (
     "Text starts with...?",
     JsGraphDataType.Boolean,
-    Triple("a", JsGraphDataType.String, ""),
-    Triple("b", JsGraphDataType.String, ""),
-    javascript = "a.startsWith(b);"
+    Triple("a", JsGraphDataType.String, null),
+    Triple("b", JsGraphDataType.String, null),
+    returnValue = "a.startsWith(b);"
 )
 
 /**
@@ -350,9 +350,9 @@ class JsStartsWithFunction : JsFunction (
 class JsEndsWithFunction : JsFunction (
     "Text ends with...?",
     JsGraphDataType.Boolean,
-    Triple("a", JsGraphDataType.String, ""),
-    Triple("b", JsGraphDataType.String, ""),
-    javascript = "a.endsWith(b);"
+    Triple("a", JsGraphDataType.String, null),
+    Triple("b", JsGraphDataType.String, null),
+    returnValue = "a.endsWith(b);"
 )
 
 /**
@@ -364,7 +364,7 @@ class JsSubstringFunction : JsFunction (
     Triple("a", JsGraphDataType.String, ""),
     Triple("b", JsGraphDataType.Number, 0.0f),
     Triple("c", JsGraphDataType.Number, 0.0f),
-    javascript = "a.substring(b, c);"
+    returnValue = "a.substring(b, c);"
 )
 
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -393,7 +393,7 @@ class JsRandomNumberFunction : JsFunction (
         JsGraphDataType.Number,
         Triple("min", JsGraphDataType.Number, Int.MIN_VALUE),
         Triple("max", JsGraphDataType.Number,  Int.MAX_VALUE),
-        javascript = " Math.floor(Math.random() * max) + min"
+        returnValue = " Math.floor(Math.random() * max) + min"
 )
 
 /**
@@ -402,7 +402,7 @@ class JsRandomNumberFunction : JsFunction (
 class JsRandomBooleanFunction : JsFunction (
         "Random Boolean",
         JsGraphDataType.Boolean,
-        javascript = " Math.floor(Math.random() * 2) == 1"
+        returnValue = " Math.floor(Math.random() * 2) == 1"
 )
 
 /**
@@ -411,7 +411,7 @@ class JsRandomBooleanFunction : JsFunction (
 class JsRandomColorFunction : JsFunction (
         "Random Color",
         JsGraphDataType.Color,
-        javascript = "rgb(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
+        returnValue = "rgb(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
 )
 
 /**
@@ -420,7 +420,7 @@ class JsRandomColorFunction : JsFunction (
 class JsRandomColorWithAlphaFunction : JsFunction (
         "Random Color With Alpha",
         JsGraphDataType.Color,
-        javascript = "rgba(Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255))"
+        returnValue = "\"rgba(\" + Math.floor(Math.random() * 255) + \", \" + Math.floor(Math.random() * 255) + \", \" + Math.floor(Math.random() * 255) + \", \" + Math.floor(Math.random() * 255) + \")\""
 )
 
 //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

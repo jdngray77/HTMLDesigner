@@ -18,6 +18,7 @@ import kotlin.reflect.KClass
  *
  * TODO variables
  * TODO value providers
+ * TODO function names are not unique. This is a problem.
  */
 class JsGraph(
 
@@ -53,18 +54,48 @@ class JsGraph(
     fun getNodes() = nodes.toList()
 
     /**
-     * Finds and returns an element in this graph by ID.
+     * Returns all [JsGraphElement]
      */
-    fun getElementNode(id: String) = nodes.filterIsInstance<JsGraphElement>().find { it.name == id }
+    fun getElementNodes() = nodes.filterIsInstance<JsGraphElement>()
+
+    /**
+     * Returns all [JsGraphFunctions]'s in this graph.
+     */
+    fun getFunctionNodes() =
+        nodes.filterIsInstance<JsGraphFunction>()
+
+
+    /**
+     * Finds any node by ID.
+     *
+     * @return node by ID, or null if not found.
+     */
+    fun getNode(name: String) =
+        nodes.find { it.name == name }
+
+    /**
+     * Finds and returns an element in this graph by ID.
+     *
+     * @return element by ID
+     */
+    fun getElement(name: String) =
+        getNode(name) as? JsGraphElement
+
+    /**
+     * Finds and returns a function in this graph by ID.
+     */
+    fun getFunction(name: String) =
+        getNode(name) as? JsGraphFunction
+
 
     /**
      * Checks to see if a node with the given ID exists in this graph.
      *
      * @throws IllegalArgumentException if the node does not exist.
      */
-    fun assertElementExists(id: String) {
-        if (getElementNode(id) == null)
-            throw IllegalArgumentException("Node with id '$id' does not exist")
+    fun assertElementExists(name: String) {
+        if (this.getElement(name) == null)
+            throw IllegalArgumentException("Node with id '$name' does not exist")
     }
 
     /**
@@ -72,9 +103,9 @@ class JsGraph(
      *
      * @throws IllegalArgumentException if the node already exists.
      */
-    fun assertElementDoesNotExist(id: String) {
-        if (getElementNode(id) != null)
-            throw IllegalArgumentException("Node with id '$id' already exists in the script graph.")
+    fun assertElementDoesNotExist(name: String) {
+        if (this.getElement(name) != null)
+            throw IllegalArgumentException("Node with id '$name' already exists in the script graph.")
     }
 
     fun assertExists(node: JsGraphNode) {
@@ -95,40 +126,53 @@ class JsGraph(
     }
 
     /**
+     * Deletes all nodes and groups
+     */
+    fun deleteEverything() {
+        nodes.clear()
+        groups.clear()
+        gc()
+    }
+
+    /**
      * Checks the data for integrity, attempts to fix anything that appears invalid.
      * // TODO unit test this
      * // TODO Check for dupe element nodes
      * @returns a list of warnings of the problems and fixes, or null if there was none.
      */
-    fun validate() : JsGraphCompiler.JsGraphCompilationResult {
-        val problems = mutableListOf<String>()
+    fun validate(): JsGraphCompiler.JsGraphCompilationResult {
+        val problems = mutableListOf<JsGraphCompiler.JsCompilationResultMessage>()
         val wasEmpty = nodes.isEmpty()
-
-        if (wasEmpty) {
-            problems.add("Graph contains no nodes.")
-        }
 
         // Test compile to check for nodes not being touched.
         // Also check if there's actually any output
         val compiled = JsGraphCompiler.compileGraph(this)
 
-        compiled.javascript.ifBlank {
-            problems.add("This graph does not generate any output.")
-        }
+        problems.addAll(0, compiled.messages)
 
-        problems.addAll(0, compiled.warnings)
+        val minor = Config[Configs.JS_GRAPH_AUTOFIX_MINOR_BOOL] as Boolean
+        val major = Config[Configs.JS_GRAPH_AUTOFIX_MAJOR_BOOL] as Boolean
 
         groups.concmod().forEach {
             if (it.isEmpty()) {
-                problems.add("The group '${it.name}' has no nodes, so it was deleted.")
-                deleteGroup(it)
+                proposeFix(
+                    minor,
+                    "The group '${it.name}' has no nodes",
+                    "so it was deleted"
+                ) {
+                    deleteGroup(it)
+                }
             }
 
-            it.concmod().forEach {
-                node ->
+            it.concmod().forEach { node ->
                 if (!nodes.contains(node)) {
-                    problems.add("The group '${it.name}' contains '${node.name}', a node that does not exist within the graph, so the node was removed from the group.")
-                    it.remove(node)
+                    proposeFix(
+                        minor,
+                        "The group '${it.name}' contains '${node.name}', a node that does not exist within the graph",
+                        "so the node was removed from the group"
+                    ) {
+                        it.remove(node)
+                    }
                 }
             }
 
@@ -138,51 +182,101 @@ class JsGraph(
         nodes.concmod().forEach {
 
             // Check for signals being emitted, but not being received
-            it.emitters().forEach {
-                emitter ->
-                emitter.emissions().forEach {
-                    emission ->
+            it.emitters().forEach { emitter ->
+                emitter.emissions().forEach { emission ->
 
                     if (!emission.receiver.hasAdmission()) {
-                        problems.add("'$emission' was being emitted but the receiver didn't know about the connection, so the connection was re-attached to the emitter.")
-                        emission.receiver.receive(emission)
+                        proposeFix(
+                            minor,
+                            "'$emission' was being emitted but the receiver didn't know about the connection",
+                            "so the connection was re-attached to the emitter."
+                        ) {
+                            emission.receiver.receive(emission)
+                        }
                     }
 
                     if (emission.receiver.admission !== emission) {
-                        problems.add("'$emission' was being emitted but the receiver was accepting a different connection, so the connection deleted.")
-                        emission.breakdown()
+                        proposeFix(
+                            minor,
+                            "'$emission' was being emitted but the receiver was accepting a different connection",
+                            "so the connection deleted."
+                        ) {
+                            emission.breakdown()
+                        }
                     }
                 }
             }
 
 
             // Check for signals being received, but not being emitted
-            it.recievers().forEach {
-                receiver ->
+            it.receivers().forEach { receiver ->
                 receiver.admission?.let {
                     if (!it.emitter.emissions().contains(it)) {
-                        problems.add("'$it' was being received but not emitted, so the connection was deleted.")
-                        it.breakdown()
+                        proposeFix(
+                            minor,
+                            "'$it' was being received but not emitted",
+                            "so the connection was deleted."
+                        ) {
+                            it.breakdown()
+                        }
                     }
                 }
             }
 
             // Check if included in the output
             if (!it.touched) {
-                if (Config[Configs.JSDESIGNER_GRAPH_AUTO_DELETE_UNCOMPILABLE_NODES_BOOL] as Boolean) {
-                    problems.add("The node '${it.name}' was not included in the output, so it was deleted as specified by the auto-delete setting.")
+                proposeFix(
+                    Config[Configs.JS_GRAPH_AUTO_DELETE_UNCOMPILED_NODES_BOOL] as Boolean,
+                    "The node '${it.name}' was not included in the output",
+                    "so it was deleted as specified by the auto-delete setting.",
+                    "but it was preserved by the auto-delete setting."
+                ) {
                     removeNode(it)
-                } else
-                    problems.add("The node '${it.name}' was not included in the output, but it was preserved by the auto-delete setting.")
+                }
             }
         }
 
         if (!wasEmpty && nodes.isEmpty())
-            problems.add("Validation deleted all nodes.")
+            problems.add(
+                JsGraphCompiler.JsCompilationResultMessage(
+                    JsGraphCompiler.MessageType.VALIDATION_PROBLEM,
+                    "Validation deleted all nodes."
+                )
+            )
 
-        return JsGraphCompiler.JsGraphCompilationResult(compiled.javascript, problems)
+        return JsGraphCompiler.JsGraphCompilationResult(compiled.javascript, problems, builder = compiled.builder)
     }
-    
+
+    /**
+     * During validation, performs fixes if they are allowed.
+     *
+     * @param permission the permission level to allow fix
+     * @param faultMessage the fault
+     * @param fixMessage Message used if action was taken
+     * @param noFixAppliedMessage Message used if no action was taken
+     * @param correctiveAction the corrective action to perform
+     */
+    private fun proposeFix(
+        permission: Boolean,
+        faultMessage: String,
+        fixMessage: String,
+        noFixAppliedMessage: String = "but auto-fix was disabled",
+        correctiveAction: () -> Unit
+    ): JsGraphCompiler.JsCompilationResultMessage {
+        var m = "$faultMessage, "
+
+        var t = if (permission) {
+            correctiveAction()
+            m += fixMessage
+            JsGraphCompiler.MessageType.VALIDATION_PROBLEM_AUTO_FIXED
+        } else {
+            m += noFixAppliedMessage
+            JsGraphCompiler.MessageType.VALIDATION_PROBLEM
+        }
+
+        return JsGraphCompiler.JsCompilationResultMessage(t, m)
+    }
+
 
     //region model manipulation
     /**
@@ -223,17 +317,13 @@ class JsGraph(
     }
 
 
-    fun getNode(name: String) =
-        nodes.find { it.name == name }
-
-
     /**
      * Breaks connections a node may have, and deletes the node
      * from the graph.
      */
     fun removeNode(id: String) {
         assertElementExists(id)
-        removeNode(getElementNode(id)!!)
+        removeNode(this.getElement(id)!!)
     }
 
     /**
@@ -277,7 +367,7 @@ class JsGraph(
      *
      * The new group is returned.
      */
-    fun cloneGroup(group : JsGraphNodeGroup) : JsGraphNodeGroup {
+    fun cloneGroup(group: JsGraphNodeGroup): JsGraphNodeGroup {
         val newGroup = JsGraphNodeGroup(group.name, group.color)
 
         group.forEach {
@@ -292,7 +382,7 @@ class JsGraph(
      * any nodes that may be contained with it.
      * TODO membership assertions
      */
-    fun dumpGroup(group: JsGraphNodeGroup){
+    fun dumpGroup(group: JsGraphNodeGroup) {
         group.clear()
         groups.remove(group)
     }
@@ -335,7 +425,7 @@ class JsGraph(
 /**
  * A [JsGraphNode] for other code utilities..
  */
-class JsGraphFunction (
+class JsGraphFunction(
 
     val function: JsFunction
 
@@ -374,6 +464,16 @@ class JsGraphFunction (
             )
         }
     }
+
+    /**
+     * returns the trigger receiver.
+     */
+    fun trigger() = receiver("trigger")
+
+    /**
+     * returns the output emitter.
+     */
+    fun output() = emitter("output")
 }
 
 class JsGraphNoteNode(note: String) : JsGraphNode(note) {
@@ -431,12 +531,32 @@ abstract class JsGraphNode(
     fun emitters() = emitters.toList()
 
     /**
+     * Finds an emitter by name.
+     *
+     * If there's more than one with the same name, only the first will be returned.
+     *
+     * If none match, will return null
+     */
+    fun emitter(name: String) =
+        emitters.find { it.name == name } ?: throw NoSuchElementException("No emitter with name $name")
+
+    /**
      * Sockets to recieve data from emitters on other nodes.
      */
     @Deprecated("Directly modifies the data without validation. Connections will not be broken down.")
     val receivers = mutableListOf<JsGraphReceiver>()
 
-    fun recievers() = receivers.toList()
+    fun receivers() = receivers.toList()
+
+    /**
+     * Finds an reciever by name.
+     *
+     * If there's more than one with the same name, only the first will be returned.
+     *
+     * If none match, will return null
+     */
+    fun receiver(name: String) =
+        receivers.find { it.name == name } ?: throw NoSuchElementException("No receiver with name $name")
 
     fun removeAllConnections() {
         emitters.forEach {
@@ -522,7 +642,8 @@ class JsGraphEmitter(
         }
     }
 }
-class JsGraphReceiver (
+
+class JsGraphReceiver(
 
     /**
      * When being evaluated (especially on functions) but has no incoming data
@@ -624,7 +745,7 @@ abstract class JsGraphNodeProperty(
  *
  * @throws IncompatibleEmissionException if the emitter and receiver are not of the same type.
  */
-class JsGraphEmission (
+class JsGraphEmission(
 
     /**
      * The emitter that is emitting data.
@@ -675,7 +796,7 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
         emitters.add(
             JsGraphEmitter(
                 JsGraphDataType.Trigger,
-                "Hover",
+                "Mouse Over",
                 this
             )
         )
@@ -703,12 +824,14 @@ class JsGraphElement(id: String) : JsGraphNode(id) {
         receivers.add(
             JsGraphReceiver(
                 false,
-                { "$name.style.visibility = ${
-                    if (it.toBoolean()) 
-                        "visible"
-                    else 
-                        "hidden"
-                }" },
+                {
+                    "$name.style.visibility = ${
+                        if (it.toBoolean())
+                            "visible"
+                        else
+                            "hidden"
+                    }"
+                },
                 JsGraphDataType.Boolean,
                 "Visible",
                 this
@@ -736,12 +859,21 @@ class JsGraphNodeGroup(
     /**
      * A personalised color used in the GUI, if the user chooses to use it.
      */
-    var color: SerializableColor = SerializableColor(1.0,1.0,1.0,0.5),
+    var color: SerializableColor = SerializableColor(1.0, 1.0, 1.0, 0.5),
 
     vararg nodes: JsGraphNode
 
 ) : ArrayList<JsGraphNode>(nodes.size), Serializable {
-    init { addAll(nodes) }
+
+    /**
+     * Constructor to create a group without having to specify the color.
+     */
+    constructor(name: String, vararg _nodes: JsGraphNode) : this(name, nodes = _nodes)
+
+
+    init {
+        addAll(nodes)
+    }
 
     /**
      * Groups are not considered to be the same
@@ -765,7 +897,7 @@ enum class JsGraphDataType {
 
 fun JsGraphDataTypeOf(value: Serializable?) =
     when (value) {
-        is Number ->  JsGraphDataType.Number
+        is Number -> JsGraphDataType.Number
         is SerializableColor -> JsGraphDataType.Color
         is String -> JsGraphDataType.String
         is Boolean -> JsGraphDataType.Boolean
@@ -776,6 +908,6 @@ fun JsGraphDataTypeOf(value: Serializable?) =
 
 class IncompatibleEmissionException(emission: JsGraphEmission) : Exception(
     "Receiver accepts ${emission.receiver.type.name}, but emitter provides ${emission.emitter.type.name}.\n" +
-    "Both must be of the same type to create a connection between them."
+            "Both must be of the same type to create a connection between them."
 )
 

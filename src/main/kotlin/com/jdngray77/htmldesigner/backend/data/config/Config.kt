@@ -180,7 +180,17 @@ enum class Configs {
      * not reached during compile are to be kept or
      * automatically removed.
      */
-    JSDESIGNER_GRAPH_AUTO_DELETE_UNCOMPILABLE_NODES_BOOL,
+    JS_GRAPH_AUTO_DELETE_UNCOMPILED_NODES_BOOL,
+
+    /**
+     * Permits JsGraph validation to attempt to automatically fix minor issues.
+     */
+    JS_GRAPH_AUTOFIX_MINOR_BOOL,
+
+    /**
+     * Permits JsGraph validation to attempt to automatically fix major issues.
+     */
+    JS_GRAPH_AUTOFIX_MAJOR_BOOL,
 }
 
 /**
@@ -221,7 +231,9 @@ object Config : Registry<Configs>(Editor.IDEDirectory.subFile("./config.registry
         put(Configs.SPOTIFY_AUTH_OTP__DONT_MODIFY__STRING, "")
         put(Configs.SPOTIFY_LAST_REFRESH__DONT_MODIFY__LONG, 0L)
         put(Configs.JSDESIGNER_EMITTER_BREAKDOWN_CONFIRM_THRESHOLD_INT, 2)
-        put(Configs.JSDESIGNER_GRAPH_AUTO_DELETE_UNCOMPILABLE_NODES_BOOL, false)
+        put(Configs.JS_GRAPH_AUTO_DELETE_UNCOMPILED_NODES_BOOL, false)
+        put(Configs.JS_GRAPH_AUTOFIX_MINOR_BOOL, true)
+        put(Configs.JS_GRAPH_AUTOFIX_MAJOR_BOOL, false)
     }
 
     /**

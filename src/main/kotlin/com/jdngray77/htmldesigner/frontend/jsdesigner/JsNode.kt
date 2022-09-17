@@ -104,7 +104,7 @@ class JsNode {
 
         txtElementName.text = e.name
 
-        e.recievers().map { addReceiver(it) }
+        e.receivers().map { addReceiver(it) }
         e.emitters().map { addEmitter(it) }
 
         // Add css class to identify the type of node.

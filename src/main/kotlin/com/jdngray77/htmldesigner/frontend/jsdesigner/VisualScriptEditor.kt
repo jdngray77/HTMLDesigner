@@ -117,6 +117,7 @@ class VisualScriptEditor : Dock(), Subscriber {
     }
 
 
+
     /**
      * A re-usable line used to give feedback to the user
      * when dragging [JsGraphConnection]s, before they
@@ -582,18 +583,20 @@ class VisualScriptEditor : Dock(), Subscriber {
     private fun validateAndCompile(quiet: Boolean = true) {
         if (disableCompile) return
 
+        // TODO rename that to validateAndCompile
         var compiled = graph.validate()
 
         // Compile and print.
         compileOutput.text = compiled.javascript
-        scriptElement?.text(compiled.javascript)
+        scriptElement!!.text(compiled.javascript)
+        mvc().currentEditor().documentChanged("Updated script : ${scriptElement!!.id()}")
 
         val isError = compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.ERROR
 
         if (isError)
             showWarningNotification(
                 // Title
-                "The graph could not be compiled.", compiled.warnings.first()
+                "The graph could not be compiled.", compiled.messages.first().toString()
             )
 
         if (!quiet || isError) {
@@ -609,16 +612,16 @@ class VisualScriptEditor : Dock(), Subscriber {
 
                             // Message
                             // Concat if there's too many warnings.
-                            (if (compiled.warnings.size <= 5)
-                                compiled.warnings.joinToString("\n")
+                            (if (compiled.messages.size <= 5)
+                                compiled.messages.joinToString("\n")
                             else
-                                "There are ${compiled.warnings.size} messages.") +
+                                "There are ${compiled.messages.size} messages.") +
 
                             "\n\n" +
                             "Click here to view warnings."
                 ) {
                     // When the notification is clicked, show all warnings in a dialog.
-                    showListOfStrings("There are some integrity issue(s) with your graph.", compiled.warnings)
+                    showListOfStrings("There are some integrity issue(s) with your graph.", compiled.messages.map { it.toString() })
                 }
             }
         }
@@ -790,10 +793,10 @@ class VisualScriptEditor : Dock(), Subscriber {
     override fun notify(e: EventType) {
         when (e) {
             EventType.EDITOR_DOCUMENT_SWITCH -> {
-                val tag = mvc().selectedTag()
-                if (tag != null && tag.tagName() == "script") {
+                scriptElement = mvc().selectedTag()
+                if (scriptElement != null && scriptElement!!.tagName() == "script") {
                     implLoadGraph(
-                        mvc().Project.loadJsGraph(tag.attr("id"))
+                        mvc().Project.loadJsGraph(scriptElement!!.attr("id"))
                     )
                 }
             }
@@ -809,14 +812,14 @@ class VisualScriptEditor : Dock(), Subscriber {
                     implLoadGraph(
                         mvc().Project.loadJsGraph(tag.attr("id"))
                     )
-                } else {
-                    scriptElement = null
-                    // TODO clear graph.
                 }
             }
 
             else -> {}
         }
+
+        if (scriptElement == null)
+            resetEditor()
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

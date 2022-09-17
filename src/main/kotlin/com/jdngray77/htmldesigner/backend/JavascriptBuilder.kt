@@ -19,7 +19,7 @@ import java.io.Serializable
  *
  * @author Jordan T Gray.
  */
-internal class JavascriptBuilder {
+class JavascriptBuilder {
 
     /**
      * A list of elements that will be used throughout the script,
@@ -105,7 +105,21 @@ internal class JavascriptBuilder {
             if (jsFunctions.isNotEmpty()) {
                 appendLine("\n\n// Functions")
                 jsFunctions.forEach {
-                    appendLine("let ${it.name.toCamel()} = (${it.args.joinToString(", ") { it.first.toCamel() }}) => { \n\t${it.javascript} \n}")
+                    // TODO check presence?
+                    if (it.returnValue == null && it.body == null)
+                        return@forEach // Nothing to compile
+
+                    // Construct function.
+                    appendLine(
+                        // Create val and begin lambda
+                    "let ${it.name.toCamel()} = (${it.args.joinToString(", ") { it.first.toCamel() }}) => { " +
+                            // Add body, if present.
+                            (it.body?.let {it+"\n"} ?: "") +
+                            // Add return, if present
+                            "\n\treturn ${it.returnValue}" +
+                            // End lambda
+                            "\n}"
+                    )
                 }
             }
 
@@ -191,7 +205,9 @@ open class JsFunction (
      */
     vararg args: Triple<String, JsGraphDataType, Serializable?>,
 
-    val javascript: String
+    val body: String? = null,
+
+    val returnValue: String? = null
 ) : Serializable {
     /**
      * The function's arguments.
@@ -206,7 +222,7 @@ open class JsFunction (
         this.args = args.toList()
 
         args.forEach {
-            if (it.second != JsGraphDataTypeOf(it.third))
+            if (it.third != null && it.second != JsGraphDataTypeOf(it.third))
                 throw IllegalArgumentException("Default value for argument '${it.first}' is '${it.third!!::class.simpleName}', but must be must be of type '${it.second.name}' in function '$name'")
         }
 
@@ -246,7 +262,7 @@ open class JsFunction (
     override fun hashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + returnType.hashCode()
-        result = 31 * result + javascript.hashCode()
+        result = 31 * result + returnValue.hashCode()
         result = 31 * result + args.hashCode()
         return result
     }

@@ -22,6 +22,7 @@ import com.jdngray77.htmldesigner.backend.data.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
 import com.jdngray77.htmldesigner.utility.*
 import javafx.application.Application
@@ -34,6 +35,7 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.io.File
+import java.io.ObjectStreamClass
 import java.lang.System.gc
 import java.util.*
 import kotlin.system.exitProcess
@@ -197,7 +199,6 @@ class Editor : Application() {
 
         // Fullscreen the window, and show it.
         stage.isFullScreen = !System.getProperty("os.name").contains("Mac")
-
 
 
         // Put the main view we just loaded into the window, and show the window.

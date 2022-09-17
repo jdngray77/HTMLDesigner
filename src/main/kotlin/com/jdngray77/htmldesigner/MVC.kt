@@ -115,6 +115,7 @@ class MVC (
      *
      * @throws [NullPointerException] if no editors are open.
      * @see [documentAvail] to check if any are open.
+     * TODO make this nullable
      */
     fun currentEditor() =
         this.findEditorFor(MainView.dockEditors.selectionModel.selectedItem)!!

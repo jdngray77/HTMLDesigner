@@ -533,11 +533,10 @@ class Project(
 
     /**
      * Overwrites a project document with [d].
-     *
      * Notifies [EventType.PROJECT_SAVED]
      */
     fun saveDocument(d: Document) =
-        saveDocument(d, CACHE.filter { it.value == d }.entries.first().key)
+        CACHE.filter { it.value == d }.entries.firstOrNull()?.key?.let { saveDocument(d, it) }
 
 
     fun saveDocument(d: Document, path: String) {
