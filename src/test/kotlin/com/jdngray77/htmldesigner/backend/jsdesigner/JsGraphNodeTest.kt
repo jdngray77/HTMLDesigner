@@ -21,22 +21,22 @@ internal class JsGraphNodeTest {
         val clickEmitter = h1.emitters().first()
 
         val a = data.addElement(Element("a").id("a"))
-        val visibilityReceiver = a.recievers().last()
+        val visibilityReceiver = a.receivers().last()
 
         clickEmitter.emit(visibilityReceiver)
     }
 
     @Test
     internal fun IncompatTypes() {
-        val h1 = data.getElementNode("h1")
+        val h1 = data.getElement("h1")
         assertNotNull(h1)
 
         val clickEmitter = h1!!.emitters().first()
 
-        val a = data.getElementNode("a")
+        val a = data.getElement("a")
         assertNotNull(a)
 
-        val colorReceiver = a!!.recievers().first()
+        val colorReceiver = a!!.receivers().first()
 
         assertThrows(IncompatibleEmissionException::class.java) { clickEmitter.emit(colorReceiver) }
     }
@@ -47,13 +47,13 @@ internal class JsGraphNodeTest {
         val a = data.getNodes().last()
 
         val emissions = h1.emitters().first().emissions()
-        val admission = a.recievers().last().admission
+        val admission = a.receivers().last().admission
         assertEquals(1, emissions.size)
         assertNotNull(admission)
 
         h1.removeAllConnections()
 
         assertEquals(0, h1.emitters().first().emissions().size)
-        assert(a.recievers().first().hasAdmission())
+        assert(a.receivers().first().hasAdmission())
     }
 }
