@@ -145,7 +145,7 @@ fun NotificationPane(string: String, buttonText: String = "", showOnBottom: Bool
 fun logWarning(string: String) {
     onUIThread {
         System.err.println(string)
-        Editor.mvcIfAvail()?.MainView?.setStatus(string)
+        mvcIfAvail()?.MainView?.setStatus(string)
     }
 }
 

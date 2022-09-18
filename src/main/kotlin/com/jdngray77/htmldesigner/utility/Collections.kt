@@ -15,7 +15,6 @@
 
 package com.jdngray77.htmldesigner.utility
 
-import javafx.beans.Observable
 import javafx.collections.ObservableList
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeTableView
@@ -75,6 +74,23 @@ fun <T> TreeItem<T>.flatten(item : TreeItem<T>): Stream<TreeItem<T>> =
         Stream.of(item),
         item.children.stream().flatMap { flatten(it) }
     )
+
+/**
+ * @return true if [item] is somewhere within the tree below [this].
+ */
+fun <T> TreeItem<T>.hasDescendant(item : TreeItem<T>): Boolean {
+    val parent = item.parentProperty().get() ?:
+    return false
+
+    // Are siblings, reduces search by one level.
+    if (parent == this.parent)
+        return false
+
+    if (parent == this)
+        return true
+
+    return hasDescendant(parent)
+}
 
 
 /**

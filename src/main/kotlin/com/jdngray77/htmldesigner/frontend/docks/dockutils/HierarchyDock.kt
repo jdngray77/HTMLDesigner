@@ -17,10 +17,18 @@ package com.jdngray77.htmldesigner.frontend.docks.dockutils
 
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.utility.StoringTreeItem
+import com.jdngray77.htmldesigner.utility.hasDescendant
 import javafx.scene.control.ContextMenu
-import javafx.scene.control.MenuItem
 import javafx.scene.control.TreeTableRow
 import javafx.scene.control.TreeTableView
+import javafx.scene.input.ClipboardContent
+import javafx.scene.input.ContextMenuEvent
+import javafx.scene.input.TransferMode
+import javafx.scene.layout.Border
+import javafx.scene.layout.BorderStroke
+import javafx.scene.layout.BorderStrokeStyle
+import javafx.scene.layout.BorderWidths
+import javafx.scene.paint.Color
 
 /**
  * A dock which can display the hierarchy of anything.
@@ -66,6 +74,11 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      */
     protected var contextItem : T? = null
 
+    private var onContextMenuRequested : ((TreeTableRow<T>, ContextMenuEvent) -> Unit)? = null
+
+    fun setOnContextMenuRequested(onContextMenuRequested: (TreeTableRow<T>, ContextMenuEvent) -> Unit) {
+        this.onContextMenuRequested = onContextMenuRequested
+    }
 
     protected fun setContextMenu(menu : ContextMenu) {
         tree.contextMenu = menu
@@ -73,10 +86,89 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
         tree.setRowFactory {
             TreeTableRow<T>().apply {
                 setOnContextMenuRequested {
-                    contextRow = this
+                    this@HierarchyDock.onContextMenuRequested?.invoke(this, it)
+
+                    if (!it.isConsumed)
+                        contextRow = this
+                }
+
+                // Drag and Drop
+                setOnDragDetected {
+                    if (onDragCommit == null) return@setOnDragDetected
+
+                    startDragAndDrop(TransferMode.MOVE).let {
+                        db ->
+                        db.dragView = snapshot(null, null)
+                        rowBeingDragged = this
+
+                        ClipboardContent().apply {
+                            putString(item.toString())
+                            db.setContent(this)
+                        }
+
+                        it.consume()
+                    }
+                }
+
+                setOnDragOver {
+                    // Don't drag if not configured
+                    if (onDragCommit == null || rowBeingDragged == null) return@setOnDragOver
+
+                    // Don't drag on rows that are empty.
+                    if (itemProperty().get() == null) return@setOnDragOver
+
+                    // Don't drag onto self
+                    if (rowBeingDragged == this) return@setOnDragOver
+
+                    // Don't drag into self
+                    if (rowBeingDragged!!.treeItem.hasDescendant(treeItem)) return@setOnDragOver
+
+                    markDragOver()
+                    it.acceptTransferModes(TransferMode.MOVE)
+                    it.consume()
+                }
+
+                setOnDragDropped {
+                    unmarkDragOver()
+                    if (onDragCommit != null && rowBeingDragged != null) {
+                        it.isDropCompleted = onDragCommit!!.invoke(rowBeingDragged!!, this)
+                        rowBeingDragged = null
+                        it.consume()
+                    }
+                }
+
+                setOnDragExited {
+                    unmarkDragOver()
                 }
             }
         }
+    }
+
+    /**
+     * When dragging a row, this is the row being dragged.
+     */
+    private var rowBeingDragged : TreeTableRow<T>? = null
+
+    private var onDragCommit : ((TreeTableRow<T>, TreeTableRow<T>) -> Boolean)? = null
+
+    /**
+     * Enables dragging of rows, and determines what happens when a row is dropped onto another.
+     *
+     * @param onDragCommit A function ran when a row is dragged onto another.
+     * @param onDragCommit.first The row being dragged.
+     * @param onDragCommit.second The row being dropped onto.
+     * @param onDragCommit.return True if the drag was successful, false otherwise.
+     */
+    fun setOnDragCommit(onDragCommit : (TreeTableRow<T>, TreeTableRow<T>) -> Boolean) {
+        this.onDragCommit = onDragCommit
+    }
+
+    private fun TreeTableRow<T>.markDragOver() {
+        this.border = ROW_HOVER_BORDER
+    }
+
+    private fun TreeTableRow<T>.unmarkDragOver() {
+        this.border = null
     }
 
     /**
@@ -107,6 +199,9 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
         tree.selectionModel.selectedItems
             .filterNotNull()
 
+    protected fun selectedTableItem() =
+        selectedTableItems().firstOrNull()
+
     /**
      * Returns the FIRST selected item, if
      * any are selected at all.
@@ -125,4 +220,8 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      * Provides the children for an element.
      */
     protected abstract fun getChildrenFor(el : T) : Iterable<T>
+
+    companion object {
+        val ROW_HOVER_BORDER = Border(BorderStroke(Color.RED, BorderStrokeStyle.SOLID, null, BorderWidths(2.0)))
+    }
 }

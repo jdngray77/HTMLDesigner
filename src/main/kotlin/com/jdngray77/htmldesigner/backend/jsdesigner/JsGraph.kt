@@ -135,12 +135,16 @@ class JsGraph(
     }
 
     /**
-     * Checks the data for integrity, attempts to fix anything that appears invalid.
+     * Checks the data for integrity, attempts to fix anything that appears invalid
+     * if permitted by [Configs.JS_GRAPH_AUTOFIX_MAJOR_BOOL], [Configs.JS_GRAPH_AUTOFIX_MINOR_BOOL]
+     * and [Configs.JS_GRAPH_AUTO_DELETE_UNCOMPILED_NODES_BOOL].
+     *
+     * Compiles the graph and returns the result.
      * // TODO unit test this
      * // TODO Check for dupe element nodes
      * @returns a list of warnings of the problems and fixes, or null if there was none.
      */
-    fun validate(): JsGraphCompiler.JsGraphCompilationResult {
+    fun validateAndCompile(): JsGraphCompiler.JsGraphCompilationResult {
         val problems = mutableListOf<JsGraphCompiler.JsCompilationResultMessage>()
         val wasEmpty = nodes.isEmpty()
 

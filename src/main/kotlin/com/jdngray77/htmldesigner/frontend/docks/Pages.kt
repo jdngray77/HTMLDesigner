@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -15,15 +14,10 @@
 
 package com.jdngray77.htmldesigner.frontend.docks
 
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.Subscriber
-import com.jdngray77.htmldesigner.backend.showErrorAlert
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
-import com.jdngray77.htmldesigner.utility.StoringTreeItem
-import com.jdngray77.htmldesigner.utility.assertEndsWith
-import com.jdngray77.htmldesigner.utility.open
+import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
@@ -46,10 +40,15 @@ import java.util.*
  *
  * TODO it's possible to delete the HTML folder.
  */
-class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
+class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
 
     init {
-        EventNotifier.subscribe(this, EventType.IDE_FINISHED_LOADING, EventType.PROJECT_PAGE_DELETED, EventType.PROJECT_CREATED)
+        EventNotifier.subscribe(
+            this,
+            EventType.IDE_FINISHED_LOADING,
+            EventType.PROJECT_PAGE_DELETED,
+            EventType.PROJECT_CREATED
+        )
 
         // Open documents that are clicked
         tree.setOnMouseClicked {
@@ -60,6 +59,16 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         tree.setOnKeyPressed {
             if (it.code == KeyCode.ENTER)
                 implOpenSelected()
+        }
+
+        setOnContextMenuRequested { row, event ->
+            if (row.item == mvc().Project.HTML)
+                event.consume()
+        }
+
+        // If the user drags rows, move the files
+        setOnDragCommit { dragging, target ->
+            implMovePage(dragging.treeItem.value, target.treeItem.value)
         }
 
         // Add columns to the tree.
@@ -83,38 +92,23 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         tree.columns.setAll(col1, col2)
 
         // Configure the context menu.
-        // TODO update to new api
         setContextMenu(
-            ContextMenu(
-            MenuItem("New Page").also {
-                it.setOnAction {
-                    implCreateNewPage()
-                }
-            },
-
-
-            MenuItem("New Folder").also {
-                it.setOnAction {
-                    implCreateNewFolder()
-                }
-            },
-
-
-            SeparatorMenuItem(),
-            MenuItem("Delete").also {
-                it.setOnAction {
-                    contextItem?.let { it1 -> mvc().delete(it1) }
-                    refresh()
-                }
-            },
-            MenuItem("「TODO」Cut"),
-            MenuItem("「TODO」Copy"),
-            SeparatorMenuItem(),
-            MenuItem("「TODO」Paste clipboard as above"),
-            MenuItem("「TODO」Paste clipboard as below"),
-            SeparatorMenuItem(),
-            MenuItem("「TODO」New folder with selected items"),
-        ))
+            menu()
+                .item("[inop] Rename") { implRenameSelected() }
+                .separator()
+                .item("New Page") { implCreateNewPage() }
+                .item("New Folder") { implCreateNewFolder() }
+                .separator()
+                .item("[inop] Cut") { implCut() }
+                .item("[inop] Copy") { implCopy() }
+                .item("[inop] Paste") { implPaste() }
+                .item("Delete") { implDeleteSelected() }
+                .separator()
+                .item("Refresh list") { refresh() }
+                .item("Show in file browser") { implShowInFileBrowser() }
+                .item("Open with web browser") { implShowInWebBrowser() }
+                .toContextMenu()
+        )
     }
 
     override fun notify(e: EventType) {
@@ -147,21 +141,23 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
      * or inside the same directory as a selected file.
      */
     private fun implCreateNewFolder() {
+
+        // TODO new folder with selected items
         mvc().Project.apply {
             File(
                 (contextOrSelectedOrNull()?.let {
                     if (it.isDirectory)
                         it.path + "/"
                     else
-                        it.parentFile.path
-                } ?: "HTML")
-                + "/" + TextInputDialog("FancyProject").let{
-                it.showAndWait()
-                if (it.result.isNullOrBlank())
-                    return
-                else
-                    it.result
-            }).mkdirs()
+                        it.parentFile.absolutePath
+                } ?: mvc().Project.HTML.absolutePath)
+                        + "/" + TextInputDialog("FancyProject").let {
+                    it.showAndWait()
+                    if (it.result.isNullOrBlank())
+                        return
+                    else
+                        it.result
+                }).mkdirs()
             refresh()
         }
     }
@@ -178,12 +174,12 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
                 createDocument(
                     (contextOrSelectedOrNull()?.let {
                         if (it.isDirectory)
-                            it.relativeTo(HTML).path  + "/"
+                            it.relativeTo(HTML).path + "/"
                         else
-                            it.relativeTo(HTML).parentFile?.let{ it.path + "/" } ?: ""
+                            it.relativeTo(HTML).parentFile?.let { it.path + "/" } ?: ""
                     } ?: "")
                             +
-                            TextInputDialog("FancyPage.html").let{
+                            TextInputDialog("FancyPage.html").let {
                                 it.showAndWait()
                                 if (it.result.isNullOrBlank())
                                     return
@@ -200,12 +196,21 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         }
     }
 
+    private fun implDeleteSelected() {
+        // TODO delete js graphs.
+        contextItem?.let {
+            if (userConfirm("Are you sure you want to delete ${it.name}?"))
+                mvc().deleteProjectFile(it)
+        }
+        refresh()
+    }
+
     /**
      * Opens an editor for the selected document.
      */
     private fun implOpenSelected() {
         tree.selectionModel.selectedItem?.apply {
-            (this as StoringTreeItem<File>).data!!.apply{
+            (this as StoringTreeItem<File>).data!!.apply {
                 if (this.isDirectory)
                     return
 
@@ -214,6 +219,36 @@ class Pages : HierarchyDock<File>({it!!.name}), Subscriber {
         }
 
         tree.selectionModel.clearSelection()
+    }
+
+    fun implRenameSelected() {
+        TODO()
+    }
+
+    fun implCopy() {
+        TODO()
+    }
+
+    fun implCut() {
+        TODO()
+    }
+
+    fun implPaste() {
+        TODO()
+    }
+
+    fun implShowInFileBrowser() {
+        contextItem?.openFolderInSystem()
+    }
+
+    fun implShowInWebBrowser() {
+        contextItem?.openFileInSystem()
+    }
+
+    fun implMovePage(file: File, to: File): Boolean {
+        return mvc().moveProjectFile(file,to).also {
+            refresh()
+        }
     }
 
     /**

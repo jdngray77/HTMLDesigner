@@ -584,7 +584,7 @@ class VisualScriptEditor : Dock(), Subscriber {
         if (disableCompile) return
 
         // TODO rename that to validateAndCompile
-        var compiled = graph.validate()
+        var compiled = graph.validateAndCompile()
 
         // Compile and print.
         compileOutput.text = compiled.javascript

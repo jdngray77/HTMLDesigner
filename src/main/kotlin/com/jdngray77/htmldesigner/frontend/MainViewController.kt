@@ -180,13 +180,13 @@ class MainViewController {
         implAddDock(dockLeftTop, ToolboxDock(), Prefabs())
 
         // BOTTOM LEFT
-        implAddDock(dockLeftBottom, Pages(), TagHierarchy(), ProjectDock())
-        implAddDock(dockBottom, VisualScriptEditor.new().second)
+        implAddDock(dockLeftBottom, TagHierarchy(), Pages(), ProjectDock())
 
         // RIGHT
-        implAddDock(dockRight, TagProperties())
-        implAddDock(dockRight, TestDock())
-        implAddDock(dockRight, HistoryDock())
+        implAddDock(dockRight, TagProperties(), TestDock(), HistoryDock())
+
+        // BOTTOM
+        implAddDock(dockBottom, VisualScriptEditor.new().second)
     }
 
     private fun implAddDock(to: TabPane, vararg it: Dock) {

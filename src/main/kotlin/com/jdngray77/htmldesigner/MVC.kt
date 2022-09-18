@@ -19,8 +19,7 @@ import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.MainViewController
-import com.jdngray77.htmldesigner.utility.flattenTree
-import com.jdngray77.htmldesigner.utility.loadFXMLComponent
+import com.jdngray77.htmldesigner.utility.*
 import javafx.scene.control.Tab
 import javafx.scene.layout.BorderPane
 import org.jsoup.nodes.Document
@@ -288,10 +287,39 @@ class MVC (
         }
     }
 
-    fun delete(projectFile: File) {
-        if (projectFile.isDirectory &&
-            userConfirm("${projectFile.name} is not empty. \n Are you sure you want to delete it's contents?"))
-                projectFile.flattenTree().map { delete(it) }
+    /**
+     * Confirms action with user, then deletes a project file.
+     *
+     * If a directory, deletes recursively.
+     *
+     * Handles deletion of associated files, depending on type of file,
+     * and validates the editors once done. (i.e closes editors of deleted files)
+     *
+     * [projectFile] must be within a project subdirectory.
+     *
+     * @param projectFile The file to delete.
+     * @param isRecurse Should not be provided. Used to skip repeating dialogs when deleting recursively.
+     */
+    fun deleteProjectFile(projectFile: File, isRecurse: Boolean = false) {
+        // Check permissions, but only on first call.
+        if (!isRecurse) {
+            if (!projectFile.isInProject()) {
+                logWarning("Refused to delete file because it's outside of the project: $projectFile")
+                return
+            }
+
+            if (projectFile.isInProjectRoot()) {
+                logWarning("Refused to delete file because it's in the project root: $projectFile")
+                return
+            }
+        }
+
+        if ((projectFile.isDirectory && projectFile.list()?.isNotEmpty() == true) &&
+            (isRecurse || userConfirm("${projectFile.name} is not empty. \n Are you sure you want to delete it's contents?"))
+        ) {
+            projectFile.listFiles()?.map { deleteProjectFile(it, true) }
+            projectFile.delete()
+        }
 
         Project.deleteFile(projectFile)
         if (projectFile.name.endsWith(".html")) {
@@ -300,6 +328,93 @@ class MVC (
         }
 
         validateEditors()
+    }
+
+    /**
+     * Moves a file within the project, whilst applying safety measures and limitations.
+     *
+     * Rejected if :
+     * - File must be within the project.
+     * - Project root is protected. Files cannot be move or added. thus :
+     * - File must be within a subdirectory of the project.
+     * - Directories cannot be moved into themselves
+     *
+     * Skipped if :
+     * - Already in projected destination
+     *
+     * @param file The file to move.
+     * @param to If a directory, the new parent file. If a file, then [projectFile] will be moved to be a sibling of [to] ([to.parent] == [projectFile.parent]).
+     * @return true iff successfully moved the file. False if rejected, skipped, or failed (i.e ioException).
+     */
+    fun moveProjectFile(projectFile: File, to: File) : Boolean {
+        // Test is in the project
+        if (!projectFile.isInProject()) {
+            logWarning("Refusing to move file because it's not in the project : ${projectFile.path}")
+            return false
+        }
+
+        // Protect files directly in the project directory.
+        // Only move files in subdirectories.
+        if (projectFile.isInProjectRoot()) {
+            logWarning("Refusing to move file because it's in the project root : ${projectFile.path}")
+            return false
+        }
+
+        // Test if the destination is in the project
+        if (!to.isInProject()) {
+            logWarning("Refusing to move file because the destination is not in the project : ${to.path}")
+            return false
+        }
+
+        // Protect adding root files
+        if (to.isProjectRoot()) {
+            logWarning("Refusing to move file into project root : ${projectFile.path}")
+            return false
+        }
+
+        // Skip if already in destination
+        if (projectFile.parentFile == to) {
+            logWarning("Skipped moving file because it's already in the destination : ${projectFile.path}")
+            return false
+        }
+
+        // Skip if already in target destination if adding as sibling
+        if (to.isFile && to.parentFile == projectFile.parentFile) {
+            logWarning("Skipped moving file because it's already in the destination : ${projectFile.path}")
+            return false
+        }
+
+        // Skip if the destination is a child of the file
+        if (projectFile.isDirectory && to.isDirectory && to.absolutePath.startsWith(projectFile.absolutePath)) {
+            logWarning("Skipped moving folder because it cannot be moved within itself : ${projectFile.path}")
+            return false
+        }
+
+
+        // If moving to file, add as sibling. Otherwise, add as child.
+        val destination = if (to.isFile) to.parentFile else to
+
+        var success = if (projectFile.isDirectory) {
+            // Moving a directory.
+
+            // Determine & create dir
+            val newDir = destination.subFile(projectFile.name)
+            newDir.mkdirs()
+
+            // Moving an entire directory.
+            projectFile.copyRecursively(newDir)
+        } else {
+            // Moving a single file.
+            projectFile.copyTo(destination.subFile(projectFile.name))
+            true
+        }
+
+        // If the copy was successful, delete the original(s)
+        if (success)
+            success = projectFile.deleteRecursively()
+
+        validateEditors()
+        return success
     }
 
 

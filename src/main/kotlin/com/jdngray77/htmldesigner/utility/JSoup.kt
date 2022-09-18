@@ -133,7 +133,7 @@ fun String.asElement(): Element =
 fun Document.getStylesheet(id : String) = this.head().getElementById(id)?.asStyleSheet()
 
 fun Document.delete() {
-    mvcIfAvail()?.delete(projectFile())
+    mvcIfAvail()?.deleteProjectFile(projectFile())
 }
 
 

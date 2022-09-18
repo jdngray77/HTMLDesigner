@@ -15,7 +15,10 @@
 
 package com.jdngray77.htmldesigner.utility
 
+import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import java.awt.Desktop
 import java.io.File
+import java.nio.file.FileVisitOption
 import java.nio.file.Files
 
 /**
@@ -81,13 +84,15 @@ fun File.requireExists(): File {
  *
  * Return list is empty if [this] is not a directory.
  */
-fun File.flattenTree(): ArrayList<File> {
+fun File.flattenTree(onlyFiles: Boolean = true): ArrayList<File> {
     val x = ArrayList<File>()
     if (!isDirectory) return x
 
-    Files.walk(this.toPath())
-        .filter(Files::isRegularFile)
+    Files.walk(this.toPath()).filter {
+        it != this && (if (onlyFiles) Files.isRegularFile(it) else true)
+    }
         .forEach{ x.add(it.toFile()) }
+
     return x
 }
 
@@ -95,3 +100,19 @@ fun File.createNewFileAndParentDirs()  {
     parentFile.mkdirs()
     createNewFile()
 }
+
+
+fun File.openFolderInSystem() {
+    Desktop.getDesktop().open(parentFile)
+}
+
+fun File.openFileInSystem() {
+    Desktop.getDesktop().open(this)
+}
+
+
+fun File.isInProject() = absolutePath.startsWith(mvc().Project.locationOnDisk.absolutePath)
+
+fun File.isInProjectRoot() = this.parentFile == mvc().Project.locationOnDisk
+
+fun File.isProjectRoot() = this == mvc().Project.locationOnDisk
