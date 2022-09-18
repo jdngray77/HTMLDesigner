@@ -20,6 +20,8 @@ import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.*
+import javafx.scene.input.Clipboard
+import javafx.scene.input.ClipboardContent
 import javafx.scene.input.KeyCode
 import java.io.File
 import java.sql.Time
@@ -217,7 +219,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
         tree.selectionModel.clearSelection()
     }
 
-    fun implRenameSelected() {
+    private fun implRenameSelected() {
         // TODO make this validator a standard somewhere.
         mvc().renameProjectFile(contextItem!!, userInput("What should ${contextItem!!.name} be called instead?") {
             if (it.isBlank()) "Provide a name." else null
@@ -226,27 +228,53 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
         refresh()
     }
 
-    fun implCopy() {
-        TODO()
+    private fun implCopy() {
+        Clipboard.getSystemClipboard().setContent(
+            ClipboardContent().apply {
+                putString(contextItem!!.absolutePath)
+                putHtml(contextItem!!.readText())
+            }
+        )
     }
 
-    fun implCut() {
-        TODO()
+    private fun implCut() {
+        implCopy()
+        mvc().deleteProjectFile(contextItem!!)
+        refresh()
     }
 
-    fun implPaste() {
-        TODO()
+    private fun implPaste() {
+        val absPath = Clipboard.getSystemClipboard().string
+        val html = Clipboard.getSystemClipboard().html
+        val file = File(absPath)
+
+        mvc().apply {
+            val newFile = (if (contextItem!!.isDirectory) contextItem!! else contextItem!!.parentFile).subFile(file.name)
+
+            if (newFile.exists()) {
+                showWarningNotification("Did not paste.", "${newFile.name} already exists!\n\nDelete the existing file first.")
+                return
+            }
+
+            val doc = Project.createDocument(newFile.relativeTo(Project.HTML).path)
+
+            Project.fileForDocument(doc).writeText(html)
+
+            openDocument(doc)
+        }
+
+        refresh()
     }
 
-    fun implShowInFileBrowser() {
+    private fun implShowInFileBrowser() {
         contextItem?.openFolderInSystem()
     }
 
-    fun implShowInWebBrowser() {
+    private fun implShowInWebBrowser() {
         contextItem?.openFileInSystem()
     }
 
-    fun implMovePage(file: File, to: File): Boolean {
+    private fun implMovePage(file: File, to: File): Boolean {
         return mvc().moveProjectFile(file,to).also {
             refresh()
         }
