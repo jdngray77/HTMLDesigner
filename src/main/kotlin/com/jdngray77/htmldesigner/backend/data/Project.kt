@@ -240,11 +240,27 @@ class Project(
     }
 
     /**
-    * TODO request to reset cache / reload all documents from disk
-    *      How to handle dirty files here update open editors
-    */
-    fun reloadOpenFilesFromDisk() {
-        TODO()
+     * Resets the caching of files loaded from disk.
+     *
+     * All files loaded will be loaded from the disk again when
+     * next requested.
+     */
+    fun invalidateCache() {
+        CACHE.clear()
+    }
+
+    /**
+     * Ensures that the file is cached.
+     *
+     * Do not use to add new entries to the cache.
+     *
+     * Skipped if file is not within the project.
+     */
+    fun assertCached(file: File, obj: Any) {
+        if (!file.isInProject())
+            return
+
+        CACHE[file.path] = obj
     }
 
     /**
@@ -690,7 +706,6 @@ class Project(
      * in the project.
      */
     fun media() = MEDIA.flattenTree()
-
 
 
     companion object {

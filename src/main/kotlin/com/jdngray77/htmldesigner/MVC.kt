@@ -227,11 +227,8 @@ class MVC (
             }
         )
 
-        // Check that remaining editors' files exist. Else, close the editor.
-        openEditors.filter {
-            !it.file.exists()
-        }.map {
-            it.requestClose()
+        openEditors.forEach {
+            it.validate()
         }
     }
 
@@ -331,7 +328,10 @@ class MVC (
     }
 
     /**
-     * Moves a file within the project, whilst applying safety measures and limitations.
+     * *Moves* a file within the project, whilst applying safety measures and limitations.
+     *
+     * Unlike some system operations, this function cannot be used to rename files.
+     * it is **move**, afterall.
      *
      * Rejected if :
      * - File must be within the project.
@@ -347,6 +347,10 @@ class MVC (
      * @return true iff successfully moved the file. False if rejected, skipped, or failed (i.e ioException).
      */
     fun moveProjectFile(projectFile: File, to: File) : Boolean {
+
+        // TODO update project cache
+        // TODO update graph files.
+
         // Test is in the project
         if (!projectFile.isInProject()) {
             logWarning("Refusing to move file because it's not in the project : ${projectFile.path}")
@@ -413,8 +417,36 @@ class MVC (
         if (success)
             success = projectFile.deleteRecursively()
 
+        Project.invalidateCache()
         validateEditors()
         return success
+    }
+
+    fun renameProjectFile(file: File, newName: String) : Boolean {
+        if (!file.isInProject()) {
+            logWarning("Refusing to rename file because it's not in the project : ${file.path}")
+            return false
+        }
+
+        if (file.isInProjectRoot()) {
+            logWarning("Refusing to rename file because it's in the project root : ${file.path}")
+            return false
+        }
+
+        val newFile = file.parentFile.subFile(newName + file.extension)
+        if (newFile.exists()) {
+            logWarning("Refusing to rename file because a file with that name already exists : ${newFile.path}")
+            return false
+        }
+
+        return if (file.renameTo(newFile)) {
+            Project.invalidateCache()
+            validateEditors()
+            true
+        } else {
+            logWarning("Failed to rename file : ${file.path}")
+            false
+        }
     }
 
 

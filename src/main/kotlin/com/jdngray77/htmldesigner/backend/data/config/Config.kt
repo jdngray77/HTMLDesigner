@@ -191,6 +191,19 @@ enum class Configs {
      * Permits JsGraph validation to attempt to automatically fix major issues.
      */
     JS_GRAPH_AUTOFIX_MAJOR_BOOL,
+
+    /**
+     * If true, the ide will show a restart suggestion prompt
+     * when [LARGE_ERROR_COUNT_THRESHOLD] unhandled exceptions have been caught.
+     */
+    LARGE_ERROR_COUNT_PROMPT_BOOL,
+
+    /**
+     * When [LARGE_ERROR_COUNT_PROMPT_BOOL] permits,
+     * the IDE will show a restart suggestion prompt
+     * every x errors.
+     */
+    LARGE_ERROR_COUNT_STEP_THRESHOLD_INT
 }
 
 /**
@@ -234,6 +247,8 @@ object Config : Registry<Configs>(Editor.IDEDirectory.subFile("./config.registry
         put(Configs.JS_GRAPH_AUTO_DELETE_UNCOMPILED_NODES_BOOL, false)
         put(Configs.JS_GRAPH_AUTOFIX_MINOR_BOOL, true)
         put(Configs.JS_GRAPH_AUTOFIX_MAJOR_BOOL, false)
+        put(Configs.LARGE_ERROR_COUNT_PROMPT_BOOL, true)
+        put(Configs.LARGE_ERROR_COUNT_STEP_THRESHOLD_INT, 10)
     }
 
     /**

@@ -52,7 +52,8 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
 
         // Open documents that are clicked
         tree.setOnMouseClicked {
-            implOpenSelected()
+            if(it.isStillSincePress)
+                implOpenSelected()
         }
 
         // Open documents if the user uses the arrow keys and presses enter.
@@ -94,7 +95,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
         // Configure the context menu.
         setContextMenu(
             menu()
-                .item("[inop] Rename") { implRenameSelected() }
+                .item("Rename") { implRenameSelected() }
                 .separator()
                 .item("New Page") { implCreateNewPage() }
                 .item("New Folder") { implCreateNewFolder() }
@@ -151,13 +152,11 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                     else
                         it.parentFile.absolutePath
                 } ?: mvc().Project.HTML.absolutePath)
-                        + "/" + TextInputDialog("FancyProject").let {
-                    it.showAndWait()
-                    if (it.result.isNullOrBlank())
-                        return
-                    else
-                        it.result
-                }).mkdirs()
+                        + "/" +
+                        userInput("What should the new folder be called?") {
+                            if (it.isBlank()) "Provide a name." else null
+                        }
+                ).mkdirs()
             refresh()
         }
     }
@@ -179,13 +178,10 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                             it.relativeTo(HTML).parentFile?.let { it.path + "/" } ?: ""
                     } ?: "")
                             +
-                            TextInputDialog("FancyPage.html").let {
-                                it.showAndWait()
-                                if (it.result.isNullOrBlank())
-                                    return
-                                else
-                                    it.result.assertEndsWith(".html")
-                            }
+                            userInput("What should the new page be called?") {
+                                if (it.isBlank()) "Provide a name" else null
+                                // TODO Validate name input more.
+                            }.assertEndsWith(".html")
                 ).open()
 
             } catch (e: FileAlreadyExistsException) {
@@ -222,7 +218,12 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
     }
 
     fun implRenameSelected() {
-        TODO()
+        // TODO make this validator a standard somewhere.
+        mvc().renameProjectFile(contextItem!!, userInput("What should ${contextItem!!.name} be called instead?") {
+            if (it.isBlank()) "Provide a name." else null
+        })
+
+        refresh()
     }
 
     fun implCopy() {

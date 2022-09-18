@@ -133,8 +133,8 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
                     if (onDragCommit != null && rowBeingDragged != null) {
                         it.isDropCompleted = onDragCommit!!.invoke(rowBeingDragged!!, this)
                         rowBeingDragged = null
-                        it.consume()
                     }
+                    it.consume()
                 }
 
                 setOnDragExited {

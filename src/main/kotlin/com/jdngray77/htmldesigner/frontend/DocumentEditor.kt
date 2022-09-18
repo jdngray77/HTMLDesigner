@@ -582,6 +582,17 @@ class DocumentEditor {
         }
     }
 
+    fun validate() {
+        if (!file.exists()) {
+            isDirty = false
+            requestClose()
+        } else {
+            mvc().Project.assertCached (
+                file, document
+            )
+        }
+    }
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                      GUI APU
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

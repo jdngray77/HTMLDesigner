@@ -78,16 +78,26 @@ fun showWarningNotification(title: String = "", message: String = "") {
         Notifications.create()
             .title(title)
             .text(message)
+            .onAction {
+                showInformationalAlert("$title \n\n $message")
+            }
             .showWarning()
     }
+
+    logWarning("$title ; $message")
 }
 
-fun showNotification(title: String = "", message: String = "", onAction: () -> Unit = {}) {
+fun showNotification(title: String = "", message: String = "", onAction: (() -> Unit)? = null) {
     onUIThread() {
         Notifications.create()
             .title(title)
             .text(message)
-            .onAction { onAction() }
+            .onAction {
+                if(onAction != null)
+                    onAction()
+                else
+                    showInformationalAlert("$title \n\n $message")
+            }
             .showInformation()
     }
 }
