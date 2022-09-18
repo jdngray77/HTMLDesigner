@@ -394,6 +394,10 @@ class MVC (
             return false
         }
 
+        openEditors.map {
+            it.save()
+        }
+
 
         // If moving to file, add as sibling. Otherwise, add as child.
         val destination = if (to.isFile) to.parentFile else to
@@ -437,6 +441,10 @@ class MVC (
         if (newFile.exists()) {
             logWarning("Refusing to rename file because a file with that name already exists : ${newFile.path}")
             return false
+        }
+
+        openEditors.map {
+            it.save()
         }
 
         return if (file.renameTo(newFile)) {
