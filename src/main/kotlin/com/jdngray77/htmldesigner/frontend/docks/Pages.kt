@@ -15,6 +15,7 @@
 package com.jdngray77.htmldesigner.frontend.docks
 
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import com.jdngray77.htmldesigner.utility.*
@@ -70,7 +71,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
         }
 
         // If the user drags rows, move the files
-        setOnDragCommit { dragging, target ->
+        setOnDragCommit { dragging, target, _ ->
             implMovePage(dragging.treeItem.value, target.treeItem.value)
         }
 
@@ -102,14 +103,15 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                 .item("New Page") { implCreateNewPage() }
                 .item("New Folder") { implCreateNewFolder() }
                 .separator()
-                .item("[inop] Cut") { implCut() }
-                .item("[inop] Copy") { implCopy() }
-                .item("[inop] Paste") { implPaste() }
+                .item("Cut") { implCut() }
+                .item("Copy") { implCopy() }
+                .item("Paste") { implPaste() }
                 .item("Delete") { implDeleteSelected() }
                 .separator()
                 .item("Refresh list") { refresh() }
                 .item("Show in file browser") { implShowInFileBrowser() }
                 .item("Open with web browser") { implShowInWebBrowser() }
+                .item("Set as startup page") { implSetAsStartupPage() }
                 .toContextMenu()
         )
     }
@@ -279,6 +281,14 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
             refresh()
         }
     }
+
+    private fun implSetAsStartupPage() {
+        mvc().Project.apply {
+            PREFERENCES[ProjectPreference.STARTUP_PAGE_PATH_STRING] = contextItem!!.relativeTo(HTML).path
+            showNotification("Start-up page set.", "When the project is loaded, the ${contextItem!!.name} will be opened automatically.")
+        }
+    }
+
 
     /**
      * In order, returns either the [contextItem] if not null, else the first [selectedItems],

@@ -17,6 +17,9 @@ package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import com.jdngray77.htmldesigner.utility.*
@@ -61,8 +64,42 @@ class MVC (
     }
 
     override fun notify(e: EventType) {
-        if (e == EventType.IDE_FINISHED_LOADING && Project.documents().isNotEmpty())
+        processStartupPage()
+    }
+
+    /**
+     * At boot, shows the selected start-up page, as determined by [ProjectPreference.STARTUP_PAGE_PATH_STRING].
+     */
+    private fun processStartupPage() {
+
+        if (Config[Configs.IGNORE_PROJECT_STARTUP_PAGE_BOOL] as Boolean)
+            return
+
+        val startupPage = Project.PREFERENCES[ProjectPreference.STARTUP_PAGE_PATH_STRING] as String
+
+        run determineStartupPage@ {
+
+            if (startupPage.isBlank())
+                return@determineStartupPage
+
+            Project.HTML.subFile(startupPage).let checkFile@ {
+                if (!it.exists())
+                    return@checkFile
+
+                openDocument(
+                    Project.loadDocument(it)
+                )
+            }
+
+            return
+        }
+
+        // If could not determine a file, default to the first page we find.
+        Project.PREFERENCES[ProjectPreference.STARTUP_PAGE_PATH_STRING] = ""
+
+        if (Project.documents().isNotEmpty())
             openDocument(Project.loadDocument(Project.documents().first()))
+
     }
 
 

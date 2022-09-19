@@ -23,6 +23,7 @@ import javafx.scene.control.TreeTableRow
 import javafx.scene.control.TreeTableView
 import javafx.scene.input.ClipboardContent
 import javafx.scene.input.ContextMenuEvent
+import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Border
 import javafx.scene.layout.BorderStroke
@@ -131,7 +132,7 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
                 setOnDragDropped {
                     unmarkDragOver()
                     if (onDragCommit != null && rowBeingDragged != null) {
-                        it.isDropCompleted = onDragCommit!!.invoke(rowBeingDragged!!, this)
+                        it.isDropCompleted = onDragCommit!!.invoke(rowBeingDragged!!, this, it)
                         rowBeingDragged = null
                     }
                     it.consume()
@@ -149,7 +150,7 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      */
     private var rowBeingDragged : TreeTableRow<T>? = null
 
-    private var onDragCommit : ((TreeTableRow<T>, TreeTableRow<T>) -> Boolean)? = null
+    private var onDragCommit : ((TreeTableRow<T>, TreeTableRow<T>, DragEvent) -> Boolean)? = null
 
     /**
      * Enables dragging of rows, and determines what happens when a row is dropped onto another.
@@ -159,7 +160,7 @@ abstract class HierarchyDock <T> (val titler: (T?) -> String) : Dock() {
      * @param onDragCommit.second The row being dropped onto.
      * @param onDragCommit.return True if the drag was successful, false otherwise.
      */
-    fun setOnDragCommit(onDragCommit : (TreeTableRow<T>, TreeTableRow<T>) -> Boolean) {
+    fun setOnDragCommit(onDragCommit : (TreeTableRow<T>, TreeTableRow<T>, DragEvent) -> Boolean) {
         this.onDragCommit = onDragCommit
     }
 

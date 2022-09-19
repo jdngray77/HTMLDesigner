@@ -46,7 +46,13 @@ enum class ProjectPreference {
      *
      * Default is .1 (10% zoom change per click).
      */
-    ZOOM_STEP_SIZE_DOUBLE
+    ZOOM_STEP_SIZE_DOUBLE,
+
+
+    /**
+     * When loading the project, the page that will be opened by default.
+     */
+    STARTUP_PAGE_PATH_STRING
 }
 
 /**
@@ -64,6 +70,7 @@ class ProjectPreferences(project: Project) : Registry<ProjectPreference>(project
         put(ProjectPreference.BACKUP_DEPTH_INT, 20)
         put(ProjectPreference.BACKUP_ENABLE_BOOL, true)
         put(ProjectPreference.ZOOM_STEP_SIZE_DOUBLE, .1)
+        put(ProjectPreference.STARTUP_PAGE_PATH_STRING, "index.html")
     }
 
     override fun validate() {

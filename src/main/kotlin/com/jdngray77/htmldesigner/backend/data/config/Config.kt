@@ -203,7 +203,13 @@ enum class Configs {
      * the IDE will show a restart suggestion prompt
      * every x errors.
      */
-    LARGE_ERROR_COUNT_STEP_THRESHOLD_INT
+    LARGE_ERROR_COUNT_STEP_THRESHOLD_INT,
+
+    /**
+     * If high at project load, the no pages will be loaded.
+     * Effectively ignoring the project's startup page preference.
+     */
+    IGNORE_PROJECT_STARTUP_PAGE_BOOL
 }
 
 /**
@@ -249,6 +255,7 @@ object Config : Registry<Configs>(Editor.IDEDirectory.subFile("./config.registry
         put(Configs.JS_GRAPH_AUTOFIX_MAJOR_BOOL, false)
         put(Configs.LARGE_ERROR_COUNT_PROMPT_BOOL, true)
         put(Configs.LARGE_ERROR_COUNT_STEP_THRESHOLD_INT, 10)
+        put(Configs.IGNORE_PROJECT_STARTUP_PAGE_BOOL, false)
     }
 
     /**

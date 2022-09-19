@@ -14,9 +14,7 @@
 
 package com.jdngray77.htmldesigner.frontend.docks
 
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
-import com.jdngray77.htmldesigner.backend.Subscriber
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import com.jdngray77.htmldesigner.utility.*
@@ -24,6 +22,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.*
 import javafx.scene.control.cell.TextFieldTreeTableCell
+import javafx.scene.input.MouseEvent
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
@@ -31,19 +30,19 @@ import org.jsoup.nodes.Element
 /**
  * A dock which can display the hierarchy of a single [Document].
  *
+ * Displays the [Element]'s of the current document, and
+ * allows the user to move them around, and change the text content.
+ *
  * Displays current document on [EventType.EDITOR_DOCUMENT_EDITED] and [EventType.EDITOR_DOCUMENT_SWITCH]
  */
 class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
-    /**
-     * Reference to the document whose tags we are displaying.
-     *
-     * Reduces calls to the mvc.
-     */
-    private lateinit var document: Document
-
     init {
-        tree.selectionModel.selectionMode = SelectionMode.MULTIPLE
+        // Able to select more than one tag at a time.
+        tree.selectionModel.selectionMode = SelectionMode.SINGLE
+
+        tree.isEditable = true
+
         EventNotifier.subscribe(
             this,
             EventType.EDITOR_DOCUMENT_SWITCH,
@@ -52,10 +51,37 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
             EventType.TAG_CREATED
         )
 
+        var draggedElement: Element? = null
+        var targetElement: Element? = null
 
-        tree.selectionModel.selectionMode = SelectionMode.MULTIPLE
-        tree.isEditable = true
+        val dragMenu = menu()
+            .item("Place this item : ")
+            .separator()
+            .item("Inside") { moveInside(draggedElement!!, targetElement!!) }
+            .separator()
+            .item("Above") { moveAbove(draggedElement!!, targetElement!!) }
+            .item("Below") { moveBelow(draggedElement!!, targetElement!!) }
+            .toContextMenu()
 
+        tree.addEventHandler(MouseEvent.MOUSE_CLICKED) {
+            if (it.isStillSincePress)
+                dragMenu.hide()
+        }
+
+        setOnDragCommit {
+            dragged, target, event ->
+
+            // If dragging to root, skip dialog. Just prepend
+            if (target.item.tagName() == "body") {
+                moveInside(dragged.item, target.item)
+                return@setOnDragCommit false
+            }
+
+            draggedElement = dragged.item
+            targetElement = target.item
+            dragMenu.show(tree, event.screenX, event.screenY)
+            return@setOnDragCommit false
+        }
 
         buttonBar.children.addAll(
             Button("Expand").apply {
@@ -72,7 +98,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
         )
 
 
-        // Configure the tree.
+        // Configure the columns.
 
         val col1 = TreeTableColumn<Element, String>("Tag").also {
             it.setCellValueFactory { p -> SimpleObjectProperty(p.value.value.tagName()) }
@@ -82,13 +108,15 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
         val col2 = TreeTableColumn<Element, String>("Content").also {
             it.setCellValueFactory { p -> SimpleStringProperty(p.value.value.ownText()) }
 
+            // User has edited the content of a tag.
             it.setOnEditCommit {
-                // TODO we can access the old value too. This will be useful for implementing undo.
                 it.rowValue.value.text(it.newValue)
                 mvc().currentEditor().documentChanged("Content of '${it.rowValue.value.tagName()}' changed to '${it.newValue}' ")
             }
-            it.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn())
 
+            it.cellFactory = TextFieldTreeTableCell.forTreeTableColumn()
+
+            // Fill the remaining width of the dock.
             it.prefWidthProperty().bind(widthProperty().subtract(col1.widthProperty().add(5)))
         }
 
@@ -96,7 +124,6 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
 
         // When a new item is selected, display it in the editor.
-
         tree.setOnMouseClicked {
             selectedTableItems().apply {
                 mvc().let {
@@ -114,13 +141,10 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
         }
 
 
-        // Context menu
         // TODO only show some of these items when one item is selected.
-
 
         setContextMenu(
             menu()
-                .iff( {true} , {it::item}, "test", null, null)
                 .item("Edit alone") {
                     mvc().currentEditor().apply {
                         selectTag(selectedTableItems().first())
@@ -129,7 +153,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                 }
                 .item("「WIP」Save As Prefab") {
                 selectedItems().map {
-                    it.createPrefab()
+                        it.createPrefab()
                     }
                 }
                 .separator()
@@ -140,6 +164,8 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                         else
                             contextRow?.let { mvc().deleteTag(it.item) }
                     }
+
+                    // Refreshes via tag deleted
                 }
                 .item("Cut") {
                     selectedItem()?.apply {
@@ -148,6 +174,8 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                         }
                         mvc().implDeleteTag(this)
                     }
+
+                    // Refreshes via tag deleted
                 }
                 .item("Copy") {
                     clipboard {
@@ -162,60 +190,51 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                             it
                         }
                     )
+                    refresh()
                 }
                 .item("Paste inside") {
                     selectedItem()?.insertChildren(
                         0,
                         clipboard().html.asElement()
                     )
+                    refresh()
                 }
                 .item("Paste below") {
                     selectedItem()?.apply {
-                        after(
-                            clipboard().html.asElement()
-                        )
-
+                        after (clipboard().html.asElement())
                         mvc().currentEditor().documentChanged("Pasted below ${tagName()}")
                     }
+
+                    refresh()
                 }
                 .item("Wrap with clipboard") {
                     selectedItem()?.apply {
                         wrap(clipboard().html)
                         mvc().currentEditor().documentChanged("Wrapped ${tagName()} with clipboard")
                     }
+
+                    refresh()
                 }
                 .separator()
                 .item("Move up within parent") {
-                selectedItem()?.apply {
-                    parent()?.let {
-                        val index = it.children().indexOf(this)
-                        if (index == 0) return@apply
-
-                        it.insertChildren(index + 1, this)
-
-                        mvc().currentEditor().documentChanged("Moved ${tagName()} up within parent")
-                        }
+                    selectedItem()?.apply {
+                            moveAbove(this, lastElementSibling())
                     }
                 }
             .item("Move down within parent") {
                 selectedItem()?.apply {
-                    parent()?.let {
-                        val index = it.children().indexOf(this)
-                        if (index == 0) return@apply
-
-                        it.insertChildren(index + 2, this)
-
-                        mvc().currentEditor().documentChanged("Moved ${tagName()} down within parent")
-                    }
+                    nextElementSibling()?.let { moveAbove(this, it) }
                 }
             }
             .separator()
             .item("Move out of parent") {
                 selectedItem()?.apply {
                     parent()?.let {
+                        if (it.tagName() == "body")
+                            return@apply
+
                         mvc().implDeleteTag(this)
-                        it.before(this)
-                        mvc().currentEditor().documentChanged("Moved ${tagName()} out of parent")
+                        moveAbove(this, it)
                     }
                 }
             }
@@ -224,32 +243,104 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
         )
     }
 
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //region                                                      Updating
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
     /**
      * Changes to show the model of a new [doc].
      *
      * Will be overwritten on the next document edit or editor switch.
      */
-    fun showDocument(doc: Document) {
-        document = doc
+    private fun showDocument(doc: Document) {
+        // Clear out the tree first. I can't remember why this was important to do.
         setRoot(Element("a"))
+
         setRoot(doc.body())
+    }
+
+    /**
+     * invokes [showDocument] with the current document.
+     */
+    private fun refresh() {
+         showDocument(mvc().currentDocument())
+    }
+
+    /**
+     * Clears out the tag hierarchy.
+     *
+     * Used when no documents are open.
+     */
+    private fun clear() {
+        setRoot(Element("a"))
+        tree.root = null
     }
 
     override fun notify(e: EventType) {
         with (mvc()) {
-            if (e == EventType.EDITOR_DOCUMENT_CLOSED && !documentAvail()) {
-                tree.root = null
-                return
-            }
 
-            showDocument(currentDocument())
+            // If there is no document available, clear the tree.
+            if (!documentAvail()) {
+                clear()
+            } else
+                refresh()
 
-            // Saves refreshing if there is no change.
-            // Ignore tag changes, if the item selected in the hierarchy already matches the one selected in the editor.
-            if (e == EventType.EDITOR_SELECTED_TAG_CHANGED && selectedItem() == currentEditor().selectedTag)
-                return
+            // Select the tag in the tree that is selected in the editor.
+            val selectedInDocument = currentEditor().selectedTag
+
+            if (selectedInDocument != null && selectedItem() != selectedInDocument)
+                select(selectedInDocument)
         }
     }
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion                                                   Updating
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    /**
+     * Selects a given element within the tree.
+     */
+    private fun select(el: Element) {
+        // Searching can be slow, especially on
+        // large documents - so we'll do it in the background.
+        BackgroundTask.submit {
+            tree.findItem(el)?.let {
+                tree.selectionModel.select(it)
+            } ?: run {
+                tree.selectionModel.clearSelection()
+                logWarning("Tag hierarchy failed to select the currently selected tag, because it was not found in the tree.")
+            }
+        }
+    }
+
+    private fun moveInside(a: Element, b: Element) {
+        b.prependChild(a)
+
+        mvc().currentEditor().apply {
+            documentChanged("Moved ${a.tagName()} inside ${b.tagName()}")
+            showDocument(document)
+        }
+    }
+
+    private fun moveAbove(a: Element, b: Element) {
+        b.before(a)
+        mvc().currentEditor().apply {
+            documentChanged("Moved ${a.tagName()} before ${b.tagName()}")
+            showDocument(document)
+        }
+    }
+
+    private fun moveBelow(a: Element, b: Element) {
+        b.after(a)
+        mvc().currentEditor().apply {
+            documentChanged("Moved ${a.tagName()} after ${b.tagName()}")
+            showDocument(document)
+        }
+    }
+
 
 
 
