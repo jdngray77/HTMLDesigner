@@ -264,7 +264,7 @@ class MVC (
             }
         )
 
-        openEditors.forEach {
+        openEditors.concmod().forEach {
             it.validate()
         }
     }
@@ -273,7 +273,7 @@ class MVC (
      * @throws InterruptedException if the user refuses to close an editor.
      */
     fun closeAllEditors() {
-        getOpenEditors().forEach {
+        openEditors.concmod().forEach {
             if (!it.requestClose()) {
                 showNotification("Shutdown or restart aborted", "An editor refused to close.")
                 throw InterruptedException("Shutdown or restart aborted. An editor refused to close.")
