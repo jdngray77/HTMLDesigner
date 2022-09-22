@@ -64,7 +64,12 @@ class SplashScreen() : Application() {
 
         //After fade in, load the app.
         fadeIn.setOnFinished { e ->
-            Editor().start(primaryStage)
+            try {
+                Editor().start(primaryStage)
+            } catch (e: Exception) {
+                Error("The editor failed to open.", e).printStackTrace()
+                Editor.EDITOR.exit()
+            }
             splashWindow.close()
         }
 

@@ -174,7 +174,7 @@ class MVC (
      * @param document The document to find an editor for.
      */
     fun findEditorFor(document: Document)  =
-        openEditors.find { it.document == document }
+        openEditors.find { it.document === document }
 
     /**
      * Finds the editor for the given tab.
@@ -182,7 +182,7 @@ class MVC (
      * @param tab The tab to find the editor for.
      */
     fun findEditorFor(tab: Tab)  =
-        openEditors.find { it.tab == tab }
+        openEditors.find { it.tab === tab }
 
     /**
      * Finds the editor for the given File
@@ -190,7 +190,7 @@ class MVC (
      * @param file the file to find the editor for.
      */
     fun findEditorFor(file: File)  =
-        openEditors.find { it.file == file }
+        openEditors.find { it.file === file }
 
     /**
      * Creates and opens a new document editor for the

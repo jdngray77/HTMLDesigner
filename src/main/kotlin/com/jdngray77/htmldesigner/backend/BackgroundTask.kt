@@ -19,6 +19,7 @@ import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import java.lang.System.gc
 import java.util.concurrent.*
+import kotlin.concurrent.thread
 import kotlin.reflect.KFunction
 
 /**
@@ -48,8 +49,8 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
      */
     @Synchronized
     fun submit(runnable: Runnable): Future<*>? {
+        println(threadPool)
 
-        // TODO if the runnable crashes, there's no logs printed. Need to find a way to print the stack trace.
         if (!threadPool.isShutdown && !threadPool.isTerminating)
             return threadPool.submit(runnable)
 
@@ -95,7 +96,7 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
 
     override fun onIDEBootEarly() {
         threadPool = Executors.newCachedThreadPool() as ThreadPoolExecutor
-        gc()
+        threadPool.prestartAllCoreThreads()
     }
 
     /**

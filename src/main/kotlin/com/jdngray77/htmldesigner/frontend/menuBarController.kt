@@ -24,15 +24,26 @@ import javafx.scene.control.MenuBar
 import javafx.scene.image.Image
 import javafx.scene.layout.Pane
 import java.io.File
+import java.util.*
 import javax.script.ScriptEngineManager
 
+/**
+ * Invokable functions for the Application's standard menu bar.
+ *
+ * @author Jordan T. Gray
+ */
 class menuBarController {
 
+    /**
+     * The menu bar.
+     *
+     * On mac, will be placed into the system standard menu bar.
+     */
     lateinit var MenuBar: MenuBar
 
     @FXML
     fun initialize() {
-            MenuBar.useSystemMenuBarProperty().set(Config[Configs.USE_MAC_MENU_BOOL] as Boolean)
+        MenuBar.useSystemMenuBarProperty().set(Config[Configs.USE_MAC_MENU_BOOL] as Boolean)
     }
 
 
@@ -40,6 +51,9 @@ class menuBarController {
     //region                                                        HTML DESIGNER
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    fun menu_debug_run_anything() {
+        RunAnything.showDialog()
+    }
 
     fun menu_soft_restart() =
         Editor.EDITOR.restart()
@@ -47,9 +61,8 @@ class menuBarController {
     fun menu_project_close() =
         Editor.EDITOR.closeProject()
 
-    fun menu_registry() {
+    fun menu_registry() =
         RegistryEditor(Config).showDialog()
-    }
 
     fun menu_exit() =
         Platform.exit()
@@ -100,18 +113,12 @@ class menuBarController {
         showInformationalAlert(ScriptEngineManager().getEngineByExtension("kts")!!.eval(input).toString())
     }
 
-    fun menu_debug_run_anything(actionEvent: ActionEvent) {
-        RunAnything.showDialog()
-    }
-
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                     DEBUG
-    //region                                                        FILE
+    //region                                                        PAGE
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     fun menu_file_revert() {
-
         if (!mvc().currentEditor().isDirty) {
             showNotification("Nothing to revert.", "No changes have been made since the last save.")
             return

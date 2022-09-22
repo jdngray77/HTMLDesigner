@@ -151,7 +151,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                         standaloneEditMode = true
                     }
                 }
-                .item("「WIP」Save As Prefab") {
+                .item("Save As Prefab") {
                 selectedItems().map {
                         it.createPrefab()
                     }

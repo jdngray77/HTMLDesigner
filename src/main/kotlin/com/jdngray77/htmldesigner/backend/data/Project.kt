@@ -555,13 +555,18 @@ class Project(
         CACHE.filter { it.value == d }.entries.firstOrNull()?.key?.let { saveDocument(d, it) }
 
 
-    fun saveDocument(d: Document, path: String) {
-        File(path).apply {
+    fun saveDocument(d: Document, path: String) =
+        saveDocument(d, File(path))
+
+
+    fun saveDocument(document: Document, file: File) {
+        file.apply {
             assertExists()
-            writeText(d.toString())
+            writeText(document.toString())
         }
         EventNotifier.notifyEvent(EventType.PROJECT_SAVED)
     }
+
 
     /**
      * Fetches an existing document from the disk

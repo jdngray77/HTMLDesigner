@@ -91,6 +91,17 @@ fun Element.saveToDisk(f: File) {
     f.writeText(toString())
 }
 
+/**
+ * Applies some clean-up operations to the element.
+ *
+ * Intended for when it is copied to the clipboard, or saved to the disk.
+ *
+ * Removes remnants of the editor, such as the debug / editing css classes.
+ */
+fun Element.prepareForExport() {
+    removeClass("debug-outline")
+}
+
 
 /**
  * Quick convinience method to create a prefab.
