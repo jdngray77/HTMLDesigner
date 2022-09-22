@@ -49,12 +49,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-test")
     implementation("org.controlsfx:controlsfx:11.1.1")
     implementation("org.jetbrains.kotlin:kotlin-serialization:1.7.10")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-    implementation("org.jfxtras:jmetro:11.6.15")
-    implementation("org.jsoup:jsoup:1.15.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("org.jfxtras:jmetro:11.6.16")
+    implementation("org.jsoup:jsoup:1.15.3")
     implementation("net.sourceforge.cssparser:cssparser:0.9.29")
     implementation("org.reflections:reflections:0.10.2")
-    implementation("org.spdx:spdx-tools:2.2.7")
+    implementation("org.spdx:spdx-tools:2.2.8")
     implementation("se.michaelthelin.spotify:spotify-web-api-java:7.2.0")
 
 // Included only for license. This library is imported as source.
@@ -82,7 +82,7 @@ tasks.withType<JavaExec>{
 
 application {
     mainClass.set("HTMLDesignerKt")
-    applicationDefaultJvmArgs = listOf("-ea", "--add-opens", "javafx.controls/javafx.scene.control.skin=ALL-UNNAMED")
+    applicationDefaultJvmArgs = listOf("--add-opens", "javafx.controls/javafx.scene.control.skin=ALL-UNNAMED")
 }
 
 /*
