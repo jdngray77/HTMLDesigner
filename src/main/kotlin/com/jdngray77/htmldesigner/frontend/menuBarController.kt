@@ -7,8 +7,8 @@ import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.html.Prefab
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.project
 import com.jdngray77.htmldesigner.frontend.MainViewController.Companion.clearDock
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
@@ -57,10 +57,10 @@ class menuBarController {
     }
 
     fun menu_soft_restart() =
-        Editor.EDITOR.restart()
+        IDE.EDITOR.restart()
 
     fun menu_project_close() =
-        Editor.EDITOR.closeProject()
+        IDE.EDITOR.closeProject()
 
     fun menu_registry() =
         RegistryEditor(Config).showDialog()
@@ -81,14 +81,14 @@ class menuBarController {
     }
 
     fun menu_debug_dirty() {
-        Editor.mvc().currentEditor().documentChanged("Debug dirty.")
+        IDE.mvc().currentEditor().documentChanged("Debug dirty.")
     }
 
     fun menu_debug_showcache() {
         showInformationalAlert(
             "Project files loaded into cache are : "
                     +
-                    Editor.mvc().Project.getCache().entries.joinToString {
+                    IDE.mvc().Project.getCache().entries.joinToString {
                         it.key + if (File(it.key).exists()) "" else "(Missing)" + "\n"
                     }
         )
@@ -101,7 +101,7 @@ class menuBarController {
     }
 
     fun menu_debug_reset_projprefs() =
-        Editor.mvc().Project.PREFERENCES.reset()
+        IDE.mvc().Project.PREFERENCES.reset()
 
 
     fun menu_debug_reset_config() =
@@ -202,7 +202,7 @@ class menuBarController {
 
 
     fun menu_project_projprefs(actionEvent: ActionEvent) {
-        RegistryEditor(Editor.mvc().Project.PREFERENCES).showDialog()
+        RegistryEditor(IDE.mvc().Project.PREFERENCES).showDialog()
     }
 
 
@@ -247,11 +247,11 @@ class menuBarController {
     }
 
     fun menu_edit_undo() {
-        Editor.mvc().currentEditor().undo()
+        IDE.mvc().currentEditor().undo()
     }
 
     fun menu_edit_redo() {
-        Editor.mvc().currentEditor().redo()
+        IDE.mvc().currentEditor().redo()
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -260,15 +260,15 @@ class menuBarController {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     fun menu_window_isolation() {
-        Editor.mvc().currentEditor().toggleStandaloneEditMode()
+        IDE.mvc().currentEditor().toggleStandaloneEditMode()
     }
 
     fun menu_window_fs() {
-        Editor.EDITOR.stage.isFullScreen = !Editor.EDITOR.stage.isFullScreen
+        IDE.EDITOR.stage.isFullScreen = !IDE.EDITOR.stage.isFullScreen
     }
 
     fun menu_window_closeeditors() {
-        Editor.mvc().closeAllEditors()
+        IDE.mvc().closeAllEditors()
     }
 
 
@@ -387,8 +387,8 @@ class menuBarController {
     }
 
     fun menu_debug_js() {
-        Editor.EDITOR.stage.scene = Scene(loadFXMLComponent<Pane>("jsdesigner/jsDesigner.fxml").first)
-        getTheme().scene = Editor.EDITOR.stage.scene
+        IDE.EDITOR.stage.scene = Scene(loadFXMLComponent<Pane>("jsdesigner/jsDesigner.fxml").first)
+        getTheme().scene = IDE.EDITOR.stage.scene
     }
 
 }

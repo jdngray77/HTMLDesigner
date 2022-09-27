@@ -1,6 +1,6 @@
 package com.jdngray77.htmldesigner.frontend.splash
 
-import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.animation.*
 import javafx.application.Application
@@ -65,10 +65,10 @@ class SplashScreen() : Application() {
         //After fade in, load the app.
         fadeIn.setOnFinished { e ->
             try {
-                Editor().start(primaryStage)
+                IDE().start(primaryStage)
             } catch (e: Exception) {
                 Error("The editor failed to open.", e).printStackTrace()
-                Editor.EDITOR.exit()
+                IDE.EDITOR.exit()
             }
             splashWindow.close()
         }
@@ -115,11 +115,11 @@ class SplashScreenController {
 
     @FXML
     fun initialize() {
-        lblVersion.text = Editor.getVersionString()
+        lblVersion.text = IDE.getVersionString()
 
         img.image = Image(javaClass.getResourceAsStream("Splash${nextInt(0, SPLASH_IMG_COUNT)}.jpeg"))
 
-        if (Editor.TESTING)
+        if (IDE.TESTING)
             testMode()
     }
 

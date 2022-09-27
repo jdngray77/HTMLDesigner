@@ -17,7 +17,7 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIfAvail
 import java.lang.Thread.UncaughtExceptionHandler
 import java.security.PrivilegedActionException
 

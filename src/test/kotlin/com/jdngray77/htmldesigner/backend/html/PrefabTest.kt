@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer
 import com.jdngray77.htmldesigner.RequiresEditorGUI
 import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.isPrefabInstance
 import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.prefab_uuid
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.junit.jupiter.api.AfterEach

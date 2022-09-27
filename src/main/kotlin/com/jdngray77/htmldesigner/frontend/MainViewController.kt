@@ -19,8 +19,8 @@ import com.jdngray77.SplashX6.audio.SpotifyAuthHelper
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.project
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.docks.*

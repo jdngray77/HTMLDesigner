@@ -15,8 +15,8 @@
 package com.jdngray77.htmldesigner.backend.html
 
 import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.frontend.Editor
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.utility.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -74,7 +74,7 @@ class Prefab(
     constructor(
         subPath: String,
         element: Element? = null
-    ) : this(Editor.mvc().Project.PREFABS.subFile(subPath.assertEndsWith(".html")), element)
+    ) : this(IDE.mvc().Project.PREFABS.subFile(subPath.assertEndsWith(".html")), element)
 
 
     /**

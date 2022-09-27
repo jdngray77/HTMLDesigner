@@ -21,8 +21,8 @@ import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.backend.showInformationalAlert
 import com.jdngray77.htmldesigner.backend.userInput
-import com.jdngray77.htmldesigner.frontend.Editor
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.utility.delete
 import javafx.event.ActionEvent
 import javafx.scene.control.ButtonType
@@ -49,18 +49,18 @@ object RunAnything : SearchableList<Task>(
         *RegistryTaskFactory("IDE").createTasks(Config),
         Task("IDE Registry > Toggle Dark Mode (requires restart)") {
             Config[Configs.DARK_MODE_BOOL] = !(Config[Configs.DARK_MODE_BOOL] as Boolean)
-            Editor.EDITOR.restart()
+            IDE.EDITOR.restart()
         },
 
 
-        *MenuTaskFactory().createTasks(Editor.EDITOR.scene.first.lookup("#MenuBar") as MenuBar),
+        *MenuTaskFactory().createTasks(IDE.EDITOR.scene.first.lookup("#MenuBar") as MenuBar),
 
-        Task("Restart") { Editor.EDITOR.restart() },
-        Task("Quit") { Editor.EDITOR.exit() },
+        Task("Restart") { IDE.EDITOR.restart() },
+        Task("Quit") { IDE.EDITOR.exit() },
 
 
         Task("Project > Validate Cache") { mvc().Project.validateCache() },
-        Task("Project > Close") { Editor.EDITOR.closeProject() },
+        Task("Project > Close") { IDE.EDITOR.closeProject() },
 
         Task("Notify Event") {
             EventNotifier.notifyEvent(

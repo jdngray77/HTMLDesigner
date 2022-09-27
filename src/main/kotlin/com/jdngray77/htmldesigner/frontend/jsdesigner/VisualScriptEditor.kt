@@ -5,8 +5,8 @@ import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphCompiler
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.utility.*

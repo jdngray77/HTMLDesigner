@@ -96,7 +96,7 @@ class LicencesWindow : SplitPane(){
         Stage().apply {
             scene = Scene(this@LicencesWindow)
             isResizable = true
-            initOwner(Editor.EDITOR.stage)
+            initOwner(IDE.EDITOR.stage)
             getTheme().scene = scene
             show()
         }

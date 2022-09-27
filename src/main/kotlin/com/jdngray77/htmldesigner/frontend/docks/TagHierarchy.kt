@@ -17,7 +17,7 @@ package com.jdngray77.htmldesigner.frontend.docks
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.createPrefab
 import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.updatePrefabFromInstance
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleObjectProperty

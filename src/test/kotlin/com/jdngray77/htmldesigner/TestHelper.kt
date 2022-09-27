@@ -15,7 +15,7 @@
 package com.jdngray77.htmldesigner
 
 import com.jdngray77.htmldesigner.RequiresEditorGUI.Companion.editorHasBeenLoaded
-import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.IDE
 import javafx.application.Platform
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -57,7 +57,7 @@ class RequiresEditorGUI : BeforeAllCallback, CloseableResource {
             }
 
             print("Awaiting editor load.")
-            while (!Editor.mvcIsAvail()) {
+            while (!IDE.mvcIsAvail()) {
                 Thread.sleep(100)
             }
         }
@@ -65,7 +65,7 @@ class RequiresEditorGUI : BeforeAllCallback, CloseableResource {
 
     override fun close() {
         // Your "after all tests" logic goes here
-        Editor.EDITOR.exit()
+        IDE.EDITOR.exit()
     }
 
 

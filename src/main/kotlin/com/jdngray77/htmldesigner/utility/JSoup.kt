@@ -22,8 +22,8 @@ import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.backend.html.Prefab
 import com.jdngray77.htmldesigner.backend.userInput
-import com.jdngray77.htmldesigner.frontend.Editor
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
+import com.jdngray77.htmldesigner.frontend.IDE
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIfAvail
 import com.steadystate.css.dom.CSSStyleSheetImpl
 import com.steadystate.css.parser.CSSOMParser
 import com.steadystate.css.parser.SACParserCSS3
@@ -55,14 +55,14 @@ import java.io.StringReader
  * holds this document.
  */
 fun Document.open() =
-    Editor.mvcIfAvail()?.openDocument(this)
+    IDE.mvcIfAvail()?.openDocument(this)
 
 /**
  * Finds an editor in the IDE that is editing this document,
  * if there is one.
  */
 fun Document.editor() =
-    Editor.mvcIfAvail()?.findEditorFor(this)
+    IDE.mvcIfAvail()?.findEditorFor(this)
 
 /**
  * If the document is open in an editor, notifies

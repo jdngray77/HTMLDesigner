@@ -16,7 +16,7 @@ package com.jdngray77.htmldesigner.frontend.controls
 
 import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.backend.userConfirm
-import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.IDE
 import javafx.beans.value.ObservableValue
 import javafx.scene.control.Button
 import javafx.scene.control.ButtonType
@@ -142,7 +142,7 @@ class RegistryEditor<T>(
                     },
                     Button("Quick restart").also {
                         it.setOnAction {
-                            Editor.EDITOR.restart() // This waits for the entire restart, including project selection.
+                            IDE.EDITOR.restart() // This waits for the entire restart, including project selection.
 
                             toFront()       // Once the ide has loaded, bring the dialog back into focus.
 

@@ -1,5 +1,5 @@
 import com.jdngray77.htmldesigner.backend.ExceptionListener
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.TESTING
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.TESTING
 import com.jdngray77.htmldesigner.frontend.splash.SplashScreen
 import javafx.application.Application
 

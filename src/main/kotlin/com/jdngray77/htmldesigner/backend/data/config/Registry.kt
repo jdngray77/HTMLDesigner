@@ -21,7 +21,7 @@ import com.jdngray77.htmldesigner.backend.showErrorAlert
 import com.jdngray77.htmldesigner.backend.showWarningNotification
 import com.jdngray77.htmldesigner.utility.loadObjectFromDisk
 import com.jdngray77.htmldesigner.utility.saveObjectToDisk
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIfAvail
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.InvalidClassException

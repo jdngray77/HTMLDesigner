@@ -18,8 +18,8 @@ package com.jdngray77.htmldesigner.backend
 import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
-import com.jdngray77.htmldesigner.frontend.Editor
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIfAvail
+import com.jdngray77.htmldesigner.frontend.IDE
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIfAvail
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.controls.SearchableList
 import javafx.application.Platform
@@ -71,7 +71,7 @@ fun showErrorNotification(error: Throwable, suppress: Boolean = Config[Configs.S
                 }"
             )
             .onAction {
-                Editor.mvcIfAvail()?.MainView?.textEditor_Open(
+                IDE.mvcIfAvail()?.MainView?.textEditor_Open(
                     StringWriter().let {
                         error.printStackTrace(PrintWriter(it))
                         it.toString()

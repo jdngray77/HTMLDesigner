@@ -20,7 +20,7 @@ import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.html.AllElements
 import com.jdngray77.htmldesigner.backend.html.Headings
 import com.jdngray77.htmldesigner.backend.html.Text
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import com.jdngray77.htmldesigner.utility.readPrivateProperty

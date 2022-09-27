@@ -18,8 +18,8 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.backend.html.Prefab
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.project
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import com.jdngray77.htmldesigner.utility.menu
 import com.jdngray77.htmldesigner.utility.setOnDoubleClick

@@ -22,7 +22,7 @@ import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
 import com.jdngray77.htmldesigner.backend.html.DefaultDocument
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.*
 import org.jsoup.Jsoup

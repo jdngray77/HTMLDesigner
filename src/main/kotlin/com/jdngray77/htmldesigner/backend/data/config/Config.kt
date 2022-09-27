@@ -15,7 +15,7 @@
 package com.jdngray77.htmldesigner.backend.data.config
 
 import com.jdngray77.htmldesigner.backend.WebServer
-import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.jdngray77.htmldesigner.utility.subFile
@@ -219,7 +219,7 @@ enum class Configs {
  *
  * Saved in the pwd.
  */
-object Config : Registry<Configs>(Editor.IDEDirectory.subFile("./config.registry")), IDEEarlyBootListener {
+object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry")), IDEEarlyBootListener {
 
     init {
         // FIXME i don't like this work-around.

@@ -21,7 +21,7 @@ import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Configs
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.EDITOR
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.utility.*
 import javafx.application.Application
 import javafx.application.Platform
@@ -44,7 +44,7 @@ import kotlin.test.assertNotNull
  * Launches the FXML, configures and stores
  * references to the [EDITOR] and the [mvc].
  */
-class Editor : Application() {
+class IDE : Application() {
 
     companion object {
 
@@ -72,7 +72,7 @@ class Editor : Application() {
          * A static reference to the application instance
          */
         @Deprecated("Don't directly access", ReplaceWith("mvc(), project(), maingui"))
-        lateinit var EDITOR : Editor
+        lateinit var EDITOR : IDE
 
         /**
          * A flag that is raised when the editor is booted

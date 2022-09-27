@@ -18,7 +18,7 @@ package com.jdngray77.htmldesigner.utility
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
-import com.jdngray77.htmldesigner.frontend.Editor
+import com.jdngray77.htmldesigner.frontend.IDE
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.fxml.FXMLLoader
@@ -73,7 +73,7 @@ fun loadFXMLScene(urlFromSrcRoot: String, css : String = "blank.css") : Pair<Sce
  * @param pathRelativeTo The class that the path is relative to.
  * @param controller Optional. An existing controller instance to use. If not provided, once will be created using the FXML.
  */
-fun <T : Parent> loadFXMLComponent(path: String, pathRelativeTo: Class<*> = Editor::class.java, controller: Any? = null) =
+fun <T : Parent> loadFXMLComponent(path: String, pathRelativeTo: Class<*> = IDE::class.java, controller: Any? = null) =
     FXMLLoader(pathRelativeTo.getResource(path)).let { loader ->
         controller?.let { loader.setController(it) }
         loader.load<T>().let {

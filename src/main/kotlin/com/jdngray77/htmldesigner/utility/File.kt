@@ -16,7 +16,7 @@
 package com.jdngray77.htmldesigner.utility
 
 import com.jdngray77.htmldesigner.backend.html.Prefab
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import java.awt.Desktop
 import java.io.File
 import java.nio.file.FileVisitOption

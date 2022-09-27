@@ -17,8 +17,8 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.frontend.DocumentEditor
-import com.jdngray77.htmldesigner.frontend.Editor
-import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
+import com.jdngray77.htmldesigner.frontend.IDE
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIsAvail
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import javafx.application.Platform
@@ -188,7 +188,7 @@ object EventNotifier {
         // TODO remove this once threading is in place. Just don't start the threading until well after the
         //      editor has initialised.
         try {
-            Editor.EDITOR.mvc
+            IDE.EDITOR.mvc
         } catch (e : UninitializedPropertyAccessException) {
             return
         }

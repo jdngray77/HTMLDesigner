@@ -13,6 +13,6 @@ class AboutScreenController {
 
     @FXML
     fun initialize() {
-        lblIDEVer.text = Editor.getVersionString()
+        lblIDEVer.text = IDE.getVersionString()
     }
 }
