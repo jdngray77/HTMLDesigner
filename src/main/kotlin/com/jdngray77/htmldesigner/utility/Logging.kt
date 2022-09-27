@@ -15,6 +15,7 @@
 
 package com.jdngray77.htmldesigner.backend
 
+import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.Editor
@@ -44,6 +45,15 @@ import java.io.StringWriter
  * Has no effect if [Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL] is true
  */
 fun showErrorNotification(error: Throwable, suppress: Boolean = Config[Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL] as Boolean ) {
+
+
+    logStatus(
+        (if (suppress) "(suppressed)" else "") +
+                "Error: ${error.message} (${error.javaClass.simpleName})\n" +
+                "Stacktrace:\n" +
+                error.stackTraceToString()
+    )
+
     if (suppress)
         return
 
@@ -74,7 +84,11 @@ fun showErrorNotification(error: Throwable, suppress: Boolean = Config[Configs.S
 }
 
 fun showWarningNotification(title: String = "", message: String = "") {
-    onUIThread() {
+
+    logStatus("\nWarning: $title - $message")
+
+
+    onUIThread {
         Notifications.create()
             .title(title)
             .text(message)
@@ -88,6 +102,9 @@ fun showWarningNotification(title: String = "", message: String = "") {
 }
 
 fun showNotification(title: String = "", message: String = "", onAction: (() -> Unit)? = null) {
+
+    logStatus("Notification: $title - $message")
+
     onUIThread() {
         Notifications.create()
             .title(title)
@@ -153,14 +170,11 @@ fun NotificationPane(string: String, buttonText: String = "", showOnBottom: Bool
  * also displays it in left of the status tray.
  */
 fun logWarning(string: String) {
+    logStatus(string)
+
     onUIThread {
-        System.err.println(string)
         mvcIfAvail()?.MainView?.setStatus(string)
     }
-}
-
-fun onUIThread(runnable: Runnable) {
-    Platform.runLater(runnable)
 }
 
 /**
@@ -174,10 +188,11 @@ fun onUIThread(runnable: Runnable) {
  * @returns The message that was displayed.
  */
 fun logStatus(string: String) {
+    println("\nIDE Status: $string")
+
     onUIThread {
         mvcIfAvail()?.MainView?.setStatus(string)
     }
-    println(string)
 }
 
 /**
@@ -191,16 +206,26 @@ fun logStatus(string: String) {
  *
  * @param action The action to display.
  */
-fun setAction(string: String) =
-    onUIThread { mvcIfAvail()?.MainView?.setAction(string) }
+fun setAction(string: String) {
+    println("\nUser Action : $string")
+
+    onUIThread {
+        mvcIfAvail()?.MainView?.setAction(string)
+    }
+}
 
 /**
  * Shows an [Alert] with a message and an OK button.
  *
  * Returns once the user has dismissed it.
  */
-fun showInformationalAlert(message: String) =
-    onUIThread { Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK).showAndWait() }
+fun showInformationalAlert(message: String) {
+    logStatus("Info alert: $message")
+
+    onUIThread {
+        Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK).showAndWait()
+    }
+}
 
 /**
  * Shows a distracting [Alert] with a error message and an OK button.
@@ -209,8 +234,13 @@ fun showInformationalAlert(message: String) =
  * Returns once the user has dismissed it.
  */
 @Deprecated("This is distracting and obnoxious, try to avoid annoying the user. if more suitable use ContextMessage(...)", ReplaceWith("ContextMessage (If more appropriate)"))
-fun showErrorAlert(message: String) =
-    onUIThread { Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait() }
+fun showErrorAlert(message: String) {
+    logStatus("Error alert: $message")
+
+    onUIThread {
+        Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait()
+    }
+}
 
 /**
  * Shows an unobtrusive pop-up message in context to some GUI element showing a message.
@@ -266,7 +296,12 @@ fun userConfirm(message : String, vararg buttonType: ButtonType) = Alert(
     message,
     *buttonType
 ).let {
+    logStatus("Confirming with user: $message")
+
     it.showAndWait()
+
+    logStatus("Confirmed with user (${it.result.text}): $message")
+
     return@let it.result
 }
 
@@ -275,6 +310,8 @@ fun userConfirm(message : String, vararg buttonType: ButtonType) = Alert(
  * @param inputValidator Optional input tester. Return an error message if you don't like what the user typed in, else null if OK.
  */
 fun userInput(message: String, inputValidator: ((String) -> String?)? = null): String {
+    logStatus("Prompting user for input: $message")
+
     TextInputDialog().apply {
         headerText = message
         if (inputValidator == null)
@@ -285,9 +322,9 @@ fun userInput(message: String, inputValidator: ((String) -> String?)? = null): S
                 inputValidator(result)?.let {
                     showErrorAlert(it)
                 } ?: run {
+                    logStatus("User provided input ($result): $message")
                     return result
                 }
-
             }
         }
     }

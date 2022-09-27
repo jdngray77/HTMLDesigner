@@ -1,7 +1,7 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.backend.BackgroundTask.submitToUI
+import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphCompiler
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNode
@@ -315,7 +315,7 @@ class VisualScriptEditor : Dock(), Subscriber {
         // Remove from GUI
         guiNodes.remove(node)
 
-        submitToUI {
+        onUIThread {
             editorRootPane.children.remove(node.root)
         }
 

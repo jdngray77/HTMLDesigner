@@ -6,6 +6,7 @@ import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.backend.html.Prefab
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.project
 import com.jdngray77.htmldesigner.frontend.MainViewController.Companion.clearDock
@@ -187,6 +188,10 @@ class menuBarController {
 
     fun menu_server_tglauto(actionEvent: ActionEvent) {
         WebServer.autoRefresh = (actionEvent.source as CheckMenuItem).isSelected
+    }
+
+    fun menu_tools_validate_prefabs() {
+        Prefab.validatePrefabs()
     }
 
 
@@ -385,4 +390,5 @@ class menuBarController {
         Editor.EDITOR.stage.scene = Scene(loadFXMLComponent<Pane>("jsdesigner/jsDesigner.fxml").first)
         getTheme().scene = Editor.EDITOR.stage.scene
     }
+
 }

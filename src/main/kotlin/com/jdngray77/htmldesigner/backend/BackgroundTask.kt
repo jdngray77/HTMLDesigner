@@ -17,6 +17,8 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
+import com.sun.javafx.tk.Toolkit
+import javafx.application.Platform
 import java.lang.System.gc
 import java.util.concurrent.*
 import kotlin.concurrent.thread
@@ -33,13 +35,23 @@ import kotlin.reflect.KFunction
 object BackgroundTask : Subscriber, IDEEarlyBootListener {
 
     init {
-        EventNotifier.subscribe(this, EventType.IDE_SHUTDOWN)
+        EventNotifier.subscribe(this, EventType.IDE_SHUTDOWN, EventType.IDE_FINISHED_LOADING)
     }
 
     private lateinit var threadPool : ThreadPoolExecutor
 
-    fun submitToUI(runnable: Runnable) {
-        onUIThread(runnable)
+    /**
+     * Asserts that the [runnable] is executed on the JavaFX Application Thread.
+     *
+     * If this is already on the qt thread, the runnable is executed immediately. Otherwise,
+     * it's submitted to [Platform.runLater] to be executed on the qt thread later.
+     */
+    fun onUIThread(runnable: Runnable) {
+//        if (Toolkit.getToolkit().isFxUserThread)
+        if (Thread.currentThread().name == "JavaFX Application Thread")
+            runnable.run()
+        else
+            Platform.runLater(runnable)
     }
 
     /**
@@ -125,6 +137,21 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
 
 
     override fun notify(e: EventType) {
-        shutdown()
+        when (e) {
+            EventType.IDE_SHUTDOWN -> shutdown()
+            EventType.IDE_FINISHED_LOADING ->
+                if (threadPool.isTerminated || threadPool.isShutdown || threadPool.isTerminating) {
+                    // Thread pool should have been booted by now. Get it started.
+                    onIDEBootEarly()
+
+                    assert(!threadPool.isShutdown)
+                    assert(!threadPool.isTerminated)
+                    assert(!threadPool.isTerminating)
+
+                    logWarning("Thread pool failed to start by the time the ide finished loading. Restarted it.")
+                }
+
+            else -> {}
+        }
     }
 }

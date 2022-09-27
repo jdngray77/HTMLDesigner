@@ -1,7 +1,7 @@
 package com.jdngray77.htmldesigner.frontend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.invokeInBackground
-import com.jdngray77.htmldesigner.backend.BackgroundTask.submitToUI
+import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphElement
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNodeGroup
@@ -179,7 +179,7 @@ x
 
         if (selectedNodes.isEmpty()) return
 
-        submitToUI {
+        onUIThread {
             lastCreatedGroup = JsNodeGroup(editor, *selectedNodes.toTypedArray()).also {
                 setAction("Selected ${it.graphGroup.size} nodes")
             }
@@ -907,7 +907,7 @@ class JsNodeGroup(
      * Removes this from the [editor]
      */
     private fun removeFromEditor() {
-        submitToUI {
+        onUIThread {
             editor.editorRootPane.children.remove(this)
         }
     }
@@ -916,7 +916,7 @@ class JsNodeGroup(
      * Adds this to the [editor], if it isn't already on screen.
      */
     private fun addToEditor() {
-        submitToUI {
+        onUIThread {
             editor.editorRootPane.children.addIfAbsent(this)
             invalidatePosition()
         }

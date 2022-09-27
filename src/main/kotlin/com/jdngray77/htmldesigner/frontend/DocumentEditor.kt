@@ -16,6 +16,7 @@
 package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
@@ -425,7 +426,10 @@ class DocumentEditor {
         setAction(desc)
         if (isDirty) return
 
-        tab.text += DIRTY_SUFFIX
+        onUIThread {
+            tab.text += DIRTY_SUFFIX
+        }
+
         isDirty = true
     }
 
@@ -447,21 +451,23 @@ class DocumentEditor {
      * Updates [WebView] to display the current state of the [document]
      */
     fun reRender() {
-        contentRenderer.engine.loadContent(
-            if (standaloneEditMode)
-                Element("div")
-                    .attr("style",
-                        "background: ${standaloneColorPicker.value.toHex()}; height: 100%; width: 100%; ${
-                            if (standaloneCenter.isSelected) 
+        onUIThread {
+            contentRenderer.engine.loadContent(
+                if (standaloneEditMode)
+                    Element("div")
+                        .attr("style",
+                            "background: ${standaloneColorPicker.value.toHex()}; height: 100%; width: 100%; ${
+                                if (standaloneCenter.isSelected)
                                     "display: flex; " +
-                                    "justify-content: center; " +
-                                    "align-items: center; "
-                            else ""}")
-                    .appendChild(selectedTag!!.clone()).outerHtml()
-            else
-                document.toString()
+                                            "justify-content: center; " +
+                                            "align-items: center; "
+                                else ""}")
+                        .appendChild(selectedTag!!.clone()).outerHtml()
+                else
+                    document.toString()
 
-        )
+            )
+        }
     }
 
     /**

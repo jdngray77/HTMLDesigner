@@ -102,30 +102,6 @@ fun Element.prepareForExport() {
     removeClass("debug-outline")
 }
 
-
-/**
- * Quick convinience method to create a prefab.
- */
-fun Element.createPrefab(): Prefab? {
-    var ret: Prefab? = null
-
-    userInput("Enter a name / path for this prefab") {
-        try {
-            // Validation.
-            // This should not exist, and throw an error. If not, then
-            // reject input.
-            Prefab(it)
-            return@userInput "$it already exists!"
-        } catch (e: NoSuchFileException) {
-            // Create it.
-            ret = Prefab(e.file, this)
-            EventNotifier.notifyEvent(EventType.PROJECT_PREFAB_CREATED)
-            return@userInput null
-        }
-    }
-    return ret
-}
-
 fun Element.userString() = tagName() + " " + id()
 
 fun String.asElement(): Element =

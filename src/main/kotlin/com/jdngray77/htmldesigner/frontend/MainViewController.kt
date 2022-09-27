@@ -238,12 +238,24 @@ class MainViewController {
         htmlEditor.htmlText = rawHTML
     }
 
-    // TODO move these to logging
-    fun setStatus(string: String) {
-        lblLeftStatus.text = string
+    var lastStatus = ""
+
+    fun showLastStatus() {
+        showListOfStrings("Last status", lastStatus.lines())
     }
 
-    // TODO move these to logging
+    fun setStatus(string: String) {
+        lastStatus = string
+        val lines = string.lines()
+
+        var output = lines.first()
+
+        if (lines.size > 1)
+            output += "..."
+
+        lblLeftStatus.text = output
+    }
+
     fun setAction(string: String) {
         lblRightStatus.text = string
     }

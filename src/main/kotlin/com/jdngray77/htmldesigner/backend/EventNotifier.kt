@@ -21,7 +21,6 @@ import com.jdngray77.htmldesigner.frontend.Editor
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvcIsAvail
 import com.jdngray77.htmldesigner.frontend.MainViewController
 import com.jdngray77.htmldesigner.utility.addIfAbsent
-import com.jdngray77.htmldesigner.utility.createPrefab
 import javafx.application.Platform
 import org.jsoup.nodes.Element
 

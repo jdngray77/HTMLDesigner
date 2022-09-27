@@ -15,6 +15,8 @@
 package com.jdngray77.htmldesigner.frontend.docks
 
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.createPrefab
+import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.updatePrefabFromInstance
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
 import com.jdngray77.htmldesigner.utility.*
@@ -151,11 +153,26 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                         standaloneEditMode = true
                     }
                 }
-                .item("Save As Prefab") {
-                selectedItems().map {
-                        it.createPrefab()
+                .subMenu("Prefabs")
+                    .item("Create new prefab") {
+                        selectedItems().map {
+                            it.createPrefab()
+                        }
                     }
-                }
+
+                    .item("Update prefab master") {
+                        selectedItems().map {
+                            it.updatePrefabFromInstance()
+                        }
+                    }
+
+                    .item("Update master & all instances") {
+                        selectedItems().map {
+                            it.updatePrefabFromInstance(true)
+                        }
+                    }
+
+                    .menuDone()
                 .separator()
                 .item("Delete") {
                     selectedItems().apply {

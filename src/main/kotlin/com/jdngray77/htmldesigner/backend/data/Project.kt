@@ -122,6 +122,7 @@ import java.util.*
  *
  * This object is serialized to disk as `project.designer`.
  *
+ * TODO paths are not transient.
  * @see locationOnDisk for project file structure.
  * @author Jordan Gray
  */
@@ -210,6 +211,19 @@ class Project(
      * The project's backup directory
      */
     val BACKUP = File(subPath(PROJECT_PATH_BACKUP))
+
+    /**
+     * The temporary document used to edit prefabs
+     */
+    val PREFAB_EDIT_DOCUMENT = File(subPath(PROJECT_PATH_PREFAB_EDIT_DOCUMENT))
+        get() {
+            if (!field.exists()) {
+                createDocument(PROJECT_PATH_PREFAB_EDIT_DOCUMENT)
+                    .body().children().clear()
+            }
+
+            return field
+        }
 
     /**
      *
@@ -753,6 +767,11 @@ class Project(
          * The location of prefabricated elements, relative to the root.
          */
         const val PROJECT_PATH_PREFABS: String = "PREFABS/"
+
+        /**
+         * Location of a document used to edit prefabs, relative to [PROJECT_PATH_HTML].
+         */
+        const val PROJECT_PATH_PREFAB_EDIT_DOCUMENT: String = "prefab editor.html"
 
 
         /**

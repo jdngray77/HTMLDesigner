@@ -201,13 +201,15 @@ class MVC (
      * new editor
      *
      * @param document Document - The document to open
+     * @return the document editor created.
      */
-    fun openDocument(document: Document) {
+    fun openDocument(document: Document) : DocumentEditor {
         loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
             (second as DocumentEditor).let {
                 it.setDocument(document)
                 openEditors.add(it)
                 switchToEditor(it)
+                return it
             }
         }
     }
@@ -218,18 +220,20 @@ class MVC (
      * If there's already an editor, it's switched to.
      * Else, one is created.
      */
-    fun openDocument(document: File) {
-        switchToDocument(Project.loadDocument(document))
-        MainView.setAction("Opened ${document.name}")
-    }
+    fun openDocument(document: File) =
+        switchToDocument(Project.loadDocument(document)).also {
+            MainView.setAction("Opened ${document.name}")
+        }
 
     /**
      * This function switches to the editor tab that is passed in as a parameter
      *
      * @param editor DocumentEditor - The editor to switch to
+     * @return editor
      */
-    fun switchToEditor(editor: DocumentEditor) {
+    fun switchToEditor(editor: DocumentEditor) : DocumentEditor {
         MainView.dockEditors.selectionModel.select(editor.tab)
+        return editor
     }
 
 
@@ -250,10 +254,11 @@ class MVC (
      * Editor as its argument
      *
      * @param document The document to switch to.
+     * @return the document editor, wether it was created anew or already existed.
      */
     fun switchToDocument(document: Document) =
-        findEditorFor(document)?.apply { switchToEditor(this) }
-            ?: run { openDocument(document) }
+        findEditorFor(document)?.let { switchToEditor(it) }
+            ?: openDocument(document)
 
     fun validateEditors() {
         // Find tabs that are not in [openEditors], and remove them.

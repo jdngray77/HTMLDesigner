@@ -25,15 +25,13 @@ import com.jdngray77.htmldesigner.utility.menu
 import com.jdngray77.htmldesigner.utility.setOnDoubleClick
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.control.SelectionMode
-import javafx.scene.control.TreeItem
-import javafx.scene.control.TreeTableColumn
-import org.jsoup.nodes.Document
+import javafx.scene.control.*
 
 /**
  * A simple dock that displays available prefabs, and injects them into the document.
  */
-class Prefabs : HierarchyDock<Prefab>({ it?.locationOnDisk!!.name }), Subscriber {
+class Prefabs : HierarchyDock<Prefab>({ it?.locationOfMaster!!.name }), Subscriber {
+
     init {
         EventNotifier.subscribe(this, EventType.IDE_FINISHED_LOADING, EventType.PROJECT_PREFAB_CREATED)
     }
@@ -60,17 +58,17 @@ class Prefabs : HierarchyDock<Prefab>({ it?.locationOnDisk!!.name }), Subscriber
             },
 
             TreeTableColumn<Prefab, String>("Type").also {
-                it.setCellValueFactory { SimpleStringProperty(it.value.value.element.tagName()) }
+                it.setCellValueFactory { SimpleStringProperty(it.value.value.masterElement.tagName()) }
 
                 it.isEditable = false
             }
         )
 
         tree.setOnDoubleClick {
-            selectedItem()?.element?.clone().apply {
+            selectedItem()?.masterElement?.clone().apply {
                 mvc().currentEditor().let {
                     it.selectedTag?.appendChild(this)
-                    it.documentChanged("Added prefab ${selectedItem()?.locationOnDisk!!.name ?: ""} to ${it.selectedTag?.tagName()}")
+                    it.documentChanged("Added prefab ${selectedItem()?.locationOfMaster!!.name ?: ""} to ${it.selectedTag?.tagName()}")
                     it.selectTag(this)
                 }
             }
@@ -78,31 +76,99 @@ class Prefabs : HierarchyDock<Prefab>({ it?.locationOnDisk!!.name }), Subscriber
 
         setContextMenu(
             menu()
-                .item("Edit Prefab") { editSelected() }
-                .item("Delete Prefab")
-                .item("[test] Commit Prefab") { commitSelected() }
+                .item("Rename...") { renameSelected() }
+                .item("Edit") { editSelected() }
+                .separator()
+                .item("Create new instance") { newInstance() }
+                .item("Delete Prefab...") { deleteSelected() }
+                .item("Update all instances") { updateAllInstances() }
                 .toContextMenu()
         )
     }
 
-    private fun editSelected() {
+    private fun renameSelected() {
+        TODO()
+    }
+
+    private fun newInstance() {
+        TODO()
+    }
+
+    private fun deleteSelected() {
+        val usersDecision = Dialog<ButtonType>().let {
+            it.title = "Confirm prefab deletion"
+
+            it.headerText = it.title
+            it.contentText = "Would you like to keep all instances of the prefab, or delete them as well?"
+
+            it.dialogPane.buttonTypes.addAll(
+                unlinkButtonType,
+                deleteButtonType,
+                ButtonType.CANCEL
+            )
+
+            it.showAndWait()
+            it.result
+        }
+
+        val prefab = selectedItem()!!
+
+        when (usersDecision) {
+
+            unlinkButtonType -> {
+                prefab.unlinkAllInstances()
+            }
+
+            deleteButtonType -> {
+                prefab.deleteAllInstances()
+            }
+
+            ButtonType.CANCEL -> {
+                return
+            }
+
+            else -> {}
+        }
+
+        // Should be pointless, but just to be safe.
+        if (prefab.masterElement.hasParent())
+            prefab.masterElement.remove()
+
+        // Delete file.
+        prefab.locationOfMaster.delete()
+    }
+
+    fun editSelected() {
         selectedItem()?.let {
-            mvc().apply {
-                openDocument(
-                    Document("").apply {
-                        body().appendChild(
-                            it.element
-                        )
-                    }
+            with (mvc()) {
+
+                val prefabEditor = mvc().openDocument(
+                    mvc().Project.PREFAB_EDIT_DOCUMENT
                 )
+
+                with(prefabEditor.document.body()) {
+                    children().forEach {
+                        it.remove()
+                    }
+
+                    appendChild(it.masterElement.clone())
+                }
+
+                prefabEditor.reRender()
+                prefabEditor.standaloneEditMode = true
             }
         }
     }
 
-    private fun commitSelected() {
-        selectedItem()?.commitChange()
+    private fun updateAllInstances() {
+        selectedItem()?.updateInstances()
     }
 
 
     override fun getChildrenFor(el: Prefab) = emptyList<Prefab>()
+
+    companion object {
+        val unlinkButtonType = ButtonType("Delete prefab only")
+        val deleteButtonType = ButtonType("Delete all instances")
+    }
 }

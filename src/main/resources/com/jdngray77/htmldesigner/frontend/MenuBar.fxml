@@ -98,6 +98,7 @@
                     </items>
                 </Menu>
             </items>
+            <MenuItem mnemonicParsing="false" onAction="#menu_tools_validate_prefabs" text="Validate prefabs" />
         </Menu>
         <Menu text="View">
             <items>

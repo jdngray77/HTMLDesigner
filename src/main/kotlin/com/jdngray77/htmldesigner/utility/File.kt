@@ -15,6 +15,7 @@
 
 package com.jdngray77.htmldesigner.utility
 
+import com.jdngray77.htmldesigner.backend.html.Prefab
 import com.jdngray77.htmldesigner.frontend.Editor.Companion.mvc
 import java.awt.Desktop
 import java.io.File
@@ -116,3 +117,5 @@ fun File.isInProject() = absolutePath.startsWith(mvc().Project.locationOnDisk.ab
 fun File.isInProjectRoot() = this.parentFile == mvc().Project.locationOnDisk
 
 fun File.isProjectRoot() = this == mvc().Project.locationOnDisk
+
+fun File.loadPrefab() = Prefab(this)
