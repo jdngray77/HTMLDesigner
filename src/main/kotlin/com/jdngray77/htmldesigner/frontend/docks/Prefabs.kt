@@ -18,9 +18,9 @@ import com.jdngray77.htmldesigner.backend.EventNotifier
 import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.backend.html.Prefab
-import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.project
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
 import com.jdngray77.htmldesigner.utility.menu
 import com.jdngray77.htmldesigner.utility.setOnDoubleClick
 import javafx.beans.property.SimpleObjectProperty
@@ -65,10 +65,10 @@ class Prefabs : HierarchyDock<Prefab>({ it?.locationOfMaster!!.name }), Subscrib
         )
 
         tree.setOnDoubleClick {
-            selectedItem()?.masterElement?.clone().apply {
-                mvc().currentEditor().let {
+            selectedItem()?.masterElement?.clone()?.apply {
+                activeDocumentEditor()?.let {
                     it.selectedTag?.appendChild(this)
-                    it.documentChanged("Added prefab ${selectedItem()?.locationOfMaster!!.name ?: ""} to ${it.selectedTag?.tagName()}")
+                    it.changed("Added prefab ${selectedItem()?.locationOfMaster!!.name ?: ""} to ${it.selectedTag?.tagName()}")
                     it.selectTag(this)
                 }
             }
@@ -139,25 +139,26 @@ class Prefabs : HierarchyDock<Prefab>({ it?.locationOfMaster!!.name }), Subscrib
     }
 
     fun editSelected() {
-        selectedItem()?.let {
-            with (mvc()) {
-
-                val prefabEditor = mvc().openDocument(
-                    mvc().Project.PREFAB_EDIT_DOCUMENT
-                )
-
-                with(prefabEditor.document.body()) {
-                    children().forEach {
-                        it.remove()
-                    }
-
-                    appendChild(it.masterElement.clone())
-                }
-
-                prefabEditor.reRender()
-                prefabEditor.standaloneEditMode = true
-            }
-        }
+        // TODO open prefab editor
+//        selectedItem()?.let {
+//            with (mvc()) {
+//
+//                val prefabEditor = openDocument(
+//                    mvc().Project.PREFAB_EDIT_DOCUMENT
+//                )
+//
+//                with(prefabEditor.document.body()) {
+//                    children().forEach {
+//                        it.remove()
+//                    }
+//
+//                    appendChild(it.masterElement.clone())
+//                }
+//
+//                prefabEditor.reRender()
+//                prefabEditor.standaloneEditMode = true
+//            }
+//        }
     }
 
     private fun updateAllInstances() {

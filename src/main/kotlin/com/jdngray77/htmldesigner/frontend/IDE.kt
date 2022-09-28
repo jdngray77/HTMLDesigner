@@ -22,6 +22,7 @@ import com.jdngray77.htmldesigner.backend.data.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager
 import com.jdngray77.htmldesigner.utility.*
 import javafx.application.Application
 import javafx.application.Platform
@@ -239,7 +240,7 @@ class IDE : Application() {
         // Ensure we're clear to shutdown.
         // ==================
 
-        mvcIfAvail()?.closeAllEditors()
+        EditorManager.requestCloseAllEditors()
 
 
         // ==================

@@ -18,6 +18,7 @@ import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.openDocument
 import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.*
@@ -214,7 +215,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                 if (this.isDirectory)
                     return
 
-                mvc().openDocument(this)
+                openDocument(this)
             }
         }
 

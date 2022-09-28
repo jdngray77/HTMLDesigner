@@ -9,6 +9,8 @@ import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
+import com.jdngray77.htmldesigner.frontend.editors.DocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.findDocumentEditorByDocument
 import com.jdngray77.htmldesigner.utility.*
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -19,6 +21,7 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
+import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.lang.System.gc
 
@@ -237,6 +240,16 @@ class VisualScriptEditor : Dock(), Subscriber {
      * The script element that the [graph] compiles into.
      */
     private var scriptElement: Element? = null
+
+    /**
+     * The document that the [graph] compiles into.
+     */
+    private var scriptDocument: Document? = null
+
+    /**
+     * The open editor that is managing the [document]
+     */
+    private var scriptEditor: DocumentEditor? = null
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                 Graph Data
@@ -470,7 +483,7 @@ class VisualScriptEditor : Dock(), Subscriber {
      * Saves the current [graph] to disk.
      */
     fun saveGraph() {
-        mvc().Project.saveJsGraph(graph)
+        mvc().Project.saveJsGraph(graph, scriptDocument!!)
     }
 
 
@@ -588,8 +601,11 @@ class VisualScriptEditor : Dock(), Subscriber {
 
         // Compile and print.
         compileOutput.text = compiled.javascript
+
+
         scriptElement!!.text(compiled.javascript)
-        mvc().currentEditor().documentChanged("Updated script : ${scriptElement!!.id()}")
+        findDocumentEditorByDocument(scriptElement!!.ownerDocument()!!)!!
+            .changed("Updated script : ${scriptElement!!.id()}")
 
         val isError = compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.ERROR
 
@@ -694,11 +710,9 @@ class VisualScriptEditor : Dock(), Subscriber {
      * Context menu item to add a new node that represents an item from the current document.
      */
     fun ctx_createNodeFromDocumentElement() {
-        val document = mvc().currentDocument()
-
-        document.getElementById(
+        scriptDocument!!.getElementById(
             ItemSelectionDialog<String>(
-                document.allElements
+                scriptDocument!!.allElements
                     .filter(VisualScriptEditor::filterElementIsGraphable)
                     .map { it.id() }
                     .toList()
@@ -760,14 +774,14 @@ class VisualScriptEditor : Dock(), Subscriber {
         val e = Element("script")
             .attr("id", name)
 
-        mvc().currentEditor().apply {
+        scriptEditor!!.apply {
             document.body().appendChild(e)
             selectTag(e)
-            documentChanged("Created script '$name'")
+            changed("Created script '$name'")
         }
 
         implLoadGraph(
-            mvc().Project.newJsGraph(name)
+            mvc().Project.newJsGraph(name, scriptDocument!!)
         )
 
 
@@ -791,35 +805,36 @@ class VisualScriptEditor : Dock(), Subscriber {
     }
 
     override fun notify(e: EventType) {
-        when (e) {
-            EventType.EDITOR_DOCUMENT_SWITCH -> {
-                scriptElement = mvc().selectedTag()
-                if (scriptElement != null && scriptElement!!.tagName() == "script") {
-                    implLoadGraph(
-                        mvc().Project.loadJsGraph(scriptElement!!.attr("id"))
-                    )
-                }
-            }
-
-            EventType.PROJECT_SAVED -> {
-                saveGraph()
-            }
-
-            EventType.EDITOR_SELECTED_TAG_CHANGED -> {
-                val tag = mvc().selectedTag()
-                if (tag != null && tag.tagName() == "script") {
-                    scriptElement = tag
-                    implLoadGraph(
-                        mvc().Project.loadJsGraph(tag.attr("id"))
-                    )
-                }
-            }
-
-            else -> {}
-        }
-
-        if (scriptElement == null)
-            resetEditor()
+        // TODO behave like an editor, not a dock.
+//        when (e) {
+//            EventType.EDITOR_DOCUMENT_SWITCH -> {
+//                scriptElement = mvc().selectedTag()
+//                if (scriptElement != null && scriptElement!!.tagName() == "script") {
+//                    implLoadGraph(
+//                        mvc().Project.loadJsGraph(scriptElement!!.attr("id"))
+//                    )
+//                }
+//            }
+//
+//            EventType.PROJECT_SAVED -> {
+//                saveGraph()
+//            }
+//
+//            EventType.EDITOR_SELECTED_TAG_CHANGED -> {
+//                val tag = mvc().selectedTag()
+//                if (tag != null && tag.tagName() == "script") {
+//                    scriptElement = tag
+//                    implLoadGraph(
+//                        mvc().Project.loadJsGraph(tag.attr("id"))
+//                    )
+//                }
+//            }
+//
+//            else -> {}
+//        }
+//
+//        if (scriptElement == null)
+//            resetEditor()
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

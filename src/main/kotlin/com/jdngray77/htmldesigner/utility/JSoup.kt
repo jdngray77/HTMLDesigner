@@ -17,13 +17,10 @@
 
 package com.jdngray77.htmldesigner.utility
 
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
-import com.jdngray77.htmldesigner.backend.html.Prefab
-import com.jdngray77.htmldesigner.backend.userInput
-import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIfAvail
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.findDocumentEditorByDocument
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.openDocument
 import com.steadystate.css.dom.CSSStyleSheetImpl
 import com.steadystate.css.parser.CSSOMParser
 import com.steadystate.css.parser.SACParserCSS3
@@ -55,21 +52,21 @@ import java.io.StringReader
  * holds this document.
  */
 fun Document.open() =
-    IDE.mvcIfAvail()?.openDocument(this)
+    openDocument(this)
 
 /**
  * Finds an editor in the IDE that is editing this document,
  * if there is one.
  */
 fun Document.editor() =
-    IDE.mvcIfAvail()?.findEditorFor(this)
+    findDocumentEditorByDocument(this)
 
 /**
  * If the document is open in an editor, notifies
  * the editor that the document has changed.
  */
 fun Document.changed(reason: String)
-    = editor()?.documentChanged(reason)
+    = editor()?.changed(reason)
 
 
 

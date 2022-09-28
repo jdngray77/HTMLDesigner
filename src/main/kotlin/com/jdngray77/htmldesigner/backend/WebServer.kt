@@ -3,6 +3,8 @@ package com.jdngray77.htmldesigner.backend
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditorIsDocument
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import org.jsoup.nodes.Document
@@ -112,8 +114,8 @@ object WebServer : Subscriber {
      * Boots the server.
      */
     fun start() {
-        if (!mvc().documentAvail()) {
-            showNotification("Web Server", "The server was not started.\nThere is no document open to host.")
+        if (!activeEditorIsDocument()) {
+            showNotification("Web Server", "The server was not started.\nActive editor is not a document that can be hosted.")
             return
         }
 
@@ -159,7 +161,7 @@ object WebServer : Subscriber {
 
         EventNotifier.subscribe(this, EventType.IDE_SHUTDOWN, EventType.EDITOR_DOCUMENT_EDITED, EventType.EDITOR_DOCUMENT_SWITCH)
 
-        serve(mvc().currentDocument())
+        serve(activeDocument())
         Desktop.getDesktop().browse(URI.create("http://localhost:$PORT"))
 
         showNotification("Web Server", "The server was started.")
@@ -206,7 +208,7 @@ object WebServer : Subscriber {
 
         if (server != null && DOCUMENT_SERVING != null)
             if (e == EventType.EDITOR_DOCUMENT_SWITCH)
-                serve(mvc().currentDocument())
+                serve(activeDocument())
             else
                 serve(DOCUMENT_SERVING!!)
     }

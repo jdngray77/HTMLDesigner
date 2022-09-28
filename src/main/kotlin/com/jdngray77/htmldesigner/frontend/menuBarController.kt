@@ -8,10 +8,12 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.html.Prefab
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.IDE.Companion.project
 import com.jdngray77.htmldesigner.frontend.MainViewController.Companion.clearDock
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.requestCloseAllEditors
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.utility.getTheme
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
@@ -25,7 +27,6 @@ import javafx.scene.control.MenuBar
 import javafx.scene.image.Image
 import javafx.scene.layout.Pane
 import java.io.File
-import java.util.*
 import javax.script.ScriptEngineManager
 
 /**
@@ -81,7 +82,7 @@ class menuBarController {
     }
 
     fun menu_debug_dirty() {
-        IDE.mvc().currentEditor().documentChanged("Debug dirty.")
+        activeDocumentEditor()!!.changed("Debug dirty.")
     }
 
     fun menu_debug_showcache() {
@@ -120,34 +121,23 @@ class menuBarController {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     fun menu_file_revert() {
-        if (!mvc().currentEditor().isDirty) {
-            showNotification("Nothing to revert.", "No changes have been made since the last save.")
-            return
-        }
+        activeEditor()?.apply {
 
-        if (!userConfirm("This will delete any changes you've made since the last time the file was saved. \n\nAre you sure?"))
-            return
-
-
-        mvc().currentEditor().apply {
-            // Close and re-load from disk
-            forceClose()
-            project().removeFromCache(document)
-            mvc().openDocument(file)
-
-            // Move the new editor to the same index
-            mvc().currentEditor().tab.let {
-                with(mvc().MainView.dockEditors) {
-                    tabs.remove(it)
-                    tabs.add(tabs.indexOf(tab), it)
-                    selectionModel.select(it)
-                }
+            if (!dirty) {
+                showNotification("Nothing to revert.", "No changes have been made since the last save.")
+                return
             }
+
+
+            if (!userConfirm("This will delete any changes you've made since the last time the file was saved. \n\nAre you sure?"))
+                return
+
+            requestReset()
         }
     }
 
     fun menu_file_save() =
-        mvc().currentEditor().save()
+        activeEditor()?.requestSave()
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -247,11 +237,11 @@ class menuBarController {
     }
 
     fun menu_edit_undo() {
-        IDE.mvc().currentEditor().undo()
+        activeEditor()?.undo()
     }
 
     fun menu_edit_redo() {
-        IDE.mvc().currentEditor().redo()
+        activeEditor()?.redo()
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -260,7 +250,8 @@ class menuBarController {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     fun menu_window_isolation() {
-        IDE.mvc().currentEditor().toggleStandaloneEditMode()
+        activeDocumentEditor()?.toggleStandaloneEditMode()
+            ?: run { showNotification("Didn't open standalone edit", "Standalone edit is only available in document editors.") }
     }
 
     fun menu_window_fs() {
@@ -268,7 +259,7 @@ class menuBarController {
     }
 
     fun menu_window_closeeditors() {
-        IDE.mvc().closeAllEditors()
+        requestCloseAllEditors()
     }
 
 

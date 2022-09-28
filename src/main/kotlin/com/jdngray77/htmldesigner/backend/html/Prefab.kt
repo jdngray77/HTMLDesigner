@@ -17,6 +17,8 @@ package com.jdngray77.htmldesigner.backend.html
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.editors.DocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.getEditorsOfType
 import com.jdngray77.htmldesigner.utility.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -227,14 +229,14 @@ class Prefab(
             // Prioritise the editors that are currently open, as these
             // are most likely to be interfered with by the user whilst this
             // task is running - and it provides feedback to them faster.
-            getOpenEditors().forEach applyChangeToEditor@ {
+            getEditorsOfType<DocumentEditor>().forEach applyChangeToEditor@ {
                 updateInstancesOnDocument(it.document, it.file, pages, change).apply {
                     instanceCount += this
 
                     if (instanceCount != 0)
                         pageCount++
 
-                    it.documentChanged("Updated prefab instances: $name")
+                    it.changed("Updated prefab instances: $name")
                 }
             }
 

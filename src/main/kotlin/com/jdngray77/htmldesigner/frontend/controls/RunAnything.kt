@@ -23,6 +23,8 @@ import com.jdngray77.htmldesigner.backend.showInformationalAlert
 import com.jdngray77.htmldesigner.backend.userInput
 import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
 import com.jdngray77.htmldesigner.utility.delete
 import javafx.event.ActionEvent
 import javafx.scene.control.ButtonType
@@ -34,7 +36,6 @@ import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist
-import java.util.stream.Collectors
 
 class Task(val name: String, val script: () -> Unit) : Runnable {
     final override fun toString() = name
@@ -68,19 +69,19 @@ object RunAnything : SearchableList<Task>(
             )
         },
 
-        Task("Current Document > Delete") { mvc().currentDocument().delete() },
+        Task("Current Document > Delete") { activeDocument()?.delete() },
         Task("Current Document > Validate") {
             showInformationalAlert(
-                if (Jsoup.isValid(mvc().currentDocument().toString(), Safelist.relaxed()))
+                if (Jsoup.isValid(activeDocument().toString(), Safelist.relaxed()))
                     "Document contains tags which Jsoup considers un-safe in regards to XSS attacks."
                 else
                     "Jsoup believes the document to be safe, containing only it considers safe."
             )
         },
 
-        Task("Current Editor > Close") { mvc().currentEditor().requestClose() },
-        Task("Current Editor > Save") { mvc().currentEditor().save() },
-        Task("Current editor > Close without saving") { mvc().currentEditor().forceClose() },
+        Task("Current Editor > Close") { activeDocumentEditor()?.requestClose() },
+        Task("Current Editor > Save") { activeDocumentEditor()?.requestSave() },
+        Task("Current editor > Close without saving") { activeDocumentEditor()?.forceClose() },
 
 
         )

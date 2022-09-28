@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -20,11 +19,14 @@ import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
-import com.jdngray77.htmldesigner.frontend.DocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.MainViewController
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.findDocumentEditorByDocument
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.findDocumentEditorByFile
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.openDocument
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.requestSaveAllEditors
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.validateEditors
 import com.jdngray77.htmldesigner.utility.*
-import javafx.scene.control.Tab
-import javafx.scene.layout.BorderPane
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
@@ -41,21 +43,21 @@ import java.io.File
  *  The entire IDE uses the data and API here
  *  to access and mutate the model.
  */
-class MVC (
+class MVC(
 
     /**
      * The project the IDE is working on.
      *
      * Use to access files on the disk.
      */
-    var Project : Project,
+    var Project: Project,
 
     /**
      * The IDE's main FXML GUI controller.
      *
      * Use to access the front-end.
      */
-    var MainView : MainViewController
+    var MainView: MainViewController
 
 ) : Subscriber {
 
@@ -77,12 +79,12 @@ class MVC (
 
         val startupPage = Project.PREFERENCES[ProjectPreference.STARTUP_PAGE_PATH_STRING] as String
 
-        run determineStartupPage@ {
+        run determineStartupPage@{
 
             if (startupPage.isBlank())
                 return@determineStartupPage
 
-            Project.HTML.subFile(startupPage).let checkFile@ {
+            Project.HTML.subFile(startupPage).let checkFile@{
                 if (!it.exists())
                     return@checkFile
 
@@ -101,198 +103,6 @@ class MVC (
             openDocument(Project.loadDocument(Project.documents().first()))
 
     }
-
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //region                                                        Editors
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-    /**
-     * A list of all open editors.
-     */
-    private val openEditors: ArrayList<DocumentEditor> = ArrayList()
-
-    /**
-     * Returns a complete list of every [DocumentEditor]
-     * currently open
-     */
-    fun getOpenEditors() = (openEditors.clone() as ArrayList<DocumentEditor>)
-
-    /**
-     * An event invoked by an editor when it is closed by the user.
-     */
-    internal fun onEditorClosed(documentEditor: DocumentEditor) {
-        openEditors.remove(documentEditor)
-        Project.removeFromCache(documentEditor.document)
-        EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_CLOSED)
-    }
-
-    /**
-     * Determines if [currentDocument] can be used without failing.
-     *
-     * If returns false, [currentDocument] will throw an exception.
-     *
-     * @returns true if there are any documents open.
-     */
-    fun documentAvail() = openEditors.isNotEmpty()
-
-    /**
-     * Returns the document of the current editor, if
-     * any are open.
-     *
-     * @throws [NullPointerException] if no documents are open.
-     * @see [documentAvail] to check if any are open.
-     */
-    fun currentDocument() =
-        currentEditor().document
-
-    /**
-     * Returns the [DocumentEditor] currently in focus in the editor.
-     *
-     * @throws [NullPointerException] if no editors are open.
-     * @see [documentAvail] to check if any are open.
-     * TODO make this nullable
-     */
-    fun currentEditor() =
-        this.findEditorFor(MainView.dockEditors.selectionModel.selectedItem)!!
-
-    /**
-     * @return the selected tag for the [currentDocument], or null if none are open.
-     * @see documentAvail to check if there is a document open to get the selected tag from.
-     */
-    fun selectedTag() =
-        if (documentAvail())
-            currentEditor().selectedTag
-        else
-            null
-
-
-
-    /**
-     * Finds the editor for the given document.
-     *
-     * @param document The document to find an editor for.
-     */
-    fun findEditorFor(document: Document)  =
-        openEditors.find { it.document === document }
-
-    /**
-     * Finds the editor for the given tab.
-     *
-     * @param tab The tab to find the editor for.
-     */
-    fun findEditorFor(tab: Tab)  =
-        openEditors.find { it.tab === tab }
-
-    /**
-     * Finds the editor for the given File
-     *
-     * @param file the file to find the editor for.
-     */
-    fun findEditorFor(file: File)  =
-        openEditors.find { it.file === file }
-
-    /**
-     * Creates and opens a new document editor for the
-     * given [document]
-     *
-     * Create a new document editor, set the document,
-     * add the editor to the list of open editors, and switch to the
-     * new editor
-     *
-     * @param document Document - The document to open
-     * @return the document editor created.
-     */
-    fun openDocument(document: Document) : DocumentEditor {
-        loadFXMLComponent<BorderPane>("DocumentEditor.fxml").apply {
-            (second as DocumentEditor).let {
-                it.setDocument(document)
-                openEditors.add(it)
-                switchToEditor(it)
-                return it
-            }
-        }
-    }
-
-    /**
-     * Loads a project document from disk and opens it.
-     *
-     * If there's already an editor, it's switched to.
-     * Else, one is created.
-     */
-    fun openDocument(document: File) =
-        switchToDocument(Project.loadDocument(document)).also {
-            MainView.setAction("Opened ${document.name}")
-        }
-
-    /**
-     * This function switches to the editor tab that is passed in as a parameter
-     *
-     * @param editor DocumentEditor - The editor to switch to
-     * @return editor
-     */
-    fun switchToEditor(editor: DocumentEditor) : DocumentEditor {
-        MainView.dockEditors.selectionModel.select(editor.tab)
-        return editor
-    }
-
-
-    /**
-     * This function switches to the editor tab that is passed in as a parameter
-     *
-     * @param editor DocumentEditor - The editor to switch to
-     */
-    fun DocumentEditor.Focus() = switchToEditor(this)
-
-
-    /**
-     * "If there's an editor for the given document, switch to it, otherwise create a new editor."
-     *
-     * The first line of the function is a call to the function findEditorFor, which returns an Editor?. If it's not null,
-     * the apply function is called on it. The apply function takes a lambda as its argument, and the lambda is executed
-     * with the Editor as its receiver. The lambda in this case is a call to the function switchToEditor, which takes an
-     * Editor as its argument
-     *
-     * @param document The document to switch to.
-     * @return the document editor, wether it was created anew or already existed.
-     */
-    fun switchToDocument(document: Document) =
-        findEditorFor(document)?.let { switchToEditor(it) }
-            ?: openDocument(document)
-
-    fun validateEditors() {
-        // Find tabs that are not in [openEditors], and remove them.
-
-        MainView.dockEditors.tabs.removeAll(
-            MainView.dockEditors.tabs.filter { tab ->
-                openEditors.find { it.tab == tab } == null
-            }
-        )
-
-        openEditors.concmod().forEach {
-            it.validate()
-        }
-    }
-
-    /**
-     * @throws InterruptedException if the user refuses to close an editor.
-     */
-    fun closeAllEditors() {
-        openEditors.concmod().forEach {
-            if (!it.requestClose()) {
-                showNotification("Shutdown or restart aborted", "An editor refused to close.")
-                throw InterruptedException("Shutdown or restart aborted. An editor refused to close.")
-            }
-        }
-    }
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                                     Editors
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
-
 
     /**
      * Deletes [tag] after confirming with the user.
@@ -317,10 +127,10 @@ class MVC (
             tag
                 .filterNot { it.parent() == null }
                 .forEach {
-                val doc = it.ownerDocument() ?: return
-                it.remove()
-                modified(doc)
-            }
+                    val doc = it.ownerDocument() ?: return
+                    it.remove()
+                    modified(doc)
+                }
 
             finishedModifying()
         }
@@ -362,7 +172,7 @@ class MVC (
 
         Project.deleteFile(projectFile)
         if (projectFile.name.endsWith(".html")) {
-            findEditorFor(projectFile)?.forceClose()
+            findDocumentEditorByFile(projectFile)?.forceClose()
             EventNotifier.notifyEvent(EventType.PROJECT_PAGE_DELETED)
         }
 
@@ -388,7 +198,7 @@ class MVC (
      * @param to If a directory, the new parent file. If a file, then [projectFile] will be moved to be a sibling of [to] ([to.parent] == [projectFile.parent]).
      * @return true iff successfully moved the file. False if rejected, skipped, or failed (i.e ioException).
      */
-    fun moveProjectFile(projectFile: File, to: File) : Boolean {
+    fun moveProjectFile(projectFile: File, to: File): Boolean {
 
         // TODO update project cache
         // TODO update graph files.
@@ -436,9 +246,7 @@ class MVC (
             return false
         }
 
-        openEditors.map {
-            it.save()
-        }
+        requestSaveAllEditors()
 
 
         // If moving to file, add as sibling. Otherwise, add as child.
@@ -468,7 +276,7 @@ class MVC (
         return success
     }
 
-    fun renameProjectFile(file: File, newName: String) : Boolean {
+    fun renameProjectFile(file: File, newName: String): Boolean {
         if (!file.isInProject()) {
             logWarning("Refusing to rename file because it's not in the project : ${file.path}")
             return false
@@ -485,9 +293,7 @@ class MVC (
             return false
         }
 
-        openEditors.map {
-            it.save()
-        }
+        requestSaveAllEditors()
 
         return if (file.renameTo(newFile)) {
             Project.invalidateCache()
@@ -524,7 +330,7 @@ class MVC (
         fun finishedModifying() {
             done = true
             distinct().forEach {
-                findEditorFor(it)!!.documentChanged(batchDescription)
+                findDocumentEditorByDocument(it)!!.changed(batchDescription)
             }
         }
 

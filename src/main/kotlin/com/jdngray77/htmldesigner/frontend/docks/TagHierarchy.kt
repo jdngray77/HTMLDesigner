@@ -19,6 +19,9 @@ import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.createPrefab
 import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.updatePrefabFromInstance
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditorIsDocument
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
 import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -112,8 +115,11 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
             // User has edited the content of a tag.
             it.setOnEditCommit {
+                if (!activeEditorIsDocument())
+                    return@setOnEditCommit
+
                 it.rowValue.value.text(it.newValue)
-                mvc().currentEditor().documentChanged("Content of '${it.rowValue.value.tagName()}' changed to '${it.newValue}' ")
+                activeDocumentEditor()!!.changed("Content of '${it.rowValue.value.tagName()}' changed to '${it.newValue}' ")
             }
 
             it.cellFactory = TextFieldTreeTableCell.forTreeTableColumn()
@@ -128,27 +134,27 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
         // When a new item is selected, display it in the editor.
         tree.setOnMouseClicked {
             selectedTableItems().apply {
-                mvc().let {
-                    it.MainView.textEditor_Open(
+                if (!activeEditorIsDocument())
+                    return@setOnMouseClicked
+
+                mvc().MainView.textEditor_Open(
                         if (size != 1) {
-                            it.currentEditor().selectTag(null)
+                            activeDocumentEditor()!!.selectTag(null)
                             ""
                         } else {
-                            it.currentEditor().selectTag(first())
+                            activeDocumentEditor()!!.selectTag(first())
                             (first() as TreeItem<Element>).value.toString()
                         }
                     )
                 }
             }
-        }
-
 
         // TODO only show some of these items when one item is selected.
 
         setContextMenu(
             menu()
                 .item("Edit alone") {
-                    mvc().currentEditor().apply {
+                    activeDocumentEditor()?.apply {
                         selectTag(selectedTableItems().first())
                         standaloneEditMode = true
                     }
@@ -201,9 +207,12 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                 }
                 .separator()
                 .item("Paste above") {
+                    if (!activeEditorIsDocument())
+                        return@item
+
                     selectedItem()?.before(
-                        clipboard().html.asElement().let{
-                            mvc().currentEditor().documentChanged("${it.tagName()} pasted before ${selectedItem()!!.tagName()}")
+                        clipboard().html.asElement().let {
+                            activeDocumentEditor()!!.changed("${it.tagName()} pasted before ${selectedItem()!!.tagName()}")
                             it
                         }
                     )
@@ -217,23 +226,32 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                     refresh()
                 }
                 .item("Paste below") {
+                    if (!activeEditorIsDocument())
+                        return@item
+
                     selectedItem()?.apply {
                         after (clipboard().html.asElement())
-                        mvc().currentEditor().documentChanged("Pasted below ${tagName()}")
+                        activeDocumentEditor()!!.changed("Pasted below ${tagName()}")
                     }
 
                     refresh()
                 }
                 .item("Wrap with clipboard") {
+                    if (!activeEditorIsDocument())
+                        return@item
+
                     selectedItem()?.apply {
                         wrap(clipboard().html)
-                        mvc().currentEditor().documentChanged("Wrapped ${tagName()} with clipboard")
+                        activeDocumentEditor()!!.changed("Wrapped ${tagName()} with clipboard")
                     }
 
                     refresh()
                 }
                 .separator()
                 .item("Move up within parent") {
+                    if (!activeEditorIsDocument())
+                        return@item
+
                     selectedItem()?.apply {
                             moveAbove(this, lastElementSibling())
                     }
@@ -283,7 +301,9 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
      * invokes [showDocument] with the current document.
      */
     private fun refresh() {
-         showDocument(mvc().currentDocument())
+         activeDocument()?.let {
+             showDocument(it)
+         }
     }
 
     /**
@@ -300,13 +320,13 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
         with (mvc()) {
 
             // If there is no document available, clear the tree.
-            if (!documentAvail()) {
+            if (!activeEditorIsDocument()) {
                 clear()
             } else
                 refresh()
 
             // Select the tag in the tree that is selected in the editor.
-            val selectedInDocument = currentEditor().selectedTag
+            val selectedInDocument = activeDocumentEditor()!!.selectedTag
 
             if (selectedInDocument != null && selectedItem() != selectedInDocument)
                 select(selectedInDocument)
@@ -334,26 +354,25 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
     }
 
     private fun moveInside(a: Element, b: Element) {
-        b.prependChild(a)
-
-        mvc().currentEditor().apply {
-            documentChanged("Moved ${a.tagName()} inside ${b.tagName()}")
+        activeDocumentEditor()!!.apply {
+            b.prependChild(a)
+            changed("Moved ${a.tagName()} inside ${b.tagName()}")
             showDocument(document)
         }
     }
 
     private fun moveAbove(a: Element, b: Element) {
-        b.before(a)
-        mvc().currentEditor().apply {
-            documentChanged("Moved ${a.tagName()} before ${b.tagName()}")
+        activeDocumentEditor()!!.apply {
+            b.before(a)
+            changed("Moved ${a.tagName()} before ${b.tagName()}")
             showDocument(document)
         }
     }
 
     private fun moveBelow(a: Element, b: Element) {
         b.after(a)
-        mvc().currentEditor().apply {
-            documentChanged("Moved ${a.tagName()} after ${b.tagName()}")
+        activeDocumentEditor()!!.apply {
+            changed("Moved ${a.tagName()} after ${b.tagName()}")
             showDocument(document)
         }
     }

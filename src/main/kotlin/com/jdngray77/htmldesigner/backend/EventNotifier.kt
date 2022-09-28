@@ -16,7 +16,7 @@
 package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.frontend.DocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIsAvail
 import com.jdngray77.htmldesigner.frontend.MainViewController

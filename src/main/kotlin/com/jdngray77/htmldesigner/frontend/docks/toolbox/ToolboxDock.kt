@@ -20,11 +20,11 @@ import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.html.AllElements
 import com.jdngray77.htmldesigner.backend.html.Headings
 import com.jdngray77.htmldesigner.backend.html.Text
-import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.selectedTag
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import com.jdngray77.htmldesigner.utility.readPrivateProperty
-import javafx.event.EventType
 import javafx.scene.control.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseButton
@@ -55,11 +55,11 @@ class ToolboxDock : Dock() {
         labelMenuItem,
         MenuItem("Add Above selected tag").apply {
             setOnAction {
-                mvc().currentEditor().apply {
+                activeDocumentEditor()?.apply {
                     Element(contextItem!!.controller.name.text).let {
                         selectedTag?.before(it)
                         selectTag(it)
-                        documentChanged("Added " + it.tagName() + " above ${selectedTag?.tagName() ?: "selected tag"}")
+                        changed("Added " + it.tagName() + " above ${selectedTag?.tagName() ?: "selected tag"}")
                     }
 
 
@@ -69,11 +69,11 @@ class ToolboxDock : Dock() {
         },
         MenuItem("Add below selected tag").apply {
             setOnAction {
-                mvc().currentEditor().apply {
+                activeDocumentEditor()?.apply {
                     Element(contextItem!!.controller.name.text).let {
                         selectedTag?.after(it)
                         selectTag(it)
-                        documentChanged("Added " + it.tagName() + " below ${selectedTag?.tagName() ?: "selected tag"}")
+                        changed("Added " + it.tagName() + " below ${selectedTag?.tagName() ?: "selected tag"}")
                     }
                     clearSearch()
                 }
@@ -81,11 +81,11 @@ class ToolboxDock : Dock() {
         },
         MenuItem("Add as child selected tag").apply {
             setOnAction {
-                mvc().currentEditor().apply {
+                activeDocumentEditor()?.apply {
                     Element(contextItem!!.controller.name.text).let {
                         selectedTag?.insertChildren(0, Element(contextItem!!.controller.name.text))
                         selectTag(it)
-                        documentChanged("Added " + it.tagName() + " inside ${selectedTag?.tagName() ?: "selected tag"}")
+                        changed("Added " + it.tagName() + " inside ${selectedTag?.tagName() ?: "selected tag"}")
                     }
                     clearSearch()
                 }
@@ -104,7 +104,7 @@ class ToolboxDock : Dock() {
                     item.initialize(t, it.second as ToolBoxItemController)
                     item.pane.prefWidthProperty().bind(widthProperty())
                     item.pane.setOnMouseClicked { mouse ->
-                        mvc().selectedTag()?.let {
+                        selectedTag()?.let {
                             labelMenuItem.text = "Creating a '${item.controller.tag.text}' tag"
                             contextItem = item
                             contextMenu.show(item.pane, mouse.screenX, mouse.screenY)

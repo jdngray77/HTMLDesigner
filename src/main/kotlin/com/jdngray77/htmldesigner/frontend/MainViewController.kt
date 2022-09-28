@@ -27,6 +27,7 @@ import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
 import com.jdngray77.htmldesigner.frontend.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.utility.camelToSentence
@@ -143,7 +144,7 @@ class MainViewController {
 
 
         htmlEditor.setOnContextMenuRequested {
-            textEditor_Open(mvc().currentDocument().html())
+            textEditor_Open(activeDocument()?.html() ?: "")
         }
 
         htmlEditor.setOnKeyReleased {

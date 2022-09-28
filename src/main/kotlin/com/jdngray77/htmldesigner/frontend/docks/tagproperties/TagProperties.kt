@@ -22,6 +22,8 @@ import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.PlaceholderPropertySheetItem
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.CSSPropertySheetItem.Companion.colorCaster
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditorIsDocument
 import com.jdngray77.htmldesigner.utility.ReflectivePropertySheetItem
 import com.jdngray77.htmldesigner.utility.readPrivateProperty
 import impl.org.controlsfx.skin.PropertySheetSkin
@@ -59,7 +61,8 @@ class TagProperties : Dock(), Subscriber {
 
     init {
         center = sheet
-        EventNotifier.subscribe(this,
+        EventNotifier.subscribe(
+            this,
             EventType.EDITOR_SELECTED_TAG_CHANGED,
             EventType.EDITOR_DOCUMENT_SWITCH,
             EventType.EDITOR_DOCUMENT_CLOSED
@@ -70,165 +73,163 @@ class TagProperties : Dock(), Subscriber {
         if (scrollPane == null)
             scrollPane = sheet.skin.readPrivateProperty<ScrollPane>(PropertySheetSkin::class, "scroller")
 
-        with(mvc()) {
-            sheet.items.clear()
+        sheet.items.clear()
 
-            if (e == EventType.EDITOR_DOCUMENT_CLOSED && !documentAvail())
-                return
+        if (e == EventType.EDITOR_DOCUMENT_CLOSED && !activeEditorIsDocument())
+            return
 
-            currentEditor().let { editor ->
+        activeDocumentEditor()?.let { editor ->
 
-                editor.selectedTag?.apply {
-                    sheet.propertyEditorFactory = CSSPropertyEditorFactory
+            editor.selectedTag?.apply {
+                sheet.propertyEditorFactory = CSSPropertyEditorFactory
 
-                    var lastCategorySelected: String? = null
-                    with(scrollPane!!.content) {
-                        if (this is Accordion)
-                            lastCategorySelected = expandedPane?.text
-                    }
-
-
-
-                    try {
-                        sheet.items.addAll(
-                            ReflectivePropertySheetItem<String>(
-                                "id",
-                                "Uniquely identify this element for scripting.",
-                                "Advanced",
-                                this,
-                                true
-                            ),
-
-                            PlaceholderPropertySheetItem(
-                                "Custom CSS",
-                                "Advanced"
-                            ),
-
-                            PlaceholderPropertySheetItem(
-                                "Attributes",
-                                "Advanced"
-                            ),
-
-                            // TODO list
-                            // Breadcrumb
-
-                            CSSPropertySheetItem(
-                                "Background color",
-                                this,
-                                "background-color",
-                                "Color",
-                                "Changes color displayed behind the content of this tag.",
-                                Color::class.java,
-                                colorCaster
-                            ),
-
-                            CSSPropertySheetItem(
-                                "Foreground color",
-                                this,
-                                "color",
-                                "Color",
-                                "Changes color of the content of this tag, such as text.",
-                                Color::class.java,
-                                colorCaster
-                            ),
-
-                            CSSDropdownItem(
-                                "Border style",
-                                this,
-                                "border-style",
-                                "Border",
-                                "Required to add a border. Determines the style line drawn around this element.",
-                                "none", "solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"
-                            ),
-
-                            CSSPropertySheetItem(
-                                "Border color",
-                                this,
-                                "border-color",
-                                "Border",
-                                "Changes color of the border, if there is one.",
-                                Color::class.java,
-                                colorCaster
-                            ),
-
-                            CSSRangeItem(
-                                "Border thickness",
-                                this,
-                                "border-width",
-                                "Border",
-                                "Determines the width of the border, if there is a border.",
-                                0.0, 100.0
-                            ),
-
-                            CSSRangeItem(
-                                "Border radius",
-                                this,
-                                "border-radius",
-                                "Border",
-                                "Determines the radius of the border, if there is a border.",
-                                0.0, 90.0, false
-                            ),
-
-                            CSSRangeItem(
-                                "Border spacing",
-                                this,
-                                "padding",
-                                "Border",
-                                "Creates a gap between the border and the content in this element.",
-                                0.0, 100.0
-                            ),
-
-                            PlaceholderPropertySheetItem(
-                                "Width",
-                                "Size & Position"
-                            ),
-                            PlaceholderPropertySheetItem(
-                                "Height",
-                                "Size & Position"
-                            ),
-
-                            PlaceholderPropertySheetItem(
-                                "Padding",
-                                "Size & Position"
-                            ),
-
-                            PlaceholderPropertySheetItem(
-                                "Margin",
-                                "Size & Position"
-                            ),
-
-                            PlaceholderPropertySheetItem(
-                                "Filters",
-                                "Appearance"
-                            ),
-
-
-                            // TODO align text
-                            // TODO manual editor
-
-                            CSSAlignmentPropertySheetItem(
-                                "Align children",
-                                this,
-                                "Alignment",
-                                "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
-                            ),
-
-                            PlaceholderPropertySheetItem(
-                                "Align direction",
-                                "Appearance"
-                            ),
-                        )
-                    } catch (e: Exception) {
-                        showErrorNotification(e, false)
-                        e.printStackTrace()
-                    }
-
-                    if (lastCategorySelected != null)
-                        (scrollPane!!.content as Accordion).apply {
-                            expandedPane = panes.find { it.text == lastCategorySelected }
-                        }
-
+                var lastCategorySelected: String? = null
+                with(scrollPane!!.content) {
+                    if (this is Accordion)
+                        lastCategorySelected = expandedPane?.text
                 }
+
+
+
+                try {
+                    sheet.items.addAll(
+                        ReflectivePropertySheetItem<String>(
+                            "id",
+                            "Uniquely identify this element for scripting.",
+                            "Advanced",
+                            this,
+                            true
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Custom CSS",
+                            "Advanced"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Attributes",
+                            "Advanced"
+                        ),
+
+                        // TODO list
+                        // Breadcrumb
+
+                        CSSPropertySheetItem(
+                            "Background color",
+                            this,
+                            "background-color",
+                            "Color",
+                            "Changes color displayed behind the content of this tag.",
+                            Color::class.java,
+                            colorCaster
+                        ),
+
+                        CSSPropertySheetItem(
+                            "Foreground color",
+                            this,
+                            "color",
+                            "Color",
+                            "Changes color of the content of this tag, such as text.",
+                            Color::class.java,
+                            colorCaster
+                        ),
+
+                        CSSDropdownItem(
+                            "Border style",
+                            this,
+                            "border-style",
+                            "Border",
+                            "Required to add a border. Determines the style line drawn around this element.",
+                            "none", "solid", "dashed", "dotted", "double", "groove", "ridge", "inset", "outset"
+                        ),
+
+                        CSSPropertySheetItem(
+                            "Border color",
+                            this,
+                            "border-color",
+                            "Border",
+                            "Changes color of the border, if there is one.",
+                            Color::class.java,
+                            colorCaster
+                        ),
+
+                        CSSRangeItem(
+                            "Border thickness",
+                            this,
+                            "border-width",
+                            "Border",
+                            "Determines the width of the border, if there is a border.",
+                            0.0, 100.0
+                        ),
+
+                        CSSRangeItem(
+                            "Border radius",
+                            this,
+                            "border-radius",
+                            "Border",
+                            "Determines the radius of the border, if there is a border.",
+                            0.0, 90.0, false
+                        ),
+
+                        CSSRangeItem(
+                            "Border spacing",
+                            this,
+                            "padding",
+                            "Border",
+                            "Creates a gap between the border and the content in this element.",
+                            0.0, 100.0
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Width",
+                            "Size & Position"
+                        ),
+                        PlaceholderPropertySheetItem(
+                            "Height",
+                            "Size & Position"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Padding",
+                            "Size & Position"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Margin",
+                            "Size & Position"
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Filters",
+                            "Appearance"
+                        ),
+
+
+                        // TODO align text
+                        // TODO manual editor
+
+                        CSSAlignmentPropertySheetItem(
+                            "Align children",
+                            this,
+                            "Alignment",
+                            "Moves content within the selected tag to one side, the center, or the other side.\nSee 'Align Direction' to change direction.",
+                        ),
+
+                        PlaceholderPropertySheetItem(
+                            "Align direction",
+                            "Appearance"
+                        ),
+                    )
+                } catch (e: Exception) {
+                    showErrorNotification(e, false)
+                    e.printStackTrace()
+                }
+
+                if (lastCategorySelected != null)
+                    (scrollPane!!.content as Accordion).apply {
+                        expandedPane = panes.find { it.text == lastCategorySelected }
+                    }
+
             }
             gc()
         }

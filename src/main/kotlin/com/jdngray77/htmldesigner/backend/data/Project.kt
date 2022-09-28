@@ -618,17 +618,17 @@ class Project(
         ) as JsGraph
     }
 
-    fun saveJsGraph(jsGraph: JsGraph) {
+    fun saveJsGraph(jsGraph: JsGraph, document: Document) {
         // TODO const val jvg
         // TODO test
-        val f = subPath("$PROJECT_PATH_JS${mvc().currentDocument().projectFile().nameWithoutExtension + "/"}${jsGraph.scriptName}.jvg")
+        val f = subPath("$PROJECT_PATH_JS${document.projectFile().nameWithoutExtension + "/"}${jsGraph.scriptName}.jvg")
         jsGraph.saveObjectToDisk(f)
         CACHE[f] = jsGraph
     }
 
-    fun newJsGraph(name: String) : JsGraph {
+    fun newJsGraph(name: String, document: Document) : JsGraph {
         val graph = JsGraph(name)
-        saveJsGraph(graph)
+        saveJsGraph(graph, document)
         return graph
     }
 

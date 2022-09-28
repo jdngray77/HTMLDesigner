@@ -29,9 +29,8 @@
 
 -->
 
-<BorderPane fx:id="editorRoot" prefHeight="617.0" prefWidth="808.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"
-            xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.jdngray77.htmldesigner.frontend.DocumentEditor">
+<BorderPane prefHeight="617.0" prefWidth="808.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"
+            xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
     <center>
         <WebView fx:id="contentRenderer" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS"/>
     </center>
@@ -41,12 +40,12 @@
        -->
         <VBox alignment="CENTER_LEFT">
             <HBox style="-fx-background-color: rgb(37,37,37);">
-                <Button mnemonicParsing="false" onAction="#back" text="&lt;-"/>
-                <Button mnemonicParsing="false" onAction="#resetEditor" text="Reset"/>
-                <Button mnemonicParsing="false" onAction="#forward" text="-&gt;"/>
-                <Button mnemonicParsing="false" onAction="#zoomOut" text="-"/>
-                <Button  fx:id="btnZoom" onMouseClicked="#resetZoom" text="100%"/>
-                <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" onAction="#zoomIn" text="+"/>
+                <Button fx:id="btnBack" mnemonicParsing="false" text="&lt;-"/>
+                <Button fx:id="btnReset" mnemonicParsing="false" text="Reset"/>
+                <Button fx:id="btnForward" mnemonicParsing="false" text="-&gt;"/>
+                <Button fx:id="btnZoomOut" mnemonicParsing="false" text="-"/>
+                <Button  fx:id="btnResetZoom" text="100%"/>
+                <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" text="+"/>
                 <Pane HBox.hgrow="ALWAYS"/>
                 <BreadCrumbBar fx:id="breadCrumb"/>
                 <Pane HBox.hgrow="ALWAYS"/>
