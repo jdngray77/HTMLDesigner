@@ -17,11 +17,8 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.threadPool
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
-import com.sun.javafx.tk.Toolkit
 import javafx.application.Platform
-import java.lang.System.gc
 import java.util.concurrent.*
-import kotlin.concurrent.thread
 import kotlin.reflect.KFunction
 
 /**
@@ -63,10 +60,10 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
     fun submit(runnable: Runnable): Future<*>? {
         println(threadPool)
 
-        if (!threadPool.isShutdown && !threadPool.isTerminating)
-            return threadPool.submit(runnable)
+        assertRunning()
 
-        return null
+        return threadPool.submit(runnable)
+//        return null
     }
 
 
@@ -91,24 +88,33 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
             // Politely wait for current tasks to close.
             if (!threadPool.awaitTermination(10L, TimeUnit.SECONDS))
                 // If there are still tasks running after timeout, force close.
-                onShutdownInterrupted()
+                forceShutdown()
         } catch (e: InterruptedException) {
             // if this thread was interrupted whilst waiting for tasks to close
-            onShutdownInterrupted()
+            forceShutdown()
         }
     }
 
     /**
      * Handles a failure to close the thread pool.
      */
-    private fun onShutdownInterrupted() {
+    private fun forceShutdown() {
         // TODO - dialog functionality for user in the event of an error
         threadPool.shutdownNow()
     }
 
     override fun onIDEBootEarly() {
+        boot()
+    }
+
+    fun boot() {
         threadPool = Executors.newCachedThreadPool() as ThreadPoolExecutor
         threadPool.prestartAllCoreThreads()
+    }
+
+    fun restart() {
+        shutdown()
+        onIDEBootEarly()
     }
 
     /**
@@ -135,23 +141,32 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
         }
     }
 
+    private fun assertRunning() {
+        if (threadPool.isTerminated || threadPool.isShutdown || threadPool.isTerminating) {
+            // Thread pool should have been booted by now. Get it started.
+            onIDEBootEarly()
+
+            assert(!threadPool.isShutdown)
+            assert(!threadPool.isTerminated)
+            assert(!threadPool.isTerminating)
+
+            logWarning("Thread pool wasn't running, when it was expected to be. Restarting it.")
+        }
+    }
+
 
     override fun notify(e: EventType) {
         when (e) {
             EventType.IDE_SHUTDOWN -> shutdown()
             EventType.IDE_FINISHED_LOADING ->
-                if (threadPool.isTerminated || threadPool.isShutdown || threadPool.isTerminating) {
-                    // Thread pool should have been booted by now. Get it started.
-                    onIDEBootEarly()
-
-                    assert(!threadPool.isShutdown)
-                    assert(!threadPool.isTerminated)
-                    assert(!threadPool.isTerminating)
-
-                    logWarning("Thread pool failed to start by the time the ide finished loading. Restarted it.")
-                }
+                assertRunning()
 
             else -> {}
         }
     }
+
+    fun print() {
+        println(threadPool)
+    }
+
 }

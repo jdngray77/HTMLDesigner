@@ -10,6 +10,7 @@ import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.editors.DocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.Editor
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.findDocumentEditorByDocument
 import com.jdngray77.htmldesigner.utility.*
 import javafx.event.ActionEvent
@@ -39,7 +40,24 @@ import java.lang.System.gc
  *
  * @author Jordan T. Gray
  */
-class VisualScriptEditor : Dock(), Subscriber {
+class VisualScriptEditor (
+
+    /**
+     * The script element that the [graph] compiles into.
+     */
+    var scriptElement: Element,
+
+    /**
+     * The open editor that is managing the [document]
+     */
+    var scriptEditor: DocumentEditor? = findDocumentEditorByDocument(scriptElement.ownerDocument()!!)
+
+    /**
+     * The document that the [graph] compiles into.
+     */
+    var scriptDocument: Document = scriptElement.ownerDocument()!!,
+
+) : Editor<JsGraph>(root, JsGraph()), Subscriber {
 
     // TODO store the js builder in here. Reuse it?
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -236,20 +254,6 @@ class VisualScriptEditor : Dock(), Subscriber {
      */
     internal val guiNodes = mutableListOf<JsNode>()
 
-    /**
-     * The script element that the [graph] compiles into.
-     */
-    private var scriptElement: Element? = null
-
-    /**
-     * The document that the [graph] compiles into.
-     */
-    private var scriptDocument: Document? = null
-
-    /**
-     * The open editor that is managing the [document]
-     */
-    private var scriptEditor: DocumentEditor? = null
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                 Graph Data
