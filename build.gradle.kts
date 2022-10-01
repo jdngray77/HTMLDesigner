@@ -4,21 +4,28 @@ import java.io.FileOutputStream
 
 plugins {
     kotlin("jvm") version "1.7.10"
-
-    id("com.palantir.git-version") version "0.15.0"
-    id("org.openjfx.javafxplugin") version "0.0.13"
-    id("org.jetbrains.dokka") version "1.7.10"
     id("java")
     id("distribution")
+    id("org.openjfx.javafxplugin") version "0.0.13"
 
     `maven-publish`
+
+    // gets git version at build time for use at runtime.
+    id("com.palantir.git-version") version "0.15.0"
+
+    // Generates documentation from docstrings
+    id("org.jetbrains.dokka") version "1.7.10"
+
+    // Generates a report of code coverage of tests.
+    id("jacoco")
+
 
     // Plugin used to generate a report of every report used by the IDE.
     // For some reason, it interferes with the spdx library, so it's commented out.
     // Just uncomment it if you want to use it.
 
     // NOTE : REMEMBER TO UNCOMMENT THE DNDTABPANE LIBRARY TO INCLUDE IT IN THE REPORT.
-//    id("io.cloudflight.license-gradle-plugin") version "1.0.3"
+    // id("io.cloudflight.license-gradle-plugin") version "1.0.3"
     application
 }
 
@@ -44,20 +51,33 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     implementation("org.junit:junit4-runner:5.0.0-ALPHA")
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-test")
+
     implementation("org.controlsfx:controlsfx:11.1.1")
+
     implementation("org.jetbrains.kotlin:kotlin-serialization:1.7.10")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
-    implementation("org.jfxtras:jmetro:11.6.16")
-    implementation("org.jsoup:jsoup:1.15.3")
-    implementation("net.sourceforge.cssparser:cssparser:0.9.29")
     implementation("org.reflections:reflections:0.10.2")
+
+    // Make the ide look not shit
+    implementation("org.jfxtras:jmetro:11.6.16")
+
+    // HMTL dom management
+    implementation("org.jsoup:jsoup:1.15.3")
+
+    // CSS validation
+    implementation("net.sourceforge.cssparser:cssparser:0.9.29")
+
+    // Fetches licences for dependencies
     implementation("org.spdx:spdx-tools:2.2.8")
+
+    // Spotify integration - for fun.
     implementation("se.michaelthelin.spotify:spotify-web-api-java:7.2.0")
 
-// Included only for license. This library is imported as source.
+// Included only for license. This library is imported as source for custom modification
 //    implementation("com.sibvisions.external.jvxfx:dndtabpane:0.1")
 
 }
