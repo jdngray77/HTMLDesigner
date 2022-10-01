@@ -23,7 +23,7 @@ import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
 import com.jdngray77.htmldesigner.backend.html.DefaultDocument
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.jsdesigner.VisualScriptEditor
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -493,7 +493,9 @@ class Project(
      *         i.e the file has been deleted or the document did not originate from the project.
      */
     fun fileForDocument(d: Document) : File {
-        CACHE.entries.find { it.value == d }
+        CACHE.entries
+            .filter { it.value is Document }
+            .find { (it.value as Document).equalsDocument(d) }
             .apply {
                 if (this == null)
                     throw UnloadedDocumentException(d)
@@ -566,7 +568,7 @@ class Project(
      * Notifies [EventType.PROJECT_SAVED]
      */
     fun saveDocument(d: Document) =
-        CACHE.filter { it.value == d }.entries.firstOrNull()?.key?.let { saveDocument(d, it) }
+        fileForDocument(d).let { saveDocument(d, it) }
 
 
     fun saveDocument(d: Document, path: String) =
@@ -609,26 +611,32 @@ class Project(
      * Loads a visual javascript data file from [PROJECT_PATH_JS].
      *
      * These can be edited and compiled with the [VisualScriptEditor]
+     * @throws NoSuchFileException if no script with that name can be found.
      */
     fun loadJsGraph(name: String): JsGraph = tryGetCached(PROJECT_PATH_JS, "$name.jvg") {
-        loadObjectFromDisk(
-            javascripts().find {
-                it.name == "$name.jvg"
-            }!!
-        ) as JsGraph
+        try {
+            loadObjectFromDisk(
+                javascripts().find {
+                    it.nameWithoutExtension == name
+                }!!
+            ) as JsGraph
+        } catch (e: NullPointerException) {
+            throw NoSuchElementException("No such graph named `$name`.")
+        }
     }
 
-    fun saveJsGraph(jsGraph: JsGraph, document: Document) {
-        // TODO const val jvg
-        // TODO test
-        val f = subPath("$PROJECT_PATH_JS${document.projectFile().nameWithoutExtension + "/"}${jsGraph.scriptName}.jvg")
+
+    // TODO const for jvg
+
+    fun saveJsGraph(jsGraph: JsGraph) {
+        val f = subPath("$PROJECT_PATH_JS${jsGraph.scriptName}.jvg")
         jsGraph.saveObjectToDisk(f)
         CACHE[f] = jsGraph
     }
 
-    fun newJsGraph(name: String, document: Document) : JsGraph {
+    fun createJsGraph(name: String) : JsGraph {
         val graph = JsGraph(name)
-        saveJsGraph(graph, document)
+        saveJsGraph(graph)
         return graph
     }
 
@@ -671,6 +679,13 @@ class Project(
     fun deleteFile(projectFile: File) {
         projectFile.delete()
         validateCache()
+    }
+
+    /**
+     * Deletes all files in the [PROJECT_PATH_LOGS] directory.
+     */
+    fun deleteLogs() {
+        subFile(PROJECT_PATH_LOGS).flattenTree().forEach { it.delete() }
     }
 
     /**

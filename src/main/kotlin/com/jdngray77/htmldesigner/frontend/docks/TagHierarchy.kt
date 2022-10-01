@@ -19,9 +19,12 @@ import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.createPrefab
 import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.updatePrefabFromInstance
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.HierarchyDock
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditorIsDocument
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.focus
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -133,6 +136,7 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
         // When a new item is selected, display it in the editor.
         tree.setOnMouseClicked {
+
             selectedTableItems().apply {
                 if (!activeEditorIsDocument())
                     return@setOnMouseClicked
@@ -142,7 +146,12 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                             activeDocumentEditor()!!.selectTag(null)
                             ""
                         } else {
-                            activeDocumentEditor()!!.selectTag(first())
+                            val tag = first().value
+                            activeDocumentEditor()!!.selectTag(tag)
+
+                            if (tag.tagName() == "script")
+                                EditorManager.switchToScript(tag)
+
                             (first() as TreeItem<Element>).value.toString()
                         }
                     )
@@ -179,6 +188,13 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                     }
 
                     .menuDone()
+
+                .item("New script") {
+                    VisualScriptEditor(
+                        VisualScriptEditor.createNewScript()
+                    ).focus()
+                }
+
                 .separator()
                 .item("Delete") {
                     selectedItems().apply {
@@ -322,14 +338,14 @@ class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
             // If there is no document available, clear the tree.
             if (!activeEditorIsDocument()) {
                 clear()
-            } else
+            } else {
                 refresh()
+                // Select the tag in the tree that is selected in the editor.
+                val selectedInDocument = activeDocumentEditor()!!.selectedTag
 
-            // Select the tag in the tree that is selected in the editor.
-            val selectedInDocument = activeDocumentEditor()!!.selectedTag
-
-            if (selectedInDocument != null && selectedItem() != selectedInDocument)
-                select(selectedInDocument)
+                if (selectedInDocument != null && selectedItem() != selectedInDocument)
+                    select(selectedInDocument)
+            }
         }
     }
 

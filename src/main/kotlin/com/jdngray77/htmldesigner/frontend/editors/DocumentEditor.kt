@@ -86,7 +86,7 @@ class DocumentEditor(
      * Remember, this file does not actually edit the
      * [document].
      */
-    var document: Document = value.get()
+    var document: Document = document
         private set
 
 
@@ -385,10 +385,24 @@ class DocumentEditor(
     override fun onDocumentChanged() {
         unhighlightSelectedTag()
         value = SerializableDocument(document)
+
+
     }
 
     override fun afterDocumentChanged() {
-        document = value.get()
+
+        // If document no longer matches, deserialize the current version.
+        // TODO this will likely get slow for large documents.
+        //      There would be a noticable delay on every fucking change they make. me no like.
+        value.get().let {
+            if (!document.equalsDocument(it))
+                document = it
+        }
+
+        // Make sure the project cache holds the current INSTANCE of document.
+        // Instances de-sync because of the serialization on the undo/redo stack.
+        mvc().Project.assertCached(file, document)
+
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
         highlightSelectedTag()
         reRender()

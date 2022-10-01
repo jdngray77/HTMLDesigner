@@ -190,6 +190,25 @@ class SerializableDocument(document: Document) : Serializable {
     fun get() = Jsoup.parse(document)
 }
 
+fun Document.equalsDocument(d: Document) : Boolean {
+    if (this == d)
+        return true
+
+    else if (title() == d.title())
+        if (toString() == d.toString())
+            return true
+
+    return true
+//    // Compare by pointer first (fastest)
+//    this === d ||
+//            (
+//                    // If not the same pointer, compare titles. If titles don't match, not same document.
+//                    title() == d.title() &&
+//                            // If titles are the same, then check the content matches (Slowest part. Trying to avoid this unless it's likely to be a match.)
+//                            toString() == d.toString()
+//                    )
+}
+
 
 const val CSS_ID_DOCUMENT_SPECIFIC = "document-css"
 

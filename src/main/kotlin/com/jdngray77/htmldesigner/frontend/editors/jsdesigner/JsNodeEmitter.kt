@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.frontend.jsdesigner
+package com.jdngray77.htmldesigner.frontend.editors.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
@@ -66,7 +66,7 @@ class JsNodeEmitter : JsNodeProperty<JsGraphEmitter>() {
         // Provide feedback when moving the mouse around.
         socket.setOnMouseDragged {
             with(graphEditor.draggingLine) {
-                graphEditor.sceneToLocal(it.sceneX, it.sceneY).let {
+                graphEditor.root.sceneToLocal(it.sceneX, it.sceneY).let {
                     endX = it.x - 5
                     endY = it.y - 5
                 }

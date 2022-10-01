@@ -1,5 +1,9 @@
 package com.jdngray77.htmldesigner.backend.jsdesigner
 
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.JsAbsFunction
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.JsColorFactoryFunction
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.JsRandomBooleanFunction
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.JsRandomNumberFunction
 import com.jdngray77.htmldesigner.frontend.jsdesigner.*
 import org.jsoup.nodes.Element
 import org.junit.jupiter.api.Test

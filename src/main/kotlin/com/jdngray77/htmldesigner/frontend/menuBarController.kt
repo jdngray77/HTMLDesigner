@@ -11,6 +11,7 @@ import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.MainViewController.Companion.clearDock
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditor
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.requestCloseAllEditors
@@ -115,6 +116,19 @@ class menuBarController {
         showInformationalAlert(ScriptEngineManager().getEngineByExtension("kts")!!.eval(input).toString())
     }
 
+
+    fun menu_debug_close_editors() {
+        EditorManager.getOpenEditors().forEach {
+            it.forceClose()
+        }
+    }
+
+    fun menu_debug_restart_bgpool() {
+        BackgroundTask.print()
+        BackgroundTask.restart()
+        BackgroundTask.print()
+    }
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                     DEBUG
     //region                                                        PAGE
@@ -193,6 +207,10 @@ class menuBarController {
 
     fun menu_project_projprefs(actionEvent: ActionEvent) {
         RegistryEditor(IDE.mvc().Project.PREFERENCES).showDialog()
+    }
+
+    fun menu_project_dellogs(actionEvent: ActionEvent) {
+        IDE.mvc().Project.deleteLogs()
     }
 
 

@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.frontend.jsdesigner
+package com.jdngray77.htmldesigner.frontend.editors.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
@@ -9,11 +9,12 @@ import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.ItemSelectionDialog
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
-import com.jdngray77.htmldesigner.frontend.editors.DocumentEditor
 import com.jdngray77.htmldesigner.frontend.editors.Editor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.findDocumentEditorByDocument
 import com.jdngray77.htmldesigner.utility.*
-import javafx.event.ActionEvent
+import javafx.beans.value.ChangeListener
+import javafx.beans.value.ObservableValue
 import javafx.fxml.FXML
 import javafx.geometry.Bounds
 import javafx.scene.Node
@@ -22,8 +23,10 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
+import org.jsoup.helper.ValidationException
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import java.io.IOException
 import java.lang.System.gc
 
 /**
@@ -43,26 +46,36 @@ import java.lang.System.gc
 class VisualScriptEditor (
 
     /**
-     * The script element that the [graph] compiles into.
+     * The script element that the javascript [graph]
+     * will be compiled into.
      */
-    var scriptElement: Element,
-
-    /**
-     * The open editor that is managing the [document]
-     */
-    var scriptEditor: DocumentEditor? = findDocumentEditorByDocument(scriptElement.ownerDocument()!!)
+    val scriptElement: Element,
 
     /**
      * The document that the [graph] compiles into.
      */
-    var scriptDocument: Document = scriptElement.ownerDocument()!!,
+    val scriptDocument: Document = scriptElement.ownerDocument()!!,
 
-) : Editor<JsGraph>(root, JsGraph()), Subscriber {
+    ) : Editor<JsGraph>(
+
+    // Load GUI from fxml
+    loadFXMLComponent<SplitPane>("jsDesigner.fxml", VisualScriptEditor::class.java, this).first,
+
+    initDetermineGraph(scriptElement)
+
+) {
 
     // TODO store the js builder in here. Reuse it?
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                       FXML Controls & GUI components.
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    init {
+        title = scriptElement.id() + scriptElement.ownerDocument()?.title().let {
+            " (from $it)"
+        }
+    }
 
     /**
      * Root of the entire editor.
@@ -71,14 +84,35 @@ class VisualScriptEditor (
      * to hold the [compileOutput]
      */
     @FXML
-    lateinit var split: SplitPane
+    var split: SplitPane = root.lookup("#split") as SplitPane
 
     /**
      * A [TextArea] that can display the output of the compiled graph, if the user chooses
      * to show it.
      */
     @FXML
-    private lateinit var compileOutput: TextArea
+    private var compileOutput: TextArea = split.items.find { it.id == "compileOutput" } as TextArea
+
+    /**
+     * Determines if the [compileOutput] is currently visible.
+     */
+    fun setCompiledCodeVisible(visible: Boolean) {
+        compileOutput.isVisible = visible
+        if (visible)
+            split.items.addIfAbsent(compileOutput)
+        else
+            split.items.remove(compileOutput)
+    }
+
+    /**
+     * @return true if [compileOutput] is visible.
+     */
+    fun getIsCompiledCodeVisible() = compileOutput.isVisible
+
+    init {
+        // Hide this by default. It's added by the menu item.
+        split.items.remove(compileOutput)
+    }
 
     /**
      * The root pane of all nodes and lines.
@@ -97,7 +131,7 @@ class VisualScriptEditor (
      * @see clearScreen to remove all nodes and lines from the screen.
      */
     @FXML
-    internal lateinit var editorRootPane: Pane
+    internal var editorRootPane: Pane = split.items.find { it.id == "editorRootPane" } as Pane
 
     /**
      * A pane that fills the [editorRootPane].
@@ -110,37 +144,53 @@ class VisualScriptEditor (
      * would consume secondary mouse clicks anywhere within the editor.
      */
     @FXML
-    internal lateinit var contextPane: Pane
+    internal var contextPane: Pane = editorRootPane.lookup("#contextPane") as Pane
 
     /**
-     * Context menu used to create new nodes.
+     * Context menu used to create new nodes & manage the script.
      */
-    private val newNodeContextMenu: ContextMenu
+    private val contextMenu: ContextMenu = menu()
+        .item("Add a new node :")
+        .separator()
 
-    internal fun newNodeContextMenuBoundsInEditor() =
-        screenToLocal(newNodeContextMenu.x, newNodeContextMenu.y)
+        .item("Element from Web Page") { ctx_createNodeFromDocumentElement() }
+        .item("[WIP] Note...") { ctx_createNote() }
+        .separator()
+
+        // All other nodes
+        .addAll(
+            *JsFunctionFactory.asMenus(this::ctx_newFunctionNode).toTypedArray()
+        )
+        .separator()
+
+        .item("Help") { openURL("https://github.com/jdngray77/HTMLDesigner/wiki/Visual-Scripting") }
+
+        .subMenu("Manage script")
+            .item("Save") { requestSave() }
+            .item("Validate & Compile") { implValidateAndRecompile() }
+            .checkItem("Display the code being generated") { setCompiledCodeVisible(it) }
+            .separator()
+            .item("Delete everything...") { reset() }
+            .item("Unlink everything...") { requestBreakdownAllConnections() }
+            .item("Editor looks fucked up...") { requestReloadEditor() }
+        .menuDone()
+
+        .toContextMenu()
 
     /**
-     * Constructor for the [newNodeContextMenu] only.
+     * @return the bounds of the [editorRootPane] within the [root]
+     *         of this [VisualScriptEditor].
      */
+    fun contextMenuBoundsInEditor() =
+        root.screenToLocal(contextMenu.x, contextMenu.y)
+
     init {
-        newNodeContextMenu = menu()
-            .item("Add a new node :")
-            .separator()
-            .item("Element from Web Page") { ctx_createNodeFromDocumentElement() }
-            .item("[WIP] Node") { ctx_createNote() }
-            .separator()
-            // All other nodes
-            .addAll(
-                *JsFunctionFactory.asMenus(this::ctx_newFunctionNode).toTypedArray()
-            )
-            .toContextMenu()
+        // Context menu
+        contextPane.addContext(contextMenu)
     }
 
-
-
     /**
-     * A re-usable line used to give feedback to the user
+     * A re-usable line shape used to give feedback to the user
      * when dragging [JsGraphConnection]s, before they
      * have been committed.
      */
@@ -171,15 +221,22 @@ class VisualScriptEditor (
             visibleProperty().addListener { _, _, _ ->
                 toFront()
             }
+
+            addImportantNode(draggingLine)
         }
     }
 
     /**
      * Manager for selecting and grouping multiple nodes.
      *
-     * Added via [addImportant] in [initialize]
+     * Added via [addImportantNode] in [initialize]
      */
-    internal val grouper = JsNodeGrouper(this)
+    internal val nodeGrouper = JsNodeGrouper(this)
+
+    init {
+        addImportantNode(nodeGrouper)
+        nodeGrouper.setupListeners()
+    }
 
     /**
      * Adds some FXML component to the editor's [root] that is ***NOT*** a part of the graph.
@@ -187,40 +244,17 @@ class VisualScriptEditor (
      * This will be marked as important GUI, and thus will be retained when the editor
      * is cleared via [clearScreen]
      */
-    internal fun addImportant(it: Node) {
+    private fun addImportantNode(it: Node) {
         editorRootPane.children.add(it)
         it.styleClass.add("important")
     }
 
-    fun childToLocal(child: Node): Bounds =
-        sceneToLocal(child.boundsInScene())
-
-//    internal fun sceneToLocal(bounds: Point2D) =
-//        sceneToLocal(bounds.x, bounds.y)
-//
-//    override fun sceneToLocal(x: Double, y: Double) =
-//        editorRootPane.sceneToLocal(x, y)
-
-
     /**
-     * After editor's FXML has loaded, initializes the editor with blank graph.
+     * Calculates the bounds of the [editorRootPane] within the [root]
+     * of this [VisualScriptEditor]
      */
-    @FXML
-    fun initialize() {
-        // Display in the parenting dock.
-        center = split
-
-        addImportant(draggingLine)
-        addImportant(grouper)
-
-        grouper.setupListeners()
-
-        // Hide this by default. It's added by the menu item.
-        split.items.remove(compileOutput)
-
-        // Context menu
-        contextPane.addContext(newNodeContextMenu)
-    }
+    fun childToLocal(child: Node): Bounds =
+        root.sceneToLocal(child.boundsInScene())
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -228,24 +262,34 @@ class VisualScriptEditor (
     //region                                                    Graph data
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-
     /**
-     * The data model that this editor is currently editing.
-     *
-     * On [EventType.EDITOR_SELECTED_TAG_CHANGED], when a
-     * script is selected, this is the graph for the selected script
-     * tag.
-     *
-     * When the view is manipulated, this is the model that is modified.
-     * When compiling, this is the model compiled.
-     *
-     * This data model is serializable such that the graph can be
-     * saved, and the JsDesigner view can be re-created from the graph.
-     * TODO make optional
-     * @see implLoadGraph
+     * Alias for this [Editor]'s [value], for better readability.
      */
-    @Deprecated("Don't set this. Use loadGraph instead.")
-    lateinit var graph: JsGraph
+    var graph
+        set(value) {
+            super.value = value
+        }
+        get() = super.value
+
+
+
+//    /**
+//     * The data model that this editor is currently editing.
+//     *
+//     * On [EventType.EDITOR_SELECTED_TAG_CHANGED], when a
+//     * script is selected, this is the graph for the selected script
+//     * tag.
+//     *
+//     * When the view is manipulated, this is the model that is modified.
+//     * When compiling, this is the model compiled.
+//     *
+//     * This data model is serializable such that the graph can be
+//     * saved, and the JsDesigner view can be re-created from the graph.
+//     * TODO make optional
+//     * @see implLoadGraph
+//     */
+//    @Deprecated("Don't set this. Use loadGraph instead.")
+//    lateinit var value: JsGraph
 
     /**
      * List of all graphical representations of nodes in the [graph].
@@ -262,19 +306,20 @@ class VisualScriptEditor (
 
 
     /**
-     * Returns the GUI Node that represents the given [JsGraphNode].
+     * @returns the GUI [JsNode] that represents the given [JsGraphNode].
+     *          or null if there is no [JsNode] for the given [JsGraphNode].
      */
     fun getGUINodeFor(node: JsGraphNode) =
         guiNodes.firstOrNull { it.graphNode == node }
 
     /**
-     * Returns a list of all GUI node groups that contain the given gui node.
+     * @returns a list of all GUI node groups that contain the given gui node.
      */
     fun getGroupsContaining(node: JsNode) =
         getGroups().filter { it.getNodes().contains(node) }
 
     /**
-     * Returns all GUI node groups in the editor.
+     * @returns all GUI node groups in the editor.
      */
     fun getGroups() =
         editorRootPane.children.filterIsInstance<JsNodeGroup>()
@@ -286,15 +331,20 @@ class VisualScriptEditor (
 
 
     /**
-     * Modifies the [graph] to breakdown every single connection that
-     * exists within it.
-     *
-     * TODO confirm with the user.
+     * Breaks down all connections on all [guiNodes],
+     * if the user consents.
      */
-    fun resetConnections() {
-        if (!userConfirm("This will destroy ALL connections in the graph.\n\nContinue?"))
-            return
+    fun requestBreakdownAllConnections() {
+        if (userConfirm("This will destroy ALL connections in the graph.\n\nContinue?"))
+            breakdownAllConnections()
+    }
 
+    /**
+     * Breaks down all connections on all [guiNodes], without
+     * asking the user.
+     */
+    @Deprecated("Prefer request sister method to get consent from the user, as this is destructive.", ReplaceWith("requestBreakdownAllConnections"))
+    fun breakdownAllConnections() {
         guiNodes.map {
             it.breakdownConnections()
         }
@@ -310,17 +360,16 @@ class VisualScriptEditor (
      *
      * @param node The node to delete.
      */
-    fun deleteNode(node: JsNode) {
-        if (!userConfirm("This will '${node.getGraphNode().name}',and destroy all connections it.\n\nContinue?"))
-            return
-
-        implDeleteNode(node)
+    fun requestDeleteNode(node: JsNode) {
+        if (userConfirm("This will '${node.getGraphNode().name}',and destroy all connections it.\n\nContinue?"))
+            deleteNode(node)
     }
 
     /**
      * Deletes a given node without questioning the user.
      */
-    fun implDeleteNode(node: JsNode) {
+    @Deprecated("Prefer request sister method to get consent from the user, as this is destructive.", ReplaceWith("requestDeleteNode"))
+    fun deleteNode(node: JsNode) {
 
         // Disconnect and delete all connections.
         // This also removes the lines from [emittingLines] and [receivingLines]
@@ -345,31 +394,28 @@ class VisualScriptEditor (
     //region                                           Graph Functions > Set-up
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    /**
-     * Loads an existing [JsGraph] into the editor.
-     *
-     * Re-creates the view from the graph.
-     *
-     * > FIXME Note that this is currently unable to determine the [document]
-     *    that the graph may have been targeted towards. If the document differs,
-     *    the graph will likely not be able to load.
-     */
-    fun implLoadGraph(g: JsGraph) {
-        // Breakdown existing graph.
-        if (this::graph.isInitialized) {
-            saveGraph()
-            resetEditor()
-        }
 
-        graph = g
-        reloadGraph()
+    /**
+     * Consents the user to [reloadGraph]
+     */
+    fun requestReloadEditor() {
+        if (userConfirm("This will re-load the GUI without modifying the data.\n" +
+                        "With any luck, you shouldn't lose any progress.\n\nContinue?"))
+            reloadGraph()
     }
 
     /**
      * Subroutine that reloads the editor from the current [graph].
      *
-     * Ensures the editor is showing the current state of the
-     * [graph], but is slow for big graphs.
+     * (Also used to create the gui on init.)
+     *
+     * For ensuring that the editor is in sync with the graph,
+     * in exchange for speed.
+     *
+     * Re-creates the entire GUI from the data, but is slow for big graphs.
+     *
+     * Best to keep the GUI up-to-date on the fly, but this is
+     * a good backup for restoring.
      *
      * Try to just invalidate areas of the graph that have changed
      * if possible, instead of reloading.
@@ -379,7 +425,7 @@ class VisualScriptEditor (
 
         // Re-create all nodes.
         graph.getNodes().map {
-            implNewNode(it)
+            implCreateGUINode(it)
                 // JavaFX doesn't calculate the position of the node until sometime later.
                 // We need to force it to evaluate now so that the bounds are correct
                 // in order to position the lines correctly in the next step.
@@ -425,7 +471,7 @@ class VisualScriptEditor (
 
 
         // Check what nodes are touched.
-        invalidateTouches()
+        recompile()
 
         // Clean up.
         gc()
@@ -450,15 +496,15 @@ class VisualScriptEditor (
      * @param x The x position of the node, within the scene. Default to using the node's position if not provided.
      * @param y The y position of the node, within the scene. Default to using the node's position if not provided.
      * @return The newly created GUI node.
-     * @throws Exception If [graphNode] does not exist within the [graph]
+     * @throws Exception If [graphNode] does not exist within the [graph] this editor is editing.
      */
-    internal fun implNewNode(graphNode: JsGraphNode, x: Double = graphNode.x, y: Double = graphNode.y): JsNode {
+    internal fun implCreateGUINode(graphNode: JsGraphNode, x: Double = graphNode.x, y: Double = graphNode.y): JsNode {
         graph.assertExists(graphNode)
 
         graphNode.x = x
         graphNode.y = y
 
-        // Load node fxml
+        // Create GUI from fxml.
         loadFXMLComponent<AnchorPane>("JsNode.fxml", javaClass).apply {
 
             // Add to root
@@ -486,8 +532,14 @@ class VisualScriptEditor (
     /**
      * Saves the current [graph] to disk.
      */
-    fun saveGraph() {
-        mvc().Project.saveJsGraph(graph, scriptDocument!!)
+    override fun save() : Boolean {
+        try {
+            mvc().Project.saveJsGraph(graph)
+        } catch (e: Exception) {
+            ExceptionListener.uncaughtException(Thread.currentThread(), e)
+            return false
+        }
+        return true
     }
 
 
@@ -511,7 +563,7 @@ class VisualScriptEditor (
      * > Note that this does not clear the graph, and as such should only be
      *      invoked when clearing the graph.
      *
-     * @see addImportant for adding GUI at runtime.
+     * @see addImportantNode for adding GUI at runtime.
      *
      * @author Jordan T. Gray
      */
@@ -527,22 +579,12 @@ class VisualScriptEditor (
     }
 
     /**
-     * User requests to reset editor back to blank.
+     * Editor has been requested to reset.
      *
-     * This will confirm with the user, then perform [resetEditor].
+     * Drops current graph, and re-loads
+     * from disk.
      */
-    fun requestResetEditor() {
-        if (userConfirm("Any unsaved changes will be lost.\n\nContinue?"))
-            resetEditor()
-    }
-
-    /**
-     * Clears the screen, and loads a blank graph.
-     *
-     * Doesn't break down the current graph.
-     * TODO confirm with the user.
-     */
-    fun resetEditor() {
+    override fun reset() {
         // Remove everything from the screen.
         clearScreen()
 
@@ -563,53 +605,78 @@ class VisualScriptEditor (
 
     /**
      * [VisualScriptEditor] automatically re-compiles on changes to represent the data,
-     * however when performing large oporations this feature only serve
+     * however when performing large operations this feature only serve
      * to exponentially slow the programme down.
      *
      * Temporarily raise this flag whilst performing large operations
      * to prevent multiple re-compiles during.
      *
      * ***Remember to lower again after!***
-     *
      */
-    internal var disableCompile = false
+    internal var isTransacting = false
+
+    /**
+     * Call when performing large operations to prevent multiple re-compiles.
+     *
+     * Call [endTransaction] when complete.
+     */
+    fun startTransaction () {
+        isTransacting = true
+    }
+
+    /**
+     * Ends a period of blocking re-compiles.
+     *
+     * Performs a re-compile.
+     */
+    fun endTransaction () {
+        isTransacting = false
+        recompile()
+    }
 
     /**
      * Compiles the entire graph, and in turn evaluates which nodes
      * were touched in the compile, and which were not.
      *
-     * After, invokes [invalidateTouched] on all nodes to update them
+     * After, invokes [invalidateAllNodeTouches] on all nodes to update them
      * with the touch status.
      *
      * Invoke when a connection between two nodes is created or
      * destroyed.
      */
-    fun invalidateTouches(quietValidation: Boolean = true) {
-        if (disableCompile) return
+    fun recompile(quietValidation: Boolean = true) {
+        if (isTransacting) return
 
-        validateAndCompile(quietValidation)
+        implValidateAndRecompile(quietValidation)
 
         // Update the CSS to show nodes that weren't touched.
-        invalidateTouched()
+        invalidateAllNodeTouches()
     }
 
     /**
-     * Compiles the graph, and shows warnings if [quiet] is false,
-     * or the compilations fails.
+     * Compiles the graph and validates the graph.
+     *
+     * Shows warnings if [quiet] is false. Always shows warnings if the
+     * compilatation fails.
+     *
+     * Updates the [touched] flag on nodes.
      */
-    private fun validateAndCompile(quiet: Boolean = true) {
-        if (disableCompile) return
+    private fun implValidateAndRecompile(quiet: Boolean = true) {
+        if (isTransacting) return
 
         // TODO rename that to validateAndCompile
         var compiled = graph.validateAndCompile()
 
+        println(compiled)
+
         // Compile and print.
         compileOutput.text = compiled.javascript
 
+        //TODO check if compiled output is different.
+        scriptElement.text(compiled.javascript)
 
-        scriptElement!!.text(compiled.javascript)
-        findDocumentEditorByDocument(scriptElement!!.ownerDocument()!!)!!
-            .changed("Updated script : ${scriptElement!!.id()}")
+        findDocumentEditorByDocument(scriptElement.ownerDocument()!!)
+            ?.changed("Updated script : ${scriptElement.id()}")
 
         val isError = compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.ERROR
 
@@ -645,16 +712,18 @@ class VisualScriptEditor (
                 }
             }
         }
+
+        invalidateAllNodeTouches()
     }
 
     /**
      * Invokes [JsNode.invalidateTouched] on all nodes in the GUI
-     * to update them to the current touch status.
+     * to notify that touch statuses have changed.
      *
-     * Invoke after a compile.
+     * Asserts that all GUI nodes correctly represent the touched
+     * flag of the corresponding node in the graph.
      */
-    @Deprecated("Did you mean to use [invalidateTouches]?")
-    private fun invalidateTouched() {
+    private fun invalidateAllNodeTouches() {
         guiNodes.forEach {
             it.invalidateTouched()
         }
@@ -662,10 +731,21 @@ class VisualScriptEditor (
 
     /**
      * Re-evaluates the position of all groups
+     *
+     * Call when a node that belongs to one or more groups has been moved.
      */
     fun invalidateGroupPositions() {
         getGroups().forEach {
             it.invalidatePosition()
+        }
+    }
+
+    /**
+     * Invalidates the position of all lines.
+     */
+    fun invalidateAllLinePositions() {
+        guiNodes.forEach {
+            it.invalidateLinePositions()
         }
     }
 
@@ -685,30 +765,11 @@ class VisualScriptEditor (
         }
     }
 
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                               update events
     //region                                                  menu events
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-    @FXML
-    private fun menu_help() =
-        openURL("https://github.com/jdngray77/HTMLDesigner/wiki/Visual-Scripting")
-
-    @FXML
-    private fun menu_add_node() =
-        newNodeContextMenu.show(editorRootPane, EDITOR.stage.x + 50.0, EDITOR.stage.y + 60.0)
-
-    @FXML
-    fun menu_toggleCompileVisible(actionEvent: ActionEvent) {
-        if ((actionEvent.source as CheckMenuItem).isSelected)
-            split.items.addIfAbsent(compileOutput)
-        else
-            split.items.remove(compileOutput)
-    }
-
-    fun validateGraph() {
-        validateAndCompile(false)
-    }
 
     /**
      * Context menu item to add a new node that represents an item from the current document.
@@ -717,16 +778,16 @@ class VisualScriptEditor (
         scriptDocument!!.getElementById(
             ItemSelectionDialog<String>(
                 scriptDocument!!.allElements
-                    .filter(VisualScriptEditor::filterElementIsGraphable)
+                    .filter(Companion::filterElementIsGraphable)
                     .map { it.id() }
                     .toList()
             ).showAndWait()
 
         )?.let {
             try {
-                val bound = newNodeContextMenuBoundsInEditor()
+                val bound = contextMenuBoundsInEditor()
 
-                implNewNode(
+                implCreateGUINode(
                     graph.addElement(it),
                     bound.x, bound.y
                 )
@@ -740,15 +801,13 @@ class VisualScriptEditor (
         }
     }
 
-    // TODO abstract create new node from menu
-
     /**
      * Creates a new note node.
      */
     fun ctx_createNote() {
-        val bound = newNodeContextMenuBoundsInEditor()
+        val bound = contextMenuBoundsInEditor()
 
-        implNewNode(
+        implCreateGUINode(
             graph.addNote(
                 userInput("Enter the note text")
             ),
@@ -757,12 +816,14 @@ class VisualScriptEditor (
         )
     }
 
+    /**
+     * Performs [implCreateGUINode] when a function is selected from the context menu.
+     */
     fun ctx_newFunctionNode(it: JsFunction) {
-
-        val bound = newNodeContextMenuBoundsInEditor()
+        val bound = contextMenuBoundsInEditor()
         // On user selecting an item, add the function to the graph
         // and create a new node for it.
-        implNewNode(
+        implCreateGUINode(
             graph.addFunction(it),
             bound.x - EDITOR.stage.x,
             bound.y - EDITOR.stage.y
@@ -770,114 +831,141 @@ class VisualScriptEditor (
     }
 
 
-    fun menu_new_script() {
-        val name = userInput("What should the script be called?") {
-            if (it.isBlank()) "Enter something" else null
-        }
-
-        val e = Element("script")
-            .attr("id", name)
-
-        scriptEditor!!.apply {
-            document.body().appendChild(e)
-            selectTag(e)
-            changed("Created script '$name'")
-        }
-
-        implLoadGraph(
-            mvc().Project.newJsGraph(name, scriptDocument!!)
-        )
-
-
-        //TODO create an event for tag created / deleted. This is fucking stupid.
-        EventNotifier.notifyEvent(EventType.TAG_CREATED)
-    }
-
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                            menu events
-    //region                                               IDE events
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    // After initalising the rest of the class, load the graph.
     init {
-        EventNotifier.subscribe(
-            this,
-            EventType.EDITOR_DOCUMENT_SWITCH,
-            EventType.PROJECT_SAVED,
-            EventType.EDITOR_SELECTED_TAG_CHANGED,
+        reloadGraph()
+
+        // listener to solve an issue where lines are not evaluated in the correct position at init.
+        root.needsLayoutProperty().addListener(
+            object : ChangeListener<Boolean> {
+                override fun changed(
+                    observable: ObservableValue<out Boolean>,
+                    oldValue: Boolean,
+                    newValue: Boolean
+                ) {
+                    if (!newValue) {
+                        invalidateGroupPositions()
+                        invalidateAllLinePositions()
+
+                        // Remove, so this only happens on the first focus.
+                        // It's fixed after the first focus, so it's just overhead.
+                        root.needsLayoutProperty().removeListener(this)
+                    }
+                }
+            }
         )
     }
-
-    override fun notify(e: EventType) {
-        // TODO behave like an editor, not a dock.
-//        when (e) {
-//            EventType.EDITOR_DOCUMENT_SWITCH -> {
-//                scriptElement = mvc().selectedTag()
-//                if (scriptElement != null && scriptElement!!.tagName() == "script") {
-//                    implLoadGraph(
-//                        mvc().Project.loadJsGraph(scriptElement!!.attr("id"))
-//                    )
-//                }
-//            }
-//
-//            EventType.PROJECT_SAVED -> {
-//                saveGraph()
-//            }
-//
-//            EventType.EDITOR_SELECTED_TAG_CHANGED -> {
-//                val tag = mvc().selectedTag()
-//                if (tag != null && tag.tagName() == "script") {
-//                    scriptElement = tag
-//                    implLoadGraph(
-//                        mvc().Project.loadJsGraph(tag.attr("id"))
-//                    )
-//                }
-//            }
-//
-//            else -> {}
-//        }
-//
-//        if (scriptElement == null)
-//            resetEditor()
-    }
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                               IDE events
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
 
     companion object {
 
         /**
-         * For use in filtering lists of elements.
+         * At init time, determines what [JsGraph] instance to use.
          *
-         * Returns true if the [e]lement can be used as a node.
+         * Is not in class, because it needs to be used before the class is initialised,
+         * when initalising the super. The functions within the class are not defined
+         * untill after the super class is finished.
          *
-         * - Must have an ID
-         * - Must not be a script
+         * Will load via project/project cache if already exists,
+         * otherwise will create a new graph if it does not exist.
          *
-         * // TODO move to instance, exlude ones that are already added.
+         * @throws ValidationException if [scriptElement] is not a valid script.
+         * @see validateJsScriptElement for [scriptElement] validation.
          */
-        fun filterElementIsGraphable(e: Element): Boolean =
-            e.id().isNotEmpty() && e.tagName().doesNotEqual("style", "script")
+        private fun initDetermineGraph(scriptElement: Element) : JsGraph {
+
+            // Check that the element is actually a valid script.
+            scriptElement.validateJsScriptElement()
+
+            val scriptName = scriptElement.id()
+
+            return try {
+                // Attempt to load existing graph
+                mvc().Project.loadJsGraph(scriptName)
+
+            } catch (e: IOException) {
+                // If failed to read file, fail as error
+                setAction("Failed to load graph from disk $scriptName")
+                throw e
+
+            } catch (e: NoSuchElementException) {
+                // If no such graph exists, create a new one.
+                mvc().Project.createJsGraph(scriptName)
+                setAction("Created a new script graph called $scriptName")
+                JsGraph(scriptName)
+            }
+        }
 
 
         /**
-         * Creates a new [VisualScriptEditor].
+         * Tests an element to see if it is a valid script element.
          *
-         * @return ([SplitPane], [VisualScriptEditor]) Where the split pane is the root of the editor's GUI.
+         * - Must be a script tag
+         * - Must have an id
+         *
+         * @throws ValidationException if [scriptElement] does not meet the requirements above.
          */
-        fun new(): Pair<SplitPane, VisualScriptEditor> =
-            loadFXMLComponent<SplitPane>("JsDesigner.fxml", this::class.java) as Pair<SplitPane, VisualScriptEditor>
+        private fun Element.validateJsScriptElement() {
+
+            if (tagName() != "script")
+                throw ValidationException("Element is not a script tag.")
+
+            if (!hasAttr("id"))
+                throw ValidationException("Script element is missing an id attribute.")
+
+        }
+
+        /**
+         * Filtering function for use in filtering lists of elements.
+         *
+         * Returns true if the [element] can be used as a node.
+         *
+         * - Must have an ID
+         * - Must not be a script
+         * - Must not be a style
+         */
+        fun filterElementIsGraphable(element: Element): Boolean =
+            element.id().isNotEmpty() && element.tagName().doesNotEqual("style", "script")
 
         /**
          * When creating a new line, this adds
          * the appropriate css classes to it.
          */
-        internal fun themeLine(line: Line) {
-            line.styleClass.add("line")
-            line.stroke = Color.WHITE
-            line.strokeWidth = 5.0
+        internal fun Line.configureVisualScriptStyle() {
+            styleClass.add("line")
+            stroke = Color.WHITE
+            strokeWidth = 5.0
+        }
+
+        /**
+         * Creates a new script, and saves it into the project.
+         *
+         * @return the script created.
+         */
+        fun createNewScript() : Element {
+            val document = activeDocument()?:
+                throw IllegalStateException("No document editor active. Select a document script, so I know where to put the script.")
+
+            val name = userInput("What should the script be called?") {
+                if (it.isBlank()) "Enter something" else null
+            }
+
+            val e = Element("script")
+                .attr("id", name)
+
+            document.body().appendChild(e)
+
+            JsGraph(name).saveObjectToDisk(
+                mvc().Project.JS.subFile("$name.jsvg")
+            )
+
+            EventNotifier.notifyEvent(EventType.TAG_CREATED)
+
+            return e
         }
     }
 }

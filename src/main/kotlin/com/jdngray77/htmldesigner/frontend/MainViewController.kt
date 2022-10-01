@@ -28,7 +28,7 @@ import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
-import com.jdngray77.htmldesigner.frontend.jsdesigner.VisualScriptEditor
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.utility.camelToSentence
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
@@ -185,9 +185,6 @@ class MainViewController {
 
         // RIGHT
         implAddDock(dockRight, TagProperties(), TestDock(), HistoryDock())
-
-        // BOTTOM
-        implAddDock(dockBottom, VisualScriptEditor.new().second)
     }
 
     private fun implAddDock(to: TabPane, vararg it: Dock) {

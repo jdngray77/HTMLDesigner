@@ -2,6 +2,7 @@ package com.jdngray77.htmldesigner.backend.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JavascriptBuilder
 import com.jdngray77.htmldesigner.backend.JavascriptBuilder.Companion.wrapAnonFunction
+import com.jdngray77.htmldesigner.backend.logWarning
 import com.jdngray77.htmldesigner.utility.toCamel
 
 /**
@@ -146,7 +147,12 @@ ${
         val message: String?
     ) {
 
-        val level: MessageLevel = MessageLevel.valueOf(type.name.split("_").first())
+        val level: MessageLevel = try {
+            MessageLevel.valueOf(type.name.split("_").first())
+        } catch (e : IllegalArgumentException) {
+            logWarning("Compiler message did not begin with a message level : $type")
+            MessageLevel.WARNING
+        }
 
         override fun toString() =
             if (message == null)
@@ -174,12 +180,13 @@ ${
         /**
          * Whilst validating the graph, problem was found but not fixed.
          */
-        VALIDATION_PROBLEM,
+        WARNING_VALIDATION_PROBLEM,
+        // TODO unit test these values begin with message level.
 
         /**
          * Whilst validating the graph, problem was found and automatically was fixed.
          */
-        VALIDATION_PROBLEM_AUTO_FIXED,
+        WARNING_VALIDATION_PROBLEM_AUTO_FIXED,
 
         /**
          * After compiling the graph, there was no javascript.

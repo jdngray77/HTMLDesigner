@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.frontend.jsdesigner
+package com.jdngray77.htmldesigner.frontend.editors.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
 import com.jdngray77.htmldesigner.utility.addIfAbsent
@@ -46,7 +46,7 @@ class JsNodeReceiver: JsNodeProperty<JsGraphReceiver>() {
             emitterBeingDragged.assertPopulationCss()
 
 
-            graphEditor.invalidateTouches()
+            graphEditor.recompile()
             it.consume()
         }
 

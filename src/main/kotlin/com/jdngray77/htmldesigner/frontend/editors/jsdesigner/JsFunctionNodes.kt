@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.frontend.jsdesigner
+package com.jdngray77.htmldesigner.frontend.editors.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.JsFunction
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataType

@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.frontend.jsdesigner
+package com.jdngray77.htmldesigner.frontend.editors.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.BackgroundTask.invokeInBackground
 import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
@@ -105,7 +105,7 @@ class JsNodeGrouper(
         // If the last selection was not committed, get rid. Replace with new selection.
         deleteIfUncommitted()
 
-        val local = editor.sceneToLocal(MouseSceneX, MouseSceneY)
+        val local = editor.root.sceneToLocal(MouseSceneX, MouseSceneY)
 
         relocate(local.x, local.y)
         originX = local.x
@@ -729,7 +729,7 @@ class JsNodeGroup(
         checkDisposeMod()
 
         // Prevent deleting nodes from re-compiling the graph.
-        editor.disableCompile = true
+        editor.startTransaction()
 
         // Delete all nodes via the GUI node.
         for (node in nodes) {
@@ -743,7 +743,7 @@ class JsNodeGroup(
         graphGroup.clear()
         editor.graph.dumpGroup(graphGroup)
 
-        editor.disableCompile = false
+        editor.endTransaction()
         setAction("Deleted group '${graphGroup.name}', and all of it's nodes.")
     }
 
@@ -964,7 +964,7 @@ class JsNodeGroup(
             editor,
             *dupedNodes.toTypedArray()
             ).also {
-            editor.grouper.lastCreatedGroup = it
+            editor.nodeGrouper.lastCreatedGroup = it
             setAction("Cloned group '${graphGroup.name}', and duplicated all nodes contained within.")
         }
     }

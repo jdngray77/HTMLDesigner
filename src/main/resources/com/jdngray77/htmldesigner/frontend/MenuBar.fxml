@@ -15,6 +15,8 @@
                         <Menu mnemonicParsing="false" text="IDE">
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />
+                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_close_editors" text="Force close all editors" />
+                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_restart_bgpool" text="Restart background worker threads" />
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_dirty" text="Mark current editor as dirty" />
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_config" text="Reset config registry" />
                             </items>
@@ -36,7 +38,7 @@
             <items>
                 <MenuItem mnemonicParsing="false" text="[inop] New..." />
                 <MenuItem mnemonicParsing="false" text="[inop] Load..." />
-            <MenuItem mnemonicParsing="false" text="[inop] Open in Finder" />
+                <MenuItem mnemonicParsing="false" text="[inop] Open in Finder" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_project_close" text="Close Project" />
                 <Menu mnemonicParsing="false" text="[inop] Backups">
                     <items>
@@ -48,23 +50,10 @@
                 <Menu mnemonicParsing="false" text="[inop] Open Recent" />
                 <SeparatorMenuItem mnemonicParsing="false" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
+                <MenuItem mnemonicParsing="false" onAction="#menu_project_dellogs" text="Delete logs" />
             </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Page">
-            <items>
-                <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save" />
-                <!--        TODO confirm this one with the user, my fucking god          -->
-                <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert unsaved changes" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <Menu mnemonicParsing="false" text="[inop] Backups">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Backup now" />
-                        <MenuItem mnemonicParsing="false" text="Restore backup..." />
-                    </items>
-                </Menu>
-            </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Edit">
+        <Menu mnemonicParsing="false" text="Editor">
             <items>
                 <MenuItem mnemonicParsing="false" onAction="#menu_edit_undo" text="Undo" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_edit_redo" text="Redo" />
@@ -76,6 +65,9 @@
                 <SeparatorMenuItem mnemonicParsing="false" />
                 <MenuItem mnemonicParsing="false" text="[inop] Select All" />
                 <MenuItem mnemonicParsing="false" text="[inop] Unselect All" />
+                <SeparatorMenuItem mnemonicParsing="false" />
+                <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save" />
+                <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert unsaved changes" />
             </items>
         </Menu>
         <Menu mnemonicParsing="false" text="Tools">

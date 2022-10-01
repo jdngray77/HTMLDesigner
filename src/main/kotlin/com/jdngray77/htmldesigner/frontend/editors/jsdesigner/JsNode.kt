@@ -1,4 +1,4 @@
-package com.jdngray77.htmldesigner.frontend.jsdesigner
+package com.jdngray77.htmldesigner.frontend.editors.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.*
 import com.jdngray77.htmldesigner.utility.addIfAbsent
@@ -130,10 +130,19 @@ class JsNode {
             )
         }
 
+        val updpos = {
+            Platform.runLater {
+                root.requestLayout()
+                root.layout()
+                invalidatePosition()
+                graphEditor.invalidateGroupPositions()
+                graphEditor.invalidateAllLinePositions()
+            }
+        }
 
         // Don't create a collapse manager if the node is a function.
         if (graphNode !is JsGraphNoteNode) {
-            collapseManager = DoubleClickCollapseManager(
+            collapseManager = DoubleClickCollapseManager (
                 // When the label is double clicked
                 txtElementName,
 
@@ -143,6 +152,7 @@ class JsNode {
                     txtElementName.text = "↓ ${graphNode.name} ↓"
                     root.children.remove(vboxEmitters)
                     root.children.remove(vboxReceivers)
+                    updpos()
                 },
 
                 // and expand the node
@@ -151,11 +161,7 @@ class JsNode {
                     txtElementName.text = graphNode.name
                     root.children.add(vboxEmitters)
                     root.children.add(vboxReceivers)
-
-                    Platform.runLater {
-                        invalidatePosition()
-                        graphEditor.invalidateGroupPositions()
-                    }
+                    updpos()
                 }
             )
         }
@@ -511,10 +517,10 @@ class JsNode {
      *
      * All connections being received and emitted are broken down.
      *
-     * Alias for [VisualScriptEditor.deleteNode].
+     * Alias for [VisualScriptEditor.requestDeleteNode].
      */
     fun delete() {
-        graphEditor.implDeleteNode(this)
+        graphEditor.deleteNode(this)
     }
 
 
@@ -527,7 +533,7 @@ class JsNode {
      * @see JsFunctionFactory.byName
      */
     fun dupeNode() =
-        graphEditor.implNewNode(
+        graphEditor.implCreateGUINode(
             graphEditor.graph.cloneNode(graphNode),
         )
 

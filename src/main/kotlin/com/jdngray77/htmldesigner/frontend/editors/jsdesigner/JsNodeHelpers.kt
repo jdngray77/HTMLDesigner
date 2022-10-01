@@ -1,8 +1,9 @@
-package com.jdngray77.htmldesigner.frontend.jsdesigner
+package com.jdngray77.htmldesigner.frontend.editors.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphEmitter
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphNodeProperty
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphReceiver
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor.Companion.configureVisualScriptStyle
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.setTooltip
 import javafx.fxml.FXML
@@ -201,7 +202,7 @@ class EmissionLine(
      */
     val receiver: JsNodeReceiver,
 
-)  {
+    )  {
 
     /**
      * The line itself.
@@ -217,8 +218,7 @@ class EmissionLine(
         }
 
         line.setTooltip("${emitter.property().parent.name}'s ${emitter.name()} sends ${emitter.property().type} to ${receiver.property().parent.name}'s ${receiver.name()}")
-
-        VisualScriptEditor.themeLine(line)
+        line.configureVisualScriptStyle()
     }
 
     /**
@@ -261,7 +261,7 @@ class EmissionLine(
         receiver.breakdown()
 
         // Recompile to check for touches.
-        emitter.graphEditor.invalidateTouches()
+        emitter.graphEditor.recompile()
 
         // Remove from the scene.
         emitter.guiNode.getGraphEditor().editorRootPane.children.remove(line)

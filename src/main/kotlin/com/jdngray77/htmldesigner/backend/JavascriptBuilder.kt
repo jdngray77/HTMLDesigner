@@ -3,7 +3,7 @@ package com.jdngray77.htmldesigner.backend
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataType
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphDataTypeOf
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraphFunction
-import com.jdngray77.htmldesigner.frontend.jsdesigner.JsFunctionFactory
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.JsFunctionFactory
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.classEquals
 import com.jdngray77.htmldesigner.utility.toCamel

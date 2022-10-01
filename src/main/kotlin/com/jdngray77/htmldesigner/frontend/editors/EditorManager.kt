@@ -2,10 +2,15 @@ package com.jdngray77.htmldesigner.frontend.editors
 
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
+import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.concmod
+import com.jdngray77.htmldesigner.utility.equalsDocument
 import javafx.scene.control.Tab
+import javafx.scene.control.TabPane
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import java.io.File
 
 /**
@@ -16,12 +21,17 @@ import java.io.File
  *
  * @author Jordan T. Gray
  */
-object EditorManager {
+object EditorManager : IDEEarlyBootListener {
+
+    override fun onIDEBootEarly() {
+        openEditors.clear()
+    }
 
     /**
      * The tab pane within the GUI that contains the editor tabs.
      */
-    private val editorDock = mvc().MainView.dockEditors
+    private val editorDock: TabPane
+        get() = mvc().MainView.dockEditors
 
     /**
      * Checks that all editors are open, and that
@@ -30,7 +40,7 @@ object EditorManager {
      * Also requests editors to validate themselves.
      */
     fun validateEditors() {
-        editorDock.tabs.forEach {
+        editorDock.tabs.concmod().forEach {
             try {
                 findEditorByTab(it).requestValidation()
             } catch (e: IllegalArgumentException) {
@@ -138,9 +148,12 @@ object EditorManager {
     /**
      * Switches focus to the given editor.
      */
-    fun switchToEditor(editor: Editor<*>) {
-        if (hasEditor(editor))
+    fun switchToEditor(editor: Editor<*>) : Boolean {
+        return if (hasEditor(editor) && activeTab() !== editor.tab) {
             editorDock.selectionModel.select(editor.tab)
+            true
+        } else
+            false
     }
 
     /**
@@ -148,7 +161,7 @@ object EditorManager {
      *
      * @param editor DocumentEditor - The editor to switch to
      */
-    fun DocumentEditor.focus() {
+    fun Editor<*>.focus() {
         if (hasEditor(this))
             switchToEditor(this)
     }
@@ -162,11 +175,11 @@ object EditorManager {
      */
     @Deprecated("Internal call only. Automatically called when an editor is created.")
     internal fun editorCreated(editor: Editor<*>) {
-        validateEditors()
-
         if (!openEditors.contains(editor)) {
             openEditors.add(editor)
         }
+
+
 
         editorDock.tabs.addIfAbsent(editor.tab)
     }
@@ -194,7 +207,7 @@ object EditorManager {
      * @throws IllegalStateException if an editor refuses to close.
      */
     fun requestCloseAllEditors() {
-        openEditors.forEach {
+        openEditors.concmod().forEach {
             if (!it.requestClose()) {
                 showNotification("Editor refused to close", "Couldn't close all editors because one refused to close.")
                 throw IllegalStateException("Editor refused to close")
@@ -228,7 +241,7 @@ object EditorManager {
      */
     fun activeDocumentEditor() = try {
         activeEditor() as DocumentEditor
-    } catch (ClassCastException: ClassCastException) {
+    } catch (e: Exception) {
         null
     }
 
@@ -256,7 +269,7 @@ object EditorManager {
      */
     fun findDocumentEditorByDocument(document: Document) : DocumentEditor? =
         getEditorsOfType<DocumentEditor>()
-            .find { it.document === document }
+            .find { it.document.equalsDocument(document) }
 
     /**
      * Finds an [DocumentEditor] by the document's file.
@@ -281,10 +294,10 @@ object EditorManager {
         val editor = findDocumentEditorByDocument(document)
 
         if (editor != null) {
-            switchToEditor(editor)
-            setAction("Switched to document '${document.title()}'")
+            if (switchToEditor(editor))
+                setAction("Switched to document '${document.title()}'")
         } else {
-            DocumentEditor(document)
+            switchToEditor(DocumentEditor(document))
             setAction("Opened document '${document.title()}'")
         }
     }
@@ -300,6 +313,16 @@ object EditorManager {
     fun openDocument(document: File) =
         openDocument(mvc().Project.loadDocument(document))
 
-
     //#endregion
+    //region script
+
+    fun switchToScript(tag: Element) {
+        getEditorsOfType<VisualScriptEditor>().find {
+            it.scriptElement.id() == tag.id()
+        }?.focus() ?: run {
+            VisualScriptEditor(
+                tag
+            ).focus()
+        }
+    }
 }

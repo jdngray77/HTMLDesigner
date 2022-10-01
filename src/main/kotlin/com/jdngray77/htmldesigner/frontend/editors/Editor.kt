@@ -1,6 +1,8 @@
 package com.jdngray77.htmldesigner.frontend.editors
 
 import com.jdngray77.htmldesigner.MVC
+import com.jdngray77.htmldesigner.backend.BackgroundTask
+import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.DocumentState
 import com.jdngray77.htmldesigner.backend.DocumentUndoRedo
 import com.jdngray77.htmldesigner.backend.setAction
@@ -174,7 +176,18 @@ abstract class Editor<T : Serializable>(
      *
      * Displayed within the editor, contains the [root] and [title].
      */
-    val tab = Tab(title, root)
+    val tab = Tab(title, root).also {
+        it.setOnCloseRequest {
+            requestClose(it)
+        }
+
+        it.selectedProperty().addListener { _, _, newValue ->
+            onUIThread {
+                if (newValue)
+                    onEditorFocus()
+            }
+        }
+    }
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -205,16 +218,16 @@ abstract class Editor<T : Serializable>(
      *
      * @return true if tab closed, false if request was refused.
      */
-    fun requestClose(): Boolean {
-        with(Event(EDITOR_CLOSE_REQUEST)) {
-            tab.onCloseRequest?.handle(this)
-            onCloseRequested(this)
+    fun requestClose(event: Event = Event(EDITOR_CLOSE_REQUEST)): Boolean {
+        // Notify implementation
+        onCloseRequested(event)
 
-            if (isConsumed)
-                return false
-
+        // If implementation did not cancel
+        return if (event.isConsumed)
+            false
+        else {
             forceClose()
-            return true
+            true
         }
     }
 
@@ -319,6 +332,14 @@ abstract class Editor<T : Serializable>(
      * Only called if confirmation was obtained to close.
      */
     protected open fun onClosed() {}
+
+    /**
+     * Called when the editor is focused within the IDE.
+     *
+     * Either via the focus extension method provided by
+     * the Editor Manager, or by the user clicking on the tab.
+     */
+    protected open fun onEditorFocus() {}
 
     companion object {
 

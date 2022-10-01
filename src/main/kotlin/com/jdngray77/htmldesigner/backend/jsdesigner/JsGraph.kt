@@ -243,7 +243,7 @@ class JsGraph(
         if (!wasEmpty && nodes.isEmpty())
             problems.add(
                 JsGraphCompiler.JsCompilationResultMessage(
-                    JsGraphCompiler.MessageType.VALIDATION_PROBLEM,
+                    JsGraphCompiler.MessageType.WARNING_VALIDATION_PROBLEM,
                     "Validation deleted all nodes."
                 )
             )
@@ -272,10 +272,10 @@ class JsGraph(
         var t = if (permission) {
             correctiveAction()
             m += fixMessage
-            JsGraphCompiler.MessageType.VALIDATION_PROBLEM_AUTO_FIXED
+            JsGraphCompiler.MessageType.WARNING_VALIDATION_PROBLEM_AUTO_FIXED
         } else {
             m += noFixAppliedMessage
-            JsGraphCompiler.MessageType.VALIDATION_PROBLEM
+            JsGraphCompiler.MessageType.WARNING_VALIDATION_PROBLEM
         }
 
         return JsGraphCompiler.JsCompilationResultMessage(t, m)
