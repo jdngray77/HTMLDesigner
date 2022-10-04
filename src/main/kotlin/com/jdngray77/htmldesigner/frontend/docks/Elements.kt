@@ -43,7 +43,7 @@ import org.jsoup.nodes.Element
  *
  * Displays current document on [EventType.EDITOR_DOCUMENT_EDITED] and [EventType.EDITOR_DOCUMENT_SWITCH]
  */
-class TagHierarchy : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
+class Elements : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
     init {
         // Able to select more than one tag at a time.

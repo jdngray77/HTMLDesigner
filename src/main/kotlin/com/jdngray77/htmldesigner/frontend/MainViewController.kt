@@ -14,27 +14,14 @@
 
 package com.jdngray77.htmldesigner.frontend
 
-import com.jdngray77.SplashX6.audio.Spotify
-import com.jdngray77.SplashX6.audio.SpotifyAuthHelper
 import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.backend.data.Project
-import com.jdngray77.htmldesigner.backend.data.config.Config
-import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.IDE.Companion.project
-import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
-import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
-import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
-import com.jdngray77.htmldesigner.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.utility.camelToSentence
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
-import com.jdngray77.htmldesigner.utility.openURL
-import javafx.application.Platform
-import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.*
 import javafx.scene.image.Image
@@ -47,9 +34,6 @@ import org.eclipse.fx.ui.controls.tabpane.DndTabPaneFactory
 import org.eclipse.fx.ui.controls.tabpane.DndTabPaneFactory.FeedbackType
 import org.eclipse.fx.ui.controls.tabpane.skin.DnDTabPaneSkin
 import org.jsoup.nodes.Document
-import java.io.File
-import java.lang.System.gc
-import javax.script.ScriptEngineManager
 
 
 /**
@@ -181,7 +165,7 @@ class MainViewController {
         implAddDock(dockLeftTop, ToolboxDock(), Prefabs())
 
         // BOTTOM LEFT
-        implAddDock(dockLeftBottom, TagHierarchy(), Pages(), ProjectDock())
+        implAddDock(dockLeftBottom, Elements(), Pages(), ProjectDock())
 
         // RIGHT
         implAddDock(dockRight, TagProperties(), TestDock(), HistoryDock())
