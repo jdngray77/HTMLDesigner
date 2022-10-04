@@ -107,6 +107,8 @@ class JsNodeGrouper(
         // If the last selection was not committed, get rid. Replace with new selection.
         deleteIfUncommitted()
 
+        setAction("Started selecting nodes")
+
         val local = editor.root.sceneToLocal(MouseSceneX, MouseSceneY)
 
         relocate(local.x, local.y)
@@ -176,10 +178,14 @@ x
 
         isVisible = false
 
+        setAction("Stopped selecting nodes")
+
         // Determine which nodes are inside the rectangle.
         val selectedNodes = evalSelected()
 
         if (selectedNodes.isEmpty()) return
+
+        setAction("No nodes selected.")
 
         onUIThread {
             lastCreatedGroup = JsNodeGroup(editor, *selectedNodes.toTypedArray()).also {
@@ -205,7 +211,6 @@ x
      */
     fun deleteIfUncommitted() {
         lastCreatedGroup = null
-        setAction("Cancelled selection")
     }
 
     /**
@@ -216,7 +221,7 @@ x
         val layout = editor.contextPane
 
         layout.addEventHandler(MouseEvent.MOUSE_PRESSED) {
-            if (it.isPrimaryButtonDown) {
+            if (isVisible && it.isPrimaryButtonDown && it.isStillSincePress) {
                 invokeInBackground(this::deleteIfUncommitted)
                 it.consume()
             }
@@ -234,6 +239,7 @@ x
         }
 
         layout.addEventHandler(MouseEvent.MOUSE_RELEASED) {
+            if (!isVisible) return@addEventHandler
             invokeInBackground(this::endSelection)
             it.consume()
         }
