@@ -20,13 +20,18 @@ import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
+import com.jdngray77.htmldesigner.backend.html.AllElements
 import com.jdngray77.htmldesigner.backend.html.DefaultDocument
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
+import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.*
+import kotlinx.serialization.internal.throwArrayMissingFieldException
 import org.jsoup.Jsoup
+import org.jsoup.helper.ValidationException
 import org.jsoup.nodes.Document
+import org.jsoup.safety.Safelist
 import java.io.File
 import java.io.IOException
 import java.io.InvalidClassException
@@ -273,10 +278,8 @@ class Project(
      * Skipped if file is not within the project.
      */
     fun assertCached(file: File, obj: Any) {
-        if (!file.isInProject())
-            return
-
-        CACHE[file.path] = obj
+        if (!CACHE.contains(file.path))
+            CACHE[file.path] = obj
     }
 
     /**
@@ -308,7 +311,7 @@ class Project(
      *
      * @throws IllegalArgumentException if directory is not empty / a project already exists.
      */
-    private fun checkPath() {
+    internal fun checkPath() {
         with(locationOnDisk) {
             if (exists()) {
                 if (hasFile(PROJECT_PATH_META))
@@ -359,14 +362,10 @@ class Project(
      * Removes any files that no-longer exist on disk from the [CACHE]
      */
     fun validateCache() {
-        val toRemove = ArrayList<String>()
-
-        CACHE.entries.forEach {
+        CACHE.entries.concmod().forEach {
             if (!File(it.key).exists())
-                toRemove.add(it.key)
+                CACHE.remove(it.key)
         }
-
-        toRemove.map { CACHE.remove(it) }
     }
 
 
@@ -479,13 +478,10 @@ class Project(
      * @param path The file path to load.
      * @param otherwise The default value provider invoked if the [path] does not exist in the [CACHE].
      */
-    private fun <T: Any> tryGetCached(directory: String, subpath: String, otherwise : () -> T) : T = subPath("$directory/$subpath").let {
-        path ->
-        getCached<T>(path) ?: let {
-            CACHE[path] = otherwise()
-            return CACHE[path] as T
+    private fun <T: Any> tryGetCached(subpath: String, otherwise : () -> T) : T = getCached<T>(subpath) ?: let {
+            CACHE[subpath] = otherwise()
+            return CACHE[subpath] as T
         }
-    }
 
     /**
      * Finds this document in the [CACHE], and returns the file
@@ -539,7 +535,7 @@ class Project(
     fun createDocument(subpath: String) : Document {
         val doc = DefaultDocument()
 
-        val loc = PROJECT_PATH_HTML + subpath
+        val loc = PROJECT_PATH_HTML + subpath.assertEndsWith(".html")
 
         File(subPath(loc)).apply {
             if (exists())
@@ -602,6 +598,7 @@ class Project(
 
         with(file) {
             requireExists()
+
             return Jsoup.parse(readText()).also {
                 CACHE[file.path] = it
             }
@@ -615,7 +612,7 @@ class Project(
      * These can be edited and compiled with the [VisualScriptEditor]
      * @throws NoSuchFileException if no script with that name can be found.
      */
-    fun loadJsGraph(name: String): JsGraph = tryGetCached(PROJECT_PATH_JS, "$name.jvg") {
+    fun loadJsGraph(name: String): JsGraph = tryGetCached(subPath("$PROJECT_PATH_JS$name${JsGraph.FILE_EXTENSION}")) {
         try {
             loadObjectFromDisk(
                 javascripts().find {
@@ -628,10 +625,13 @@ class Project(
     }
 
 
-    // TODO const for jvg
+
+
+    // TODO api is inconsistent.
+    // Some accept files, some accept sub paths, some are names.
 
     fun saveJsGraph(jsGraph: JsGraph) {
-        val f = subPath("$PROJECT_PATH_JS${jsGraph.scriptName}.jvg")
+        val f = subPath("$PROJECT_PATH_JS${jsGraph.scriptName}${JsGraph.FILE_EXTENSION}")
         jsGraph.saveObjectToDisk(f)
         CACHE[f] = jsGraph
     }
@@ -640,6 +640,16 @@ class Project(
         val graph = JsGraph(name)
         saveJsGraph(graph)
         return graph
+    }
+
+    fun deleteJsGraph(name: String) {
+        val f = locationOnDisk.subFile("$PROJECT_PATH_JS$name${JsGraph.FILE_EXTENSION}")
+
+        if (!f.exists())
+            throw NoSuchFileException(f)
+
+        f.delete()
+        CACHE.remove(f.path)
     }
 
 //    /**
@@ -674,6 +684,18 @@ class Project(
 //            CACHE[file.path] = it
 //        }
 //    }
+
+    /**
+     * Deletes all files on disk, and closes the project within the editor
+     * if the editor has this project loaded.
+     */
+    fun deleteProject() {
+        locationOnDisk.deleteRecursively()
+
+        if (mvc().Project === this)
+            IDE.EDITOR.closeProject()
+
+    }
 
     /**
      * Deletes a file on disk then [validateCache]

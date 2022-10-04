@@ -51,12 +51,17 @@ class RequiresEditorGUI : BeforeAllCallback, CloseableResource {
 
             // Your "before all tests" startup logic goes here
 
+            println("==========================================")
+            println("Awaiting IDE load.")
+            println("Check the GUI to make sure it's loaded a project.")
+            println("==========================================")
+
             Thread { testMain() }.apply {
                 isDaemon = true
                 start()
             }
 
-            print("Awaiting editor load.")
+
             while (!IDE.mvcIsAvail()) {
                 Thread.sleep(100)
             }

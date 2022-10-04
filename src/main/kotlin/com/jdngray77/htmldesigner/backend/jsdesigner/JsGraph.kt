@@ -31,6 +31,12 @@ class JsGraph(
 
 ) : Serializable {
 
+    companion object {
+
+        internal const val FILE_EXTENSION = ".jsvg"
+        
+    }
+
     /**
      * Collection of nodes that exist in this graph.
      *

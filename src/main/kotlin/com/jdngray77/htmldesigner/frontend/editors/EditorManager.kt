@@ -148,7 +148,7 @@ object EditorManager : IDEEarlyBootListener {
     /**
      * Switches focus to the given editor.
      */
-    fun switchToEditor(editor: Editor<*>) : Boolean {
+    fun switchToEditor(editor: Editor<*>): Boolean {
         return if (hasEditor(editor) && activeTab() !== editor.tab) {
             editorDock.selectionModel.select(editor.tab)
             true
@@ -267,16 +267,19 @@ object EditorManager : IDEEarlyBootListener {
      *
      * @return the editor that's editing [document], or null if no editor is editing it.
      */
-    fun findDocumentEditorByDocument(document: Document) : DocumentEditor? =
-        getEditorsOfType<DocumentEditor>()
+    fun findDocumentEditorByDocument(document: Document): DocumentEditor? {
+        validateEditors()
+
+        return getEditorsOfType<DocumentEditor>()
             .find { it.document.equalsDocument(document) }
+    }
 
     /**
      * Finds an [DocumentEditor] by the document's file.
      *
      * @return the editor that's editing [document], or null if no editor is editing it.
      */
-    fun findDocumentEditorByFile(file: File) : DocumentEditor? =
+    fun findDocumentEditorByFile(file: File): DocumentEditor? =
         getEditorsOfType<DocumentEditor>()
             .find { it.file == file }
 

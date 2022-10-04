@@ -16,6 +16,7 @@
 
 package com.jdngray77.htmldesigner.backend.data.config
 
+import com.jdngray77.htmldesigner.backend.ExceptionListener
 import com.jdngray77.htmldesigner.backend.data.config.Registry.Companion.keyType
 import com.jdngray77.htmldesigner.backend.showErrorAlert
 import com.jdngray77.htmldesigner.backend.showWarningNotification
@@ -269,7 +270,7 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
 
             } catch (e : Exception) {
                 mvcIfAvail()?.apply {
-                    Project.logError(e)
+                    ExceptionListener.uncaughtException(Thread.currentThread(), e)
                     showWarningNotification("A Registry was reset.", "A project or IDE config file was incompatible with this version of the IDE, so it was upgraded. Settings it contained have been reset to their defaults.")
                 }
 
