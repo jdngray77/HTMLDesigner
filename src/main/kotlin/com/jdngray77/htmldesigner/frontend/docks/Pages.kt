@@ -135,7 +135,10 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
      * Determines the files within a given folder. Used by super
      * to create the tree.
      */
-    override fun getChildrenFor(el: File) = el.listFiles()?.toList() ?: arrayListOf()
+    override fun getChildrenFor(el: File) = el.listFiles()?.let {
+        it.filter { it.extension == "html" }.toList()
+    } ?: arrayListOf()
+
 
     /**
      * The code which will create a new folder
