@@ -56,7 +56,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
 
         // Open documents that are clicked
         tree.setOnMouseClicked {
-            if(it.isStillSincePress)
+            if(it.isPrimaryButtonDown && it.isStillSincePress)
                 implOpenSelected()
         }
 
