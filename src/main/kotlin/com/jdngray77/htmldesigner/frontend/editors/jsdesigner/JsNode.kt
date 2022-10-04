@@ -1,6 +1,7 @@
 package com.jdngray77.htmldesigner.frontend.editors.jsdesigner
 
 import com.jdngray77.htmldesigner.backend.jsdesigner.*
+import com.jdngray77.htmldesigner.frontend.DoubleClickToggleListener
 import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.concmod
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
@@ -37,13 +38,13 @@ class JsNode {
      *
      * Configured in [initialize]
      */
-    private var collapseManager : DoubleClickCollapseManager? = null
+    private var collapseManager : DoubleClickToggleListener? = null
 
     /**
      * @return true if this node is collapsed
      * to show less information
      */
-    fun isCollapsed() = collapseManager?.isCollapsed == true
+    fun isCollapsed() = collapseManager?.isToggled == true
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //region                                                FXML GUI controls
@@ -142,7 +143,7 @@ class JsNode {
 
         // Don't create a collapse manager if the node is a function.
         if (graphNode !is JsGraphNoteNode) {
-            collapseManager = DoubleClickCollapseManager (
+            collapseManager = DoubleClickToggleListener (
                 // When the label is double clicked
                 txtElementName,
 
@@ -391,8 +392,12 @@ class JsNode {
      */
     private fun stowPosition() {
         with(root.boundsInParent) {
-            graphNode.x = minX
-            graphNode.y = minY
+            if (graphNode.x != minX || graphNode.y != minY) {
+                graphEditor.changed("${graphNode.name} moved to (X:$minX, Y:$minY)")
+
+                graphNode.x = minX
+                graphNode.y = minY
+            }
         }
     }
 
@@ -407,14 +412,6 @@ class JsNode {
 
     fun toFront() {
         invalidatePosition()
-    }
-
-    fun mEnter() {
-
-    }
-
-    fun mExit() {
-//        root.cursor = Cursor.DEFAULT
     }
 
     fun mPress(mouseEvent: MouseEvent) {
@@ -462,6 +459,7 @@ class JsNode {
         (emittingLines + receivingLines).find {
             it.emitter.emitter() === emission.emitter && it.receiver.receiver() === emission.receiver
         }!!.breakdown()
+        graphEditor.changed("Connection broken ($emission)")
     }
 
 
@@ -472,10 +470,12 @@ class JsNode {
      */
     fun emitConnection(from: JsNodeEmitter, to: JsNodeReceiver) {
         // Edit the graph.
-        from.emitter().emit(to.receiver())
+        val connection = from.emitter().emit(to.receiver())
 
         // Create the line.
         emitConnectionLine(from, to)
+
+        graphEditor.changed("Connection created ($connection)")
     }
 
     /**
@@ -510,6 +510,8 @@ class JsNode {
         receivingLines.concmod().forEach {
             it.breakdown()
         }
+
+        graphEditor.changed("All connections for ${graphNode.name} broken")
     }
 
     /**

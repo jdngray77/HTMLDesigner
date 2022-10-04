@@ -385,6 +385,8 @@ class VisualScriptEditor (
             editorRootPane.children.remove(node.root)
         }
 
+        changed("Node deleted (${node.graphNode.name})")
+
         gc()
     }
 
@@ -517,6 +519,8 @@ class VisualScriptEditor (
 
                 // Configure the node's controller
                 initNodeController(graphNode, this@VisualScriptEditor)
+
+                changed("New Node Created")
 
                 return this
             }
@@ -664,19 +668,21 @@ class VisualScriptEditor (
     private fun implValidateAndRecompile(quiet: Boolean = true) {
         if (isTransacting) return
 
-        // TODO rename that to validateAndCompile
-        var compiled = graph.validateAndCompile()
+        val compiled = graph.validateAndCompile()
 
         println(compiled)
 
         // Compile and print.
         compileOutput.text = compiled.javascript
 
-        //TODO check if compiled output is different.
-        scriptElement.text(compiled.javascript)
+        if (scriptElement.text() != compiled.javascript) {
+            scriptElement.text(compiled.javascript)
+            changed("Graph changed")
+            findDocumentEditorByDocument(scriptElement.ownerDocument()!!)
+                ?.changed("Updated script : ${scriptElement.id()}")
+        }
 
-        findDocumentEditorByDocument(scriptElement.ownerDocument()!!)
-            ?.changed("Updated script : ${scriptElement.id()}")
+
 
         val isError = compiled.type == JsGraphCompiler.JsGraphCompilationResult.ResultType.ERROR
 
@@ -839,6 +845,7 @@ class VisualScriptEditor (
     // After initalising the rest of the class, load the graph.
     init {
         reloadGraph()
+        dirty = false
 
         // listener to solve an issue where lines are not evaluated in the correct position at init.
         root.needsLayoutProperty().addListener(

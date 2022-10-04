@@ -248,9 +248,11 @@ class Project(
     @Deprecated("This is for debug access only. Cache is internal to the project only.")
     fun getCache() = CACHE
 
-    inline fun <reified T> removeFromCache(any: T) {
-        getCache().entries.filter { it.value is T && it.value == any }
-            .map { getCache().remove(it.key) }
+    fun removeFromCache(obj: Any,) {
+        getCache().apply {
+            entries.filter { it.value == obj }
+            .map { remove(it.key) }
+        }
     }
 
     /**

@@ -619,7 +619,7 @@ class JsGraphEmitter(
      *
      * A reference to the connection is stored in both.
      */
-    fun emit(reciever: JsGraphReceiver) {
+    fun emit(reciever: JsGraphReceiver) : JsGraphEmission {
         val it = JsGraphEmission(
             this,
             reciever
@@ -627,6 +627,8 @@ class JsGraphEmitter(
 
         emit(it)
         reciever.receive(it)
+
+        return it
     }
 
 

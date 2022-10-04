@@ -9,7 +9,9 @@ import com.jdngray77.htmldesigner.backend.setAction
 import com.jdngray77.htmldesigner.backend.showWarningNotification
 import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.backend.userInput
+import com.jdngray77.htmldesigner.frontend.DoubleClickToggleListener
 import com.jdngray77.htmldesigner.utility.addIfAbsent
+import com.jdngray77.htmldesigner.utility.changeProperty
 import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.scene.Cursor
@@ -181,7 +183,7 @@ x
 
         onUIThread {
             lastCreatedGroup = JsNodeGroup(editor, *selectedNodes.toTypedArray()).also {
-                setAction("Selected ${it.graphGroup.size} nodes")
+                editor.changed("Selected ${it.graphGroup.size} nodes")
             }
         }
     }
@@ -372,7 +374,7 @@ class JsNodeGroup(
     }
 
 
-    private val collapseManager = DoubleClickCollapseManager(
+    private val collapseManager = DoubleClickToggleListener(
         this,
         {
             lblHeader.text = "↓ ${graphGroup.name} ↓"
@@ -655,7 +657,8 @@ class JsNodeGroup(
     fun commitToGraph(graph: JsGraph) {
         checkDisposeMod()
         graph.addGroup(graphGroup)
-        setAction("Group '${graphGroup.name}' created with ${graphGroup.size} nodes")
+
+        editor.changed("Group '${graphGroup.name}' created with ${graphGroup.size} nodes")
     }
 
 
@@ -698,7 +701,7 @@ class JsNodeGroup(
         nodes.add(node)
         graphGroup.add(node.graphNode)
 
-        setAction("Added node '${node.graphNode.name}' to group '${graphGroup.name}'")
+        editor.changed("Added node '${node.graphNode.name}' to group '${graphGroup.name}'")
 
         invalidatePosition()
     }
@@ -712,7 +715,7 @@ class JsNodeGroup(
         nodes.remove(node)
         graphGroup.remove(node.graphNode)
 
-        setAction("Removed node '${node.graphNode.name}' from group '${graphGroup.name}'")
+        editor.changed("Removed node '${node.graphNode.name}' from group '${graphGroup.name}'")
 
         if (checkNotEmpty()) {
             invalidatePosition()
@@ -744,7 +747,7 @@ class JsNodeGroup(
         editor.graph.dumpGroup(graphGroup)
 
         editor.endTransaction()
-        setAction("Deleted group '${graphGroup.name}', and all of it's nodes.")
+        editor.changed("Deleted group '${graphGroup.name}', and all of it's nodes.")
     }
 
     /**
@@ -815,7 +818,7 @@ class JsNodeGroup(
     fun invalidatePosition() {
 
 
-        if (collapseManager.isCollapsed) {
+        if (collapseManager.isToggled) {
             Platform.runLater {
                 prefWidth = lblHeader.width + if (!collapseWidthFix) {
                                                 collapseWidthFix = true
@@ -882,7 +885,7 @@ class JsNodeGroup(
     private fun checkNotEmpty() : Boolean {
         if (nodes.isEmpty()) {
             dumpGroup()
-            setAction("Auto-deleted group '${graphGroup.name}' because all nodes were removed.")
+            editor.changed("Auto-deleted group '${graphGroup.name}' because all nodes were removed.")
             return false
         }
 
@@ -965,7 +968,7 @@ class JsNodeGroup(
             *dupedNodes.toTypedArray()
             ).also {
             editor.nodeGrouper.lastCreatedGroup = it
-            setAction("Cloned group '${graphGroup.name}', and duplicated all nodes contained within.")
+            editor.changed("Cloned group '${graphGroup.name}', and duplicated all nodes contained within.")
         }
     }
 }

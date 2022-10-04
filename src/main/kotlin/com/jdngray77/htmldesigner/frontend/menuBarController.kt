@@ -129,6 +129,12 @@ class menuBarController {
         BackgroundTask.print()
     }
 
+    fun menu_debug_clearcache(actionEvent: ActionEvent) {
+        mvc().Project.apply {
+            getCache().forEach { removeFromCache(it) }
+        }
+    }
+
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion                                                     DEBUG
     //region                                                        PAGE

@@ -24,6 +24,7 @@
                         <Menu mnemonicParsing="false" text="Project">
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_showcache" text="Show Project File Cache Entires" />
+                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_clearcache" text="Clear file cache" />
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_showserial" text="Show and Copy Project Serial Version" />
                                 <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_projprefs" text="Reset preferences registry" />
                             </items>

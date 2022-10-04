@@ -1,14 +1,10 @@
 package com.jdngray77.htmldesigner.frontend.editors
 
-import com.jdngray77.htmldesigner.MVC
-import com.jdngray77.htmldesigner.backend.BackgroundTask
 import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.DocumentState
 import com.jdngray77.htmldesigner.backend.DocumentUndoRedo
 import com.jdngray77.htmldesigner.backend.setAction
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
-import com.jdngray77.htmldesigner.utility.SerializableDocument
-import com.jdngray77.htmldesigner.utility.readPrivateProperty
 import javafx.event.Event
 import javafx.scene.Parent
 import javafx.scene.control.Tab
@@ -115,7 +111,11 @@ abstract class Editor<T : Serializable>(
      * Not required if changing the [title]
      */
     fun updateTitle() {
-        tab.text = "$dirtyPrefix$title$dirtyPostfix"
+        tab.text =
+            if (dirty)
+                "$dirtyPrefix$title$dirtyPostfix"
+            else
+                title
     }
 
 
@@ -144,11 +144,16 @@ abstract class Editor<T : Serializable>(
      * if [dirty]
      */
     var dirty = false
-        private set(value) {
+        protected set(value) {
+            if (field == value) return
+
             field = value
 
+
             if (field)
-                updateTitle()
+                onUIThread {
+                    updateTitle()
+                }
         }
 
     /**
@@ -204,6 +209,7 @@ abstract class Editor<T : Serializable>(
     fun forceClose() {
         tab.onClosed?.handle(null)
         EditorManager.editorClosed(this)
+        mvc().Project.removeFromCache(value)
         onClosed()
     }
 
