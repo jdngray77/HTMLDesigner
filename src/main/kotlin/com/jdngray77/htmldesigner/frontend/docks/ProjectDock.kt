@@ -42,7 +42,10 @@ class ProjectDock() : AutoDock(), Subscriber {
     var Author = ""
         set(value) {
             field = value
-            mvc().Project.author = field
+            mvc().Project.apply {
+                meta.author = field
+                saveDesignerFile()
+            }
         }
 
 //    @Title("Meta Data")
@@ -52,7 +55,7 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     @Inspectable(20)
     fun ShowInSystem() {
-        Desktop.getDesktop().open(mvc().Project.locationOnDisk);
+        Desktop.getDesktop().open(mvc().Project.fileStructure.locationOnDisk);
     }
 
     @Inspectable(10000)
@@ -67,8 +70,8 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     override fun notify(e: EventType) {
         mvc().Project.apply {
-            ProjectName = projectName()
-            author?.let { Author = it }
+            ProjectName = meta.name
+            meta.author?.let { Author = it }
         }
         update()
     }

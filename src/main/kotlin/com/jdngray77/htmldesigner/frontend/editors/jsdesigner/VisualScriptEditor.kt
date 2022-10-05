@@ -892,7 +892,7 @@ class VisualScriptEditor (
 
             return try {
                 // Attempt to load existing graph
-                mvc().Project.loadJsGraph(scriptName)
+                mvc().Project.loadJsGraph(scriptName).data
 
             } catch (e: IOException) {
                 // If failed to read file, fail as error
@@ -967,7 +967,7 @@ class VisualScriptEditor (
             document.body().appendChild(e)
 
             JsGraph(name).saveObjectToDisk(
-                mvc().Project.JS.subFile("$name.jsvg")
+                mvc().Project.fileStructure.JS.subFile("$name.jsvg")
             )
 
             EventNotifier.notifyEvent(EventType.TAG_CREATED)

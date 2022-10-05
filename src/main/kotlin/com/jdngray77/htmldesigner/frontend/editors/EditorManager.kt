@@ -3,10 +3,7 @@ package com.jdngray77.htmldesigner.frontend.editors
 import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
-import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
-import com.jdngray77.htmldesigner.utility.addIfAbsent
-import com.jdngray77.htmldesigner.utility.concmod
-import com.jdngray77.htmldesigner.utility.equalsDocument
+import com.jdngray77.htmldesigner.utility.*
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import org.jsoup.nodes.Document
@@ -313,8 +310,8 @@ object EditorManager : IDEEarlyBootListener {
      *
      * @see the sister [openDocument] for opening logic.
      */
-    fun openDocument(document: File) =
-        openDocument(mvc().Project.loadDocument(document))
+    fun openDocument(document: CachedFile<Document>) =
+        openDocument(document.data)
 
     //#endregion
     //region script

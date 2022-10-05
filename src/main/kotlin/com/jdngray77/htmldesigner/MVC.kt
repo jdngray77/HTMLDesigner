@@ -84,12 +84,12 @@ class MVC(
             if (startupPage.isBlank())
                 return@determineStartupPage
 
-            Project.HTML.subFile(startupPage).let checkFile@{
+            Project.fileStructure.HTML.subFile(startupPage).let checkFile@ {
                 if (!it.exists())
                     return@checkFile
 
                 openDocument(
-                    Project.loadDocument(it)
+                    Project.getDocument(it)
                 )
             }
 
@@ -100,7 +100,7 @@ class MVC(
         Project.PREFERENCES[ProjectPreference.STARTUP_PAGE_PATH_STRING] = ""
 
         if (Project.documents().isNotEmpty())
-            openDocument(Project.loadDocument(Project.documents().first()))
+            openDocument(Project.getDocument(Project.documents().first()))
 
     }
 
@@ -144,12 +144,14 @@ class MVC(
      * Handles deletion of associated files, depending on type of file,
      * and validates the editors once done. (i.e closes editors of deleted files)
      *
-     * [projectFile] must be within a project subdirectory.
+     * [cachedFile] must be within a project subdirectory.
      *
-     * @param projectFile The file to delete.
+     * @param cachedFile The file to delete.
      * @param isRecurse Should not be provided. Used to skip repeating dialogs when deleting recursively.
      */
-    fun deleteProjectFile(projectFile: File, isRecurse: Boolean = false) {
+    fun deleteProjectFile(cachedFile: CachedFile<*>, isRecurse: Boolean = false) {
+        val projectFile = cachedFile.file
+
         // Check permissions, but only on first call.
         if (!isRecurse) {
             if (!projectFile.isInProject()) {
@@ -166,11 +168,12 @@ class MVC(
         if ((projectFile.isDirectory && projectFile.list()?.isNotEmpty() == true) &&
             (isRecurse || userConfirm("${projectFile.name} is not empty. \n Are you sure you want to delete it's contents?"))
         ) {
-            projectFile.listFiles()?.map { deleteProjectFile(it, true) }
+            projectFile.listFiles()?.map { deleteProjectFile(cachedFile, true) }
             projectFile.delete()
         }
 
-        Project.deleteFile(projectFile)
+        Project.deleteFile(cachedFile)
+
         if (projectFile.name.endsWith(".html")) {
             findDocumentEditorByFile(projectFile)?.forceClose()
             EventNotifier.notifyEvent(EventType.PROJECT_PAGE_DELETED)
@@ -178,6 +181,10 @@ class MVC(
 
         validateEditors()
     }
+
+    fun deleteProjectFile(file: File) =
+        deleteProjectFile(Project.findCachedFile(file)!!)
+
 
     /**
      * *Moves* a file within the project, whilst applying safety measures and limitations.
@@ -271,7 +278,7 @@ class MVC(
         if (success)
             success = projectFile.deleteRecursively()
 
-        Project.invalidateCache()
+        //Project.invalidateCache()
         validateEditors()
         return success
     }
@@ -296,7 +303,7 @@ class MVC(
         requestSaveAllEditors()
 
         return if (file.renameTo(newFile)) {
-            Project.invalidateCache()
+//            Project.invalidateCache()
             validateEditors()
             true
         } else {

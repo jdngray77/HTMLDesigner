@@ -143,3 +143,7 @@ tasks.jar {
 //            "libs/${file.name}"
 //        }
 }
+
+tasks.register("testAndReport") {
+    dependsOn("test", "jacocoTestReport")
+}

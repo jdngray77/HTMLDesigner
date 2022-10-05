@@ -15,29 +15,6 @@
 
 package com.jdngray77.htmldesigner.backend.data
 
-import com.jdngray77.htmldesigner.*
-import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.backend.data.config.Config
-import com.jdngray77.htmldesigner.backend.data.config.Configs
-import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
-import com.jdngray77.htmldesigner.backend.html.AllElements
-import com.jdngray77.htmldesigner.backend.html.DefaultDocument
-import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
-import com.jdngray77.htmldesigner.frontend.IDE
-import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
-import com.jdngray77.htmldesigner.utility.*
-import kotlinx.serialization.internal.throwArrayMissingFieldException
-import org.jsoup.Jsoup
-import org.jsoup.helper.ValidationException
-import org.jsoup.nodes.Document
-import org.jsoup.safety.Safelist
-import java.io.File
-import java.io.IOException
-import java.io.InvalidClassException
-import java.sql.Time
-import java.time.Instant
-import java.util.*
 
 /*
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -115,409 +92,311 @@ import java.util.*
 
 
 
+import com.jdngray77.htmldesigner.backend.EventNotifier
+import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
+import com.jdngray77.htmldesigner.backend.data.project.ProjectMeta
+import com.jdngray77.htmldesigner.backend.data.project.ProjectStructure
+import com.jdngray77.htmldesigner.backend.data.project.ProjectStructure.Companion.PROJECT_PATH_META
+import com.jdngray77.htmldesigner.backend.html.DefaultDocument
+import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
+import com.jdngray77.htmldesigner.backend.logStatus
+import com.jdngray77.htmldesigner.backend.showInformationalAlert
+import com.jdngray77.htmldesigner.frontend.IDE
+import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
+import com.jdngray77.htmldesigner.utility.*
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import java.io.File
+import java.io.IOException
+import java.io.InvalidClassException
+import java.sql.Time
+import java.time.Instant
 
 /**
- * A HTML Designer project.
+ * A user's HTML Designer project.
  *
- * A midpoint between the files on the disk
- * and the data.
+ * A medium for files on the disk to be accessed and manipulated in a standardised fashion
+ * that can be more easily validated.
  *
- * Stores paths to files which *should* exist on the disk,
- * and fetches them when requested.
+ * Creates and manages a directory structure, tracks project files, and handles disk access.
  *
- * This object is serialized to disk as `project.designer`.
+ * When requesting files to be loaded, relative paths are used to identify a file within it's directory.
+ * i.e `index.html` or `page2/index.html` are valid pages for [getDocument].
  *
- * TODO paths are not transient.
- * @see locationOnDisk for project file structure.
- * @author Jordan Gray
+ * Once files are loaded, the data read is kept in a [CachedFile] within the [cache].
+ *
+ * All paths, once loaded, are absolute to avoid ambiguity.
+ *
+ * > N.B the lifetime of a [CachedFile] *should* be equal to the lifetime of an [Editor],
+ * therefore when an editor managing a file is closed, the [CachedFile] should be removed from the [cache].
+ *
+ * The initaliser is used to create a project. Loading is only possible via deserialization.
+ *
+ * This class is created once when the project is, and stored in the root of the project directory as `project.designer`.
+ *
+ * @see [load] for loading a project from disk
+ *
+ * @see [ProjectPreferences] for project preferences
+ * @see [ProjectStructure] for project directory structure & file access.
+ * @see [FileCache] for caching of files.
+ * @see [ProjectMeta] for meta data pertaining to projects.
+ *
+ * @param fileOnDisk The file that the project is to be created in
+ * @param name The display name of the project
+ * @param author The author / organisation of the project
+ *
+ * @author Jordan T. Gray.
+ *
+ * TODO file manifest
  */
-class Project(
+class Project (
 
     /**
-     * The location on disk containing this project.
+     * The file that the project is to be created in
+     */
+    fileOnDisk: File,
+
+    /**
+     * The display name of the project
+     */
+    name: String = fileOnDisk.nameWithoutExtension,
+
+    /**
+     * The author / organisation of the project
+     */
+    author : String? = null
+
+) : PartiallySerializable {
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //region                         properties
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+    /**
+     * The file structure of the project.
      *
-     * This must be validated as :
-     *  - A folder, not a File
-     *  - Does not exist already
+     * Pertains to disk access and directory structure management.
      *
-     * Then is created automatically when this project is made.
+     * Handles creation of the directory structure at init time, and validates at load time.
      *
-     * Predicted project folder structure :
+     * All disk file access starts here.
+     */
+    val fileStructure: ProjectStructure = ProjectStructure(fileOnDisk)
+
+    /**
+     * Metadata pertaining to the project.
      *
-     * ```
-     * myProject
-     * | project.designer (This class serialized)
-     * |
-     * | backups
-     * | | 5-6-2022 13:13:13.meta (Historical copies of the above)
-     * | | 4-6-2022 13:13:13.meta
-     * | | 3-6-2022 13:13:13.meta
-     * |
-     * | export (The latest export)
-     * | | HTML
-     * | | | index.html
-     * | | CSS
-     * | | | styles.css
-     * | | JS
-     * | | | index.js
-     * | | MEDIA
-     * | | | dog.jpg
-     * ```
+     * Simple data class that is serialized within the `project.designer`.
      */
-    val locationOnDisk: File,
-
-    _author: String? = null
-
-) : java.io.Serializable {
+    val meta: ProjectMeta = ProjectMeta(
+        name,
+        author
+    )
 
     /**
-     * Name of the person or organisation
-     * that created this project.
-     *
-     * Saves meta when altered.
-     */
-    var author: String? = _author
-        set(value) {
-            field = value
-            saveMeta()
-        }
-
-    /**
-     * The date this project was created.
-     */
-    val createdOn = Date.from(Instant.now())
-
-    /**
-     * The project's HTML directory
-     */
-    val HTML = File(subPath(PROJECT_PATH_HTML))
-
-    /**
-     * The project's javascript directory
-     */
-    val JS = File(subPath(PROJECT_PATH_JS))
-
-    /**
-     * The project's CSS directory
-     */
-    val CSS = File(subPath(PROJECT_PATH_CSS))
-
-    /**
-     * The project's MEDIA directory
-     */
-    val MEDIA = File(subPath(PROJECT_PATH_MEDIA))
-
-    /**
-     * The project's PREFABS directory
-     */
-    val PREFABS = File(subPath(PROJECT_PATH_PREFABS))
-
-    /**
-     * The project's backup directory
-     */
-    val BACKUP = File(subPath(PROJECT_PATH_BACKUP))
-
-    /**
-     * The temporary document used to edit prefabs
-     */
-    val PREFAB_EDIT_DOCUMENT = File(subPath(PROJECT_PATH_PREFAB_EDIT_DOCUMENT))
-        get() {
-            if (!field.exists()) {
-                createDocument(PROJECT_PATH_PREFAB_EDIT_DOCUMENT)
-                    .body().children().clear()
-            }
-
-            return field
-        }
-
-    /**
-     *
+     * Project specific preferences that are stored alongside the project
+     * in `preferences.registry`.
      */
     @Transient
     lateinit var PREFERENCES: ProjectPreferences
         private set
 
-    /**
-     * Storage of any document file after load.
-     *
-     * Once a file has been loaded once, the loaded version is returned
-     * upon every subsequent request.
-     *
-     * TODO cache JS, media, etc.
-     *
 
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion
+    //region                         file cache
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+
+
+    /**
+     * A store of all files and project data that is actively open
+     * within the editor.
+     *
+     * If a file is open in the editor, it can be found here.
      */
     @Transient
-    private lateinit var CACHE : HashMap<String, Any>
-
-    @Deprecated("This is for debug access only. Cache is internal to the project only.")
-    fun getCache() = CACHE
-
-    fun removeFromCache(obj: Any,) {
-        getCache().apply {
-            entries.filter { it.value == obj }
-            .map { remove(it.key) }
-        }
-    }
+    private lateinit var cache : FileCache
 
     /**
-     * Resets the caching of files loaded from disk.
-     *
-     * All files loaded will be loaded from the disk again when
-     * next requested.
+     * @return a non-mutable copy of the file cache, containing all files that are loaded.
      */
-    fun invalidateCache() {
-        CACHE.clear()
-    }
+    fun getCache() = cache.copy() as HashMap<String, CachedFile<*>>
 
     /**
-     * Ensures that the file is cached.
-     *
-     * Do not use to add new entries to the cache.
-     *
-     * Skipped if file is not within the project.
+     * Removes any files from the cache that do not exist
+     * // TODO don't keep files that are not loaded, either.
      */
-    fun assertCached(file: File, obj: Any) {
-        if (!CACHE.contains(file.path))
-            CACHE[file.path] = obj
-    }
+    fun validateCache() = cache.validate()
+
 
     /**
-     * Creation of a new project only.
+     * Deletes everything from the project cache.
+     */
+    @Deprecated("Used for forceful and debug operations only. Cached files should be removed when thier corresponding editor is closed.")
+    fun invalidateCache() = cache.clear()
+
+    /**
+     * @returns a [CachedFile] containing the [file], or null of that file is not in the cache.
+     */
+    fun findCachedFile(file: File) = getCache().entries.find { it.key == file.absolutePath || it.value.file == file }?.value
+
+
+    /**
+     * Removes a specific item from the cache.
      *
-     * Since this file will be serialized to disk
-     * as project.designer, it will only be created
-     * when the project is.
+     * Use this only if you don't have access to the [CachedFile] itself.
+     * @see [CachedFile.removeCache]
+     */
+    fun removeTFromCache(it: Any) : Boolean {
+        return cache.findT(it)?.let {
+            it.removeCache()
+            true
+        } ?: false
+    }
+
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion
+    //region                         initalisation
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+
+
+    /**
+     * Project creation time initaliser.
+     *
+     * Creates the project for the first time.
      */
     init {
-        checkPath()
-        initDirectoryStructure()
-        validate()
-        createDocument("index.html")
-        logStatus("Created new project '${locationOnDisk.name}'")
+        // Create project
+        recreateTransientProperties()
+        saveDesignerFile()
+
+        // Check
+        fileStructure.validateLocationOnDisk()
+
+        // Report success
+        createDocument("index")
+        logStatus("Created new project '$name'")
+        EventNotifier.notifyEvent(EventType.PROJECT_CREATED)
     }
 
 
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //region                                            Initialisation & Validation
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    /**
+     * Project load time initaliser.
+     *
+     * Re-creates properties that are not serialized.
+     */
+    override fun recreateTransientProperties() {
+        fileStructure.recreateTransientProperties()
+        cache = FileCache()
+        PREFERENCES = ProjectPreferences(this)
+    }
 
     /**
-     * Checks to see if [locationOnDisk]
-     * is a valid path to create a project.
+     * Saves the 'project.designer' file containing metadata about the project.
      *
-     * If [locationOnDisk] exists and is empty,
-     * then the check passes.
-     *
-     * @throws IllegalArgumentException if directory is not empty / a project already exists.
+     * Notifies [EventType.PROJECT_META_SAVED]
      */
-    internal fun checkPath() {
-        with(locationOnDisk) {
-            if (exists()) {
-                if (hasFile(PROJECT_PATH_META))
-                    throw IllegalArgumentException("A project already exists here. Load it instead, or delete it if you want to overwrite it.")
-                else
-                    if (listFiles()?.isNotEmpty() == true)
-                        throw IllegalArgumentException("Directory must be empty in order to create a new project here.")
+    fun saveDesignerFile() {
+        saveObjectToDisk(fileStructure.locationOnDisk.subFile(PROJECT_PATH_META))
+        EventNotifier.notifyEvent(EventType.PROJECT_META_SAVED)
+    }
+
+
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion
+    //region                         project util functions
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+
+
+    fun renameOrMoveProject(newLocation: File) {
+        TODO()
+    }
+
+
+    /**
+     * Deletes all files on disk, and closes the project within the editor
+     * if the editor has this project loaded.
+     */
+    fun deleteProject() {
+        fileStructure.deleteEverything()
+
+        if (IDE.mvc().Project === this)
+            IDE.EDITOR.closeProject()
+    }
+
+
+    /**
+     * Deletes all files in the [PROJECT_PATH_LOGS] directory.
+     */
+    fun deleteLogs() {
+        fileStructure.LOGS.deleteRecursively()
+        fileStructure.LOGS.mkdir()
+    }
+
+    /**
+     * Deletes one or many files on disk then [validateCache]
+     */
+    fun deleteFile(vararg projectFile: CachedFile<*>) {
+        projectFile.forEach {
+            it.file.delete()
+            cache.remove(it.file)
+        }
+        cache.validate()
+    }
+
+    /**
+     * Saves the stacktrace of [e] in the [PROJECT_PATH_LOGS] folder.
+     *
+     * The file is titled the date and time of invocation.
+     */
+    fun logError(e : Throwable) {
+        fileStructure.LOGS.subFile(" [ERR] ${Time.from(Instant.now())}.log").apply {
+            createNewFile()
+            printWriter().apply {
+                e.printStackTrace(this)
+                flush()
             }
         }
     }
 
     /**
-     * Checks the folder structure on disk.
+     * Takes a copy of the project files and the meta into [PROJECT_PATH_BACKUP].
      *
-     * [locationOnDisk] must contain the correct subdirectories.
-     *
-     * Also initalises [CACHE], if it is not already.
-     * since [CACHE] is used by IO operations, this has to be called before any
-     * are attempted.
-     *
-     * If not
-     * @throws IllegalStateException
+     * Notifies [EventType.PROJECT_BACKEDUP]
      */
-    fun validate() {
-        with (locationOnDisk) {
-            if (
-                !hasChild(PROJECT_PATH_HTML)    ||
-                !hasChild(PROJECT_PATH_CSS)     ||
-                !hasChild(PROJECT_PATH_MEDIA)   ||
-                !hasChild(PROJECT_PATH_BACKUP)  ||
-                !hasChild(PROJECT_PATH_PREFABS) ||
-                !hasChild(PROJECT_PATH_JS)
-            ) throw IllegalStateException("A project folder has gone missing") // TODO create it or prompt to restore backup
-        }
-
-        // Handle transient properties
-
-        if (!this::CACHE.isInitialized)
-            CACHE = HashMap()
-        else
-            validateCache()
-
-        if (!this::PREFERENCES.isInitialized)
-            PREFERENCES = ProjectPreferences(this)
-    }
-
-    /**
-     * Removes any files that no-longer exist on disk from the [CACHE]
-     */
-    fun validateCache() {
-        CACHE.entries.concmod().forEach {
-            if (!File(it.key).exists())
-                CACHE.remove(it.key)
-        }
+    fun backup() {
+        TODO()
+        EventNotifier.notifyEvent(EventType.PROJECT_BACKEDUP)
     }
 
 
-    /**
-     * Creates the folder structure for a
-     * new project on the disk under [locationOnDisk]
-     *
-     * If [locationOnDisk] does not exist,
-     * it is created.
-     *
-     * @throws IOException if unable to write to disk.
-     */
-    private fun initDirectoryStructure() {
-        with(locationOnDisk) {
-            mkdirs()
-
-            createSubDirectory(PROJECT_PATH_BACKUP)
-            createSubDirectory(PROJECT_PATH_LOGS)
-            createSubDirectory(PROJECT_PATH_CSS)
-            createSubDirectory(PROJECT_PATH_HTML)
-            createSubDirectory(PROJECT_PATH_JS)
-            createSubDirectory(PROJECT_PATH_MEDIA)
-            createSubDirectory(PROJECT_PATH_PREFABS)
-        }
-    }
-
-    /**
-     * Creates a directory within the project structure.
-     */
-    private fun createSubDirectory(subPath: String) =
-        File(subPath(subPath)).mkdirs()
-
-    /**
-     * Returns the path of the root of the project,
-     * so that it can be used to point to sub dirs and files.
-     *
-     * i.e `subFile("index.hmtl")
-     */
-    fun subPath(subpath: String) =
-        locationOnDisk.path + "/" + subpath
-
-    /**
-     * Returns a file relative to the root of the project,
-     * so that it can be used to point to sub dirs and files.
-     *
-     * i.e `subFile("index.hmtl")
-     */
-    @Deprecated("Moved to [File.subFile]", ReplaceWith("File.subFile(subpath))"))
-    fun subFile(subpath: String) =
-        File(subPath(subpath))
 
 
-    /**
-     * Validates the state of an existing HTML document on the
-     * disk.
-     *
-     * @param HTMLPath Path to the document (Root to ./HTML/)
-     *
-     * @throws NoSuchFileException if it does not exist, but is supposed to.
-     */
-    private fun assertHTMLFileExists(HTMLPath: String) =
-        File(subPath(PROJECT_PATH_HTML + HTMLPath)).requireExists()
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion
+    //region                         Documents
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 
 
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                    Initialisation and Validation
-    //region                                                      IO
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-    /**
-     * The name of this project, as inherited by
-     * the project's directory name.
-     */
-    fun projectName() =
-        locationOnDisk.name
 
-    /**
-     * renames [locationOnDisk]
-     */
-    @Deprecated("Incomplete and untested. This will likely break the ability to locate files.")
-    fun renameOrMoveProject(destination: File) =
-        locationOnDisk.renameTo(destination)
-
-    /**
-     * Returns [file] as it appears in the [CACHE], or
-     * null if it has not been loaded.
-     */
-    private fun <T> getCached(file: File) =
-        getCached<T>(file.path)
-
-    /**
-     * Returns [file] as it appears in the [CACHE], or
-     * null if it has not been loaded.
-     */
-    private fun <T> getCached(path: String) : T?{
-        try {
-            return CACHE[path]?.let {
-                it  as T
-            }
-        } catch (e: ClassCastException) {
-            throw ClassCastException("The loaded file for `$path` was not the expected file type.")
-        }
-    }
-
-    /**
-     * Attempts to fetch a file from the [CACHE], but if it doesn't exist
-     * invokes a function that provides it instead.
-     *
-     * @param path The file path to load.
-     * @param otherwise The default value provider invoked if the [path] does not exist in the [CACHE].
-     */
-    private fun <T: Any> tryGetCached(subpath: String, otherwise : () -> T) : T = getCached<T>(subpath) ?: let {
-            CACHE[subpath] = otherwise()
-            return CACHE[subpath] as T
-        }
-
-    /**
-     * Finds this document in the [CACHE], and returns the file
-     * that it was loaded from.
-     *
-     * @throws UnloadedDocumentException if the file is not in the cache,
-     *         i.e the file has been deleted or the document did not originate from the project.
-     */
-    fun fileForDocument(d: Document) : File {
-        CACHE.entries
-            .filter { it.value is Document }
-            .find { (it.value as Document).equalsDocument(d) }
-            .apply {
-                if (this == null)
-                    throw UnloadedDocumentException(d)
-
-                return File(key)
-            }
-    }
-
-    /**
-     * Saves the 'project.designer' file containing meta data about the project.
-     *
-     * Called automatically when changes are made to this class.
-     *
-     * TODO Automatically creates backups prior to saving.
-     *
-     * Notifies [EventType.PROJECT_SAVED]
-     */
-    @Synchronized
-    fun saveMeta() {
-        backup()
-
-        saveObjectToDisk(subPath(PROJECT_PATH_META))
-        EventNotifier.notifyEvent(EventType.PROJECT_SAVED)
-    }
 
     /**
      * Creates a new HTML document in this project, and saves it to the disk.
@@ -532,12 +411,13 @@ class Project(
      *
      * @return the new document.
      */
-    fun createDocument(subpath: String) : Document {
+    fun createDocument(subpath: String) : CachedFile<Document> {
         val doc = DefaultDocument()
 
-        val loc = PROJECT_PATH_HTML + subpath.assertEndsWith(".html")
+        val file = fileStructure.HTML.subFile(subpath.assertEndsWith(".html"))
 
-        File(subPath(loc)).apply {
+
+        file.apply {
             if (exists())
                 throw FileAlreadyExistsException(this)
 
@@ -550,35 +430,34 @@ class Project(
             doc.addStylesheet(CSS_ID_DOCUMENT_SPECIFIC)
             doc.addStylesheet(CSS_ID_DEBUG, CSS_SHEET_DEBUG)
 
-            saveDocument(doc, path)
-            CACHE[path] = doc
+            saveDocument(
+                cache.put(file, doc)
+            )
         }
 
-        saveMeta()
+        saveDesignerFile()
 
         EventNotifier.notifyEvent(EventType.PROJECT_CREATED)
-        return doc
+        return cache[file]!! as CachedFile<Document>
     }
-
 
     /**
      * Overwrites a project document with [d].
-     * Notifies [EventType.PROJECT_SAVED]
+     * Notifies [EventType.PROJECT_META_SAVED]
      */
-    fun saveDocument(d: Document) =
-        fileForDocument(d).let { saveDocument(d, it) }
+    fun saveDocument(d: CachedFile<Document>) =
+        saveDocument(d.data, d.file)
 
-
-    fun saveDocument(d: Document, path: String) =
-        saveDocument(d, File(path))
-
-
+    /**
+     * Overwrites a project document with [d].
+     * Notifies [EventType.PROJECT_META_SAVED]
+     */
     fun saveDocument(document: Document, file: File) {
         file.apply {
             assertExists()
             writeText(document.toString())
         }
-        EventNotifier.notifyEvent(EventType.PROJECT_SAVED)
+        EventNotifier.notifyEvent(EventType.PROJECT_DOCUMENT_SAVED)
     }
 
 
@@ -591,322 +470,188 @@ class Project(
      * @param path the location, must be from [pagePaths]
      * @return the document
      */
-    fun loadDocument(file: File): Document {
-        getCached<Document>(file)?.apply {
-            return this
-        }
+    fun getDocument(subpath: String): CachedFile<Document> =
+        getDocument(fileStructure.HTML.subFile(subpath))
 
-        with(file) {
-            requireExists()
 
-            return Jsoup.parse(readText()).also {
-                CACHE[file.path] = it
-            }
+    /**
+     * Fetches an existing document from the disk
+     *
+     * If has been loaded previously, the existing object is
+     * returned.
+     *
+     * @param path the location, must be from [pagePaths]
+     * @return the document
+     */
+    fun getDocument(file: File): CachedFile<Document> {
+        return cache.getOrLoad(file) {
+            Jsoup.parse(it)
         }
     }
+
+
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion
+    //region                         Javascript graphs
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
 
 
     /**
      * Loads a visual javascript data file from [PROJECT_PATH_JS].
      *
      * These can be edited and compiled with the [VisualScriptEditor]
+     * @return Cached file containting the [JsGraph]
      * @throws NoSuchFileException if no script with that name can be found.
      */
-    fun loadJsGraph(name: String): JsGraph = tryGetCached(subPath("$PROJECT_PATH_JS$name${JsGraph.FILE_EXTENSION}")) {
-        try {
-            loadObjectFromDisk(
-                javascripts().find {
-                    it.nameWithoutExtension == name
-                }!!
-            ) as JsGraph
-        } catch (e: NullPointerException) {
-            throw NoSuchElementException("No such graph named `$name`.")
+    fun loadJsGraph(subpath: String): CachedFile<JsGraph> =
+        loadJsGraph(fileStructure.JS.subFile(subpath.assertEndsWith(JsGraph.FILE_EXTENSION)))
+
+
+    /**
+     * Loads a visual javascript data file from [PROJECT_PATH_JS].
+     *
+     * These can be edited and compiled with the [VisualScriptEditor]
+     * @return Cached file containing [JsGraph]
+     * @throws NoSuchFileException if no script with that name can be found.
+     */
+    fun loadJsGraph(file: File): CachedFile<JsGraph> = cache.getOrLoad(file) {
+        loadObjectFromDisk(file) as JsGraph
+    }
+
+    /**
+     * Saves a visual javascript data file to it's file.
+     *
+     * @param jsGraph the graph to save
+     */
+    fun saveJsGraph(jsGraph: CachedFile<JsGraph>) : CachedFile<JsGraph> {
+        jsGraph.data.saveObjectToDisk(jsGraph.file)
+        return jsGraph
+    }
+
+    /**
+     * Saves a visual javascript data file to it's file.
+     *
+     * Use this if you have the file object, but not the cached file.
+     *
+     * If you have access to the cached file, preffer sister method.
+     */
+    fun saveJsGraph(jsGraph: JsGraph) : CachedFile<JsGraph> =
+        cache.findT(jsGraph)!!.also {
+            saveJsGraph(it)
         }
-    }
 
+    /**
+     * Creates a new graph.
+     */
+    fun createJsGraph(subpath: String) : CachedFile<JsGraph> = saveJsGraph(JsGraph(subpath))
 
-
-
-    // TODO api is inconsistent.
-    // Some accept files, some accept sub paths, some are names.
-
-    fun saveJsGraph(jsGraph: JsGraph) {
-        val f = subPath("$PROJECT_PATH_JS${jsGraph.scriptName}${JsGraph.FILE_EXTENSION}")
-        jsGraph.saveObjectToDisk(f)
-        CACHE[f] = jsGraph
-    }
-
-    fun createJsGraph(name: String) : JsGraph {
-        val graph = JsGraph(name)
-        saveJsGraph(graph)
-        return graph
-    }
-
-    fun deleteJsGraph(name: String) {
-        val f = locationOnDisk.subFile("$PROJECT_PATH_JS$name${JsGraph.FILE_EXTENSION}")
+    /**
+    * Deletes a graph
+    */
+    fun deleteJsGraph(subpath: String) {
+        val f = fileStructure.locationOnDisk.subFile(subpath.assertEndsWith(JsGraph.FILE_EXTENSION))
 
         if (!f.exists())
             throw NoSuchFileException(f)
 
         f.delete()
-        CACHE.remove(f.path)
+        cache.remove(f)
     }
 
-//    /**
-//     * Creates a new stylesheet
-//     */
-//    fun createStylesheet(name: String) : StyleSheet {
-//        File(subPath("$PROJECT_PATH_CSS$name.stylesheet")).apply {
-//            createNewFile()
-//            return StyleSheet(name).also {
-//                saveStylesheet(it, this)
-//            }
-//        }
-//    }
-//
-//    /**
-//     * Saves a stylesheet to [file]
-//     */
-//    fun saveStylesheet(styleSheet: StyleSheet, file: File) =
-//        styleSheet.saveObjectToDisk(file.toString()).also {
-//            CACHE[file.path] = it
-//        }
-//
-//    /**
-//     * Loads a stylesheet from [file]
-//     */
-//    fun loadStylesheet(file: File) : StyleSheet {
-//        getCached<StyleSheet>(file)?.apply {
-//            return this
-//        }
-//
-//        return (loadObjectFromDisk(file) as StyleSheet).also {
-//            CACHE[file.path] = it
-//        }
-//    }
+
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion
+    //region                         file getters
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+
 
     /**
-     * Deletes all files on disk, and closes the project within the editor
-     * if the editor has this project loaded.
-     */
-    fun deleteProject() {
-        locationOnDisk.deleteRecursively()
-
-        if (mvc().Project === this)
-            IDE.EDITOR.closeProject()
-
-    }
-
-    /**
-     * Deletes a file on disk then [validateCache]
-     */
-    fun deleteFile(projectFile: File) {
-        projectFile.delete()
-        validateCache()
-    }
-
-    /**
-     * Deletes all files in the [PROJECT_PATH_LOGS] directory.
-     */
-    fun deleteLogs() {
-        subFile(PROJECT_PATH_LOGS).flattenTree().forEach { it.delete() }
-    }
-
-    /**
-     * Takes a copy of the project files and the meta into [PROJECT_PATH_BACKUP].
+     * @return a list of all documents, loaded or not, that are in the project directory.
      *
-     * Notifies [EventType.PROJECT_BACKEDUP]
+     * Load via [getDocument]
      */
-    fun backup() {
-//        TODO()
-        EventNotifier.notifyEvent(EventType.PROJECT_BACKEDUP)
-    }
+    fun documents() = fileStructure.HTML.flattenTree()
 
     /**
-     * Saves the stacktrace of [e] in the [PROJECT_PATH_LOGS] folder.
+     * @return a list of all stylesheets files, loaded or not, that are in the project directory.
+     */
+    fun stylesheets() = fileStructure.CSS.flattenTree()
+
+    /**
+     * @return a list of all javascript files, loaded or not, that are in the project directory.
      *
-     * The file is titled the date and time of invocation.
+     * Load via [loadJsGraph]
      */
-    fun logError(e : Throwable) {
-        subFile("$PROJECT_PATH_LOGS [ERR] ${Time.from(Instant.now())}.log").apply {
-            createNewFile()
-            printWriter().apply {
-                e.printStackTrace(this)
-                flush()
-            }
-        }
-    }
-
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    //endregion                                             Save / Load
-    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    fun javascripts() = fileStructure.JS.flattenTree()
 
     /**
-     * Returns an array of [File]s containing [HTML] documents
-     * in the project.
+     * @return a list of all image files, loaded or not, that are in the project directory.
      */
-    fun documents() = HTML.flattenTree()
+    fun media() = fileStructure.MEDIA.flattenTree()
 
     /**
-     * Returns an array of [File]s containing [CSS] documents
-     * in the project.
+     * @return a list of all files, loaded or not, that are in the project directory.
      */
-    fun stylesheets() = CSS.flattenTree()
+    fun prefabs() = fileStructure.PREFABS.flattenTree()
 
-    /**
-     * Returns an array of [File]s containing [JS] documents
-     * in the project.
-     */
-    fun javascripts() = JS.flattenTree()
 
-    /**
-     * Returns an array of [File]s containing [MEDIA] documents
-     * in the project.
-     */
-    fun media() = MEDIA.flattenTree()
+
+
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //endregion
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
 
 
     companion object {
-        /**
-         * The location of the project meta data, relative to the project root.
-         */
-        const val PROJECT_PATH_META: String = "project.designer"
-
-        /**
-         * The location of the project backups, relative to the project root.
-         */
-        const val PROJECT_PATH_BACKUP: String = ".backup/"
-
-        /**
-         * The location of the logs, relative to the project root.
-         */
-        const val PROJECT_PATH_LOGS: String = ".logs/"
-
-        /**
-         * The location of the project css, relative to the project root.
-         */
-        const val PROJECT_PATH_CSS: String = "CSS/"
-
-        /**
-         * The location of the project HTML, relative to the project root.
-         */
-        const val PROJECT_PATH_HTML: String = "HTML/"
-
-        /**
-         * The location of the project javascript, relative to the project root.
-         */
-        const val PROJECT_PATH_JS: String = "JS/"
-
-        /**
-         * The location of the project media, relative to the project root.
-         */
-        const val PROJECT_PATH_MEDIA: String = "MEDIA/"
-
-        /**
-         * The location of prefabricated elements, relative to the root.
-         */
-        const val PROJECT_PATH_PREFABS: String = "PREFABS/"
-
-        /**
-         * Location of a document used to edit prefabs, relative to [PROJECT_PATH_HTML].
-         */
-        const val PROJECT_PATH_PREFAB_EDIT_DOCUMENT: String = "prefab editor.html"
-
-
-        /**
-         * Creates a new project at the specified location.
-         *
-         * @param path The path to the project directory.
-         */
-        fun create(path : String) = Project(File(path))
 
         /**
          * Loads a project from disk
          *
          * If the project meta file exists, load it, validate it, and return it.
          *
-         * @param path The path to the project folder
+         * @param absolutePath The path to the project folder
          * @return A Project object
          */
-        fun load(path : String) : Project? {
-            if (!File(path).exists()) {
-                throw NoSuchFileException(File(path), reason = "Tried to load a project, but there's nothing there!")
-            }
+        fun load(absolutePath : String) : Project? {
+            if (!File(absolutePath).exists())
+                throw NoSuchFileException(File(absolutePath), reason = "Tried to load a project, but there's nothing there!")
 
-            File("$path/$PROJECT_PATH_META").apply {
+            File("$absolutePath/$PROJECT_PATH_META").apply {
+
                 if (!exists())
                     throw NoSuchFileException(this, reason = "\n\nThere is no $PROJECT_PATH_META file in ${parentFile.name}. \nAre you sure this is the right folder?")
+
                 return try {
-                        val proj = loadObjectFromDisk(this) as Project
-                        proj.validate()
-                        logStatus("Loaded Existing Project '${proj.locationOnDisk.name}'")
-                        proj
-                    } catch (e: InvalidClassException) {
-                        showInformationalAlert("This project was made with a different version of the IDE, and is incompatible.\n\n" +
-                                "To load this project, you need an editor that supports the following project version : \n\n${Project::class.hashCode()}\n\n" +
-                                "To find what editor version you need, visit \n\nhttps://github.com/jdngray77/HTMLDesigner/wiki/IDE-to-Project-Version-Map")
-                        null
-                   }
+
+                    val proj = loadObjectFromDisk(this) as Project
+                    proj.recreateTransientProperties()
+                    logStatus("Loaded Existing Project '${proj.fileStructure.locationOnDisk.name}'")
+                    proj
+
+                } catch (e: InvalidClassException) {
+                    showInformationalAlert("This project was made with a different version of the IDE, and is incompatible.\n\n" +
+                            "To load this project, you need an editor that supports the following project version : \n\n${Project::class.hashCode()}\n\n" +
+                            "To find what editor version you need, visit \n\nhttps://github.com/jdngray77/HTMLDesigner/wiki/IDE-to-Project-Version-Map")
+                    null
+                }
             }
         }
 
-        fun Document.projectFile() = mvc().Project.fileForDocument(this)
+        fun Document.projectFile() = IDE.mvc().Project.cache.findT(this)!!
     }
 
     class UnloadedDocumentException(val d: Document) : Exception("The file for ${d.title().assertEndsWith(".html")} was required, but the file was not loaded.")
-}
-
-/**
- * Simple object-oriented wrapper for Configs.AUTO_LOAD stuff,
- * for convenience.
- */
-internal object AutoLoad {
-
-    /**
-     * @return true if [Configs.AUTO_LOAD_PROJECT_BOOL] permits auto-loading, and the there is a project to load
-     *         within [Configs.AUTO_LOAD_PROJECT_PATH]
-     */
-    fun isAvailable() =
-        (Config[Configs.AUTO_LOAD_PROJECT_BOOL] as Boolean)
-        && Config[Configs.LAST_PROJECT_PATH_STRING] != ""
-
-    /**
-     * Raises [Configs.AUTO_LOAD_PROJECT_BOOL]
-     */
-    fun enable() {
-        Config[Configs.AUTO_LOAD_PROJECT_BOOL] = true
-    }
-
-    /**
-     * Lowers [Configs.AUTO_LOAD_PROJECT_BOOL]
-     */
-    fun disable() {
-        Config[Configs.AUTO_LOAD_PROJECT_BOOL] = false
-    }
-
-    /**
-     * @return the value of [Configs.AUTO_LOAD_PROJECT_PATH]
-     */
-    fun getLastProjectLoaded() =
-        Config[Configs.LAST_PROJECT_PATH_STRING] as String
-
-    /**
-     * Sets [Configs.AUTO_LOAD_PROJECT_PATH] to nothing.
-     *
-     * Makes [AutoLoad] not [isAvailable]
-     */
-    fun clearLastProjectLoaded() {
-        Config[Configs.LAST_PROJECT_PATH_STRING] = ""
-    }
-
-    /**
-     * Stores a project that could be loaded at next boot.
-     *
-     * Typically set when project is loaded.
-     *
-     * [Configs.AUTO_LOAD_PROJECT_PATH] to the specified value.
-     */
-    fun storeLastProjectLoaded(path: String) {
-        Config[Configs.LAST_PROJECT_PATH_STRING] = path
-    }
 }

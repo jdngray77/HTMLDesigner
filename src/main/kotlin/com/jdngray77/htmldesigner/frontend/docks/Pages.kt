@@ -25,6 +25,7 @@ import javafx.scene.control.*
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import javafx.scene.input.KeyCode
+import org.jsoup.nodes.Document
 import java.io.File
 import java.sql.Time
 import java.time.Instant
@@ -67,7 +68,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
         }
 
         setOnContextMenuRequested { row, event ->
-            if (row.item == mvc().Project.HTML)
+            if (row.item == mvc().Project.fileStructure.HTML)
                 event.consume()
         }
 
@@ -125,7 +126,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
      * Clears and sets the contents of the tree.
      */
     fun refresh() {
-        mvc().Project.HTML.apply {
+        mvc().Project.fileStructure.HTML.apply {
             setRoot(this)
             tree.root.isExpanded = true
         }
@@ -159,7 +160,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                         it.path + "/"
                     else
                         it.parentFile.absolutePath
-                } ?: mvc().Project.HTML.absolutePath)
+                } ?: mvc().Project.fileStructure.HTML.absolutePath)
                         + "/" +
                         userInput("What should the new folder be called?") {
                             if (it.isBlank()) "Provide a name." else null
@@ -181,16 +182,16 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                 createDocument(
                     (contextOrSelectedOrNull()?.let {
                         if (it.isDirectory)
-                            it.relativeTo(HTML).path + "/"
+                            it.relativeTo(fileStructure.HTML).path + "/"
                         else
-                            it.relativeTo(HTML).parentFile?.let { it.path + "/" } ?: ""
+                            it.relativeTo(fileStructure.HTML).parentFile?.let { it.path + "/" } ?: ""
                     } ?: "")
                             +
                             userInput("What should the new page be called?") {
                                 if (it.isBlank()) "Provide a name" else null
                                 // TODO Validate name input more.
                             }.assertEndsWith(".html")
-                ).open()
+                ).data.open()
 
             } catch (e: FileAlreadyExistsException) {
                 // Issue 24
@@ -218,7 +219,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                 if (this.isDirectory)
                     return
 
-                openDocument(this)
+                openDocument(mvc().Project.findCachedFile(this)!! as CachedFile<Document>)
             }
         }
 
@@ -262,9 +263,9 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                 return
             }
 
-            val doc = Project.createDocument(newFile.relativeTo(Project.HTML).path)
+            val doc = Project.createDocument(newFile.relativeTo(Project.fileStructure.HTML).path)
 
-            Project.fileForDocument(doc).writeText(html)
+            doc.file.writeText(html)
 
             openDocument(doc)
         }
@@ -288,7 +289,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
 
     private fun implSetAsStartupPage() {
         mvc().Project.apply {
-            PREFERENCES[ProjectPreference.STARTUP_PAGE_PATH_STRING] = contextItem!!.relativeTo(HTML).path
+            PREFERENCES[ProjectPreference.STARTUP_PAGE_PATH_STRING] = contextItem!!.relativeTo(fileStructure.HTML).path
             showNotification("Start-up page set.", "When the project is loaded, the ${contextItem!!.name} will be opened automatically.")
         }
     }

@@ -104,6 +104,11 @@ fun <V,K> HashMap<V,K>.reverseGet(value : V) =
 fun <T> ObservableList<T>.addIfAbsent(that: T) =
     if (!this.contains(that)) this.add(that) else false
 
+
+fun <K, V> HashMap<K, V>.copy() : HashMap<K, V> = HashMap<K, V>().also { hm ->
+    forEach { hm[it.key] = it.value }
+}
+
 /**
  * To avoid concurrent modification exceptions.
  *

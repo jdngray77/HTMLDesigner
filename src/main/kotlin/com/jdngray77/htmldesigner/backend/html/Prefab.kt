@@ -76,7 +76,7 @@ class Prefab(
     constructor(
         subPath: String,
         element: Element? = null
-    ) : this(IDE.mvc().Project.PREFABS.subFile(subPath.assertEndsWith(".html")), element)
+    ) : this(mvc().Project.fileStructure.PREFABS.subFile(subPath.assertEndsWith(".html")), element)
 
 
     /**
@@ -221,7 +221,7 @@ class Prefab(
     private fun updateAllInstances(change: (Element) -> Unit = this@Prefab::updPayload_ReplaceInstaceWithMaster) {
         mvc().apply mvc@ {
             // Fetch a list of all documents.
-            val pages = Project.HTML.flattenTree()
+            val pages = Project.documents()
 
             var instanceCount = 0
             var pageCount = 0
@@ -230,7 +230,7 @@ class Prefab(
             // are most likely to be interfered with by the user whilst this
             // task is running - and it provides feedback to them faster.
             getEditorsOfType<DocumentEditor>().forEach applyChangeToEditor@ {
-                updateInstancesOnDocument(it.document, it.file, pages, change).apply {
+                updateInstancesOnDocument(it.file, pages, change).apply {
                     instanceCount += this
 
                     if (instanceCount != 0)
@@ -243,14 +243,14 @@ class Prefab(
 
             // Now apply changes to all remaining documents, which are not loaded.
             pages.concmod().forEach { file ->
-                Project.loadDocument(file).apply {
-                    updateInstancesOnDocument(this, file, pages, change).apply {
+                Project.getDocument(file).apply {
+                    updateInstancesOnDocument(this, pages, change).apply {
                         instanceCount += this
 
                         if (instanceCount != 0)
                             pageCount++
                     }
-                    Project.saveDocument(this, file)
+                    Project.saveDocument(this)
                 }
             }
 
@@ -297,18 +297,21 @@ class Prefab(
      * @param pages The list of all pages that [updateAllInstances] is working on. [file] will be removed.
      * @param payload The change to apply to all instances of the prefab in the [document].
      */
-    private fun updateInstancesOnDocument(document: Document, file: File, pages: ArrayList<File>, payload: (Element) -> Unit) : Int {
+    private fun updateInstancesOnDocument(doc: CachedFile<Document>, pages: ArrayList<File>, payload: (Element) -> Unit) : Int {
         var instances = 0
-        document.select(AttributeWithValueContaining("prefab-uuid",uuid)).forEach instances@ { prefabInstance ->
-            instances++
 
-            // If instances match, then the change will already be within the document. Skip this instance.
-            if (prefabInstance === masterElement) return@instances
+            doc.data.select(AttributeWithValueContaining("prefab-uuid",uuid))
+                .forEach instances@ {
+                        prefabInstance ->
+                    instances++
 
-            payload(prefabInstance)
-        }
+                    // If instances match, then the change will already be within the document. Skip this instance.
+                    if (prefabInstance === masterElement) return@instances
 
-        pages.remove(file)
+                    payload(prefabInstance)
+                }
+
+        pages.remove(doc.file)
         return instances
     }
 
@@ -521,11 +524,13 @@ class Prefab(
             BackgroundTask.submit {
                 showNotification("Checking prefabs", "Checking your documents and prefabs are all OK.")
 
-                val allDocs = mvc().Project.HTML.flattenTree().map { mvc().Project.loadDocument(it) }
+                val allDocs = mvc().Project.documents().map { mvc().Project.getDocument(it) }
 
                 val report = arrayListOf<String>()
 
-                allDocs.forEach document@ { doc  ->
+                allDocs
+                    .map { it.data }
+                    .forEach document@ { doc  ->
                     doc.body().select(Attribute(PREFAB_UUID_ATTR)).forEach instancesInDoc@ {
                         val uuid = it.prefab_uuid()
 
@@ -542,7 +547,8 @@ class Prefab(
 
                 val allfabs = getAllPrefabs()
 
-                allfabs.forEach {
+                allfabs
+                    .forEach {
                     prefab->
                     if (prefab.instances().isEmpty())
                         report.add("Prefab '${prefab.name}' is not being used in any documents. No action taken.")
@@ -567,17 +573,10 @@ class Prefab(
 
 
         /**
-         * Returns a list of all prefabs in the project.
+         * Loads and returns every prefab in the project.
          */
         fun getAllPrefabs() =
-            getAllPrefabFiles().map { Prefab(it) }
-
-        /**
-         * Returns all the on-disk HTML files containing the prefab masters.
-         */
-        fun getAllPrefabFiles() =
-            mvc().Project.PREFABS.flattenTree()
-
+            mvc().Project.prefabs().map { Prefab(it) }
 
         /**
          * Searches all pages for instances of the [master] prefab.
@@ -587,10 +586,14 @@ class Prefab(
         fun getAllInstancesOf(prefab: Prefab) : List<Element> {
             val instances = ArrayList<Element>()
 
-            // TODO make this a project function to get all documents.
-            mvc().Project.HTML.flattenTree().map { mvc().Project.loadDocument(it) }.forEach { document ->
-                instances.addAll(0, document.select(AttributeWithValueContaining(PREFAB_UUID_ATTR, prefab.uuid)))
-            }
+            // TODO make this a project function to apply a function to all documents.
+
+            mvc().Project.documents()
+                .map { mvc().Project.getDocument(it) }
+                .forEach { document ->
+                    instances.addAll(0, document.data.select(AttributeWithValueContaining(PREFAB_UUID_ATTR, prefab.uuid)))
+                    document.removeCache()
+                }
 
             return instances
         }

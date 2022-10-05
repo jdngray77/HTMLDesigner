@@ -95,7 +95,7 @@ class DocumentEditor(
      *
      * This is where it will be saved to.
      */
-    var file: File = document.projectFile()
+    var file: CachedFile<Document> = document.projectFile()
         private set
 
 
@@ -176,11 +176,17 @@ class DocumentEditor(
         resetZoom()
 
         project().apply {
-            removeFromCache(document)
-            document = loadDocument(file)
+            // Unload document
+            file.removeCache()
+
+            // Reload
+            getDocument(file.file).let {
+                file = it
+                document = it.data
+            }
         }
 
-        setAction("Reset changes made to ${file.nameWithoutExtension}")
+        setAction("Reset changes made to ${file.file.nameWithoutExtension}")
 
         focus()
         reRender()
@@ -401,7 +407,7 @@ class DocumentEditor(
 
         // Make sure the project cache holds the current INSTANCE of document.
         // Instances de-sync because of the serialization on the undo/redo stack.
-        mvc().Project.assertCached(file, document)
+        file.data = document
 
         EventNotifier.notifyEvent(EventType.EDITOR_DOCUMENT_EDITED)
         highlightSelectedTag()
@@ -442,7 +448,7 @@ class DocumentEditor(
         selectedTag = null
 
         try {
-            mvc().Project.saveDocument(document)
+            mvc().Project.saveDocument(file)
         } catch (e: Exception) {
             ExceptionListener.uncaughtException(Thread.currentThread(),e)
             return false
@@ -455,13 +461,11 @@ class DocumentEditor(
     }
 
     override fun validate() {
-        if (!file.exists()) {
+        if (!file.file.exists()) {
             clean()
             requestClose()
         } else {
-            mvc().Project.assertCached(
-                file, document
-            )
+            file.data = document
         }
     }
 
@@ -501,7 +505,7 @@ class DocumentEditor(
     }
 
     override fun onClosed() {
-        mvc().Project.removeFromCache(document)
+        file.removeCache()
     }
 
 

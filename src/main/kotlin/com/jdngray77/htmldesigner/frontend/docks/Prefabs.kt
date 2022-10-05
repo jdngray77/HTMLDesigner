@@ -38,7 +38,7 @@ class Prefabs : HierarchyDock<Prefab>({ it?.locationOfMaster!!.name }), Subscrib
 
     override fun notify(e: EventType) {
         tree.root = TreeItem<Prefab?>().also {
-            project().PREFABS.listFiles()?.forEach { prefab ->
+            project().prefabs()?.forEach { prefab ->
                 it.children.add(TreeItem(Prefab(prefab)))
             }
         }

@@ -2,8 +2,8 @@ package com.jdngray77.htmldesigner.backend.data
 
 import com.jdngray77.htmldesigner.RequiresEditorGUI
 import com.jdngray77.htmldesigner.backend.ExceptionListener
-import com.jdngray77.htmldesigner.backend.data.Project.Companion.PROJECT_PATH_LOGS
-import com.jdngray77.htmldesigner.backend.data.Project.Companion.PROJECT_PATH_META
+import com.jdngray77.htmldesigner.backend.data.project.ProjectStructure.Companion.PROJECT_PATH_LOGS
+import com.jdngray77.htmldesigner.backend.data.project.ProjectStructure.Companion.PROJECT_PATH_META
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.JsRandomColorFunction
 import com.jdngray77.htmldesigner.utility.*
@@ -22,16 +22,16 @@ internal class ProjectTest {
     lateinit var project: Project
 
     companion object {
-        const val TEST_PROJECT_PATH = "./testProject"
+        val TEST_PROJECT_PATH = File("./testProject")
     }
 
     @BeforeEach
     internal fun setUp() {
-        if (File(TEST_PROJECT_PATH).exists()) {
-            File(TEST_PROJECT_PATH).deleteRecursively()
+        if (TEST_PROJECT_PATH.exists()) {
+            TEST_PROJECT_PATH.deleteRecursively()
         }
 
-        project = Project.create(TEST_PROJECT_PATH)
+        project = Project(TEST_PROJECT_PATH)
     }
 
     @AfterEach
@@ -41,46 +41,47 @@ internal class ProjectTest {
 
     @Test
     fun testPath() {
-        assertEquals(File(TEST_PROJECT_PATH).absolutePath, project.locationOnDisk.absolutePath)
+        assertEquals(TEST_PROJECT_PATH.absolutePath, project.fileStructure.locationOnDisk.absolutePath)
     }
 
     @Test
     fun getAuthor() {
-        project.author = "My Name Here"
-        assertEquals("My Name Here", project.author)
+        project.meta.author = "My Name Here"
+        assertEquals("My Name Here", project.meta.author)
     }
 
     @Test
     fun hasDefaultHTMLDocument() {
-        assertEquals(1, project.HTML.listFiles()?.size ?: 1)
-        val file = project.HTML.listFiles()!!.first()
+        assertEquals(1, project.documents().size)
+        val file = project.documents().first()
 
         assertDoesNotThrow {
-            project.loadDocument(file)
+            project.getDocument(file)
         }
 
-        val defaultDocument = project.loadDocument(file)
+        val defaultDocument = project.getDocument(file)
 
-        assertEquals(file.name, defaultDocument.title())
+        assertEquals(file.name, defaultDocument.data.title())
     }
 
     @Test
     fun jsGraph() {
         // No files to start
-        assertEquals(0, project.JS.listFiles()?.size ?: 0)
+        assertEquals(0, project.javascripts().size)
 
-        project.invalidateCache()
-        assertEquals(0, project.getCache().size)
+        project
+        assertEquals(0, project.getCache().entries.size)
 
         // Create file
-        val graph = project.createJsGraph("myscript")
+        val graphFile = project.createJsGraph("myscript")
+        val graph = graphFile.data
 
         assertEquals(0, graph.getNodes().size)
 
-        assertTrue(project.getCache().containsValue(graph))
+        assertTrue(project.getCache().containsValue(graphFile))
 
         // there is one file, and the graph is cached
-        assertEquals(1, project.JS.listFiles()?.size ?: 0)
+        assertEquals(1, project.javascripts().size)
 
         assertEquals(1, project.getCache().size)
 
@@ -101,7 +102,7 @@ internal class ProjectTest {
         // Delete
         project.deleteJsGraph("myscript")
 
-        assertEquals(0, project.JS.listFiles()?.size ?: null)
+        assertEquals(0, project.javascripts().size)
 
         assertEquals(0, project.getCache().size)
 
@@ -116,7 +117,7 @@ internal class ProjectTest {
         project.saveJsGraph(graph)
 
         project.invalidateCache()
-        val graph1 = project.loadJsGraph("myscript")
+        val graph1 = project.loadJsGraph("myscript").data
         assertEquals(1, graph1.getNodes().size)
         assertEquals(JsRandomColorFunction().name, graph1.getFunctionNodes().first()!!.function.name)
 
@@ -124,39 +125,45 @@ internal class ProjectTest {
 
     @Test
     fun document() {
-        // No files to start
-        assertEquals(0, project.HTML.listFiles()?.size ?: 0)
+        // Start with no files.
+        project.fileStructure.HTML.deleteRecursively()
+        project.fileStructure.HTML.mkdir()
 
+        assertEquals(0, project.documents().size)
+
+        // Nothing should be loaded
         project.invalidateCache()
         assertEquals(0, project.getCache().size)
 
         // Create file
-        val doc = project.createDocument("hello")
-        val file = project.fileForDocument(doc)
+        var cachedfile = project.createDocument("hello")
+        val doc = cachedfile.data
+        val file = cachedfile.file
+
 
         assertTrue(file.exists())
 
         // configured document
-        assertEquals("hello", doc.title())
-        assertEquals("hello", doc.getElementById("PageTitle")!!.text())
+        assertEquals(file.name, doc.title())
+        assertEquals(file.name, doc.getElementById("PageTitle")!!.text())
 
         assertNotNull(doc.getStylesheet(CSS_ID_DEBUG))
         assertNotNull(doc.getStylesheet(CSS_SHEET_DEBUG))
         assertNotNull(doc.getStylesheet(CSS_ID_DOCUMENT_SPECIFIC))
 
-        assertTrue(project.getCache().containsValue(doc))
+        assertTrue(project.getCache().containsValue(cachedfile))
 
         // Create dupe
         assertThrowsExactly(FileAlreadyExistsException::class.java) { project.createDocument("hello") }
 
 
         // there is one file, and the graph is cached
-        assertEquals(1, project.HTML.listFiles()?.size ?: 0)
+        assertEquals(1, project.documents().size)
 
         assertEquals(1, project.getCache().size)
 
         // load from cache
-        assertDoesNotThrow { project.loadDocument(file) }
+        assertDoesNotThrow { project.getDocument(file) }
 
         assertEquals(1, project.getCache().size)
 
@@ -165,17 +172,17 @@ internal class ProjectTest {
 
         assertEquals(0, project.getCache().size)
 
-        assertDoesNotThrow { project.loadDocument(file) }
+        assertDoesNotThrow { project.getDocument(file) }
 
 
         // Load non-existant
 
-        assertThrowsExactly(NoSuchFileException::class.java) { project.loadDocument(File("i don't exist")) }
+        assertThrowsExactly(NoSuchFileException::class.java) { project.getDocument(File("i don't exist")) }
 
         // Delete
-        project.deleteFile(file)
+        project.deleteFile(cachedfile)
 
-        assertEquals(0, project.JS.listFiles()?.size)
+        assertEquals(0, project.javascripts().size)
 
         assertEquals(0, project.getCache().size)
 
@@ -185,51 +192,51 @@ internal class ProjectTest {
 
         doc.getElementById("PageTitle")!!.text("Test")
 
-        project.saveDocument(doc)
-        project.saveDocument(doc, project.HTML.subFile("test.html"))
+        project.saveDocument(cachedfile)
+        project.saveDocument(doc, project.fileStructure.HTML.subFile("test.html"))
 
         // load changes from disk
         project.invalidateCache()
 
-        val doc2 = project.loadDocument(file)
+        val doc2 = project.getDocument(file).data
         assertEquals("Test", doc2.getElementById("PageTitle")!!.text())
 
-        val doc3 = project.loadDocument(project.HTML.subFile("test.html"))
+        val doc3 = project.getDocument(project.fileStructure.HTML.subFile("test.html")).data
         assertEquals("Test", doc3.getElementById("PageTitle")!!.text())
 
     }
 
     @Test
     fun testMissingFolder() {
-        assertDoesNotThrow { project.validate() }
+        assertDoesNotThrow { project.fileStructure.validateLocationOnDisk() }
 
-        project.HTML.deleteRecursively()
-        assertThrowsExactly(IllegalStateException::class.java) { project.validate() }
+        project.fileStructure.HTML.deleteRecursively()
+        assertThrowsExactly(IllegalStateException::class.java) { project.fileStructure.validateLocationOnDisk() }
         tearDown()
         setUp()
 
-        project.JS.deleteRecursively()
-        assertThrowsExactly(IllegalStateException::class.java) { project.validate() }
+        project.fileStructure.JS.deleteRecursively()
+        assertThrowsExactly(IllegalStateException::class.java) { project.fileStructure.validateLocationOnDisk() }
         tearDown()
         setUp()
 
-        project.CSS.deleteRecursively()
-        assertThrowsExactly(IllegalStateException::class.java) { project.validate() }
+        project.fileStructure.CSS.deleteRecursively()
+        assertThrowsExactly(IllegalStateException::class.java) { project.fileStructure.validateLocationOnDisk() }
         tearDown()
         setUp()
 
-        project.MEDIA.deleteRecursively()
-        assertThrowsExactly(IllegalStateException::class.java) { project.validate() }
+        project.fileStructure.MEDIA.deleteRecursively()
+        assertThrowsExactly(IllegalStateException::class.java) { project.fileStructure.validateLocationOnDisk() }
         tearDown()
         setUp()
 
-        project.BACKUP.deleteRecursively()
-        assertThrowsExactly(IllegalStateException::class.java) { project.validate() }
+        project.fileStructure.BACKUP.deleteRecursively()
+        assertThrowsExactly(IllegalStateException::class.java) { project.fileStructure.validateLocationOnDisk() }
         tearDown()
         setUp()
 
-        project.PREFABS.deleteRecursively()
-        assertThrowsExactly(IllegalStateException::class.java) { project.validate() }
+        project.fileStructure.PREFABS.deleteRecursively()
+        assertThrowsExactly(IllegalStateException::class.java) { project.fileStructure.validateLocationOnDisk() }
         tearDown()
         setUp()
     }
@@ -237,21 +244,23 @@ internal class ProjectTest {
     @Test
     fun testCheckPath() {
         // Project already exists.
-        assertThrowsExactly(IllegalArgumentException::class.java) { project.checkPath() }
+        assertThrowsExactly(IllegalArgumentException::class.java) { project.fileStructure.checkValidCreationTarget() }
 
         // No project, but folder is not empty.
-        project.locationOnDisk.subFile(PROJECT_PATH_META).delete()
-        assertThrowsExactly(IllegalArgumentException::class.java) { project.checkPath() }
+        project.fileStructure.locationOnDisk.subFile(PROJECT_PATH_META).delete()
+        assertThrowsExactly(IllegalArgumentException::class.java) { project.fileStructure.checkValidCreationTarget() }
     }
 
     @Test
     fun validateCache() {
         project.invalidateCache()
+
         val doc = project.createDocument("hello")
-        val file = project.fileForDocument(doc)
+        val file = doc.file
+
         assertEquals(1, project.getCache().size)
 
-        assertEquals(2, project.HTML.listFiles()!!.size)
+        assertEquals(2, project.documents().size)
 
         file.delete()
         project.validateCache()
@@ -263,15 +272,15 @@ internal class ProjectTest {
     fun assertCached() {
         project.invalidateCache()
         val doc = project.createDocument("hello")
-        val file = project.fileForDocument(doc)
+        val file = doc.file
 
         assertEquals(1, project.getCache().size)
-        project.assertCached(file,doc)
+        project.getDocument(file)
         assertEquals(1, project.getCache().size)
 
         project.invalidateCache()
         assertEquals(0, project.getCache().size)
-        project.assertCached(file,doc)
+        project.getDocument(file)
         assertEquals(1, project.getCache().size)
     }
 
@@ -370,17 +379,18 @@ internal class ProjectTest {
         TODO()
     }
 
+
     @Test
     fun logError() {
         // Can't forward to unloaded project, so test using the loaded project.
         val project = mvc().Project
 
         project.deleteLogs()
-        assertEquals(0, project.locationOnDisk.subFile(PROJECT_PATH_LOGS).listFiles()!!.size)
+        assertEquals(0, project.fileStructure.locationOnDisk.subFile(PROJECT_PATH_LOGS).listFiles()!!.size)
         ExceptionListener.uncaughtException(Thread.currentThread(), Exception("Test"))
-        assertEquals(1, project.locationOnDisk.subFile(PROJECT_PATH_LOGS).listFiles()!!.size)
+        assertEquals(1, project.fileStructure.locationOnDisk.subFile(PROJECT_PATH_LOGS).listFiles()!!.size)
         project.deleteLogs()
-        assertEquals(0, project.locationOnDisk.subFile(PROJECT_PATH_LOGS).listFiles()!!.size)
+        assertEquals(0, project.fileStructure.locationOnDisk.subFile(PROJECT_PATH_LOGS).listFiles()!!.size)
     }
 
     @Test

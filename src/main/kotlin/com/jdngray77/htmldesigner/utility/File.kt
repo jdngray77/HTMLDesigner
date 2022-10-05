@@ -112,10 +112,10 @@ fun File.openFileInSystem() {
 }
 
 
-fun File.isInProject() = absolutePath.startsWith(mvc().Project.locationOnDisk.absolutePath)
+fun File.isInProject() = absolutePath.startsWith(mvc().Project.fileStructure.locationOnDisk.absolutePath)
 
-fun File.isInProjectRoot() = this.parentFile == mvc().Project.locationOnDisk
+fun File.isInProjectRoot() = this.parentFile == mvc().Project.fileStructure.locationOnDisk
 
-fun File.isProjectRoot() = this == mvc().Project.locationOnDisk
+fun File.isProjectRoot() = this == mvc().Project.fileStructure.locationOnDisk
 
 fun File.loadPrefab() = Prefab(this)

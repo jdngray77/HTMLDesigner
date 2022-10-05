@@ -5,6 +5,7 @@ import com.jdngray77.htmldesigner.RequiresEditorGUI
 import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.isPrefabInstance
 import com.jdngray77.htmldesigner.backend.html.Prefab.Companion.prefab_uuid
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.utility.CachedFile
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.junit.jupiter.api.AfterEach
@@ -22,6 +23,8 @@ internal class PrefabTest {
     lateinit var prefab: Prefab
 
     lateinit var testDocument1: Document
+    lateinit var testDocfile1: CachedFile<Document>
+    lateinit var testDocfile2: CachedFile<Document>
     lateinit var testDocument2: Document
 
     @BeforeEach
@@ -38,17 +41,20 @@ internal class PrefabTest {
 
         assert(prefab.locationOfMaster.exists())
 
-        testDocument1 = mvc().Project.createDocument("_PREFAB_TEST1").also {
-            it.body().appendChild(
+        testDocfile1 = mvc().Project.createDocument("_PREFAB_TEST1").also {
+            it.data.body().appendChild(
                 prefab.newInstance()
             )
         }
 
-        testDocument2 = mvc().Project.createDocument("_PREFAB_TEST2").also {
-            it.body().appendChild(
+        testDocfile2 = mvc().Project.createDocument("_PREFAB_TEST2").also {
+            it.data.body().appendChild(
                 prefab.newInstance()
             )
         }
+
+        testDocument1 = testDocfile1.data
+        testDocument2 = testDocfile2.data
     }
 
     @AfterEach
@@ -56,8 +62,7 @@ internal class PrefabTest {
         prefab.locationOfMaster.delete()
         assert(!prefab.locationOfMaster.exists())
 
-        mvc().Project.fileForDocument(testDocument1).delete()
-        mvc().Project.fileForDocument(testDocument2).delete()
+        mvc().Project.deleteFile(testDocfile1, testDocfile2)
     }
 
 

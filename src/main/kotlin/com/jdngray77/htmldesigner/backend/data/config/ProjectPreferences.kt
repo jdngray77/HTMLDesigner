@@ -16,6 +16,7 @@
 package com.jdngray77.htmldesigner.backend.data.config
 
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.data.project.ProjectStructure
 import com.jdngray77.htmldesigner.utility.subFile
 
 /**
@@ -60,7 +61,9 @@ enum class ProjectPreference {
  *
  * Instances of this class are found serialized in the [Project].
  */
-class ProjectPreferences(project: Project) : Registry<ProjectPreference>(project.locationOnDisk.subFile("ProjectPrefs.registry")) {
+class ProjectPreferences(project: Project) : Registry<ProjectPreference>(
+    project.fileStructure.subFile(ProjectStructure.PROJECT_PATH_PREFERENCES)
+) {
 
     init {
         defferedInit()

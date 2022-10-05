@@ -18,7 +18,7 @@ package com.jdngray77.htmldesigner.frontend
 import ExitCodes
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.backend.data.AutoLoad
+import com.jdngray77.htmldesigner.backend.data.config.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
@@ -315,7 +315,7 @@ class IDE : Application() {
                     // If auto-load is unavailable, prompt the user for a project.
                     usrChooseProject().also {
                         // Store what the user provided for the auto-load.
-                        AutoLoad.storeLastProjectLoaded(it.locationOnDisk.path)
+                        AutoLoad.storeLastProjectLoaded(it.fileStructure.locationOnDisk.path)
                     }
 
 
@@ -350,6 +350,7 @@ class IDE : Application() {
             try {
                 projToLoad = implUsrSelectProject()
             } catch (e: Exception) {
+                e.printStackTrace()
                 showErrorAlert("Project access failed : \n(${e::class.simpleName})\n\n${e.message ?: "No reason was provided"}")
             }
 
@@ -381,10 +382,14 @@ class IDE : Application() {
             }
 
             ButtonTypeCreate -> {
-                Project.create(FileChooser().let {
+                FileChooser().let {
                     it.title = "Create a new project"
                     it.showSaveDialog(stage).path
-                })
+                }.let {
+                    Project(
+                        File(it)
+                    )
+                }
             }
 
             else -> null

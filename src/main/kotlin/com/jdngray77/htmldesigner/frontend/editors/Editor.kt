@@ -209,7 +209,7 @@ abstract class Editor<T : Serializable>(
     fun forceClose() {
         tab.onClosed?.handle(null)
         EditorManager.editorClosed(this)
-        mvc().Project.removeFromCache(value)
+        mvc().Project.removeTFromCache(value)
         onClosed()
     }
 

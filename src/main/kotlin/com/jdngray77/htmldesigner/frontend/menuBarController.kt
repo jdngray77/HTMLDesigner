@@ -131,7 +131,7 @@ class menuBarController {
 
     fun menu_debug_clearcache(actionEvent: ActionEvent) {
         mvc().Project.apply {
-            getCache().forEach { removeFromCache(it) }
+            getCache().forEach { removeTFromCache(it) }
         }
     }
 

@@ -53,7 +53,10 @@ enum class EventType {
     /**
      * Unused.
      */
-    PROJECT_SAVED,
+    PROJECT_META_SAVED,
+
+
+    PROJECT_DOCUMENT_SAVED,
 
     /**
      * Unused.
