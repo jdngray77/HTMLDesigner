@@ -132,43 +132,36 @@ class ProjectStructure (
     /**
      * The project's HTML directory
      */
-    @Transient
     var HTML: File = File("")
 
     /**
      * The project's javascript directory
      */
-    @Transient
     var JS: File = File("")
 
     /*
      * The project's CSS directory
      */
-    @Transient
     var CSS: File = File("")
 
     /**
      * The project's MEDIA directory
      */
-    @Transient
     var MEDIA: File = File("")
 
     /**
      * The project's PREFABS directory
      */
-    @Transient
     var PREFABS: File = File("")
 
     /**
      * The project's backup directory
      */
-    @Transient
     var BACKUP: File = File("")
 
     /**
      * Directory used to store error and activity logs.
      */
-    @Transient
     var LOGS: File = File("")
 
     /**
