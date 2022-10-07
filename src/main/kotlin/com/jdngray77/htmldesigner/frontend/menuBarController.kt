@@ -123,6 +123,12 @@ class menuBarController {
         }
     }
 
+
+    fun menu_debug_show_editors(actionEvent: ActionEvent) {
+        showListOfStrings("Editors believed to be open", EditorManager.getOpenEditors().map { it.title }.toList())
+    }
+
+
     fun menu_debug_restart_bgpool() {
         BackgroundTask.print()
         BackgroundTask.restart()

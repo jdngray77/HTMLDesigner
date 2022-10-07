@@ -219,7 +219,7 @@ class Pages : HierarchyDock<File>({ it!!.name }), Subscriber {
                 if (this.isDirectory)
                     return
 
-                openDocument(mvc().Project.findCachedFile(this)!! as CachedFile<Document>)
+                openDocument(mvc().Project.getDocument(this))
             }
         }
 

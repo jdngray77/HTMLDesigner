@@ -119,7 +119,7 @@ fun showNotification(title: String = "", message: String = "", onAction: (() -> 
     }
 }
 
-fun showListOfStrings(title: String = "", strings: List<String>) {
+fun showListOfStrings(title: String = "", strings: Collection<String>) {
     onUIThread {
         Dialog<ButtonType>().apply {
             this.title = title
