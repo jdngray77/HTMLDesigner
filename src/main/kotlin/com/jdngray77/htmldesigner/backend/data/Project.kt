@@ -92,19 +92,21 @@ package com.jdngray77.htmldesigner.backend.data
 
 
 
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.backend.data.config.ProjectPreference
 import com.jdngray77.htmldesigner.backend.data.config.ProjectPreferences
 import com.jdngray77.htmldesigner.backend.data.project.ProjectMeta
 import com.jdngray77.htmldesigner.backend.data.project.ProjectStructure
 import com.jdngray77.htmldesigner.backend.data.project.ProjectStructure.Companion.PROJECT_PATH_META
 import com.jdngray77.htmldesigner.backend.html.DefaultDocument
 import com.jdngray77.htmldesigner.backend.jsdesigner.JsGraph
-import com.jdngray77.htmldesigner.backend.logStatus
-import com.jdngray77.htmldesigner.backend.showInformationalAlert
 import com.jdngray77.htmldesigner.frontend.IDE
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.*
+import javafx.scene.control.ButtonType
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
@@ -640,6 +642,53 @@ class Project (
 
                     proj.fileStructure.validateLocationOnDisk(this.parentFile)
                     proj.recreateTransientProperties()
+
+                    if (
+                        !(proj.PREFERENCES[ProjectPreference.SUPPRESS_PROJECT_NAME_MISMATCH_WARNING_BOOL] as Boolean)
+                        && proj.fileStructure.locationOnDisk.nameWithoutExtension != proj.meta.name
+                    ) {
+
+                        val curr = proj.fileStructure.locationOnDisk.nameWithoutExtension
+                        val orig = proj.meta.name
+
+                        val updDirectory = ButtonType("Change folder back to '$orig'")
+                        val updProject = ButtonType("Update project to '$curr'")
+                        val updNeither = ButtonType("Nothing")
+                        val updNeitherDontAsk = ButtonType("Nothing & don't ask again")
+
+                        val response = userConfirm(
+                            "This project is titled '$orig', but the folder has been renamed to" +
+                                    " '$curr'.\n\n" +
+                                    "What would you like to do?",
+                            updDirectory, updProject, updNeither, updNeitherDontAsk
+                        )
+
+                        when (response) {
+                            updDirectory -> {
+                                // rename the directory
+                                val dest = File(proj.fileStructure.locationOnDisk.parentFile, orig)
+
+                                proj.fileStructure.locationOnDisk.renameTo(dest)
+                                proj.fileStructure.validateLocationOnDisk(dest)
+
+                                // Restart to reload
+                                Config[Configs.LAST_PROJECT_PATH_STRING] = proj.fileStructure.locationOnDisk.absolutePath
+                                EDITOR.restart()
+                            }
+                            updProject -> {
+                                proj.meta.name = proj.fileStructure.locationOnDisk.nameWithoutExtension
+                                proj.saveDesignerFile()
+                            }
+                            updNeitherDontAsk -> {
+                                proj.PREFERENCES[ProjectPreference.SUPPRESS_PROJECT_NAME_MISMATCH_WARNING_BOOL] = true
+                                proj.saveDesignerFile()
+                            }
+                        }
+
+                    }
+
+
+
 
                     logStatus("Loaded Existing Project '${proj.fileStructure.locationOnDisk.name}'")
                     proj

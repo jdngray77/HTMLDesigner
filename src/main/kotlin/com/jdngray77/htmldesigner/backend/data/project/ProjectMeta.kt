@@ -89,7 +89,7 @@ data class ProjectMeta (
      * May differ from the name of the directory in which
      * the project is stored.
      */
-    val name: String,
+    var name: String,
 
     /**
      * Name of the person or organisation
