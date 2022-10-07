@@ -11,7 +11,7 @@ internal class KeyBindingsTest {
 
     @Test
     fun getKeyArray() {
-        val keys = KeyBindings.array
+        val keys = KeyBindings.keyBindings
 
         assertNotNull(keys)
         assert(keys.size >= 0)

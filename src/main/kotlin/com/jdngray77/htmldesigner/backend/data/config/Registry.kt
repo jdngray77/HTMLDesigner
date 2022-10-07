@@ -347,5 +347,5 @@ open class Registry <T>(val saveLocation: File) : HashMap<T, Any>() {
 
 
     class MismatchedTypeException(key : Any?, value: Any) : IllegalArgumentException("[DEV - DO NOT COMMIT] Registry value was ${value::class.simpleName}, but the key states that it should be ${keyType(key)}")
-    class MissingEntryException(key: Any?) : Exception("$key wass requested, but it was not created when the registry was. ")
+    class MissingEntryException(key: Any?) : Exception("$key was requested, but it was not created when the registry was. ")
 }

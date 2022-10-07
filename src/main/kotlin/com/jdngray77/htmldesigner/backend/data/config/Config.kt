@@ -22,10 +22,6 @@ import com.jdngray77.htmldesigner.utility.subFile
 import jfxtras.styles.jmetro.Style.*
 import jfxtras.styles.jmetro.JMetro
 import java.lang.Thread.UncaughtExceptionHandler
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
-import java.io.File
-import java.util.function.Predicate
 
 /**
  * Keys for the [config] registry.
@@ -199,6 +195,7 @@ enum class Configs {
     /**
      * If true, the ide will show a restart suggestion prompt
      * when [LARGE_ERROR_COUNT_THRESHOLD] unhandled exceptions have been caught.
+     */
     LARGE_ERROR_COUNT_PROMPT_BOOL,
 
     /**
@@ -212,11 +209,12 @@ enum class Configs {
      * If high at project load, the no pages will be loaded.
      * Effectively ignoring the project's startup page preference.
      */
-    IGNORE_PROJECT_STARTUP_PAGE_BOOL
+    IGNORE_PROJECT_STARTUP_PAGE_BOOL,
 
+    /**
+     * Used to only show caps lock warning once.
      */
-    KEY_BINDINGS_HASHMAP,
-    KEY_BINDINGS_CAPS_WARNING_BOOL,
+    KEY_BINDINGS_SUPPRESS_CAPS_WARNING_BOOL,
 }
 
 /**
@@ -270,7 +268,7 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(Configs.LARGE_ERROR_COUNT_PROMPT_BOOL, true)
         put(Configs.LARGE_ERROR_COUNT_STEP_THRESHOLD_INT, 10)
         put(Configs.IGNORE_PROJECT_STARTUP_PAGE_BOOL, false)
-        put(Configs.KEY_BINDINGS_CAPS_WARNING_BOOL, true)
+        put(Configs.KEY_BINDINGS_SUPPRESS_CAPS_WARNING_BOOL, true)
     }
 
     /**
