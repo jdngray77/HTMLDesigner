@@ -4,8 +4,9 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditor
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
+import com.jdngray77.htmldesigner.utility.boundsInScene
+import com.jdngray77.htmldesigner.utility.concmod
 import javafx.scene.control.Labeled
 import javafx.scene.input.*
 import org.controlsfx.control.PopOver
@@ -14,13 +15,39 @@ import java.awt.Toolkit
 /**
  * Binds keyboard shortcuts to actions.
  *
- * A binding may execute a runnable, or invoke a method.
+ * Executable scripts or buttons can be subscribed to a [KeyEvent].
  *
- * Bindings are stored in the [Config] registry.
+ * [KeyEvent]s are raised by key combinations, as defined by the configuration.
+ *
+ * This means that multiple executables can be invoked by one key press by simply
+ * binding multiple to the same event. Standardising the events also means that
+ * the key combinations can easily be changed.
+ *
+ * The user could even have multiple key combinations for the same event.
+ *
+ * Basically :
+ *
+ * [KeyBindingSubscriber] subscribes to [KeyEvent]
+ * [KeyToEventBinding] raises [KeyEvent]
+ * [KeyEvent] triggers subscribed [KeyBindingSubscriber]s.
+ *
+ * The configuration stores a string like the following to represent a [KeyToEventBinding] :
+ *
+ * `EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z`
+ *
+ * The first part is the [KeyEvent] name, the rest are the key combinations.
+ *
+ * Combinations are in the order :
+ *
+ * Mac | Windows | Linux
+ *
+ * The correct combination for the current target will be selected automatically at runtime.
  *
  * @author Dylan Brand
  */
 object KeyBindings : Subscriber, IDEEarlyBootListener {
+
+    //region init
 
     /**
      * Used to automatically find and init the class when the IDE starts.
@@ -45,94 +72,213 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
      */
     override fun notify(e: EventType) {
         checkCapsActive()
-        assignKeys()
+        loadBindingsFromConfig()
     }
 
-    //    val keyControl = Config[Configs.KEY_BINDINGS_HASHMAP] as HashMap<Predicate<KeyEvent>, Runnable>
+    //endregion
+    //region Event binding
 
     /**
-     * An array of key bindings.
-     *
-     * Each row of the table represents one key binding.
-     *
-     * Columns are as follows :
-     *
-     * Buttons | Runnable scripts | Mac bindings | Windows bindings | Linux bindings
+     * An enumeration of events that can be triggered by a key binding.
      */
-    val keyBindings = arrayOf(
-        // Buttons
-        arrayListOf<Labeled?>(), // save
-        // Runnables
-        arrayListOf<Runnable>(),
-        // Mac
-        arrayListOf<KeyCombination>(),
-        // Windows
-        arrayListOf<KeyCombination>(),
-        // Linux
-        arrayListOf<KeyCombination>()
-    )
-    
+    enum class KeyEvent {
+        EDITOR_REQUEST_CLOSE,
+        EDITOR_SAVE,
+        EDITOR_UNDO,
+        EDITOR_REDO,
+        EDITOR_NEXT,
+        EDITOR_PREVIOUS,
+    }
 
     /**
-     * Initialises the key bindings.
+     * An event that may be triggered by a [KeyEvent] when raised by a key press.
      */
-    fun assignKeys() {
+    class KeyBindingSubscriber(
 
-        checkCapsActive()
+        /**
+         * If provided, a primary click on this button will be
+         * simulated when the key combination is pressed.
+         */
+        val button: Labeled? = null,
 
-        EDITOR.stage.focusedProperty().addListener { _, _, _ ->
-            checkCapsActive()
+        /**
+         * If provided, this script will be executed when the key combination is pressed.
+         */
+        val runnable: Runnable? = null
+
+    ) : Runnable {
+        init {
+            if (button == null && runnable == null)
+                throw IllegalArgumentException("Either a button or runnable must be provided.")
         }
 
-        val os = PlatformType.getPlatformType() // user operating system
-        val systemColumn = os.ordinal + 2
+        override fun run() {
+            if (button != null)
+                button.fireEvent(MouseEvent(MouseEvent.MOUSE_CLICKED, button.layoutX, button.layoutY, button.boundsInScene().centerX, button.boundsInScene().centerY, MouseButton.PRIMARY, 1, false, false, false, false, false, false, false, false, false, false, null))
+            else runnable!!.run()
+        }
 
-        // Keyboard shortcuts
-        val metaS = KeyCharacterCombination("s", KeyCombination.META_DOWN)
-        val metaZ = KeyCharacterCombination("z", KeyCombination.META_DOWN)
-        val metaR = KeyCharacterCombination("y", KeyCombination.CONTROL_ANY)
-        val caps = KeyCodeCombination(KeyCode.CAPS)
-
-
-        // initialise the bindings
-        bind(metaS) { activeEditor()?.requestSave() }
-        bind(metaZ) { activeEditor()?.undo() }
-        bind(caps) { checkCapsActive() }
-
-        for (i in keyBindings[0].indices) {
-            val keyCombo = keyBindings[systemColumn][i] as KeyCombination
-            val button = keyBindings[0][i]
-
-            if (button != null) {
-                val b = Mnemonic(button as Labeled, keyCombo)
-                EDITOR.scene.first.addMnemonic(b)
-            } else {
-                EDITOR.scene.first.accelerators[keyCombo] = keyBindings[1][i] as Runnable
+        fun unbind() {
+            registeredBindings.forEach {
+                if (it.value.contains(this))
+                    it.value.remove(this)
             }
         }
     }
 
     /**
-     * Binds [KeyCombination]'s to [Runnable]'s to enable keyboard shortcuts.
-     *
-     * @param [bindingLinux] The key binding that will be used if the application is running on a linux target.
-     * @param [bindingMac] The key binding that will be used if the application is running on a mac target.
-     * @param [bindingWindows] The key binding that will be used if the application is running on a windows target.
-     * @param [runnable] The [Runnable] that will be executed when the key binding is pressed.
-     * @param [button] Optional : A button that will be clicked when the key binding is pressed.
+     * A collection of [KeyBindingSubscriber]s that have been bound to [KeyEvent].
      */
-    private fun bind(
-        bindingWindows: KeyCombination,
-        bindingMac: KeyCombination = bindingWindows,
-        bindingLinux: KeyCombination = bindingWindows,
-        button: Labeled? = null,
-        runnable: Runnable
+    private val registeredBindings = HashMap<KeyEvent, MutableList<KeyBindingSubscriber>>().also {
+        hm ->
+        KeyEvent.values().forEach {
+            hm[it] = mutableListOf()
+        }
+    }
+
+    /**
+     * Registers a [KeyBindingSubscriber] to a [KeyEvent].
+     *
+     * When a key binding triggers that [KeyEvent], the [KeyBindingSubscriber] will be executed.
+     *
+     * @param executable the bindable event to register
+     * @param onEvent the event type to register the bindable event to
+     */
+    fun bindKey(onEvent: KeyEvent, executable: KeyBindingSubscriber) {
+        registeredBindings[onEvent]!!.add(executable)
+    }
+
+    /**
+     * Registers a [KeyBindingSubscriber] to a [KeyEvent].
+     *
+     * When a key binding triggers that [KeyEvent], the [KeyBindingSubscriber] will be executed.
+     *
+     * @param button Optional : A button to fire when the event is triggered
+     * @param runnable Optional : A runnable to execute when the event is triggered
+     * @param onEvent the event type to register the bindable event to
+     */
+    fun bindKey(onEvent: KeyEvent, button: Labeled?, runnable: Runnable?) =
+        KeyBindingSubscriber(button, runnable).also {
+            bindKey(onEvent, it)
+        }
+
+
+
+    /**
+     * Registers a [KeyBindingSubscriber] to a [KeyEvent].
+     *
+     * When a key binding triggers that [KeyEvent], the [KeyBindingSubscriber] will be executed.
+     *
+     * @param button Optional : A button to fire when the event is triggered
+     * @param runnable Optional : A runnable to execute when the event is triggered
+     * @param onEvent the event type to register the bindable event to
+     */
+    fun bindKey(onEvent: KeyEvent, runnable: Runnable?) =
+        KeyBindingSubscriber(null, runnable).also {
+            bindKey(onEvent, it)
+        }
+
+    /**
+     * Registers a [KeyBindingSubscriber] to a [KeyEvent].
+     *
+     * When a key binding triggers that [KeyEvent], the [KeyBindingSubscriber] will be executed.
+     *
+     * @param button Optional : A button to fire when the event is triggered
+     * @param runnable Optional : A runnable to execute when the event is triggered
+     * @param onEvent the event type to register the bindable event to
+     */
+    fun bindKey(onEvent: KeyEvent, button: Labeled?) =
+        KeyBindingSubscriber(button, null).also {
+            bindKey(onEvent, it)
+        }
+
+
+    /**
+     * Registers a [KeyBindingSubscriber] to javafx, such that javafx will call back
+     * to [raise] when the key combination is pressed.
+     */
+    fun bindKey(b: KeyToEventBinding) {
+        // TODO able to check here for overriding key bindings. Warn user?
+        EDITOR.scene.first.accelerators[b.determineCombination()] = Runnable { raise(b.event) }
+    }
+
+    /**
+     * Exectutes all executables bound to this event.
+     */
+    private fun raise(event: KeyEvent) {
+        // Concmod just incase any of the subscribers unsubscribe once used.
+        registeredBindings[event]!!.concmod().forEach {
+            it.run()
+        }
+    }
+
+    //endregion
+    //region key to event binding
+
+    /**
+     * A binding between a key combination and a runnable or a button
+     */
+    data class KeyToEventBinding (
+
+        /**
+         * The event to raise when pressed.
+         */
+        val event: KeyEvent,
+
+        /**
+         * The key combination that triggers the button or runnable
+         * when on a Mac based target
+         */
+        val onMac: KeyCombination,
+
+        /**
+         * The key combination that triggers the button or runnable
+         * when on a Windows based target
+         */
+        val onWindows: KeyCombination,
+
+        /**
+         * The key combination that triggers the button or runnable
+         * when on a Linux based target
+         */
+        val onLinux: KeyCombination
     ) {
-        (keyBindings[3] as ArrayList<KeyCombination>).add(bindingWindows) // windows
-        (keyBindings[2] as ArrayList<KeyCombination>).add(bindingMac) // mac
-        (keyBindings[4] as ArrayList<KeyCombination>).add(bindingLinux) // linux
-        (keyBindings[0] as ArrayList<Labeled?>).add(button)
-        (keyBindings[1] as ArrayList<Runnable>).add(runnable)
+
+        /**
+         * returns the correct key combination for the current platform
+         */
+        fun determineCombination() =
+            when (PlatformType.getPlatformType()) {
+                PlatformType.PlatformTypes.MAC -> onMac
+                PlatformType.PlatformTypes.WINDOWS -> onWindows
+                PlatformType.PlatformTypes.LINUX -> onLinux
+            }
+
+    }
+
+    /**
+     * Populates [KeyToEventBinding]s for every key binding in the configuration.
+     */
+    private fun loadBindingsFromConfig() {
+        // TODO unbind everything first
+
+        val configs = (Config[Configs.KEY_BINDINGS_STRING] as String).lines()
+
+        configs.forEach {
+            // Eg of each config
+            // EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z
+
+            val cols = it.split(",")
+
+            bindKey(
+                KeyToEventBinding(
+                    KeyEvent.valueOf(cols[0]),
+                    KeyCombination.valueOf(cols[1]),
+                    KeyCombination.valueOf(cols[2]),
+                    KeyCombination.valueOf(cols[3])
+                )
+            )
+        }
     }
 
     /**
@@ -144,7 +290,6 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         else
             hideCapsActiveNotif()
     }
-
 
     private fun showCapsActiveNotif() {
         mvc().MainView.capsHBox.isVisible = true
@@ -163,4 +308,34 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
     private fun hideCapsActiveNotif() {
         mvc().MainView.capsHBox.isVisible = false
     }
+}
+
+/**
+ * A utility class that allows for temporary structures in the IDE to register and unregister
+ * collections of [KeyBindingSubscriber]s.
+ */
+class KeyBindingCollection(vararg bindings: KeyBindings.KeyBindingSubscriber = arrayOf()) {
+
+    private val binds = bindings.toMutableList()
+
+    fun bind(onEvent: KeyBindings.KeyEvent, button: Labeled?, runnable: Runnable?): KeyBindingCollection {
+        KeyBindings.bindKey(onEvent, button, runnable).also {
+            binds.add(it)
+        }
+
+        return this
+    }
+
+    fun bind(onEvent: KeyBindings.KeyEvent, runnable: Runnable?): KeyBindingCollection = bind(onEvent, null, runnable)
+
+    fun bind(onEvent: KeyBindings.KeyEvent, button: Labeled): KeyBindingCollection = bind(onEvent, button, null)
+
+    fun dispose() {
+        binds.forEach { it.unbind() }
+    }
+
+    fun finalize() {
+        dispose()
+    }
+
 }

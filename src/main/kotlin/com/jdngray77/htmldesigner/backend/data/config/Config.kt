@@ -249,8 +249,11 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(
             Configs.KEY_BINDINGS_STRING,
             """
-            Menu > Edit > [WIP] Undo,Meta+Z,Ctrl+Z,Ctrl+Z
-            Menu > Edit > [WIP] Redo,Meta+shift+Z,Ctrl+Y,Ctrl+Y
+            EDITOR_REQUEST_CLOSE,Meta+W,Ctrl+W,Ctrl+W
+            EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z
+            EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y
+            EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tab
+            EDITOR_PREVIOUS,Opt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab
             """.trimIndent()
         )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)

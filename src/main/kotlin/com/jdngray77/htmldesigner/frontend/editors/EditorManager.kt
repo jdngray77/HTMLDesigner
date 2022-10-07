@@ -1,6 +1,7 @@
 package com.jdngray77.htmldesigner.frontend.editors
 
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.KeyBindings.bindKey
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.editors.jsdesigner.VisualScriptEditor
 import com.jdngray77.htmldesigner.utility.*
@@ -22,6 +23,13 @@ object EditorManager : IDEEarlyBootListener {
 
     override fun onIDEBootEarly() {
         openEditors.clear()
+
+        bindKey(KeyBindings.KeyEvent.EDITOR_REQUEST_CLOSE) { activeEditor()?.requestClose() }
+        bindKey(KeyBindings.KeyEvent.EDITOR_UNDO) { activeEditor()?.undo() }
+        bindKey(KeyBindings.KeyEvent.EDITOR_UNDO) { activeEditor()?.redo() }
+        bindKey(KeyBindings.KeyEvent.EDITOR_SAVE) { activeEditor()?.requestSave() }
+        bindKey(KeyBindings.KeyEvent.EDITOR_NEXT) { nextEditor() }
+        bindKey(KeyBindings.KeyEvent.EDITOR_PREVIOUS) { previousEditor() }
     }
 
     /**
@@ -82,6 +90,14 @@ object EditorManager : IDEEarlyBootListener {
     //endregion                                Raw editors
     //region                                Utility functions
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    fun nextEditor() {
+        editorDock.selectionModel.selectNext()
+    }
+
+    fun previousEditor() {
+        editorDock.selectionModel.selectPrevious()
+    }
 
 
     /**

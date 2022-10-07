@@ -11,20 +11,20 @@ internal class KeyBindingsTest {
 
     @Test
     fun getKeyArray() {
-        val keys = KeyBindings.keyBindings
-
-        assertNotNull(keys)
-        assert(keys.size >= 0)
+//        val keys = KeyBindings.keyBindings
+//
+//        assertNotNull(keys)
+//        assert(keys.size >= 0)
     }
 
     @Test
     fun checkColumns() {
-
+        TODO()
     }
 
     @Test
     fun checkRows() {
-
+        TODO()
     }
 
     @After

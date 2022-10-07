@@ -1,9 +1,7 @@
 package com.jdngray77.htmldesigner.frontend.editors
 
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
-import com.jdngray77.htmldesigner.backend.DocumentState
-import com.jdngray77.htmldesigner.backend.DocumentUndoRedo
-import com.jdngray77.htmldesigner.backend.setAction
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import javafx.event.Event
 import javafx.scene.Parent
@@ -307,7 +305,7 @@ abstract class Editor<T : Serializable>(
      * Should validate that the editor is in a good state,
      * (i.e the document being edited exists).
      *
-     * If in bad state, typically call [requestClose] to close the editor.
+     * If in bad state, typically call [requestCloseBinding] to close the editor.
      */
     protected open fun validate() {}
 
@@ -326,7 +324,7 @@ abstract class Editor<T : Serializable>(
     protected open fun onHistoryTraversed() {}
 
     /**
-     * Invoked when [requestClose] is called.
+     * Invoked when [requestCloseBinding] is called.
      *
      * consume e to cancel close.
      */
