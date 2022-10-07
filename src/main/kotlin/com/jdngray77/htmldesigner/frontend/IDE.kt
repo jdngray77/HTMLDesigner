@@ -221,6 +221,7 @@ class IDE : Application() {
             // Starts up the remaining systems that depend on the GUI or a project.
             EventType.IDE_FINISHED_LOADING.notify()
         }
+
     }
 
     /**

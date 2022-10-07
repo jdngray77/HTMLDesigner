@@ -109,6 +109,7 @@ enum class Configs {
      */
     WEB_SERVER_REFRESH_DELAY_INT,
 
+    KEY_BINDINGS_STRING,
     /**
      * Determines the maximum number of document states
      * that can be held in RAM for undo/redo.
@@ -191,7 +192,6 @@ enum class Configs {
      * Permits JsGraph validation to attempt to automatically fix major issues.
      */
     JS_GRAPH_AUTOFIX_MAJOR_BOOL,
-
     /**
      * If true, the ide will show a restart suggestion prompt
      * when [LARGE_ERROR_COUNT_THRESHOLD] unhandled exceptions have been caught.
@@ -209,7 +209,12 @@ enum class Configs {
      * If high at project load, the no pages will be loaded.
      * Effectively ignoring the project's startup page preference.
      */
-    IGNORE_PROJECT_STARTUP_PAGE_BOOL
+    IGNORE_PROJECT_STARTUP_PAGE_BOOL,
+
+    /**
+     * Used to only show caps lock warning once.
+     */
+    KEY_BINDINGS_SUPPRESS_CAPS_WARNING_BOOL,
 }
 
 /**
@@ -241,6 +246,16 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(Configs.AUTO_LOAD_PROJECT_BOOL, true)
         put(Configs.WEB_SERVER_PORT_INT, 8080)
         put(Configs.WEB_SERVER_REFRESH_DELAY_INT, 0)
+        put(
+            Configs.KEY_BINDINGS_STRING,
+            """
+            EDITOR_REQUEST_CLOSE,Meta+W,Ctrl+W,Ctrl+W
+            EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z
+            EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y
+            EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tab
+            EDITOR_PREVIOUS,Opt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab
+            """.trimIndent()
+        )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)
         put(Configs.SPOTIFY_CLIENT_ID_STRING, "")
         put(Configs.SPOTIFY_CLIENT_SECRET_STRING, "")
@@ -256,6 +271,7 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(Configs.LARGE_ERROR_COUNT_PROMPT_BOOL, true)
         put(Configs.LARGE_ERROR_COUNT_STEP_THRESHOLD_INT, 10)
         put(Configs.IGNORE_PROJECT_STARTUP_PAGE_BOOL, false)
+        put(Configs.KEY_BINDINGS_SUPPRESS_CAPS_WARNING_BOOL, true)
     }
 
     /**
