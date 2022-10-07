@@ -97,6 +97,11 @@ object EditorManager : IDEEarlyBootListener {
     fun activeEditor() = activeTab()?.let { findEditorByTab(it) }
 
     /**
+     * @return true if [activeTab] is not null. i.e there is at least one tab open.
+     */
+    fun editorAvailable() = activeEditor() != null
+
+    /**
      * Determines if the active editor is of the given type.
      *
      * @param T the type of editor.

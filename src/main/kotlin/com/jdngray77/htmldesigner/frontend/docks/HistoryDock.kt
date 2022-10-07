@@ -7,6 +7,8 @@ import com.jdngray77.htmldesigner.backend.Subscriber
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditor
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditorIsDocument
+import com.jdngray77.htmldesigner.frontend.editors.EditorManager.editorAvailable
 import com.jdngray77.htmldesigner.utility.SerializableDocument
 import javafx.collections.FXCollections
 import javafx.scene.control.ListView
@@ -35,6 +37,9 @@ class HistoryDock : Dock(), Subscriber {
     }
 
     override fun notify(e: EventType) {
+        if (!editorAvailable())
+            return
+
         val history = activeEditor()?.history?.timeline()
 
         (center as ListView<DocumentState<*>>).apply {
