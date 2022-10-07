@@ -55,6 +55,8 @@ enum class EventType {
      */
     PROJECT_META_SAVED,
 
+    PROJECT_MOVED,
+
 
     PROJECT_DOCUMENT_SAVED,
 

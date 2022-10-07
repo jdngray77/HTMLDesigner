@@ -1,5 +1,7 @@
 package com.jdngray77.htmldesigner.backend.data.project
 
+import com.jdngray77.htmldesigner.backend.EventNotifier
+import com.jdngray77.htmldesigner.backend.EventType
 import com.jdngray77.htmldesigner.utility.PartiallySerializable
 import com.jdngray77.htmldesigner.utility.hasFile
 import com.jdngray77.htmldesigner.utility.subFile
@@ -87,6 +89,11 @@ import kotlin.reflect.KProperty
  */
 class ProjectStructure (
 
+    _locationOnDisk: File,
+
+) : PartiallySerializable {
+
+
     /**
      * The location on disk containing this project.
      *
@@ -118,9 +125,8 @@ class ProjectStructure (
      * | | | dog.jpg
      * ```
      */
-    val locationOnDisk: File
-
-) : PartiallySerializable {
+    var locationOnDisk: File = _locationOnDisk
+        private set
 
     /**
      * @returns a file with a path relative to the root of the project.
@@ -179,16 +185,25 @@ class ProjectStructure (
     }
 
     /**
-     * For after the project has been created,
-     * especially with loading.
+     * Checks the location of the project.
      *
-     * Checks that the file exists, and is a project.
-     * If not, we know that the project has been moved.
+     * Makes sure that the project directory exists, and contains the designer file.
      *
+     * For after the project has been created, especially with loading.
+     *
+     * Updates [locationOnDisk] is the project has been moved.
+     *
+     * @param loadLocation The location on disk that the project has just been loaded from. If not provided, will validate the currently known location.s
      * @throws IllegalArgumentException if [locationOnDisk] does not exist, or the meta is missing.
      */
-    internal fun validateLocationOnDisk() {
+    internal fun validateLocationOnDisk(loadLocation: File = locationOnDisk) {
         baseLocationChecks()
+
+        if (loadLocation != locationOnDisk) {
+            locationOnDisk = loadLocation
+            EventNotifier.notifyEvent(EventType.PROJECT_MOVED)
+        }
+
 
         if (!locationOnDisk.exists())
             throw IllegalArgumentException("Project location does not exist. Has it been moved?")
@@ -197,13 +212,13 @@ class ProjectStructure (
             throw IllegalArgumentException("Project location is missing project meta data. Restore it from a backup, or re-import the project.")
 
 
-        // Check directories are present
-        forEachRootDirectory { property, file ->
-            if (!file.exists() || !locationOnDisk.hasFile(file.name))
-                throw IllegalArgumentException("${file.name} directory does is missing from the project!")
-
-            file
-        }
+//        // Check directories are present
+//        forEachRootDirectory { property, file ->
+//            if (!file.exists() || !locationOnDisk.hasFile(file.name))
+//                throw IllegalArgumentException("${file.name} directory does is missing from the project!")
+//
+//            file
+//        }
 
     }
 
@@ -254,6 +269,7 @@ class ProjectStructure (
             companionconst ->
             this::class.members
                 .filterIsInstance<KMutableProperty<File>>()
+                .filter { it.name != this::locationOnDisk.name }
                 .forEach {
                     it.setter.call(this@ProjectStructure, payload(it, it.getter.call(this@ProjectStructure)))
                 }

@@ -637,7 +637,10 @@ class Project (
                 return try {
 
                     val proj = loadObjectFromDisk(this) as Project
+
+                    proj.fileStructure.validateLocationOnDisk(this.parentFile)
                     proj.recreateTransientProperties()
+
                     logStatus("Loaded Existing Project '${proj.fileStructure.locationOnDisk.name}'")
                     proj
 

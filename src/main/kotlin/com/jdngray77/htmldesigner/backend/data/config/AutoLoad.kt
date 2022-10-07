@@ -1,7 +1,6 @@
 package com.jdngray77.htmldesigner.backend.data.config
 
-import com.jdngray77.htmldesigner.backend.data.config.Config
-import com.jdngray77.htmldesigner.backend.data.config.Configs
+import java.io.File
 
 
 /**
@@ -18,6 +17,7 @@ internal object AutoLoad {
     fun isAvailable() =
         (Config[Configs.AUTO_LOAD_PROJECT_BOOL] as Boolean)
                 && Config[Configs.LAST_PROJECT_PATH_STRING] != ""
+                && File(Config[Configs.LAST_PROJECT_PATH_STRING] as String).exists()
 
     /**
      * Raises [Configs.AUTO_LOAD_PROJECT_BOOL]
