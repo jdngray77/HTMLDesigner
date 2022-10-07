@@ -190,9 +190,13 @@ class Elements : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                     .menuDone()
 
                 .item("New script") {
+                    val x = activeDocumentEditor()!!
+
                     VisualScriptEditor(
                         VisualScriptEditor.createNewScript()
                     ).focus()
+
+                    x.changed("Created new script")
                 }
 
                 .separator()
@@ -292,6 +296,13 @@ class Elements : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
 
             .toContextMenu()
         )
+
+        setOnContextMenuRequested { it ->
+            if (!activeEditorIsDocument()) {
+                ContextMessage(tree, "You're not currently editing a page.")
+                it.consume()
+            }
+        }
     }
 
 
