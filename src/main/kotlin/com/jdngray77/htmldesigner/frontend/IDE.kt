@@ -200,6 +200,7 @@ class IDE : Application() {
 
         // Put the main view we just loaded into the window, and show the window.
         stage.scene = scene.first
+        stage.title = "HTML Designer"
         stage.show()
 
         // Run later - return from [start] to allow javafx to create the window, then
@@ -216,6 +217,8 @@ class IDE : Application() {
 
                 exitProcess(ExitCodes.ERROR_NO_MVC.ordinal)
             }
+
+            stage.title = "HTML Designer - ${mvc!!.Project.meta.name}"
 
             // Notify meta listeners that the GUI and MVC have loaded.
             // Starts up the remaining systems that depend on the GUI or a project.
