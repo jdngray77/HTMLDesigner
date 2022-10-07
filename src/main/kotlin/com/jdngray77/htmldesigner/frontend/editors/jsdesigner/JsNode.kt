@@ -360,8 +360,6 @@ class JsNode {
 
     /**
      * Updates the position of the node, and the connected lines.
-     *
-     * Also stores the current position in the underlying [graphNode]
      */
     internal fun invalidatePosition() {
 
@@ -371,8 +369,6 @@ class JsNode {
         root.toFront()
 
         invalidateLinePositions()
-
-        stowPosition()
     }
 
     fun invalidateLinePositions() {
@@ -440,6 +436,8 @@ class JsNode {
                     it.invalidatePosition()
             }
         }
+
+        stowPosition()
     }
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
