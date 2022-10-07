@@ -53,7 +53,15 @@ enum class ProjectPreference {
     /**
      * When loading the project, the page that will be opened by default.
      */
-    STARTUP_PAGE_PATH_STRING
+    STARTUP_PAGE_PATH_STRING,
+
+    /**
+     * When loading the project the user is warned if the project directory name is
+     * different to the project name.
+     *
+     * This suppresses that after being declined once.
+     */
+    SUPPRESS_PROJECT_NAME_MISMATCH_WARNING_BOOL
 }
 
 /**
@@ -74,6 +82,7 @@ class ProjectPreferences(project: Project) : Registry<ProjectPreference>(
         put(ProjectPreference.BACKUP_ENABLE_BOOL, true)
         put(ProjectPreference.ZOOM_STEP_SIZE_DOUBLE, .1)
         put(ProjectPreference.STARTUP_PAGE_PATH_STRING, "index.html")
+        put(ProjectPreference.SUPPRESS_PROJECT_NAME_MISMATCH_WARNING_BOOL, false)
     }
 
     override fun validate() {

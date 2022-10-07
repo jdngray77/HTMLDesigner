@@ -14,13 +14,10 @@
 
 package com.jdngray77.htmldesigner.frontend.controls
 
-import com.jdngray77.htmldesigner.backend.EventNotifier
-import com.jdngray77.htmldesigner.backend.EventType
+import com.jdngray77.htmldesigner.backend.*
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.Registry
-import com.jdngray77.htmldesigner.backend.showInformationalAlert
-import com.jdngray77.htmldesigner.backend.userInput
 import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
@@ -82,6 +79,7 @@ object RunAnything : SearchableList<Task> (
         Task("Current Editor > Close") { activeDocumentEditor()?.requestClose() },
         Task("Current Editor > Save") { activeDocumentEditor()?.requestSave() },
         Task("Current editor > Close without saving") { activeDocumentEditor()?.forceClose() },
+        Task("Reload key configuration") { KeyBindings.loadBindingsFromConfig() },
 
 
         )

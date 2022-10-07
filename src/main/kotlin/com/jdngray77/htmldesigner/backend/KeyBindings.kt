@@ -2,8 +2,10 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.jdngray77.htmldesigner.utility.boundsInScene
 import com.jdngray77.htmldesigner.utility.concmod
@@ -11,6 +13,7 @@ import javafx.scene.control.Labeled
 import javafx.scene.input.*
 import org.controlsfx.control.PopOver
 import java.awt.Toolkit
+import java.lang.System.gc
 
 /**
  * Binds keyboard shortcuts to actions.
@@ -200,12 +203,15 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
     fun bindKey(b: KeyToEventBinding) {
         // TODO able to check here for overriding key bindings. Warn user?
         EDITOR.scene.first.accelerators[b.determineCombination()] = Runnable { raise(b.event) }
+        logStatus("${b.event} is bound to ${b.determineCombination()}")
     }
 
     /**
-     * Exectutes all executables bound to this event.
+     * Executes all executables bound to this event.
      */
     private fun raise(event: KeyEvent) {
+        logStatus("Key event raised : $event")
+
         // Concmod just incase any of the subscribers unsubscribe once used.
         registeredBindings[event]!!.concmod().forEach {
             it.run()
@@ -259,8 +265,11 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
     /**
      * Populates [KeyToEventBinding]s for every key binding in the configuration.
      */
-    private fun loadBindingsFromConfig() {
-        // TODO unbind everything first
+    internal fun loadBindingsFromConfig() {
+
+
+        unbindAll()
+
 
         val configs = (Config[Configs.KEY_BINDINGS_STRING] as String).lines()
 
@@ -279,6 +288,15 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
                 )
             )
         }
+    }
+
+    fun unbindAll() {
+        EDITOR.scene.first.accelerators.clear()
+        registeredBindings.values.concmod().forEach {
+            it.concmod().forEach { it.unbind() }
+            it.clear()
+        }
+        gc()
     }
 
     /**

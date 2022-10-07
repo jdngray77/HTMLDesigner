@@ -250,6 +250,7 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
             Configs.KEY_BINDINGS_STRING,
             """
             EDITOR_REQUEST_CLOSE,Meta+W,Ctrl+W,Ctrl+W
+            EDITOR_REQUEST_SAVE,Meta+S,Ctrl+S,Ctrl+S
             EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z
             EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y
             EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tab
