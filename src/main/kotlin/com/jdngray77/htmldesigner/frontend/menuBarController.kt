@@ -130,9 +130,7 @@ class menuBarController {
 
 
     fun menu_debug_restart_bgpool() {
-        BackgroundTask.print()
         BackgroundTask.restart()
-        BackgroundTask.print()
     }
 
     fun menu_debug_clearcache(actionEvent: ActionEvent) {

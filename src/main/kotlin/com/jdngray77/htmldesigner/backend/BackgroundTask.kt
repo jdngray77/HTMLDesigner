@@ -58,8 +58,6 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
      */
     @Synchronized
     fun submit(runnable: Runnable): Future<*>? {
-        println(threadPool)
-
         assertRunning()
 
         return threadPool.submit(runnable)
@@ -164,9 +162,4 @@ object BackgroundTask : Subscriber, IDEEarlyBootListener {
             else -> {}
         }
     }
-
-    fun print() {
-        println(threadPool)
-    }
-
 }
