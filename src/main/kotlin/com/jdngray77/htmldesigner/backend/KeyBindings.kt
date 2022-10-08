@@ -61,7 +61,6 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
     /**
      * Checks caps notification and binds to completion of IDE load (after project loaded)
-     *
      * We can't configure the bindings or caps notification this early, as we need to access the GUI
      * via the MVC, but the MVC isn't available until after the project has been loaded - so we
      * subscribe to be notified after the project has been loaded.
@@ -86,7 +85,7 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
      */
     enum class KeyEvent {
         EDITOR_REQUEST_CLOSE,
-        EDITOR_SAVE,
+        EDITOR_REQUEST_SAVE,
         EDITOR_UNDO,
         EDITOR_REDO,
         EDITOR_NEXT,
@@ -268,9 +267,6 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
     internal fun loadBindingsFromConfig() {
 
 
-        unbindAll()
-
-
         val configs = (Config[Configs.KEY_BINDINGS_STRING] as String).lines()
 
         configs.forEach {
@@ -279,14 +275,20 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
             val cols = it.split(",")
 
-            bindKey(
-                KeyToEventBinding(
-                    KeyEvent.valueOf(cols[0]),
-                    KeyCombination.valueOf(cols[1]),
-                    KeyCombination.valueOf(cols[2]),
-                    KeyCombination.valueOf(cols[3])
+            try {
+                bindKey(
+                    KeyToEventBinding(
+                        KeyEvent.valueOf(cols[0]),
+                        KeyCombination.valueOf(cols[1]),
+                        KeyCombination.valueOf(cols[2]),
+                        KeyCombination.valueOf(cols[3])
+                    )
                 )
-            )
+            } catch (e: IllegalArgumentException) {
+                logWarning("Unable to bind key combination for ${cols[0]}, as there is no such key event.")
+            } catch (ignored: Exception) {
+                logWarning("Unable to parse key binding '$it'")
+            }
         }
     }
 

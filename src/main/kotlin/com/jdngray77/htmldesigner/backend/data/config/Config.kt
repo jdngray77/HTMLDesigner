@@ -253,7 +253,7 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
             EDITOR_REQUEST_SAVE,Meta+S,Ctrl+S,Ctrl+S
             EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z
             EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y
-            EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tab
+            EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tabs
             EDITOR_PREVIOUS,Opt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab
             """.trimIndent()
         )

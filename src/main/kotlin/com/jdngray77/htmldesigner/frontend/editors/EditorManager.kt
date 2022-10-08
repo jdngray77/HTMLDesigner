@@ -23,11 +23,13 @@ object EditorManager : IDEEarlyBootListener {
 
     override fun onIDEBootEarly() {
         openEditors.clear()
+    }
 
+    init {
         bindKey(KeyBindings.KeyEvent.EDITOR_REQUEST_CLOSE) { activeEditor()?.requestClose() }
         bindKey(KeyBindings.KeyEvent.EDITOR_UNDO) { activeEditor()?.undo() }
         bindKey(KeyBindings.KeyEvent.EDITOR_UNDO) { activeEditor()?.redo() }
-        bindKey(KeyBindings.KeyEvent.EDITOR_SAVE) { activeEditor()?.requestSave() }
+        bindKey(KeyBindings.KeyEvent.EDITOR_REQUEST_SAVE) { activeEditor()?.requestSave() }
         bindKey(KeyBindings.KeyEvent.EDITOR_NEXT) { nextEditor() }
         bindKey(KeyBindings.KeyEvent.EDITOR_PREVIOUS) { previousEditor() }
     }
