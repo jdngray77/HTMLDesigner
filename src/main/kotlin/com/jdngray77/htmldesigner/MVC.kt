@@ -67,6 +67,7 @@ class MVC(
 
     override fun notify(e: EventType) {
         processStartupPage()
+        EventNotifier.unsubscribe(this, EventType.IDE_FINISHED_LOADING)
     }
 
     /**
