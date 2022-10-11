@@ -111,6 +111,11 @@ enum class EventType {
 
     TAG_CREATED,
     TAG_DELETED,
+
+    /**
+     * Whenever a log is made to the standard out or logging class.
+     */
+    LOG,
 }
 
 fun EventType.notify() {
@@ -213,7 +218,8 @@ object EventNotifier {
             }
         }
 
-        logStatus("Notified $event to ${backgroundSubscribers.size + FXSubscribers.size} Subscribers")
+        if (event != EventType.LOG)
+            logStatus("Notified $event to ${backgroundSubscribers.size + FXSubscribers.size} Subscribers")
     }
 
     /**

@@ -1,4 +1,3 @@
-
 /*░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
  ░                                                                                                ░
  ░ Jordan T. Gray's                                                                               ░
@@ -152,7 +151,7 @@ import java.time.Instant
  *
  * TODO file manifest
  */
-class Project (
+class Project(
 
     /**
      * The file that the project is to be created in
@@ -167,7 +166,7 @@ class Project (
     /**
      * The author / organisation of the project
      */
-    author : String? = null
+    author: String? = null
 
 ) : PartiallySerializable {
 
@@ -213,9 +212,6 @@ class Project (
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 
-
-
-
     /**
      * A store of all files and project data that is actively open
      * within the editor.
@@ -223,7 +219,7 @@ class Project (
      * If a file is open in the editor, it can be found here.
      */
     @Transient
-    private lateinit var cache : FileCache
+    private lateinit var cache: FileCache
 
     /**
      * @return a non-mutable copy of the file cache, containing all files that are loaded.
@@ -246,7 +242,8 @@ class Project (
     /**
      * @returns a [CachedFile] containing the [file], or null of that file is not in the cache.
      */
-    fun findCachedFile(file: File) = getCache().entries.find { it.key == file.absolutePath || it.value.file == file }?.value
+    fun findCachedFile(file: File) =
+        getCache().entries.find { it.key == file.absolutePath || it.value.file == file }?.value
 
 
     /**
@@ -255,7 +252,7 @@ class Project (
      * Use this only if you don't have access to the [CachedFile] itself.
      * @see [CachedFile.removeCache]
      */
-    fun removeTFromCache(it: Any) : Boolean {
+    fun removeTFromCache(it: Any): Boolean {
         return cache.findT(it)?.let {
             it.removeCache()
             true
@@ -263,14 +260,10 @@ class Project (
     }
 
 
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion
     //region                         initalisation
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
 
 
     /**
@@ -315,15 +308,10 @@ class Project (
     }
 
 
-
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion
     //region                         project util functions
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
 
 
     fun renameOrMoveProject(newLocation: File) {
@@ -366,14 +354,30 @@ class Project (
      * Saves the stacktrace of [e] in the [PROJECT_PATH_LOGS] folder.
      *
      * The file is titled the date and time of invocation.
+     *
+     * @return the log file that was created.
      */
-    fun logError(e : Throwable) {
-        fileStructure.LOGS.subFile(" [ERR] ${Time.from(Instant.now())}.log").apply {
+    fun logError(e: Throwable) =
+        newLogFile(e.stackTraceToString(), "ERR")
+
+    /**
+     * Creates a new log file with the given contents.
+     * @return the file created.
+     */
+    fun newLogFile(content: String, prefix: String = "") : File {
+        fileStructure.LOGS.subFile(
+            (if (prefix.isNotBlank()) " [$prefix] " else "") +
+                    "" +
+                    "${Time.from(Instant.now())}.log"
+        ).apply {
+
             createNewFile()
             printWriter().apply {
-                e.printStackTrace(this)
+                write(content)
                 flush()
             }
+
+            return this
         }
     }
 
@@ -388,16 +392,10 @@ class Project (
     }
 
 
-
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion
     //region                         Documents
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
-
 
 
     /**
@@ -413,7 +411,7 @@ class Project (
      *
      * @return the new document.
      */
-    fun createDocument(subpath: String) : CachedFile<Document> {
+    fun createDocument(subpath: String): CachedFile<Document> {
         val doc = DefaultDocument()
 
         val file = fileStructure.HTML.subFile(subpath.assertEndsWith(".html"))
@@ -492,15 +490,10 @@ class Project (
     }
 
 
-
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion
     //region                         Javascript graphs
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
 
 
     /**
@@ -530,7 +523,7 @@ class Project (
      *
      * @param jsGraph the graph to save
      */
-    fun saveJsGraph(jsGraph: CachedFile<JsGraph>) : CachedFile<JsGraph> {
+    fun saveJsGraph(jsGraph: CachedFile<JsGraph>): CachedFile<JsGraph> {
         jsGraph.data.saveObjectToDisk(jsGraph.file)
         return jsGraph
     }
@@ -542,7 +535,7 @@ class Project (
      *
      * If you have access to the cached file, preffer sister method.
      */
-    fun saveJsGraph(jsGraph: JsGraph) : CachedFile<JsGraph> =
+    fun saveJsGraph(jsGraph: JsGraph): CachedFile<JsGraph> =
         cache.findT(jsGraph)!!.also {
             saveJsGraph(it)
         }
@@ -550,11 +543,11 @@ class Project (
     /**
      * Creates a new graph.
      */
-    fun createJsGraph(subpath: String) : CachedFile<JsGraph> = saveJsGraph(JsGraph(subpath))
+    fun createJsGraph(subpath: String): CachedFile<JsGraph> = saveJsGraph(JsGraph(subpath))
 
     /**
-    * Deletes a graph
-    */
+     * Deletes a graph
+     */
     fun deleteJsGraph(subpath: String) {
         val f = fileStructure.locationOnDisk.subFile(subpath.assertEndsWith(JsGraph.FILE_EXTENSION))
 
@@ -566,15 +559,10 @@ class Project (
     }
 
 
-
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion
     //region                         file getters
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
 
 
     /**
@@ -607,14 +595,9 @@ class Project (
     fun prefabs() = fileStructure.PREFABS.flattenTree()
 
 
-
-
-
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //endregion
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
 
 
     companion object {
@@ -627,14 +610,20 @@ class Project (
          * @param absolutePath The path to the project folder
          * @return A Project object
          */
-        fun load(absolutePath : String) : Project? {
+        fun load(absolutePath: String): Project? {
             if (!File(absolutePath).exists())
-                throw NoSuchFileException(File(absolutePath), reason = "Tried to load a project, but there's nothing there!")
+                throw NoSuchFileException(
+                    File(absolutePath),
+                    reason = "Tried to load a project, but there's nothing there!"
+                )
 
             File("$absolutePath/$PROJECT_PATH_META").apply {
 
                 if (!exists())
-                    throw NoSuchFileException(this, reason = "\n\nThere is no $PROJECT_PATH_META file in ${parentFile.name}. \nAre you sure this is the right folder?")
+                    throw NoSuchFileException(
+                        this,
+                        reason = "\n\nThere is no $PROJECT_PATH_META file in ${parentFile.name}. \nAre you sure this is the right folder?"
+                    )
 
                 return try {
 
@@ -672,13 +661,16 @@ class Project (
                                 proj.fileStructure.validateLocationOnDisk(dest)
 
                                 // Restart to reload
-                                Config[Configs.LAST_PROJECT_PATH_STRING] = proj.fileStructure.locationOnDisk.absolutePath
+                                Config[Configs.LAST_PROJECT_PATH_STRING] =
+                                    proj.fileStructure.locationOnDisk.absolutePath
                                 EDITOR.restart()
                             }
+
                             updProject -> {
                                 proj.meta.name = proj.fileStructure.locationOnDisk.nameWithoutExtension
                                 proj.saveDesignerFile()
                             }
+
                             updNeitherDontAsk -> {
                                 proj.PREFERENCES[ProjectPreference.SUPPRESS_PROJECT_NAME_MISMATCH_WARNING_BOOL] = true
                                 proj.saveDesignerFile()
@@ -694,9 +686,11 @@ class Project (
                     proj
 
                 } catch (e: InvalidClassException) {
-                    showInformationalAlert("This project was made with a different version of the IDE, and is incompatible.\n\n" +
-                            "To load this project, you need an editor that supports the following project version : \n\n${Project::class.hashCode()}\n\n" +
-                            "To find what editor version you need, visit \n\nhttps://github.com/jdngray77/HTMLDesigner/wiki/IDE-to-Project-Version-Map")
+                    showInformationalAlert(
+                        "This project was made with a different version of the IDE, and is incompatible.\n\n" +
+                                "To load this project, you need an editor that supports the following project version : \n\n${Project::class.hashCode()}\n\n" +
+                                "To find what editor version you need, visit \n\nhttps://github.com/jdngray77/HTMLDesigner/wiki/IDE-to-Project-Version-Map"
+                    )
                     null
                 }
             }
@@ -705,5 +699,6 @@ class Project (
         fun Document.projectFile() = IDE.mvc().Project.cache.findT(this)!!
     }
 
-    class UnloadedDocumentException(val d: Document) : Exception("The file for ${d.title().assertEndsWith(".html")} was required, but the file was not loaded.")
+    class UnloadedDocumentException(val d: Document) :
+        Exception("The file for ${d.title().assertEndsWith(".html")} was required, but the file was not loaded.")
 }

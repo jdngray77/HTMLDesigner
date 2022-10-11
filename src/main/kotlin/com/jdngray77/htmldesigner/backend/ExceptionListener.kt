@@ -37,19 +37,8 @@ object ExceptionListener : UncaughtExceptionHandler {
 
     override fun uncaughtException(t: Thread?, e: Throwable?) {
         e?.let {
-            if (Config[Configs.LARGE_ERROR_COUNT_PROMPT_BOOL] as Boolean) {
-                errCount ++
-                if (errCount % Config[Configs.LARGE_ERROR_COUNT_STEP_THRESHOLD_INT] as Int == 0) {
-                    showWarningNotification("We suggest restarting the IDE.",
-                            "The IDE has encountered $errCount errors (so far...).\n\nTo be safe, please save your work and restart the IDE.\n\nThese prompts can be disabled in the registry.\n(LARGE_ERROR_COUNT_PROMPT_BOOL)")
-                }
-            }
-
-
             mvcIfAvail()?.Project?.logError(e)
-            e.printStackTrace()
             showErrorNotification(sanitizeException(e))
-
             checkSpecial(e)
         }
     }
@@ -66,6 +55,14 @@ object ExceptionListener : UncaughtExceptionHandler {
                 }
             }
             else -> {}
+        }
+
+        if (Config[Configs.LARGE_ERROR_COUNT_PROMPT_BOOL] as Boolean) {
+            errCount ++
+            if (errCount % Config[Configs.LARGE_ERROR_COUNT_STEP_THRESHOLD_INT] as Int == 0) {
+                showWarningNotification("We suggest restarting the IDE.",
+                    "The IDE has encountered $errCount errors (so far...).\n\nTo be safe, please save your work and restart the IDE.\n\nThese prompts can be disabled in the registry.\n(LARGE_ERROR_COUNT_PROMPT_BOOL)")
+            }
         }
     }
 }

@@ -114,6 +114,20 @@ class DocumentEditor(
     @FXML
     var contentRenderer: WebView = root.lookup("#contentRenderer") as WebView
 
+    init {
+        contentRenderer.engine.setOnError {
+            println("Error in WebView: ${it.message}")
+        }
+
+        contentRenderer.engine.setOnAlert {
+            println("Alert in WebView: ${it.data}")
+        }
+
+        contentRenderer.engine.setOnStatusChanged {
+            println("Status changed in WebView: ${it.data}")
+        }
+    }
+
     /**
      * Button which shows the zoom level to the user,
      * and allows them to reset the zoom when clicked.

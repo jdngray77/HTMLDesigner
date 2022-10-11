@@ -903,7 +903,6 @@ enum class JsGraphDataType {
     Boolean,
     Color,
     Trigger,
-
     void
 }
 

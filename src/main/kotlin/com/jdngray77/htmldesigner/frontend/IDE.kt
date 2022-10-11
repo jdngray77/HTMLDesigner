@@ -178,6 +178,9 @@ class IDE : Application() {
         this.stage = stage
         EDITOR = this
 
+        // Init logging.
+        SystemOutCapturer.init()
+
         // Notify early systems to boot.
         // This starts systems that the GUI requires in order
         // to be loaded.
@@ -185,7 +188,7 @@ class IDE : Application() {
             try {
                 (it as IDEEarlyBootListener).onIDEBootEarly()
             } catch (e: Exception) {
-                e.printStackTrace()
+                ExceptionListener.uncaughtException(Thread.currentThread(), e)
             }
         }
 
@@ -311,6 +314,7 @@ class IDE : Application() {
     private fun determineProject(): Project {
         while (true) {
             try {
+                // TODO only try auto load once.
                 return if (AutoLoad.isAvailable())
                     // If auto-load is available, load the last project.
                     // However, if that fails then just prompt the user anyway.
@@ -321,7 +325,6 @@ class IDE : Application() {
                         // Store what the user provided for the auto-load.
                         AutoLoad.storeLastProjectLoaded(it.fileStructure.locationOnDisk.path)
                     }
-
 
             } catch (e: Exception) {
                 // If the project could not be loaded, notify the user and prompt.

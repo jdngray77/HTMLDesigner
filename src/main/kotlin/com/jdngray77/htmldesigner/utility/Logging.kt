@@ -20,24 +20,26 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIfAvail
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvcIsAvail
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.frontend.controls.SearchableList
-import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.layout.*
-import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import javafx.scene.text.Text
 import jfxtras.styles.jmetro.JMetro
 import jfxtras.styles.jmetro.Style
 import org.controlsfx.control.NotificationPane
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.PopOver
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Shows a floating notification in the lower right, displaying the [error]
@@ -46,12 +48,9 @@ import java.io.StringWriter
  */
 fun showErrorNotification(error: Throwable, suppress: Boolean = Config[Configs.SUPPRESS_EXCEPTION_NOTIFICATIONS_BOOL] as Boolean ) {
 
-
     logStatus(
-        (if (suppress) "(suppressed)" else "") +
-                "Error: ${error.message} (${error.javaClass.simpleName})\n" +
-                "Stacktrace:\n" +
-                error.stackTraceToString()
+        (if (suppress) "(suppressed) " else "") +
+                "Error: ${error.message} (${error.javaClass.simpleName})"
     )
 
     if (suppress)
@@ -188,7 +187,7 @@ fun logWarning(string: String) {
  * @returns The message that was displayed.
  */
 fun logStatus(string: String) {
-    println("\nIDE Status: $string")
+    println("IDE Status: $string")
 
     onUIThread {
         mvcIfAvail()?.MainView?.setStatus(string)
@@ -207,7 +206,7 @@ fun logStatus(string: String) {
  * @param action The action to display.
  */
 fun setAction(string: String) {
-    println("\nUser Action : $string")
+    println("User Action : $string")
 
     onUIThread {
         mvcIfAvail()?.MainView?.setAction(string)
@@ -328,4 +327,109 @@ fun userInput(message: String, inputValidator: ((String) -> String?)? = null): S
             }
         }
     }
+}
+
+/**
+ * A complete log of all err and out text, obtained via
+ * the [SystemOutCapturer]
+ */
+val IDE_LOG = StringBuilder()
+
+
+/**
+ * A wrapper for a given steam that sends a copy of the stream to a string builder.
+ *
+ * The original stream still operates as before, the wrapper just takes a live copy.
+ */
+class SystemOutCapturer(
+
+    /**
+     * The stream that will be re-directed
+     */
+    val stream: PrintStream,
+
+    /**
+     * The builder that the output will be re-directed to.
+     *
+     * Holds the entire log of the stream.
+     */
+    val builder: StringBuilder
+
+): PrintStream(ByteArrayOutputStream()) {
+
+    companion object {
+
+        /**
+         * Wrapper for the error output that re-directs a copy of the output to the IDE_LOG.
+         */
+        val wrappedErr = SystemOutCapturer(System.err, IDE_LOG).also {
+            System.setErr(it)
+        }
+
+        /**
+         * Wrapper for the standard output that re-directs a copy of the output to the IDE_LOG.
+         */
+        val wrappedOut = SystemOutCapturer(System.out, IDE_LOG).also {
+            System.setOut(it)
+        }
+
+        /**
+         * Configures or restarts log capturing
+         * for the standard output and error output.
+         */
+        fun init () {
+
+            // MVC is only available if editor is restarting.
+            if (mvcIsAvail())
+                println("\n\n\n\nSOFT RESTART\n=======================\n")
+            else
+                println("\n\n\n\nBEGIN SESSION LOG\n=======================\n")
+
+            wrappedErr.builder.clear()
+            wrappedOut.builder.clear()
+        }
+
+        fun timestamp() = "[${SimpleDateFormat("HH:mm:ss").format(Date())}] "
+
+    }
+
+    /**
+     * @return the entire history of the stream.
+     */
+    override fun toString(): String = builder.toString()
+
+    private fun onPrint(a: Any) {
+        val b = timestamp() + a
+        stream.print(b)
+        builder.append(b)
+        EventNotifier.notifyEvent(EventType.LOG)
+    }
+
+    private fun onPrintLn(b: Any) {
+        val a = timestamp() + b
+        stream.println(a)
+        builder.appendLine(a)
+        EventNotifier.notifyEvent(EventType.LOG)
+    }
+
+    override fun print(b: Boolean) = onPrint(b)
+    override fun print(c: Char) = onPrint(c)
+    override fun print(i: Int) = onPrint(i)
+    override fun print(l: Long) = onPrint(l)
+    override fun print(f: Float) = onPrint(f)
+    override fun print(d: Double) = onPrint(d)
+    override fun print(s: CharArray) = onPrint(s)
+    override fun print(s: String) = onPrint(s)
+    override fun print(obj: Any) = onPrint(obj)
+    override fun println() = onPrintLn("")
+
+    override fun println(x: Boolean) = onPrintLn(x)
+    override fun println(x: Char) = onPrintLn(x)
+    override fun println(x: Int) = onPrintLn(x)
+    override fun println(x: Long) = onPrintLn(x)
+    override fun println(x: Float) = onPrintLn(x)
+    override fun println(x: Double) = onPrintLn(x)
+    override fun println(x: CharArray) = onPrintLn(x)
+    override fun println(x: String) = onPrintLn(x)
+    override fun println(x: Any) = onPrintLn(x)
 }
