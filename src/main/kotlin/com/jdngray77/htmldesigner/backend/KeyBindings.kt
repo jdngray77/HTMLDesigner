@@ -2,10 +2,8 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
-import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.jdngray77.htmldesigner.utility.boundsInScene
 import com.jdngray77.htmldesigner.utility.concmod
@@ -57,15 +55,7 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
      *
      * Causes [init] upon first boot.
      */
-    override fun onIDEBootEarly() {}
-
-    /**
-     * Checks caps notification and binds to completion of IDE load (after project loaded)
-     * We can't configure the bindings or caps notification this early, as we need to access the GUI
-     * via the MVC, but the MVC isn't available until after the project has been loaded - so we
-     * subscribe to be notified after the project has been loaded.
-     */
-    init {
+    override fun onIDEBootEarly() {
         EventNotifier.subscribe(this, EventType.IDE_FINISHED_LOADING)
     }
 
@@ -90,6 +80,8 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         EDITOR_REDO,
         EDITOR_NEXT,
         EDITOR_PREVIOUS,
+        META_CAPS_LOCK_CHANGED,
+        IDE_RESTART,
     }
 
     /**
@@ -263,11 +255,48 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
     /**
      * Populates [KeyToEventBinding]s for every key binding in the configuration.
+     *
+     * Creates all of the pnemonics and chords and places them into the scene.
+     *
+     * Since they're enlisted into the scene, they will be lost on soft restarts
+     * and will need to be re-enlisted on every soft restart, hence [notify] on [IDE_FINISHED_LOADING].
      */
     internal fun loadBindingsFromConfig() {
+        var configs = (Config[Configs.KEY_BINDINGS_STRING] as String).lines()
+
+        // Sanitiztion
 
 
-        val configs = (Config[Configs.KEY_BINDINGS_STRING] as String).lines()
+        // Issue #63. Key bindings are all on the same line.
+        // Split them up.
+        if (configs.size == 1 && configs.first().split(",").size > 3) {
+            var saneEntries = configs.first().split(",",";")
+
+            saneEntries = saneEntries.filter { it.isNotEmpty() }
+
+            // Check correct number of columns for each entry.
+            // Otherwise it's a different malformation problem - not #63
+            if (saneEntries.size % 4 != 0)
+                throw IllegalArgumentException("Key bindings are not in the correct format. Please check your config file.")
+
+            logStatus("Key bindings were malformed (Issue 63). Attempting to fix.")
+
+            configs = saneEntries
+                .chunked(4) // FIXME This does not support one binding for all platforms.
+                .map { it.joinToString(",") }
+        }
+
+
+        configs = configs.map {
+            it.replace("\n", "")
+            it.replace(";", "")
+        }
+
+
+
+        logStatus("Config contains ${configs.size} keyboard bindings")
+
+        var boundSuccessfully = 0
 
         configs.forEach {
             // Eg of each config
@@ -280,16 +309,20 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
                     KeyToEventBinding(
                         KeyEvent.valueOf(cols[0]),
                         KeyCombination.valueOf(cols[1]),
-                        KeyCombination.valueOf(cols[2]),
-                        KeyCombination.valueOf(cols[3])
+                        KeyCombination.valueOf(cols.getOrElse(2) { cols[1] } ),
+                        KeyCombination.valueOf(cols.getOrElse(3) { cols[1] })
                     )
                 )
+
+                boundSuccessfully++
             } catch (e: IllegalArgumentException) {
                 logWarning("Unable to bind key combination for ${cols[0]}, as there is no such key event.")
             } catch (ignored: Exception) {
                 logWarning("Unable to parse key binding '$it'")
             }
         }
+
+        logStatus("Bound $boundSuccessfully of ${configs.size} key bindings successfully.")
     }
 
     fun unbindAll() {
@@ -327,6 +360,18 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
     private fun hideCapsActiveNotif() {
         mvc().MainView.capsHBox.isVisible = false
+    }
+
+
+    /**
+     * Checks caps notification and binds to completion of IDE load (after project loaded)
+     * We can't configure the bindings or caps notification this early, as we need to access the GUI
+     * via the MVC, but the MVC isn't available until after the project has been loaded - so we
+     * subscribe to be notified after the project has been loaded.
+     */
+    init {
+        // check caps notification when caps is pressed.
+        bindKey(KeyEvent.META_CAPS_LOCK_CHANGED) { checkCapsActive() }
     }
 }
 

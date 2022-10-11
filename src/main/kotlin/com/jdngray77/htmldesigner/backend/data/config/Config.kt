@@ -28,7 +28,7 @@ import java.lang.Thread.UncaughtExceptionHandler
  *
  * See the [Documentation](https://github.com/jdngray77/HTMLDesigner/wiki/Registries#keys)
  */
-enum class Configs {
+enum class  Configs {
 
     // Java docs here appear in the Dokka HTML renderings.
 
@@ -249,12 +249,14 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(
             Configs.KEY_BINDINGS_STRING,
             """
-            EDITOR_REQUEST_CLOSE,Meta+W,Ctrl+W,Ctrl+W
-            EDITOR_REQUEST_SAVE,Meta+S,Ctrl+S,Ctrl+S
-            EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z
-            EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y
-            EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tabs
-            EDITOR_PREVIOUS,Opt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab
+            EDITOR_REQUEST_CLOSE,Meta+W,Ctrl+W,Ctrl+W;
+            EDITOR_REQUEST_SAVE,Meta+S,Ctrl+S,Ctrl+S;
+            EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z;
+            EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y;
+            EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tabs;
+            EDITOR_PREVIOUS,Opt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
+            META_CAPS_LOCK_CHANGED,Caps Lock,Caps Lock,Caps Lock;
+            IDE_RESTART,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
             """.trimIndent()
         )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)

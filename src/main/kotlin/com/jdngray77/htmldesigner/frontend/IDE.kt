@@ -18,6 +18,7 @@ package com.jdngray77.htmldesigner.frontend
 import ExitCodes
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.KeyBindings.bindKey
 import com.jdngray77.htmldesigner.backend.data.config.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.Project
 import com.jdngray77.htmldesigner.backend.data.config.Configs
@@ -191,6 +192,10 @@ class IDE : Application() {
                 ExceptionListener.uncaughtException(Thread.currentThread(), e)
             }
         }
+
+
+        // General IDE key bindings
+        bindKey(KeyBindings.KeyEvent.IDE_RESTART) { restart() }
 
         // Load the main view from FXML.
         // This is the bulk of the load time.
