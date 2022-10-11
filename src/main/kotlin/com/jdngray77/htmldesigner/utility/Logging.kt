@@ -169,7 +169,7 @@ fun NotificationPane(string: String, buttonText: String = "", showOnBottom: Bool
  * also displays it in left of the status tray.
  */
 fun logWarning(string: String) {
-    logStatus(string)
+    System.err.println("IDE Warning: $string")
 
     onUIThread {
         mvcIfAvail()?.MainView?.setStatus(string)
