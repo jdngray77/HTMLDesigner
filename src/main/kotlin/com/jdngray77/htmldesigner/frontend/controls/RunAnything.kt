@@ -15,6 +15,7 @@
 package com.jdngray77.htmldesigner.frontend.controls
 
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.KeyBindings.bindKey
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.data.config.Registry
@@ -22,6 +23,7 @@ import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
+import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.jdngray77.htmldesigner.utility.delete
 import javafx.event.ActionEvent
 import javafx.scene.control.ButtonType
@@ -83,7 +85,7 @@ object RunAnything : SearchableList<Task> (
 
 
         )
-) {
+){
 
     override fun onAction(item: Task) {
         //BackgroundTask.submit(item)

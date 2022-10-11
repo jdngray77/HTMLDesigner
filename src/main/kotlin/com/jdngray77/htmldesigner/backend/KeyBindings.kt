@@ -2,8 +2,10 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
+import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.jdngray77.htmldesigner.utility.boundsInScene
 import com.jdngray77.htmldesigner.utility.concmod
@@ -65,6 +67,20 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
     override fun notify(e: EventType) {
         checkCapsActive()
         loadBindingsFromConfig()
+        bindGlobal()
+    }
+
+    /**
+     * A function that applies event to code bindings.
+     *
+     * At runtime, binds key events to function invocations.
+     *
+     * Called on [notify] (every start/restart).
+     */
+    private fun bindGlobal() {
+        bindKey(KeyEvent.REQUEST_RUN_ANYTHING, RunAnything::showDialog)
+        bindKey(KeyEvent.REQUEST_RUN_SERVER, WebServer::toggle)
+        bindKey(KeyEvent.REQUEST_IDE_RESTART) { EDITOR.restart() }
     }
 
     //endregion
@@ -80,8 +96,12 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         EDITOR_REDO,
         EDITOR_NEXT,
         EDITOR_PREVIOUS,
+
+        REQUEST_RUN_SERVER,
+        REQUEST_RUN_ANYTHING,
+        REQUEST_IDE_RESTART,
+
         META_CAPS_LOCK_CHANGED,
-        IDE_RESTART,
     }
 
     /**

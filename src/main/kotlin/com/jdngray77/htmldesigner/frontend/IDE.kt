@@ -194,9 +194,6 @@ class IDE : Application() {
         }
 
 
-        // General IDE key bindings
-        bindKey(KeyBindings.KeyEvent.IDE_RESTART) { restart() }
-
         // Load the main view from FXML.
         // This is the bulk of the load time.
         // It's controller will take over from here.

@@ -256,7 +256,9 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
             EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tabs;
             EDITOR_PREVIOUS,Opt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
             META_CAPS_LOCK_CHANGED,Caps Lock,Caps Lock,Caps Lock;
-            IDE_RESTART,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
+            REQUEST_IDE_RESTART,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
+            REQUEST_RUN_ANYTHING,Meta+.,Ctrl+.,Ctrl+.;
+            REQUEST_RUN_SERVER,Meta+R,Ctrl+R,Ctrl+R;
             """.trimIndent()
         )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)
