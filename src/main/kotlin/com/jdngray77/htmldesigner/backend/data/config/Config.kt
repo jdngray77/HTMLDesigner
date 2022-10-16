@@ -253,14 +253,16 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
             EDITOR_REQUEST_SAVE,Meta+S,Ctrl+S,Ctrl+S;
             EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z;
             EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y;
-            EDITOR_NEXT,Opt+Tab,Alt+Tab,Alt+Tabs;
-            EDITOR_PREVIOUS,Opt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
+            EDITOR_NEXT,Alt+Tab,Alt+Tab,Alt+Tabs;
+            EDITOR_PREVIOUS,Alt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
             META_CAPS_LOCK_CHANGED,Caps Lock,Caps Lock,Caps Lock;
             REQUEST_IDE_RESTART,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
-            REQUEST_RUN_ANYTHING,Meta+.,Ctrl+.,Ctrl+.;
+            REQUEST_RUN_ANYTHING,Meta+Shift+A,Ctrl+Shift+A,Ctrl+Shift+A;
             REQUEST_RUN_SERVER,Meta+R,Ctrl+R,Ctrl+R;
             PROJECT_CLOSE,Meta+Alt+W,Ctrl+Alt+W,Ctrl+Alt+W;
             PROJECT_SHOW_IN_FINDER,Meta+Alt+O,Ctrl+Alt+O,Ctrl+Alt+O;
+            OPEN_SETTINGS,Meta+.,Ctrl+.,Ctrl+.;
+            OPEN_PROJECT_PREFS,Meta+Alt+.,Ctrl+Alt+.,Ctrl+Alt+.;
             """.trimIndent()
         )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)

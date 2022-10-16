@@ -17,6 +17,8 @@ package com.jdngray77.htmldesigner.frontend.controls
 import com.jdngray77.htmldesigner.backend.data.config.Registry
 import com.jdngray77.htmldesigner.backend.userConfirm
 import com.jdngray77.htmldesigner.frontend.IDE
+import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.utility.openFolderInSystem
 import javafx.beans.value.ObservableValue
 import javafx.scene.control.Button
 import javafx.scene.control.ButtonType
@@ -149,7 +151,13 @@ class RegistryEditor<T>(
                             refreshEditor() // Update the registry editor. The IDE may have made changes during the restart.
                         }
                     },
-                    Text("Most changes require a restart to take effect.")
+                    Button("Reveal '${registry.saveLocation.name}' in Finder").also {
+                        it.setOnAction {
+                            registry.saveLocation.openFolderInSystem()
+                        }
+                    },
+
+                    Text("Some changes require a restart to take effect.")
                 )
             }
             dialogPane.setPrefSize(800.0, 500.0)

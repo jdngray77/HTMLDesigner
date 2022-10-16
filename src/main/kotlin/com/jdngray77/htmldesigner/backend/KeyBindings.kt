@@ -5,6 +5,7 @@ import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
+import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.jdngray77.htmldesigner.utility.boundsInScene
@@ -88,6 +89,8 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         bindKey(KeyEvent.REQUEST_IDE_RESTART) { EDITOR.restart() }
         bindKey(KeyEvent.PROJECT_SHOW_IN_FINDER) { mvc().Project.showInExplorer() }
         bindKey(KeyEvent.PROJECT_CLOSE) { EDITOR.closeProject() }
+        bindKey(KeyEvent.OPEN_SETTINGS) { RegistryEditor(Config).showDialog() }
+        bindKey(KeyEvent.OPEN_PROJECT_PREFS) { RegistryEditor(mvc().Project.PREFERENCES).showDialog() }
     }
 
     //endregion
@@ -110,6 +113,9 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
         PROJECT_CLOSE,
         PROJECT_SHOW_IN_FINDER,
+
+        OPEN_SETTINGS,
+        OPEN_PROJECT_PREFS,
 
         META_CAPS_LOCK_CHANGED,
     }
@@ -328,22 +334,33 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
         var boundSuccessfully = 0
 
-        configs.forEach {
+        configs.forEach skip@ {
             // Eg of each config
             // EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z
 
             val cols = it.split(",")
 
+            var a: KeyCombination?
+            var b: KeyCombination?
+            var c: KeyCombination?
+
+            // Disambiguate inability to parse key combinations
+            try {
+                a = KeyCombination.valueOf(cols[1])
+                b = KeyCombination.valueOf(cols.getOrElse(2) { cols[1] })
+                c = KeyCombination.valueOf(cols.getOrElse(3) { cols[1] })
+            } catch (e: IllegalArgumentException) {
+                logWarning("One or more key combinations for ${cols[0]} is not in valid. ($it)")
+                return@skip
+            }
+
             try {
                 bindKey(
                     KeyToEventBinding(
                         KeyEvent.valueOf(cols[0]),
-                        KeyCombination.valueOf(cols[1]),
-                        KeyCombination.valueOf(cols.getOrElse(2) { cols[1] } ),
-                        KeyCombination.valueOf(cols.getOrElse(3) { cols[1] })
+                        a,b,c
                     )
                 )
-
                 boundSuccessfully++
             } catch (e: IllegalArgumentException) {
                 logWarning("Unable to bind key combination for ${cols[0]}, as there is no such key event.")
