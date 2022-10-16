@@ -108,6 +108,7 @@ import com.jdngray77.htmldesigner.utility.*
 import javafx.scene.control.ButtonType
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.awt.Desktop
 import java.io.File
 import java.io.IOException
 import java.io.InvalidClassException
@@ -316,6 +317,14 @@ class Project(
 
     fun renameOrMoveProject(newLocation: File) {
         TODO()
+    }
+
+    /**
+     * Reveals the project root in the system explorer.
+     */
+    fun showInExplorer() {
+        //Desktop.getDesktop().open(fileStructure.locationOnDisk);
+        fileStructure.locationOnDisk.openFileInSystem()
     }
 
 

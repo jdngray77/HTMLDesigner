@@ -9,6 +9,7 @@ import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.jdngray77.htmldesigner.utility.boundsInScene
 import com.jdngray77.htmldesigner.utility.concmod
+import com.jdngray77.htmldesigner.utility.openURL
 import javafx.scene.control.Labeled
 import javafx.scene.input.*
 import org.controlsfx.control.PopOver
@@ -75,12 +76,18 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
      *
      * At runtime, binds key events to function invocations.
      *
+     * Some bindings are applied through thier respective system / IDE components,
+     * but some bindings are not related to any component, and so are applied here
+     * instead.
+     *
      * Called on [notify] (every start/restart).
      */
     private fun bindGlobal() {
         bindKey(KeyEvent.REQUEST_RUN_ANYTHING, RunAnything::showDialog)
         bindKey(KeyEvent.REQUEST_RUN_SERVER, WebServer::toggle)
         bindKey(KeyEvent.REQUEST_IDE_RESTART) { EDITOR.restart() }
+        bindKey(KeyEvent.PROJECT_SHOW_IN_FINDER) { mvc().Project.showInExplorer() }
+        bindKey(KeyEvent.PROJECT_CLOSE) { EDITOR.closeProject() }
     }
 
     //endregion
@@ -100,6 +107,9 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         REQUEST_RUN_SERVER,
         REQUEST_RUN_ANYTHING,
         REQUEST_IDE_RESTART,
+
+        PROJECT_CLOSE,
+        PROJECT_SHOW_IN_FINDER,
 
         META_CAPS_LOCK_CHANGED,
     }

@@ -55,7 +55,7 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     @Inspectable(20)
     fun ShowInSystem() {
-        Desktop.getDesktop().open(mvc().Project.fileStructure.locationOnDisk);
+
     }
 
     @Inspectable(10000)

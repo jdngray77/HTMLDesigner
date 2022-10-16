@@ -259,6 +259,8 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
             REQUEST_IDE_RESTART,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
             REQUEST_RUN_ANYTHING,Meta+.,Ctrl+.,Ctrl+.;
             REQUEST_RUN_SERVER,Meta+R,Ctrl+R,Ctrl+R;
+            PROJECT_CLOSE,Meta+Alt+W,Ctrl+Alt+W,Ctrl+Alt+W;
+            PROJECT_SHOW_IN_FINDER,Meta+Alt+O,Ctrl+Alt+O,Ctrl+Alt+O;
             """.trimIndent()
         )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)
