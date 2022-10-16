@@ -67,7 +67,6 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
      * Sets up the key bindings when the IDE finished loading / restarts.
      */
     override fun notify(e: EventType) {
-        checkCapsActive()
         loadBindingsFromConfig()
         bindGlobal()
     }
@@ -116,8 +115,6 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
         OPEN_SETTINGS,
         OPEN_PROJECT_PREFS,
-
-        META_CAPS_LOCK_CHANGED,
     }
 
     /**
@@ -376,7 +373,7 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         }
 
         logStatus("Bound $boundSuccessfully of ${configs.size} key bindings successfully.")
-        logStatus("BEGIN KEY BINDINGS")
+        logStatus("END KEY BINDINGS")
         logStatus("======================")
     }
 
@@ -388,46 +385,6 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
             assert(it.isEmpty())
         }
         gc()
-    }
-
-    /**
-     * Displays a notification on the editor when caps lock is on.
-     */
-    private fun checkCapsActive() {
-        if (Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))
-            showCapsActiveNotif()
-        else
-            hideCapsActiveNotif()
-    }
-
-    private fun showCapsActiveNotif() {
-        mvc().MainView.capsHBox.isVisible = true
-
-        if (!(Config[Configs.KEY_BINDINGS_SUPPRESS_CAPS_WARNING_BOOL] as Boolean)) {
-            ContextMessage(
-                mvc().MainView.capsHBox,
-                "CAPS LOCK ON\n\nKeyboard shortcuts do not work.\n Shortcuts are case sensitive.",
-                PopOver.ArrowLocation.BOTTOM_CENTER
-            )
-
-            Config[Configs.KEY_BINDINGS_SUPPRESS_CAPS_WARNING_BOOL] = true
-        }
-    }
-
-    private fun hideCapsActiveNotif() {
-        mvc().MainView.capsHBox.isVisible = false
-    }
-
-
-    /**
-     * Checks caps notification and binds to completion of IDE load (after project loaded)
-     * We can't configure the bindings or caps notification this early, as we need to access the GUI
-     * via the MVC, but the MVC isn't available until after the project has been loaded - so we
-     * subscribe to be notified after the project has been loaded.
-     */
-    init {
-        // check caps notification when caps is pressed.
-        bindKey(KeyEvent.META_CAPS_LOCK_CHANGED) { checkCapsActive() }
     }
 }
 

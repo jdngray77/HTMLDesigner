@@ -51,9 +51,6 @@ class MainViewController {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     @FXML
-    lateinit var capsHBox: HBox
-
-    @FXML
     lateinit var root: VBox
 
     @FXML

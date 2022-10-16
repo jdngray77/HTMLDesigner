@@ -255,7 +255,6 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
             EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y;
             EDITOR_NEXT,Alt+Tab,Alt+Tab,Alt+Tabs;
             EDITOR_PREVIOUS,Alt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
-            META_CAPS_LOCK_CHANGED,Caps Lock,Caps Lock,Caps Lock;
             REQUEST_IDE_RESTART,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
             REQUEST_RUN_ANYTHING,Meta+Shift+A,Ctrl+Shift+A,Ctrl+Shift+A;
             REQUEST_RUN_SERVER,Meta+R,Ctrl+R,Ctrl+R;

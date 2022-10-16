@@ -143,17 +143,6 @@
          <right>
                 <Label fx:id="lblRightStatus" maxWidth="-1.0" text="" BorderPane.alignment="CENTER" />
          </right>
-         <center>
-            <HBox fx:id="capsHBox" alignment="CENTER" BorderPane.alignment="CENTER">
-               <children>
-                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@icons8-caps-lock-on-50.png" />
-                     </image></ImageView>
-                  <Label text="CAPS ON" textAlignment="CENTER" textFill="WHITE" />
-               </children>
-            </HBox>
-         </center>
       </BorderPane>
 
     </children>
