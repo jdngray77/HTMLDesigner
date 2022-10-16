@@ -36,7 +36,6 @@ import org.controlsfx.control.BreadCrumbBar
 import org.controlsfx.control.ToggleSwitch
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import java.io.File
 import kotlin.math.roundToInt
 
 /**
@@ -546,7 +545,7 @@ class DocumentEditor(
         // Breadcrumb only shows tag name
         breadCrumb.setCrumbFactory {
             BreadCrumbBar.BreadCrumbButton(
-                (it.value as Element).userString()
+                (it.value as Element).tagNameAndID()
             )
         }
 

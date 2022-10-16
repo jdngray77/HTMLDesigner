@@ -70,6 +70,8 @@ class menuBarController {
     fun menu_exit() =
         Platform.exit()
 
+    fun menu_project_showInFinder() =
+        mvc().Project.showInExplorer()
 
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

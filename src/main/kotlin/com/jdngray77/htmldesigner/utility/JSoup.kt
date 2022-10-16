@@ -99,7 +99,7 @@ fun Element.prepareForExport() {
     removeClass("debug-outline")
 }
 
-fun Element.userString() = tagName() + " " + id()
+fun Element.tagNameAndID() =     tagName() + if (id().isNotEmpty()) "#${id()}" else ""
 
 fun String.asElement(): Element =
     Jsoup.parse(this, "", xmlParser()).let {

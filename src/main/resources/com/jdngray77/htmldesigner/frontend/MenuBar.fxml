@@ -38,9 +38,7 @@
         </Menu>
         <Menu mnemonicParsing="false" text="Project">
             <items>
-                <MenuItem mnemonicParsing="false" text="[inop] New..." />
-                <MenuItem mnemonicParsing="false" text="[inop] Load..." />
-                <MenuItem mnemonicParsing="false" text="[inop] Open in Finder" />
+                <MenuItem mnemonicParsing="false" onAction="#menu_project_showInFinder" text="Open in Finder" />
                 <MenuItem mnemonicParsing="false" onAction="#menu_project_close" text="Close Project" />
                 <Menu mnemonicParsing="false" text="[inop] Backups">
                     <items>

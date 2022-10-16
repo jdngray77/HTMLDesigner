@@ -18,22 +18,17 @@ class CSSUnitSlider(
 
 ) : HBox() {
 
-    val slider = Slider(min, max, step)
+    val slider = CommittingSlider(min, max, step)
 
     val unit = CSSUnitCombo(defaultUnit)
 
     init {
         children.add(slider)
         showUnits(enableUnits)
-        slider.valueProperty().addListener { _, _, _ ->
+
+        slider.setOnChangeCommitted {
             updateObservableValue()
         }
-
-        unit.valueProperty().addListener { _, _, _ ->
-            updateObservableValue()
-        }
-
-
     }
 
     fun showUnits(boolean: Boolean) {
@@ -64,6 +59,14 @@ class CSSUnitSlider(
 
     private fun updateObservableValue() {
         observableValue.value = toString()
+    }
+
+    /**
+     * Registers a function to execute that previews a change to
+     * the value of the slider, whilst it is in motion.
+     */
+    fun setPreviewValueChange(it: (Double) -> Unit) {
+        slider.setOnUncommittedChanged(it)
     }
 
     fun getValue(): String = toString()

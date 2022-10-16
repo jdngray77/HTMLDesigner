@@ -15,14 +15,12 @@
 
 package com.jdngray77.htmldesigner.frontend.docks.tagproperties
 
-import com.jdngray77.htmldesigner.utility.changed
 import com.jdngray77.htmldesigner.backend.html.StyleAttributeSnapshot
 import com.jdngray77.htmldesigner.frontend.controls.AlignControl
 import com.jdngray77.htmldesigner.frontend.controls.CSSUnitSlider
 import com.jdngray77.htmldesigner.frontend.controls.QuadControl
 import com.jdngray77.htmldesigner.frontend.controls.removeCSSUnit
-import com.jdngray77.htmldesigner.utility.readPrivateProperty
-import com.jdngray77.htmldesigner.utility.toHex
+import com.jdngray77.htmldesigner.utility.*
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
@@ -30,7 +28,6 @@ import javafx.collections.FXCollections
 import javafx.scene.Node
 import javafx.scene.control.ColorPicker
 import javafx.scene.control.ComboBox
-import javafx.scene.control.Slider
 import javafx.scene.paint.Color
 import javafx.util.Callback
 import org.controlsfx.control.PropertySheet
@@ -39,7 +36,11 @@ import org.controlsfx.property.editor.DefaultPropertyEditorFactory
 import org.controlsfx.property.editor.PropertyEditor
 import org.jsoup.nodes.Element
 import java.util.*
-import kotlin.math.floor
+
+
+// Good luck to anyone trying to maintain this one.
+// There's so many bodges in here, it's not even funny.
+// I wrote the thing, and i'm still fucking confused to this day.
 
 /**
  *
@@ -232,6 +233,22 @@ open class CSSPropertySheetItem(
     override fun getValue(): Any? = styles.capture()[property]?.let { caster(it) }// The capture here is to ensure the current value is returned, not the value of the last capture.
 
     override fun setValue(value: Any?) {
+       updateTag(value, true)
+
+        // Notify the property sheet of the change
+        observableProp.value = styles.toString()
+
+        // Report change
+        if (initalised) {
+            element.ownerDocument()?.changed(_name + " of '" + element.tagNameAndID() + "' changed to " + value)
+        } else {
+            initalised = true
+        }
+
+        element.ownerDocument()?.editor()?.reRender()
+    }
+
+    fun updateTag(value: Any?, skipRender: Boolean = false) {
         // re-capture to get the current style attribute state, so we don't overwrite any changes made elsewhere.
         styles.capture()
 
@@ -247,16 +264,8 @@ open class CSSPropertySheetItem(
         // Commit the changes back to the tag
         styles.commit()
 
-        // Notify the property sheet of the change
-        observableProp.value = styles.toString()
-
-        // Notify the IDE of the change
-        if (initalised) {
-            element.ownerDocument()?.changed(_name + " of " + element.tagName() + "changed to " + value)
-        } else {
-            initalised = true
-        }
-
+        if (!skipRender)
+            element.ownerDocument()?.editor()?.reRender()
     }
 
     /**
@@ -271,7 +280,6 @@ open class CSSPropertySheetItem(
 
         val colorCaster: (String) -> Color = { Color.web(it) }
         val doubleCaster: (String) -> Double = { removeCSSUnit(it).toDouble() }
-
 
     }
 }
@@ -587,7 +595,9 @@ class CSSRangeEditor(
 ) : CSSPropertyEditor<String>(property, CSSUnitSlider(property.min, property.max, enableUnits = property.enableUnits)) {
 
     init {
-//        (editor as CSSUnitSlider).observableValue.addListener(onUserEditedEditor())
+        (editor as CSSUnitSlider).setPreviewValueChange {
+            property.updateTag(editor.toString())
+        }
     }
 
     override fun setValue(value: String?) {
