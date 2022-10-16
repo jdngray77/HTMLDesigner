@@ -298,6 +298,10 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
      * and will need to be re-enlisted on every soft restart, hence [notify] on [IDE_FINISHED_LOADING].
      */
     internal fun loadBindingsFromConfig() {
+        logStatus("======================")
+        logStatus("BEGIN KEY BINDINGS")
+
+
         var configs = (Config[Configs.KEY_BINDINGS_STRING] as String).lines()
 
         // Sanitiztion
@@ -370,6 +374,8 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         }
 
         logStatus("Bound $boundSuccessfully of ${configs.size} key bindings successfully.")
+        logStatus("BEGIN KEY BINDINGS")
+        logStatus("======================")
     }
 
     fun unbindAll() {
