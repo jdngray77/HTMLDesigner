@@ -301,6 +301,8 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         logStatus("======================")
         logStatus("BEGIN KEY BINDINGS")
 
+        // Remove all existing bindings
+        unbindAll()
 
         var configs = (Config[Configs.KEY_BINDINGS_STRING] as String).lines()
 
@@ -383,6 +385,7 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         registeredBindings.values.concmod().forEach {
             it.concmod().forEach { it.unbind() }
             it.clear()
+            assert(it.isEmpty())
         }
         gc()
     }
