@@ -55,7 +55,7 @@ class ProjectDock() : AutoDock(), Subscriber {
 
     @Inspectable(20)
     fun ShowInSystem() {
-
+        mvc().Project.showInExplorer()
     }
 
     @Inspectable(10000)
