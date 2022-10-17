@@ -146,13 +146,14 @@ class Elements : HierarchyDock<Element>({ it!!.tagName() }), Subscriber {
                             activeDocumentEditor()!!.selectTag(null)
                             ""
                         } else {
-                            val tag = first().value
-                            activeDocumentEditor()!!.selectTag(tag)
+                            val treeItem = first() as TreeItem<Element>
+                            val tag = treeItem.value
+                            activeDocumentEditor()!!.selectTag(treeItem)
 
                             if (tag.tagName() == "script")
                                 EditorManager.switchToScript(tag)
 
-                            (first() as TreeItem<Element>).value.toString()
+                            tag.toString()
                         }
                     )
                 }
