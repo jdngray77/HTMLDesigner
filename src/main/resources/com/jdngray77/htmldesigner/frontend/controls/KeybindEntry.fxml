@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.controlsfx.control.*?>
+
+<AnchorPane fx:id="root" prefHeight="40.0" prefWidth="759.0" style="-fx-border-width: 0px 0px 2px 0px; -fx-border-style: dashed; -fx-border-color: darkgray;" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.controls.KeybindEntryController">
+   <children>
+      <ToggleSwitch fx:id="tglEnable" prefHeight="40.0" prefWidth="41.0" selected="true" />
+      <TextField fx:id="txtTarget" layoutX="79.0" layoutY="8.0" prefHeight="25.0" prefWidth="193.0" promptText="Target" />
+      <Button layoutX="271.0" layoutY="8.0" mnemonicParsing="false" onAction="#promptTarget" prefHeight="25.0" prefWidth="25.0" text="₪" />
+      <TextField fx:id="txtMac" layoutX="333.0" layoutY="8.0" prefHeight="25.0" prefWidth="117.0" promptText="Mac binding">
+         <tooltip>
+            <Tooltip text="Required. Used as default when the others are not provided." />
+         </tooltip>
+      </TextField>
+      <TextField fx:id="txtWindows" layoutX="467.0" layoutY="8.0" prefHeight="25.0" prefWidth="117.0" promptText="Windows Binding" />
+      <TextField fx:id="txtLinux" layoutX="601.0" layoutY="7.0" prefHeight="25.0" prefWidth="117.0" promptText="Linux Binding" />
+      <Button layoutX="726.0" layoutY="8.0" mnemonicParsing="false" onAction="#delete" text="⌫">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+   </children>
+</AnchorPane>

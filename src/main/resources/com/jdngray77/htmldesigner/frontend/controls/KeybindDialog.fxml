@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.controls.KeybindDialogController">
+   <center>
+       <ScrollPane fx:id="scrollPane">
+           <VBox fx:id="entryList" prefHeight="350.0" prefWidth="800.0" BorderPane.alignment="CENTER" />
+       </ScrollPane>
+   </center>
+   <bottom>
+      <ButtonBar buttonOrder="C+B+U+A" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <buttons>
+            <Button layoutX="522.0" layoutY="18.0" onAction="#cancel" text="Cancel" ButtonBar.buttonData="CANCEL_CLOSE">
+                <tooltip>
+                    <Tooltip text="Close the dialog without saving any changes." />
+                </tooltip>
+            </Button>
+
+
+            <Button layoutX="519.0" layoutY="18.0" onAction="#defaults" text="Defaults" ButtonBar.buttonData="BACK_PREVIOUS" >
+                <tooltip>
+                    <Tooltip text="Reset to factory bindings. Deletes any customizations." />
+                </tooltip>
+            </Button>
+
+            <Button fx:id="btnCheck" onAction="#checkAllOK" text="Check" >
+                <tooltip>
+                    <Tooltip text="Lets you know if any entries seem incorrect" />
+                </tooltip>
+            </Button>
+
+
+            <Button onAction="#apply" text="Apply" ButtonBar.buttonData="APPLY" >
+                <tooltip>
+                    <Tooltip text="Save and close" />
+                </tooltip>
+            </Button>
+
+            <Button onAction="#revert" text="Revert" ButtonBar.buttonData="BACK_PREVIOUS">
+                <tooltip>
+                    <Tooltip text="Forgets any changes you've just made. Useful for when you make mistakes." />
+                </tooltip>
+            </Button>
+
+            <Button onAction="#newEntry" text="Add New" >
+                <tooltip>
+                    <Tooltip text="Adds a new configuration." />
+                </tooltip>
+            </Button>
+
+
+            <Button onAction="#debugPrint" text="Debug print" />
+        </buttons>
+      </ButtonBar>
+   </bottom>
+</BorderPane>

@@ -15,6 +15,7 @@ import com.jdngray77.htmldesigner.frontend.editors.EditorManager
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocumentEditor
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditor
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.requestCloseAllEditors
+import com.jdngray77.htmldesigner.frontend.controls.KeybindEditor
 import com.jdngray77.htmldesigner.utility.CopyToClipboard
 import com.jdngray77.htmldesigner.utility.getTheme
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
@@ -67,6 +68,10 @@ class MenuBarController {
 
     fun menu_registry() =
         RegistryEditor(Config).showDialog()
+
+    fun menu_keybinds() {
+        KeybindEditor()
+    }
 
     fun menu_exit() =
         Platform.exit()

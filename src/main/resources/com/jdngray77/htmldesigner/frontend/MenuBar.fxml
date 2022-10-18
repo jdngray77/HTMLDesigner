@@ -9,6 +9,7 @@
             <items>
                 <MenuItem onAction="#menu_debug_run_anything" text="Run a Task..." />
                 <MenuItem onAction="#menu_registry" text="Registry..." />
+                <MenuItem onAction="#menu_keybinds" text="Keybindings..." />
                 <Menu text="Debug">
                     <items>
                         <MenuItem onAction="#menu_debug_eval" text="Evaluate..." />

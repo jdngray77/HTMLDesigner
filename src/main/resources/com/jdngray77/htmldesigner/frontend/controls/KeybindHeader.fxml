@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="root" prefHeight="40.0" prefWidth="759.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label layoutX="4.0" layoutY="11.0" text="Enabled" />
+      <Label layoutX="167.0" layoutY="11.0" text="Target" />
+      <Label layoutX="639.0" layoutY="11.0" text="Linux" />
+      <Label layoutX="505.0" layoutY="11.0" text="Windows" />
+      <Label layoutX="373.0" layoutY="11.0" text="Mac" />
+   </children>
+</AnchorPane>

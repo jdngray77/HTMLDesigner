@@ -4,8 +4,6 @@ import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
-import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
-import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.*
 import javafx.scene.control.Labeled
 import javafx.scene.control.Menu
@@ -172,6 +170,31 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
             }
         }
     }
+
+    val DEFAULT_KEYBINDINGS = """
+            EDITOR_REQUEST_CLOSE,Meta+W,Ctrl+W,Ctrl+W;
+            EDITOR_NEXT,Alt+Tab,Alt+Tab,Alt+Tab;
+            EDITOR_PREVIOUS,Alt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
+            EDITOR_TOGGLE_DIRECT,Meta+E,Ctrl+E,Ctrl+E;
+                       
+            Menu > HTML Designer > Run a Task...,Meta+Shift+A,Ctrl+Shift+A,Ctrl+Shift+A;
+            Menu > HTML Designer > Soft Restart...,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
+            Menu > HTML Designer > Registry...,Meta+.,Ctrl+.,Ctrl+.;
+            Menu > HTML Designer > Exit,Meta+Esc,Ctrl+Esc,Ctrl+Esc;
+            
+            Menu > Tools > Live Server > Enable debug server,Meta+R,Ctrl+R,Ctrl+R;
+            
+            Menu > View > Show bottom dock,Meta+B,Ctrl+B,Ctrl+B;
+            
+            Menu > Project > Open in Finder,Meta+Alt+O,Ctrl+Alt+O,Ctrl+Alt+O;
+            Menu > Project > Close Project,Meta+Alt+W,Ctrl+Alt+W,Ctrl+Alt+W;
+            Menu > Project > Registry...,Meta+Alt+.,Ctrl+Alt+.,Ctrl+Alt+.;
+            
+            Menu > Editor > Undo,Meta+Z,Ctrl+Z,Ctrl+Z;
+            Menu > Editor > Redo,Meta+Shift+Z,Ctrl+Y,Ctrl+Y;
+            Menu > Editor > Save,Meta+S,Ctrl+S,Ctrl+S;
+
+            """.trimIndent()
 
     /**
      * A collection of [KeyBindingSubscriber]s that have been bound to [KeyEvent].
@@ -377,11 +400,15 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
             var windows: KeyCombination?
             var linux: KeyCombination?
 
+            val x: (Int) -> String = {
+                (cols.getOrElse(it) { cols[1] }).takeUnless { it.isBlank() } ?: cols[1]
+            }
+
             // Disambiguate inability to parse key combinations
             try {
                 mac = KeyCombination.valueOf(cols[1])
-                windows = KeyCombination.valueOf(cols.getOrElse(2) { cols[1] })
-                linux = KeyCombination.valueOf(cols.getOrElse(3) { cols[1] })
+                windows = KeyCombination.valueOf(x(2))
+                linux = KeyCombination.valueOf(x(3))
             } catch (e: IllegalArgumentException) {
                 logWarning("One or more key combinations for ${cols[0]} is not in valid. ($it)")
                 return@skip
@@ -395,23 +422,14 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
                 if (target.lowercase().startsWith("menu > ")) {
                     // Is Menu.
 
-                    val path = target.substringAfter("Menu > ").split(" > ")
+                    // Assign key combination
+                    determineMenuItem(target)?.apply {
+                        accelerator = KeyToEventBinding.determineCombination(mac, windows, linux)
+                        logStatus("Assigned $target to $accelerator")
+                        boundSuccessfully++
+                    }
 
-                    mvc().MainView.menuBar.menus
-                        // Find menu
-                        .find { it.text == path.first() }
-
-                        // Determine menu item recursively
-                        ?.let { determineMenuItem(it, path.drop(1)) }
-
-                        // Assign key combination
-                        ?.apply {
-                            accelerator = KeyToEventBinding.determineCombination(mac, windows, linux)
-                            logStatus("Assigned $target to $accelerator")
-                            boundSuccessfully++
-                        }
-
-                        // Warn if no matching menu is found
+                    // Warn if no matching menu is found
                         ?: logWarning("Could not find menu item for $target. Key binding is ignored.")
 
                 } else {
@@ -438,6 +456,17 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         logStatus("======================")
     }
 
+    private fun determineMenuItem(target: String): MenuItem? {
+        val path = target.substringAfter("Menu > ").split(" > ")
+
+        return mvc().MainView.menuBar.menus
+            // Find menu
+            .find { it.text == path.first() }
+
+            // Determine menu item recursively
+            ?.let { determineMenuItem(it, path.drop(1)) }
+    }
+
     private fun determineMenuItem(it: Menu, path: List<String>): MenuItem? {
         it.items.find { it.text == path.first() }
             ?.let { menuItem ->
@@ -447,6 +476,53 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
                     return menuItem
                 }
             }
+
+        return null
+    }
+
+
+    /**
+     * Determines if a binding configuration string is in
+     * a valid format.
+     */
+    fun bindStringIsValid(string: String): String? {
+        if (string.isBlank())
+            return "Empty"
+
+        if (!string.endsWith(";"))
+            return "Missing ';' at end of line"
+
+
+        var sanit = string
+
+        sanit = sanit.replace(";", "")
+
+        if (sanit.startsWith("//"))
+            sanit = sanit.drop(2)
+
+        val cols = sanit.split(",")
+
+        if (cols.size > 4)
+            return "Too many commas (max 3)"
+
+        if (cols.size == 1)
+            return "No key bindings."
+
+        if (cols[0].isBlank())
+            return "No target."
+
+        if (cols[1].isBlank() && cols[2].isBlank() && cols[3].isBlank())
+            return "No key combinations."
+
+        if (cols[0].startsWith("Menu > ")) {
+            determineMenuItem(cols[0]) ?: return "No matching menu item."
+        } else {
+            try {
+                KeyEvent.valueOf(cols[0])
+            } catch (e: IllegalArgumentException) {
+                return "No event called '${cols[0]}'"
+            }
+        }
 
         return null
     }

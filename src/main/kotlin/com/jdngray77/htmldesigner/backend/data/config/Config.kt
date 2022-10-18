@@ -14,6 +14,7 @@
 
 package com.jdngray77.htmldesigner.backend.data.config
 
+import com.jdngray77.htmldesigner.backend.KeyBindings
 import com.jdngray77.htmldesigner.backend.WebServer
 import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
@@ -253,30 +254,7 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(Configs.WEB_SERVER_REFRESH_DELAY_INT, 0)
         put(
             Configs.KEY_BINDINGS_STRING,
-            """
-            EDITOR_REQUEST_CLOSE,Meta+W,Ctrl+W,Ctrl+W;
-            EDITOR_NEXT,Alt+Tab,Alt+Tab,Alt+Tabs;
-            EDITOR_PREVIOUS,Alt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
-            EDITOR_TOGGLE_DIRECT,Meta+E,Ctrl+E,Ctrl+E;
-                       
-            Menu > HTML Designer > Run a Task...,Meta+Shift+A,Ctrl+Shift+A,Ctrl+Shift+A;
-            Menu > HTML Designer > Soft Restart...,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
-            Menu > HTML Designer > Registry...,Meta+.,Ctrl+.,Ctrl+.;
-            Menu > HTML Designer > Exit,Meta+Esc,Ctrl+Esc,Ctrl+Esc;
-            
-            Menu > Tools > Live Server > Enable debug server,Meta+R,Ctrl+R,Ctrl+R;
-            
-            Menu > View > Show bottom dock,Meta+B,Ctrl+B,Ctrl+B;
-            
-            Menu > Project > Open in Finder,Meta+Alt+O,Ctrl+Alt+O,Ctrl+Alt+O;
-            Menu > Project > Close Project,Meta+Alt+W,Ctrl+Alt+W,Ctrl+Alt+W;
-            Menu > Project > Registry...,Meta+Alt+.,Ctrl+Alt+.,Ctrl+Alt+.;
-            
-            Menu > Editor > Undo,Meta+Z,Ctrl+Z,Ctrl+Z;
-            Menu > Editor > Redo,Meta+Shift+Z,Ctrl+Y,Ctrl+Y;
-            Menu > Editor > Save,Meta+S,Ctrl+S,Ctrl+S;
-
-            """.trimIndent()
+            KeyBindings.DEFAULT_KEYBINDINGS
         )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)
         put(Configs.SPOTIFY_CLIENT_ID_STRING, "")

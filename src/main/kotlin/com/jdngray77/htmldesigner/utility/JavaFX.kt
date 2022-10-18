@@ -81,6 +81,9 @@ fun <T : Parent> loadFXMLComponent(path: String, pathRelativeTo: Class<*> = IDE:
         }
     }
 
+fun loadControllerlessFXMLComponent(path: String, pathRelativeTo: Class<*> = IDE::class.java) =
+    FXMLLoader(pathRelativeTo.getResource(path)).let { it.load<Parent>() }
+
 /**
  * Returns a JMetro instance
  * in the correct color scheme.
