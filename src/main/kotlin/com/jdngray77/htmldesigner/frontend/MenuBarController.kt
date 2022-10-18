@@ -193,15 +193,12 @@ class MenuBarController {
     //region                                                        TOOLS
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    @FXML
+    lateinit var tglServer: CheckMenuItem
 
-    fun menu_server_start() {
-        WebServer.start()
+    fun menu_server_toggle() {
+        tglServer.isSelected = WebServer.toggle()
     }
-
-    fun menu_server_stop() {
-        WebServer.stop()
-    }
-
 
     fun menu_server_tglauto(actionEvent: ActionEvent) {
         WebServer.autoRefresh = (actionEvent.source as CheckMenuItem).isSelected

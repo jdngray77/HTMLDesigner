@@ -2,16 +2,15 @@ package com.jdngray77.htmldesigner.backend
 
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
-import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
 import com.jdngray77.htmldesigner.utility.*
 import javafx.scene.control.Labeled
+import javafx.scene.control.Menu
+import javafx.scene.control.MenuItem
 import javafx.scene.input.*
-import org.controlsfx.control.PopOver
-import java.awt.Toolkit
 import java.lang.System.gc
 
 /**
@@ -83,15 +82,12 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
      * instead.
      *
      * Called on [notify] (every start/restart).
+     *
+     * > N.B prefer to use menu bar items instead
      */
+    @Deprecated("Prefer to use menu bar items instead")
     private fun bindGlobal() {
-        bindKey(KeyEvent.REQUEST_RUN_ANYTHING, RunAnything::showDialog)
-        bindKey(KeyEvent.REQUEST_RUN_SERVER, WebServer::toggle)
-        bindKey(KeyEvent.REQUEST_IDE_RESTART) { EDITOR.restart() }
-        bindKey(KeyEvent.PROJECT_SHOW_IN_FINDER) { mvc().Project.showInExplorer() }
-        bindKey(KeyEvent.PROJECT_CLOSE) { EDITOR.closeProject() }
-        bindKey(KeyEvent.OPEN_SETTINGS) { RegistryEditor(Config).showDialog() }
-        bindKey(KeyEvent.OPEN_PROJECT_PREFS) { RegistryEditor(mvc().Project.PREFERENCES).showDialog() }
+
     }
 
     //endregion
@@ -144,7 +140,28 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
         override fun run() {
             if (button != null)
-                button.fireEvent(MouseEvent(MouseEvent.MOUSE_CLICKED, button.layoutX, button.layoutY, button.boundsInScene().centerX, button.boundsInScene().centerY, MouseButton.PRIMARY, 1, false, false, false, false, false, false, false, false, false, false, null))
+                button.fireEvent(
+                    MouseEvent(
+                        MouseEvent.MOUSE_CLICKED,
+                        button.layoutX,
+                        button.layoutY,
+                        button.boundsInScene().centerX,
+                        button.boundsInScene().centerY,
+                        MouseButton.PRIMARY,
+                        1,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        null
+                    )
+                )
             else runnable!!.run()
         }
 
@@ -159,8 +176,7 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
     /**
      * A collection of [KeyBindingSubscriber]s that have been bound to [KeyEvent].
      */
-    private val registeredBindings = HashMap<KeyEvent, MutableList<KeyBindingSubscriber>>().also {
-        hm ->
+    private val registeredBindings = HashMap<KeyEvent, MutableList<KeyBindingSubscriber>>().also { hm ->
         KeyEvent.values().forEach {
             hm[it] = mutableListOf()
         }
@@ -191,7 +207,6 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         KeyBindingSubscriber(button, runnable).also {
             bindKey(onEvent, it)
         }
-
 
 
     /**
@@ -251,7 +266,7 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
     /**
      * A binding between a key combination and a runnable or a button
      */
-    data class KeyToEventBinding (
+    data class KeyToEventBinding(
 
         /**
          * The event to raise when pressed.
@@ -280,13 +295,16 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         /**
          * returns the correct key combination for the current platform
          */
-        fun determineCombination() =
-            when (PlatformType.getPlatformType()) {
-                PlatformType.PlatformTypes.MAC -> onMac
-                PlatformType.PlatformTypes.WINDOWS -> onWindows
-                PlatformType.PlatformTypes.LINUX -> onLinux
-            }
+        fun determineCombination() = Companion.determineCombination(onMac, onWindows, onLinux)
 
+        companion object {
+            fun determineCombination(mac: KeyCombination, windows: KeyCombination, linux: KeyCombination) =
+                when (PlatformType.getPlatformType()) {
+                    PlatformType.PlatformTypes.MAC -> mac
+                    PlatformType.PlatformTypes.WINDOWS -> windows
+                    PlatformType.PlatformTypes.LINUX -> linux
+                }
+        }
     }
 
     /**
@@ -301,6 +319,8 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         logStatus("======================")
         logStatus("BEGIN KEY BINDINGS")
 
+        // TODO warn if an accellerator is used more than once.
+
         // Remove all existing bindings
         unbindAll()
 
@@ -314,7 +334,7 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         // Issue #63. Key bindings are all on the same line.
         // Split them up.
         if (configs.size == 1 && configs.first().split(",").size > 3) {
-            var saneEntries = configs.first().split(",",";")
+            var saneEntries = configs.first().split(",", ";")
 
             saneEntries = saneEntries.filter { it.isNotEmpty() }
 
@@ -342,44 +362,93 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
         var boundSuccessfully = 0
 
-        configs.forEach skip@ {
+        configs.forEach skip@{
             // Eg of each config
+            //
             // EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z
+            // OR
+            // Menu > View > Show bottom dock,Meta+B,Ctrl+B,Ctrl+B
 
+            // Collect key combinations
             val cols = it.split(",")
 
-            var a: KeyCombination?
-            var b: KeyCombination?
-            var c: KeyCombination?
+            var target = cols[0]
+            var mac: KeyCombination?
+            var windows: KeyCombination?
+            var linux: KeyCombination?
 
             // Disambiguate inability to parse key combinations
             try {
-                a = KeyCombination.valueOf(cols[1])
-                b = KeyCombination.valueOf(cols.getOrElse(2) { cols[1] })
-                c = KeyCombination.valueOf(cols.getOrElse(3) { cols[1] })
+                mac = KeyCombination.valueOf(cols[1])
+                windows = KeyCombination.valueOf(cols.getOrElse(2) { cols[1] })
+                linux = KeyCombination.valueOf(cols.getOrElse(3) { cols[1] })
             } catch (e: IllegalArgumentException) {
                 logWarning("One or more key combinations for ${cols[0]} is not in valid. ($it)")
                 return@skip
             }
 
+
+            // Determine where to assign the combinations
+
             try {
-                bindKey(
-                    KeyToEventBinding(
-                        KeyEvent.valueOf(cols[0]),
-                        a,b,c
-                    )
-                )
-                boundSuccessfully++
-            } catch (e: IllegalArgumentException) {
-                logWarning("Unable to bind key combination for ${cols[0]}, as there is no such key event.")
-            } catch (ignored: Exception) {
+
+                if (target.lowercase().startsWith("menu > ")) {
+                    // Is Menu.
+
+                    val path = target.substringAfter("Menu > ").split(" > ")
+
+                    mvc().MainView.menuBar.menus
+                        // Find menu
+                        .find { it.text == path.first() }
+
+                        // Determine menu item recursively
+                        ?.let { determineMenuItem(it, path.drop(1)) }
+
+                        // Assign key combination
+                        ?.apply {
+                            accelerator = KeyToEventBinding.determineCombination(mac, windows, linux)
+                            logStatus("Assigned $target to $accelerator")
+                            boundSuccessfully++
+                        }
+
+                        // Warn if no matching menu is found
+                        ?: logWarning("Could not find menu item for $target. Key binding is ignored.")
+
+                } else {
+                    // If not a menu, check if is valid event
+                    try {
+                        val event = KeyEvent.valueOf(target)
+                        // Is event
+                        bindKey(KeyToEventBinding(event, mac, windows, linux))
+                        boundSuccessfully++
+                    } catch (e: IllegalArgumentException) {
+                        // Not event
+                        logWarning("Key binding target '$target' is not a valid event or menu item. Binding is ignored.")
+                        return@skip
+                    }
+                }
+            } catch (e: Exception) {
                 logWarning("Unable to parse key binding '$it'")
+                ExceptionListener.uncaughtException(e)
             }
         }
 
         logStatus("Bound $boundSuccessfully of ${configs.size} key bindings successfully.")
         logStatus("END KEY BINDINGS")
         logStatus("======================")
+    }
+
+    private fun determineMenuItem(it: Menu, path: List<String>): MenuItem? {
+        it.items.find { it.text == path.first() }
+            ?.let { menuItem ->
+                if (menuItem is Menu)
+                    return determineMenuItem(menuItem, path.drop(1))
+                else {
+                    return menuItem
+                }
+            }
+
+        return null
     }
 
     fun unbindAll() {

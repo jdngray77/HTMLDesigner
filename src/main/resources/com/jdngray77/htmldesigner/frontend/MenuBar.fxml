@@ -7,7 +7,7 @@
     <menus>
         <Menu text="HTML Designer">
             <items>
-                <MenuItem onAction="#menu_debug_run_anything" text="Run a Task" />
+                <MenuItem onAction="#menu_debug_run_anything" text="Run a Task..." />
                 <MenuItem onAction="#menu_registry" text="Registry..." />
                 <Menu text="Debug">
                     <items>
@@ -49,7 +49,7 @@
                 </Menu>
                 <Menu text="[inop] Open Recent" />
                 <SeparatorMenuItem />
-                <MenuItem onAction="#menu_project_projprefs" text="Registry…" />
+                <MenuItem onAction="#menu_project_projprefs" text="Registry..." />
                 <MenuItem onAction="#menu_project_dellogs" text="Delete logs" />
             </items>
         </Menu>
@@ -75,8 +75,7 @@
                 <MenuItem onAction="#menu_window_isolation" text="Standalone edit mode" />
                 <Menu text="Live Server">
                     <items>
-                        <MenuItem onAction="#menu_server_start" text="Start" />
-                        <MenuItem onAction="#menu_server_stop" text="Stop" />
+                        <CheckMenuItem fx:id="tglServer" onAction="#menu_server_toggle" text="Enable debug server" />
                         <SeparatorMenuItem />
                         <CheckMenuItem onAction="#menu_server_tglauto" selected="true" text="Toggle auto-refresh" />
                     </items>

@@ -94,6 +94,8 @@ class MainViewController {
     @FXML
     lateinit var centerSplitPane: SplitPane
 
+    lateinit var menuBar: MenuBar
+
     /**
      * Stupid image view in the GUI to view the album art.
      *
@@ -114,7 +116,11 @@ class MainViewController {
     fun initialize() {
 
         // Load the menu bar - It's now stored in a seperate file.
-        root.children.add(0, loadFXMLComponent<MenuBar>("MenuBar.fxml").first)
+        with (loadFXMLComponent<MenuBar>("MenuBar.fxml")) {
+            root.children.add(0, first)
+            menuBar = first
+        }
+
 
         val skin = DnDTabPaneSkin(dockLeftTop)
         val skin1 = DnDTabPaneSkin(dockLeftBottom)

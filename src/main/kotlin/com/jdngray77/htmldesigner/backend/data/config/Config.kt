@@ -255,23 +255,27 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
             Configs.KEY_BINDINGS_STRING,
             """
             EDITOR_REQUEST_CLOSE,Meta+W,Ctrl+W,Ctrl+W;
-            EDITOR_REQUEST_SAVE,Meta+S,Ctrl+S,Ctrl+S;
-            EDITOR_UNDO,Meta+Z,Ctrl+Z,Ctrl+Z;
-            EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y;
             EDITOR_NEXT,Alt+Tab,Alt+Tab,Alt+Tabs;
             EDITOR_PREVIOUS,Alt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
             EDITOR_TOGGLE_DIRECT,Meta+E,Ctrl+E,Ctrl+E;
+                       
+            Menu > HTML Designer > Run a Task...,Meta+Shift+A,Ctrl+Shift+A,Ctrl+Shift+A;
+            Menu > HTML Designer > Soft Restart...,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
+            Menu > HTML Designer > Registry...,Meta+.,Ctrl+.,Ctrl+.;
+            Menu > HTML Designer > Exit,Meta+Esc,Ctrl+Esc,Ctrl+Esc;
             
-            REQUEST_IDE_RESTART,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
-            REQUEST_RUN_ANYTHING,Meta+Shift+A,Ctrl+Shift+A,Ctrl+Shift+A;
-            REQUEST_RUN_SERVER,Meta+R,Ctrl+R,Ctrl+R;
+            Menu > Tools > Live Server > Enable debug server,Meta+R,Ctrl+R,Ctrl+R;
             
-            PROJECT_CLOSE,Meta+Alt+W,Ctrl+Alt+W,Ctrl+Alt+W;
-            PROJECT_SHOW_IN_FINDER,Meta+Alt+O,Ctrl+Alt+O,Ctrl+Alt+O;
+            Menu > View > Show bottom dock,Meta+B,Ctrl+B,Ctrl+B;
             
-            OPEN_SETTINGS,Meta+.,Ctrl+.,Ctrl+.;
-            OPEN_PROJECT_PREFS,Meta+Alt+.,Ctrl+Alt+.,Ctrl+Alt+.;
+            Menu > Project > Open in Finder,Meta+Alt+O,Ctrl+Alt+O,Ctrl+Alt+O;
+            Menu > Project > Close Project,Meta+Alt+W,Ctrl+Alt+W,Ctrl+Alt+W;
+            Menu > Project > Registry...,Meta+Alt+.,Ctrl+Alt+.,Ctrl+Alt+.;
             
+            Menu > Editor > Undo,Meta+Z,Ctrl+Z,Ctrl+Z;
+            Menu > Editor > Redo,Meta+Shift+Z,Ctrl+Y,Ctrl+Y;
+            Menu > Editor > Save,Meta+S,Ctrl+S,Ctrl+S;
+
             """.trimIndent()
         )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)

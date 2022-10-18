@@ -112,12 +112,16 @@ object WebServer : Subscriber {
 
     /**
      * If running, [stop]s the server, otherwise starts it.
+     *
+     * @return true if the server was started, false if it was stopped.
      */
-    fun toggle() {
-        if (server != null) {
+    fun toggle() : Boolean {
+        return if (server != null) {
             stop()
+            false
         } else {
             start()
+            true
         }
     }
 
