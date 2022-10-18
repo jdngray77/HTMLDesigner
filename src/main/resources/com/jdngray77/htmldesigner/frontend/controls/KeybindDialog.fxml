@@ -49,9 +49,6 @@
                     <Tooltip text="Adds a new configuration." />
                 </tooltip>
             </Button>
-
-
-            <Button onAction="#debugPrint" text="Debug print" />
         </buttons>
       </ButtonBar>
    </bottom>

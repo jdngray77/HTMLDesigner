@@ -121,10 +121,6 @@ class KeybindDialogController {
 
     override fun toString() = _entryList.map { it.toString() }.joinToString("\n")
 
-    fun debugPrint() {
-        logStatus(toString())
-    }
-
     /**
      * Checks that every entry is OK.
      *
