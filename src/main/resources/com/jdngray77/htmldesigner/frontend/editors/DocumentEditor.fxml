@@ -40,18 +40,54 @@
        -->
         <VBox alignment="CENTER_LEFT" >
             <HBox style="-fx-background-color: rgb(37,37,37);">
-                <Button fx:id="btnBack" mnemonicParsing="false" text="&lt;-"/>
-                <Button fx:id="btnReset" mnemonicParsing="false" text="Reset"/>
-                <Button fx:id="btnForward" mnemonicParsing="false" text="-&gt;"/>
-                <Button fx:id="btnZoomOut" mnemonicParsing="false" text="-"/>
-                <Button  fx:id="btnResetZoom" text="100%"/>
-                <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" text="+"/>
+                <Button fx:id="btnBack" mnemonicParsing="false" text="&lt;-">
+                    <tooltip>
+                        <Tooltip text="Go back to the previous page."/>
+                    </tooltip>
+                </Button>
+
+                <Button fx:id="btnReset" mnemonicParsing="false" text="Reset">
+                    <tooltip>
+                        <Tooltip text="Reset to the default view of the editor. Does not change the page."/>
+                    </tooltip>
+                </Button>
+
+                <Button fx:id="btnForward" mnemonicParsing="false" text="-&gt;">
+                    <tooltip>
+                        <Tooltip text="Return to the next page"/>
+                    </tooltip>
+                </Button>
+
+                <Button fx:id="btnZoomOut" mnemonicParsing="false" text="-">
+                    <tooltip>
+                        <Tooltip text="Zoom out"/>
+                    </tooltip>
+                </Button>
+
+                <Button  fx:id="btnResetZoom" text="100%">
+                    <tooltip>
+                        <Tooltip text="Current zoom level. Click to reset to 100%."/>
+                    </tooltip>
+                </Button>
+
+                <Button fx:id="btnZoomIn" layoutX="10.0" layoutY="13.0" mnemonicParsing="false" text="+">
+                    <tooltip>
+                        <Tooltip text="Zoom in"/>
+                    </tooltip>
+                </Button>
+
                 <Pane HBox.hgrow="ALWAYS"/>
+
                 <BreadCrumbBar fx:id="breadCrumb"/>
+
                 <Pane HBox.hgrow="ALWAYS"/>
-                <ToggleSwitch VBox.vgrow="ALWAYS" fx:id="tglDirectEdit" text="Edit directly"/>
+
+                <ToggleSwitch fx:id="tglDirectEdit" text="Edit directly"/>
+
                 <ChoiceBox fx:id="cmbSizePreset" prefWidth="150.0"/>
+
                 <Button layoutX="39.0" layoutY="10.0" mnemonicParsing="false" text="Fit"/>
+
             </HBox>
         </VBox>
     </bottom>

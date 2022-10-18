@@ -15,6 +15,8 @@
 package com.jdngray77.htmldesigner.frontend
 
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.data.config.Config
+import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.docks.*
 import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
@@ -88,6 +90,9 @@ class MainViewController {
 
     @FXML
     lateinit var documentation: WebView
+
+    @FXML
+    lateinit var centerSplitPane: SplitPane
 
     /**
      * Stupid image view in the GUI to view the album art.
@@ -171,6 +176,7 @@ class MainViewController {
         implAddDock(dockRight, TagProperties(), TestDock(), HistoryDock())
 
         // Bottom
+        assertBottomDock()
         implAddDock(dockBottom, Logs())
     }
 
@@ -243,6 +249,25 @@ class MainViewController {
 
     fun setAction(string: String) {
         lblRightStatus.text = string
+    }
+
+    fun assertBottomDock() {
+        if (Config[Configs.SHOW_BOTTOM_DOCK_BOOL] as Boolean)
+            showBottomDock()
+        else
+            hideBottomDock()
+    }
+
+    fun hideBottomDock() {
+        centerSplitPane.items.remove(dockBottom)
+        centerSplitPane.setDividerPosition(0, 1.0)
+        Config[Configs.SHOW_BOTTOM_DOCK_BOOL] = false
+    }
+
+    fun showBottomDock() {
+        centerSplitPane.items.add(dockBottom)
+        centerSplitPane.setDividerPosition(0, .7)
+        Config[Configs.SHOW_BOTTOM_DOCK_BOOL] = true
     }
 
 

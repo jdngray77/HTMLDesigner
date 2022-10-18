@@ -87,7 +87,7 @@
                                 </VBox>
                             </items>
                         </SplitPane>
-                        <SplitPane dividerPositions="0.7" orientation="VERTICAL">
+                        <SplitPane fx:id="centerSplitPane" dividerPositions="0.7" orientation="VERTICAL">
                             <items>
 
                                 <AnchorPane prefHeight="200.0" prefWidth="200.0">

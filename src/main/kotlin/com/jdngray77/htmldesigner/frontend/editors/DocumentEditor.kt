@@ -140,6 +140,7 @@ class DocumentEditor(
         contentRenderer.engine.setOnStatusChanged {
             println("Status changed in WebView: ${it.data}")
         }
+
     }
 
     /**
@@ -148,6 +149,50 @@ class DocumentEditor(
      */
     @FXML
     var btnZoom: Button = root.lookup("#btnResetZoom") as Button
+
+    @FXML
+    var btnZoomIn: Button = root.lookup("#btnZoomIn") as Button
+
+    @FXML
+    var btnZoomOut: Button = root.lookup("#btnZoomOut") as Button
+
+    @FXML
+    var btnBack: Button = root.lookup("#btnBack") as Button
+
+    @FXML
+    var btnForward: Button = root.lookup("#btnForward") as Button
+
+    @FXML
+    var btnReset: Button = root.lookup("#btnReset") as Button
+
+    init {
+        btnReset.setOnAction {
+            standaloneEditMode = false
+            disableDirectEdit()
+            reRender()
+        }
+
+        btnBack.setOnAction {
+            back()
+        }
+
+        btnForward.setOnAction {
+            forward()
+        }
+
+        btnZoomIn.setOnAction {
+            zoomIn()
+        }
+
+        btnZoomOut.setOnAction {
+            zoomOut()
+        }
+
+        btnZoom.setOnAction {
+            resetZoom()
+        }
+    }
+
 
     /**
      * Breadcrumb bar for the element the user has selected.

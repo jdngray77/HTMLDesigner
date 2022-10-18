@@ -35,7 +35,7 @@ import javax.script.ScriptEngineManager
  *
  * @author Jordan T. Gray
  */
-class menuBarController {
+class MenuBarController {
 
     /**
      * The menu bar.
@@ -47,6 +47,7 @@ class menuBarController {
     @FXML
     fun initialize() {
         MenuBar.useSystemMenuBarProperty().set(Config[Configs.USE_MAC_MENU_BOOL] as Boolean)
+        tglShowBottomDock.isSelected = Config[Configs.SHOW_BOTTOM_DOCK_BOOL] as Boolean
     }
 
 
@@ -278,6 +279,18 @@ class menuBarController {
     //endregion                                                     ABOUT
     //region                                                        WINDOW
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+    @FXML
+    lateinit var tglShowBottomDock: CheckMenuItem
+
+    fun menu_view_showbottomdock() {
+        with (mvc().MainView) {
+            if (tglShowBottomDock.isSelected)
+                showBottomDock()
+            else
+                hideBottomDock()
+        }
+    }
 
     fun menu_window_isolation() {
         activeDocumentEditor()?.toggleStandaloneEditMode()

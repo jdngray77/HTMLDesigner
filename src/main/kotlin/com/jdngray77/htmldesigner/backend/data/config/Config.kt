@@ -215,6 +215,11 @@ enum class  Configs {
      * Used to only show caps lock warning once.
      */
     KEY_BINDINGS_SUPPRESS_CAPS_WARNING_BOOL,
+
+    /**
+     * Determines whether to display the bottom dock, or not.
+     */
+    SHOW_BOTTOM_DOCK_BOOL,
 }
 
 /**
@@ -285,6 +290,7 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
         put(Configs.LARGE_ERROR_COUNT_STEP_THRESHOLD_INT, 10)
         put(Configs.IGNORE_PROJECT_STARTUP_PAGE_BOOL, false)
         put(Configs.KEY_BINDINGS_SUPPRESS_CAPS_WARNING_BOOL, true)
+        put(Configs.SHOW_BOTTOM_DOCK_BOOL, true)
     }
 
     /**

@@ -2,132 +2,133 @@
 
 <?import javafx.scene.control.*?>
 
-<MenuBar fx:id="MenuBar" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.menuBarController">
+<MenuBar fx:id="MenuBar" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.MenuBarController">
 
     <menus>
-        <Menu mnemonicParsing="false" text="HTML Designer">
+        <Menu text="HTML Designer">
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#menu_debug_run_anything" text="Run a Task" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_registry" text="Registry..." />
-                <Menu mnemonicParsing="false" text="Debug">
+                <MenuItem onAction="#menu_debug_run_anything" text="Run a Task" />
+                <MenuItem onAction="#menu_registry" text="Registry..." />
+                <Menu text="Debug">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_debug_eval" text="Evaluate..." />
-                        <Menu mnemonicParsing="false" text="IDE">
+                        <MenuItem onAction="#menu_debug_eval" text="Evaluate..." />
+                        <Menu text="IDE">
                             <items>
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_err" text="Throw an exception" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_close_editors" text="Force close all editors" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_show_editors" text="Show all editors" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_restart_bgpool" text="Restart background worker threads" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_dirty" text="Mark current editor as dirty" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_config" text="Reset config registry" />
+                                <MenuItem onAction="#menu_debug_err" text="Throw an exception" />
+                                <MenuItem onAction="#menu_debug_close_editors" text="Force close all editors" />
+                                <MenuItem onAction="#menu_debug_show_editors" text="Show all editors" />
+                                <MenuItem onAction="#menu_debug_restart_bgpool" text="Restart background worker threads" />
+                                <MenuItem onAction="#menu_debug_dirty" text="Mark current editor as dirty" />
+                                <MenuItem onAction="#menu_debug_reset_config" text="Reset config registry" />
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Project">
+                        <Menu text="Project">
                             <items>
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_showcache" text="Show Project File Cache Entires" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_clearcache" text="Clear file cache" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_showserial" text="Show and Copy Project Serial Version" />
-                                <MenuItem mnemonicParsing="false" onAction="#menu_debug_reset_projprefs" text="Reset preferences registry" />
+                                <MenuItem onAction="#menu_debug_showcache" text="Show Project File Cache Entries" />
+                                <MenuItem onAction="#menu_debug_clearcache" text="Clear file cache" />
+                                <MenuItem onAction="#menu_debug_showserial" text="Show and Copy Project Serial Version" />
+                                <MenuItem onAction="#menu_debug_reset_projprefs" text="Reset preferences registry" />
                             </items>
                         </Menu>
                     </items>
                 </Menu>
-                <MenuItem mnemonicParsing="false" onAction="#menu_soft_restart" text="Soft Restart..." />
-                <MenuItem mnemonicParsing="false" onAction="#menu_exit" text="Exit" />
+                <MenuItem onAction="#menu_soft_restart" text="Soft Restart..." />
+                <MenuItem onAction="#menu_exit" text="Exit" />
             </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Project">
+        <Menu text="Project">
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#menu_project_showInFinder" text="Open in Finder" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_project_close" text="Close Project" />
-                <Menu mnemonicParsing="false" text="[inop] Backups">
+                <MenuItem onAction="#menu_project_showInFinder" text="Open in Finder" />
+                <MenuItem onAction="#menu_project_close" text="Close Project" />
+                <Menu text="[inop] Backups">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Backup now" />
-                        <MenuItem mnemonicParsing="false" text="Restore backup..." />
-                        <MenuItem mnemonicParsing="false" text="Revert changes made this session..." />
+                        <MenuItem text="Backup now" />
+                        <MenuItem text="Restore backup..." />
+                        <MenuItem text="Revert changes made this session..." />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="[inop] Open Recent" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_project_projprefs" text="Registry…" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_project_dellogs" text="Delete logs" />
+                <Menu text="[inop] Open Recent" />
+                <SeparatorMenuItem />
+                <MenuItem onAction="#menu_project_projprefs" text="Registry…" />
+                <MenuItem onAction="#menu_project_dellogs" text="Delete logs" />
             </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Editor">
+        <Menu text="Editor">
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#menu_edit_undo" text="Undo" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_edit_redo" text="Redo" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem mnemonicParsing="false" text="[inop] Cut" />
-                <MenuItem mnemonicParsing="false" text="[inop] Copy" />
-                <MenuItem mnemonicParsing="false" text="[inop] Paste" />
-                <MenuItem mnemonicParsing="false" text="[inop] Delete" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem mnemonicParsing="false" text="[inop] Select All" />
-                <MenuItem mnemonicParsing="false" text="[inop] Unselect All" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_file_save" text="Save" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_file_revert" text="Revert unsaved changes" />
+                <MenuItem onAction="#menu_edit_undo" text="Undo" />
+                <MenuItem onAction="#menu_edit_redo" text="Redo" />
+                <SeparatorMenuItem />
+                <MenuItem text="[inop] Cut" />
+                <MenuItem text="[inop] Copy" />
+                <MenuItem text="[inop] Paste" />
+                <MenuItem text="[inop] Delete" />
+                <SeparatorMenuItem />
+                <MenuItem text="[inop] Select All" />
+                <MenuItem text="[inop] Unselect All" />
+                <SeparatorMenuItem />
+                <MenuItem onAction="#menu_file_save" text="Save" />
+                <MenuItem onAction="#menu_file_revert" text="Revert unsaved changes" />
             </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Tools">
+        <Menu text="Tools">
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#menu_window_isolation" text="Standalone edit mode" />
-                <Menu mnemonicParsing="false" text="Live Server">
+                <MenuItem onAction="#menu_window_isolation" text="Standalone edit mode" />
+                <Menu text="Live Server">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menu_server_start" text="Start" />
-                        <MenuItem mnemonicParsing="false" onAction="#menu_server_stop" text="Stop" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <CheckMenuItem mnemonicParsing="false" onAction="#menu_server_tglauto" selected="true" text="Toggle auto-refresh" />
+                        <MenuItem onAction="#menu_server_start" text="Start" />
+                        <MenuItem onAction="#menu_server_stop" text="Stop" />
+                        <SeparatorMenuItem />
+                        <CheckMenuItem onAction="#menu_server_tglauto" selected="true" text="Toggle auto-refresh" />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Git">
+                <Menu text="Git">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="[inop] Publish changes..." />
-                        <MenuItem mnemonicParsing="false" text="[inop] Update project..." />
-                        <MenuItem mnemonicParsing="false" text="[inop] Branches..." />
-                        <MenuItem mnemonicParsing="false" text="[inop] Delete changes..." />
+                        <MenuItem text="[inop] Publish changes..." />
+                        <MenuItem text="[inop] Update project..." />
+                        <MenuItem text="[inop] Branches..." />
+                        <MenuItem text="[inop] Delete changes..." />
                     </items>
                 </Menu>
             </items>
-            <MenuItem mnemonicParsing="false" onAction="#menu_tools_validate_prefabs" text="Validate prefabs" />
+            <MenuItem onAction="#menu_tools_validate_prefabs" text="Validate prefabs" />
         </Menu>
         <Menu text="View">
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#menu_window_closeeditors" text="Close all open editors" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_window_resetdocks" text="Reset docks" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_window_fs" text="Toggle Fullscreen" />
+                <CheckMenuItem fx:id="tglShowBottomDock" onAction="#menu_view_showbottomdock" selected="true" text="Show bottom dock" />
+                <MenuItem onAction="#menu_window_closeeditors" text="Close all open editors" />
+                <MenuItem onAction="#menu_window_resetdocks" text="Reset docks" />
+                <MenuItem onAction="#menu_window_fs" text="Toggle Fullscreen" />
 
             </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Spotify">
+        <Menu text="Spotify">
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#menu_spotify_nowplaying" text="Now Playing" />
+                <MenuItem onAction="#menu_spotify_nowplaying" text="Now Playing" />
                 <SeparatorMenuItem />
-                <MenuItem mnemonicParsing="false" onAction="#menu_spotify_next" text="Next" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_spotify_previous" text="Previous" />
+                <MenuItem onAction="#menu_spotify_next" text="Next" />
+                <MenuItem onAction="#menu_spotify_previous" text="Previous" />
                 <SeparatorMenuItem />
-                <MenuItem mnemonicParsing="false" onAction="#menu_spotify_pause" text="Pause" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_spotify_play" text="Play" />
+                <MenuItem onAction="#menu_spotify_pause" text="Pause" />
+                <MenuItem onAction="#menu_spotify_play" text="Play" />
                 <SeparatorMenuItem />
-                <MenuItem mnemonicParsing="false" onAction="#menu_spotify_connect" text="Connect" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_spotify_help" text="Help" />
+                <MenuItem onAction="#menu_spotify_connect" text="Connect" />
+                <MenuItem onAction="#menu_spotify_help" text="Help" />
                 <SeparatorMenuItem />
-                <MenuItem mnemonicParsing="false" onAction="#menu_spotify_deletedata" text="Delete data" />
+                <MenuItem onAction="#menu_spotify_deletedata" text="Delete data" />
             </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Help">
+        <Menu text="Help">
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_wiki" text="Wiki" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_repo" text="Repository" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_issues" text="Report a problem" />
-                <SeparatorMenuItem mnemonicParsing="false" text="Developers" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_jdngray" text="Author      -   Jordan Gray" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_dbrand" text="Junior       -   Dylan Brand" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_tbird" text="Designer  -   Tom Bird" />
-                <SeparatorMenuItem mnemonicParsing="false" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_about" text="[WIP] About" />
-                <MenuItem mnemonicParsing="false" onAction="#menu_help_licences" text="Licenses" />
+                <MenuItem onAction="#menu_help_wiki" text="Wiki" />
+                <MenuItem onAction="#menu_help_repo" text="Repository" />
+                <MenuItem onAction="#menu_help_issues" text="Report a problem" />
+                <SeparatorMenuItem text="Developers" />
+                <MenuItem onAction="#menu_help_jdngray" text="Author      -   Jordan Gray" />
+                <MenuItem onAction="#menu_help_dbrand" text="Junior       -   Dylan Brand" />
+                <MenuItem onAction="#menu_help_tbird" text="Designer  -   Tom Bird" />
+                <SeparatorMenuItem />
+                <MenuItem onAction="#menu_help_about" text="[WIP] About" />
+                <MenuItem onAction="#menu_help_licences" text="Licenses" />
             </items>
         </Menu>
     </menus>
