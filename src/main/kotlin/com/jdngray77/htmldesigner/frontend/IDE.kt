@@ -18,9 +18,8 @@ package com.jdngray77.htmldesigner.frontend
 import ExitCodes
 import com.jdngray77.htmldesigner.MVC
 import com.jdngray77.htmldesigner.backend.*
-import com.jdngray77.htmldesigner.backend.KeyBindings.bindKey
-import com.jdngray77.htmldesigner.backend.data.config.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.Project
+import com.jdngray77.htmldesigner.backend.data.config.AutoLoad
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager

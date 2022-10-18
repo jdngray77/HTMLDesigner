@@ -7,10 +7,7 @@ import com.jdngray77.htmldesigner.frontend.IDE.Companion.EDITOR
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.controls.RegistryEditor
 import com.jdngray77.htmldesigner.frontend.controls.RunAnything
-import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
-import com.jdngray77.htmldesigner.utility.boundsInScene
-import com.jdngray77.htmldesigner.utility.concmod
-import com.jdngray77.htmldesigner.utility.openURL
+import com.jdngray77.htmldesigner.utility.*
 import javafx.scene.control.Labeled
 import javafx.scene.input.*
 import org.controlsfx.control.PopOver
@@ -69,6 +66,11 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
     override fun notify(e: EventType) {
         loadBindingsFromConfig()
         bindGlobal()
+
+        everyInstanceOf(KeybindingListener::class).forEach {
+            (it as KeybindingListener).bindKeybindings()
+        }
+
     }
 
     /**
@@ -105,6 +107,7 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
         EDITOR_REDO,
         EDITOR_NEXT,
         EDITOR_PREVIOUS,
+        EDITOR_TOGGLE_DIRECT,
 
         REQUEST_RUN_SERVER,
         REQUEST_RUN_ANYTHING,
@@ -305,6 +308,8 @@ object KeyBindings : Subscriber, IDEEarlyBootListener {
 
         // Sanitiztion
 
+        configs = configs.filter { it.isNotBlank() }
+
 
         // Issue #63. Key bindings are all on the same line.
         // Split them up.
@@ -416,4 +421,17 @@ class KeyBindingCollection(vararg bindings: KeyBindings.KeyBindingSubscriber = a
         dispose()
     }
 
+}
+
+/**
+ * An interface class for static objects that need to register key bindings early in the boot
+ * process.
+ *
+ * Instances of this interface will be found and invoked when keybindings are configured at boot.
+ *
+ * Just bare in mind that there must be instances of this class available at boot time, so
+ * this goes hand-in-hand with the [IDEEarlyBootListener]
+ */
+interface KeybindingListener {
+    fun bindKeybindings()
 }

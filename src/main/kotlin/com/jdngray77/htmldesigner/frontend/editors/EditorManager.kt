@@ -19,14 +19,15 @@ import java.io.File
  *
  * @author Jordan T. Gray
  */
-object EditorManager : IDEEarlyBootListener {
+object EditorManager : IDEEarlyBootListener, KeybindingListener {
 
     override fun onIDEBootEarly() {
         openEditors.clear()
     }
 
-    init {
+    override fun bindKeybindings() {
         bindKey(KeyBindings.KeyEvent.EDITOR_REQUEST_CLOSE) { activeEditor()?.requestClose() }
+        bindKey(KeyBindings.KeyEvent.EDITOR_TOGGLE_DIRECT) { activeDocumentEditor()?.toggleDirectEditMode() }
         bindKey(KeyBindings.KeyEvent.EDITOR_UNDO) { activeEditor()?.undo() }
         bindKey(KeyBindings.KeyEvent.EDITOR_UNDO) { activeEditor()?.redo() }
         bindKey(KeyBindings.KeyEvent.EDITOR_REQUEST_SAVE) { activeEditor()?.requestSave() }
@@ -320,7 +321,14 @@ object EditorManager : IDEEarlyBootListener {
             if (switchToEditor(editor))
                 setAction("Switched to document '${document.title()}'")
         } else {
-            switchToEditor(DocumentEditor(document))
+            try {
+                switchToEditor(DocumentEditor(document))
+            } catch (e: Exception) {
+                ExceptionListener.uncaughtException(e)
+                showErrorNotification(e, false)
+                showNotification("There was a problem opening the editor", e.message?: "No reason was provided.")
+                validateEditors()
+            }
             setAction("Opened document '${document.title()}'")
         }
     }

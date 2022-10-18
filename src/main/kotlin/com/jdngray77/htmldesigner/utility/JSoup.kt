@@ -198,7 +198,7 @@ fun Document.equalsDocument(d: Document) : Boolean {
         if (toString() == d.toString())
             return true
 
-    return true
+    return false
 //    // Compare by pointer first (fastest)
 //    this === d ||
 //            (

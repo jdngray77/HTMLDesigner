@@ -17,7 +17,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.web.*?>
-<?import org.controlsfx.control.BreadCrumbBar?>
+<?import org.controlsfx.control.*?>
 
 <!--
 
@@ -29,7 +29,7 @@
 
 -->
 
-<BorderPane prefHeight="617.0" prefWidth="808.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"
+<BorderPane fx:id="borderPane" prefHeight="617.0" prefWidth="808.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"
             xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
     <center>
         <WebView fx:id="contentRenderer" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS"/>
@@ -38,7 +38,7 @@
         <!--  This control is transparent, which causes the 'no editor image' to show through the button bar if the editor is positioned right
                so a background color is added to cover it.
        -->
-        <VBox alignment="CENTER_LEFT">
+        <VBox alignment="CENTER_LEFT" >
             <HBox style="-fx-background-color: rgb(37,37,37);">
                 <Button fx:id="btnBack" mnemonicParsing="false" text="&lt;-"/>
                 <Button fx:id="btnReset" mnemonicParsing="false" text="Reset"/>
@@ -49,6 +49,7 @@
                 <Pane HBox.hgrow="ALWAYS"/>
                 <BreadCrumbBar fx:id="breadCrumb"/>
                 <Pane HBox.hgrow="ALWAYS"/>
+                <ToggleSwitch VBox.vgrow="ALWAYS" fx:id="tglDirectEdit" text="Edit directly"/>
                 <ChoiceBox fx:id="cmbSizePreset" prefWidth="150.0"/>
                 <Button layoutX="39.0" layoutY="10.0" mnemonicParsing="false" text="Fit"/>
             </HBox>

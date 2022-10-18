@@ -1,12 +1,10 @@
 package com.jdngray77.htmldesigner.backend
 
-import com.jdngray77.htmldesigner.backend.KeyBindings.bindKey
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.frontend.IDE.Companion.mvc
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeEditorIsDocument
-import com.jdngray77.htmldesigner.utility.IDEEarlyBootListener
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import org.jsoup.nodes.Document

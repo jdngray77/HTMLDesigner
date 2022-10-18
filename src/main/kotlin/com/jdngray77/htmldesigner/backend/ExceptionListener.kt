@@ -35,8 +35,12 @@ object ExceptionListener : UncaughtExceptionHandler {
     var errCount = 0
         private set
 
+    fun uncaughtException(e: Throwable?) = uncaughtException(Thread.currentThread(), e)
+
     override fun uncaughtException(t: Thread?, e: Throwable?) {
         e?.let {
+            logWarning("Uncaught exception in thread ${t?.name}: $it")
+            it.printStackTrace()
             mvcIfAvail()?.Project?.logError(e)
             showErrorNotification(sanitizeException(e))
             checkSpecial(e)

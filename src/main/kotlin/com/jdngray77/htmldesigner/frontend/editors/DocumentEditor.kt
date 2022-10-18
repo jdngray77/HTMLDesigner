@@ -15,6 +15,7 @@
 package com.jdngray77.htmldesigner.frontend.editors
 
 import com.jdngray77.htmldesigner.backend.*
+import com.jdngray77.htmldesigner.backend.BackgroundTask.invokeInBackground
 import com.jdngray77.htmldesigner.backend.BackgroundTask.onUIThread
 import com.jdngray77.htmldesigner.backend.data.Project.Companion.projectFile
 import com.jdngray77.htmldesigner.backend.data.config.Config
@@ -31,9 +32,11 @@ import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
+import javafx.scene.web.HTMLEditor
 import javafx.scene.web.WebView
 import org.controlsfx.control.BreadCrumbBar
 import org.controlsfx.control.ToggleSwitch
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import kotlin.math.roundToInt
@@ -81,12 +84,20 @@ class DocumentEditor(
 
     /**
      * The document held by this editor.
-     *
-     * Remember, this file does not actually edit the
-     * [document].
      */
     var document: Document = document
         private set
+
+    /**
+     * Cached copy of the [document].
+     *
+     * Updated whenever [changed].
+     */
+    private var documentHTML: String = document.toString()
+
+    fun cacheDocumentHTML() {
+        documentHTML = document.toString()
+    }
 
 
     /**
@@ -112,6 +123,10 @@ class DocumentEditor(
      */
     @FXML
     var contentRenderer: WebView = root.lookup("#contentRenderer") as WebView
+
+
+    @FXML
+    val borderPane = root.lookup("#borderPane") as BorderPane
 
     init {
         contentRenderer.engine.setOnError {
@@ -365,8 +380,127 @@ class DocumentEditor(
 
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
     //#endregion standalone edit mode
+    //#region Direct edit mode
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+    // HTML text editor that allows the user to make direct edits to the document's content.
+
+    /**
+     * Toggle switch that enables / diables direct edit mode.
+     *
+     * Compatable with [standaloneEditMode].
+     */
+    @FXML
+    val tglDirectEdit: ToggleSwitch = root.lookup("#tglDirectEdit") as ToggleSwitch
+
+    /**
+     * The text editor used in direct edit mode.
+     */
+    val htmlEditor: HTMLEditor = HTMLEditor()
+
+    /**
+     * Cache of the [htmlEditor]'s last known content.
+     *
+     * Used to check for changes.
+     */
+    private var lastDirectEditorValue = ""
+
+    init {
+        // Toggle switch toggles mode
+        tglDirectEdit.selectedProperty().addListener { _,_,_ ->
+            if (tglDirectEdit.isSelected)
+                enableDirectEdit()
+            else
+                disableDirectEdit()
+        }
+
+
+        htmlEditor.setOnKeyPressed {
+            directEditChangeEvent.trigger()
+        }
+
+        htmlEditor.setOnMouseClicked {
+            directEditChangeEvent.trigger()
+        }
+
+        htmlEditor.setOnMouseExited {
+            checkHtmlEditorChange()
+        }
+    }
+
+    fun toggleDirectEditMode() {
+        tglDirectEdit.isSelected = !tglDirectEdit.isSelected
+    }
+
+    /**
+     * Timer used to group together many quick consecutive changes to the [htmlEditor]
+     * into a single change state.
+     */
+    val directEditChangeEvent = ResettableEventTimer(mvc().Project.PREFERENCES[ProjectPreference.DIRECT_EDIT_CHANGE_DELAY_MS_LONG] as Long) {
+        invokeInBackground(::commitHtmlEditorChange)
+    }
+
+    fun enableDirectEdit() {
+        borderPane.center = htmlEditor
+
+        htmlEditor.htmlText =
+            if (standaloneEditMode)
+                selectedTag.toString()
+            else
+                documentHTML
+
+        lastDirectEditorValue = htmlEditor.htmlText
+    }
+
+    fun disableDirectEdit() {
+        borderPane.center = contentRenderer
+        fixEditableDocument()
+        reRender()
+    }
+
+    /**
+     * Checks to see if the user has changed the contents of the
+     * [htmlEditor] since the last time it was checked.
+     *
+     * If it has changed, [directEditChangeEvent] is triggered.
+     */
+    fun checkHtmlEditorChange() {
+        if (htmlEditor.htmlText != lastDirectEditorValue) {
+            lastDirectEditorValue = htmlEditor.htmlText
+            directEditChangeEvent.trigger()
+        }
+    }
+
+
+    /**
+     * Commits the changes made to the [htmlEditor] to the document,
+     * and pushes the changes to the history.
+     */
+    fun commitHtmlEditorChange() {
+        document = Jsoup.parse(htmlEditor.htmlText)
+        fixEditableDocument()
+        changed("User made direct edit")
+    }
+
+    /**
+     * The [htmlEditor] functions using a webview by making the
+     * body of the document editable.
+     *
+     * When we take back the content of the document, the document is still
+     * editable - so when it's [reRender]ed into our [contentRenderer] webview,
+     * it's suddenly editable, when it shouldn't be.
+     *
+     * This removes the editable attribute to fix this.
+     */
+    fun fixEditableDocument () {
+        document.body().removeAttr("contenteditable")
+    }
+
+    fun isDirectEditMode() = tglDirectEdit.isSelected
+
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+    //#endregion Direct edit mode
+    //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     /**
      * Selects the given element, but does not populate the [breadCrumb].
@@ -404,8 +538,7 @@ class DocumentEditor(
     override fun onDocumentChanged() {
         unhighlightSelectedTag()
         value = SerializableDocument(document)
-
-
+        cacheDocumentHTML()
     }
 
     override fun afterDocumentChanged() {
@@ -447,7 +580,7 @@ class DocumentEditor(
                         )
                         .appendChild(selectedTag!!.clone()).outerHtml()
                 else
-                    document.toString()
+                    documentHTML
 
             )
         }
@@ -513,6 +646,7 @@ class DocumentEditor(
                 }
 
                 // Otherwise don't consume, close the editor.
+                directEditChangeEvent.finalize()
             }
         }
     }

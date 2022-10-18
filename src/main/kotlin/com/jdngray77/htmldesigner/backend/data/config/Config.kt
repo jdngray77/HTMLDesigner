@@ -255,13 +255,18 @@ object Config : Registry<Configs>(IDE.IDEDirectory.subFile("./config.registry"))
             EDITOR_REDO,Meta+Shift+Z,Ctrl+Y,Ctrl+Y;
             EDITOR_NEXT,Alt+Tab,Alt+Tab,Alt+Tabs;
             EDITOR_PREVIOUS,Alt+Shift+Tab,Alt+Shift+Tab,Alt+Shift+Tab;
+            EDITOR_TOGGLE_DIRECT,Meta+E,Ctrl+E,Ctrl+E;
+            
             REQUEST_IDE_RESTART,Meta+Shift+R,Ctrl+Shift+R,Ctrl+Shift+R;
             REQUEST_RUN_ANYTHING,Meta+Shift+A,Ctrl+Shift+A,Ctrl+Shift+A;
             REQUEST_RUN_SERVER,Meta+R,Ctrl+R,Ctrl+R;
+            
             PROJECT_CLOSE,Meta+Alt+W,Ctrl+Alt+W,Ctrl+Alt+W;
             PROJECT_SHOW_IN_FINDER,Meta+Alt+O,Ctrl+Alt+O,Ctrl+Alt+O;
+            
             OPEN_SETTINGS,Meta+.,Ctrl+.,Ctrl+.;
             OPEN_PROJECT_PREFS,Meta+Alt+.,Ctrl+Alt+.,Ctrl+Alt+.;
+            
             """.trimIndent()
         )
         put(Configs.UNDO_HISTORY_MAX_INT, 20)

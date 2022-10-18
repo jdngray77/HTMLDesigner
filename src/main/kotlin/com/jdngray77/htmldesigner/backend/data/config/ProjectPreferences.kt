@@ -61,7 +61,15 @@ enum class ProjectPreference {
      *
      * This suppresses that after being declined once.
      */
-    SUPPRESS_PROJECT_NAME_MISMATCH_WARNING_BOOL
+    SUPPRESS_PROJECT_NAME_MISMATCH_WARNING_BOOL,
+
+    /**
+     * When making changes in direct edit mode, changes made within
+     * this delay are considered part of the same edit.
+     *
+     * @see com.jdngray77.htmldesigner.utility.ResettableEventTimer
+     */
+    DIRECT_EDIT_CHANGE_DELAY_MS_LONG,
 }
 
 /**
@@ -83,6 +91,7 @@ class ProjectPreferences(project: Project) : Registry<ProjectPreference>(
         put(ProjectPreference.ZOOM_STEP_SIZE_DOUBLE, .1)
         put(ProjectPreference.STARTUP_PAGE_PATH_STRING, "index.html")
         put(ProjectPreference.SUPPRESS_PROJECT_NAME_MISMATCH_WARNING_BOOL, false)
+        put(ProjectPreference.DIRECT_EDIT_CHANGE_DELAY_MS_LONG, 1000L)
     }
 
     override fun validate() {
