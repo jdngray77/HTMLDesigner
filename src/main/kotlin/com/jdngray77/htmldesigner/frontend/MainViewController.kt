@@ -22,6 +22,7 @@ import com.jdngray77.htmldesigner.frontend.docks.dockutils.Dock
 import com.jdngray77.htmldesigner.frontend.docks.tagproperties.TagProperties
 import com.jdngray77.htmldesigner.frontend.docks.toolbox.ToolboxDock
 import com.jdngray77.htmldesigner.frontend.editors.EditorManager.activeDocument
+import com.jdngray77.htmldesigner.utility.addIfAbsent
 import com.jdngray77.htmldesigner.utility.camelToSentence
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
@@ -78,6 +79,9 @@ class MainViewController {
 
     @FXML
     lateinit var dockBottom: TabPane
+
+    @FXML
+    lateinit var dockBottomContainer: AnchorPane
 
     @FXML
     lateinit var htmlEditor: HTMLEditor
@@ -182,8 +186,8 @@ class MainViewController {
         implAddDock(dockRight, TagProperties(), TestDock(), HistoryDock())
 
         // Bottom
-        assertBottomDock()
         implAddDock(dockBottom, Logs())
+        assertBottomDock()
     }
 
     private fun implAddDock(to: TabPane, vararg it: Dock) {
@@ -265,13 +269,13 @@ class MainViewController {
     }
 
     fun hideBottomDock() {
-        centerSplitPane.items.remove(dockBottom)
+        centerSplitPane.items.remove(dockBottomContainer)
         centerSplitPane.setDividerPosition(0, 1.0)
         Config[Configs.SHOW_BOTTOM_DOCK_BOOL] = false
     }
 
     fun showBottomDock() {
-        centerSplitPane.items.add(dockBottom)
+        centerSplitPane.items.addIfAbsent(dockBottomContainer)
         centerSplitPane.setDividerPosition(0, .7)
         Config[Configs.SHOW_BOTTOM_DOCK_BOOL] = true
     }

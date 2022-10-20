@@ -87,15 +87,14 @@
                                 </VBox>
                             </items>
                         </SplitPane>
-                        <SplitPane fx:id="centerSplitPane" dividerPositions="0.7" orientation="VERTICAL">
+                        <SplitPane fx:id="centerSplitPane" orientation="VERTICAL">
                             <items>
-
                                 <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                     <children>
                                         <TabPane fx:id="dockEditors" layoutX="77.0" layoutY="395.0" tabClosingPolicy="ALL_TABS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     </children>
                                 </AnchorPane>
-                                <AnchorPane fx:id="dockbottom" prefHeight="200.0" prefWidth="200.0">
+                                <AnchorPane fx:id="dockBottomContainer" prefHeight="200.0" prefWidth="200.0">
                                     <children>
                                         <TabPane  tabDragPolicy="REORDER" fx:id="dockBottom" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <tabs>

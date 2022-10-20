@@ -314,7 +314,7 @@ class MenuBarController {
     //░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
     fun menu_spotify_next() {
-        Spotify.next()
+        Spotify.next() 
         menu_spotify_nowplaying()
     }
 
