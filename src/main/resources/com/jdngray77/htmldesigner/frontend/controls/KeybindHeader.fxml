@@ -8,7 +8,7 @@
       <Label layoutX="4.0" layoutY="11.0" text="Enabled" />
       <Label layoutX="167.0" layoutY="11.0" text="Target" />
       <Label layoutX="639.0" layoutY="11.0" text="Linux" />
-      <Label layoutX="505.0" layoutY="11.0" text="Windows" />
-      <Label layoutX="373.0" layoutY="11.0" text="Mac" />
+      <Label layoutX="494.0" layoutY="11.0" text="Windows" />
+      <Label layoutX="351.0" layoutY="11.0" text="Mac (Default)" />
    </children>
 </AnchorPane>

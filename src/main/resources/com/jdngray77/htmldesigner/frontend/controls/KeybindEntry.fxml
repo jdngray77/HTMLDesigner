@@ -1,25 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.*?>
 
-<AnchorPane fx:id="root" prefHeight="40.0" prefWidth="759.0" style="-fx-border-width: 0px 0px 2px 0px; -fx-border-style: dashed; -fx-border-color: darkgray;" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jdngray77.htmldesigner.frontend.controls.KeybindEntryController">
-   <children>
-      <ToggleSwitch fx:id="tglEnable" prefHeight="40.0" prefWidth="41.0" selected="true" />
-      <TextField fx:id="txtTarget" layoutX="79.0" layoutY="8.0" prefHeight="25.0" prefWidth="193.0" promptText="Target" />
-      <Button layoutX="271.0" layoutY="8.0" mnemonicParsing="false" onAction="#promptTarget" prefHeight="25.0" prefWidth="25.0" text="₪" />
-      <TextField fx:id="txtMac" layoutX="333.0" layoutY="8.0" prefHeight="25.0" prefWidth="117.0" promptText="Mac binding">
-         <tooltip>
-            <Tooltip text="Required. Used as default when the others are not provided." />
-         </tooltip>
-      </TextField>
-      <TextField fx:id="txtWindows" layoutX="467.0" layoutY="8.0" prefHeight="25.0" prefWidth="117.0" promptText="Windows Binding" />
-      <TextField fx:id="txtLinux" layoutX="601.0" layoutY="7.0" prefHeight="25.0" prefWidth="117.0" promptText="Linux Binding" />
-      <Button layoutX="726.0" layoutY="8.0" mnemonicParsing="false" onAction="#delete" text="⌫">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font></Button>
-   </children>
+<AnchorPane fx:id="root" prefHeight="40.0" prefWidth="750.0"
+            style="-fx-border-width: 0px 0px 2px 0px; -fx-border-style: dashed; -fx-border-color: darkgray;"
+            xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.jdngray77.htmldesigner.frontend.controls.KeybindEntryController">
+    <padding>
+        <Insets bottom="8.0" right="0"/>
+    </padding>
+    <children>
+        <VBox alignment="CENTER" VBox.vgrow="ALWAYS">
+            <children>
+                <ToggleSwitch fx:id="tglEnable" alignment="CENTER" contentDisplay="CENTER" prefHeight="40.0"
+                              prefWidth="41.0" selected="true" textAlignment="CENTER" VBox.vgrow="ALWAYS">
+                    <tooltip>
+                        <Tooltip text="Enable / Disable this binding" />
+                    </tooltip>
+                    <VBox.margin>
+                        <Insets top="10.0"/>
+                    </VBox.margin>
+                </ToggleSwitch>
+            </children>
+        </VBox>
+
+        <TextField fx:id="txtTarget" layoutX="79.0" layoutY="8.0" prefWidth="193.0" promptText="Target">
+            <tooltip>
+                <Tooltip text="The thing that will be triggered by the key combination" />
+            </tooltip>
+        </TextField>
+
+        <Button layoutX="271.0" layoutY="8.0" maxHeight="15.0" mnemonicParsing="false" onAction="#promptTarget" style="-fx-padding: 2px 6px;" text="₪">
+            <tooltip>
+                <Tooltip text="Select the target" />
+            </tooltip>
+        </Button>
+
+
+        <TextField fx:id="txtMac" layoutX="333.0" layoutY="8.0" prefWidth="117.0" promptText="Mac binding">
+            <tooltip>
+                <Tooltip text="Required. Used as default when the others are not provided."/>
+            </tooltip>
+        </TextField>
+
+        <TextField fx:id="txtWindows" layoutX="467.0" layoutY="8.0" prefHeight="25.0" prefWidth="117.0"
+                   promptText="Windows Binding">
+            <tooltip>
+                <Tooltip text="Optional. Used when on Windows."/>
+            </tooltip>
+        </TextField>
+
+        <TextField fx:id="txtLinux" layoutX="601.0" layoutY="8.0" prefWidth="117.0" promptText="Linux Binding">
+            <tooltip>
+                <Tooltip text="Optional. Used when on Linux."/>
+            </tooltip>
+        </TextField>
+
+        <Button layoutX="726.0" layoutY="8.0" maxHeight="15.0" mnemonicParsing="false" onAction="#delete"
+                style="-fx-padding: 2px 6px;" text="⌫">
+            <tooltip>
+                <Tooltip text="Deletes this entry"/>
+            </tooltip>
+        </Button>
+
+    </children>
 </AnchorPane>

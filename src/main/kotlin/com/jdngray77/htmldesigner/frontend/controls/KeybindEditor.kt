@@ -5,6 +5,7 @@ import com.jdngray77.htmldesigner.backend.KeyBindings
 import com.jdngray77.htmldesigner.backend.data.config.Config
 import com.jdngray77.htmldesigner.backend.data.config.Configs
 import com.jdngray77.htmldesigner.backend.logStatus
+import com.jdngray77.htmldesigner.frontend.IDE
 import com.jdngray77.htmldesigner.utility.loadControllerlessFXMLComponent
 import com.jdngray77.htmldesigner.utility.loadFXMLComponent
 import javafx.fxml.FXML
@@ -22,6 +23,9 @@ class KeybindEditor() {
     init {
         val d = Dialog<Unit>()
         d.dialogPane = DialogPane()
+        d.title = "Keybinding Editor"
+
+        d.initOwner(IDE.EDITOR.stage)
         loadFXMLComponent<BorderPane>("KeybindDialog.fxml", this::class.java).apply {
             d.dialogPane.content = first
             (second as KeybindDialogController).dialog = d
@@ -58,6 +62,8 @@ class KeybindDialogController {
 
     @FXML
     fun initialize() {
+        scrollPane.isFitToWidth = true
+
         populate()
 
         // Add the header from file.
