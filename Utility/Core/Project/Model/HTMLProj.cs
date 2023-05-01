@@ -1,11 +1,13 @@
 namespace Utility.Core.Project.Model;
 
-internal class HTMLProj
+public class HTMLProj
 {
     #region User configurable
 
     public string DisplayName;
+    public string Description;
     public string Author;
+    public string[] Tags;
     public double Version;
     
     #endregion

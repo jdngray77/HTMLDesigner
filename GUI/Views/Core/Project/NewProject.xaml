@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HTML_Designer_MAUI.Views.Core.Project.NewProject"
+             xmlns:vm="clr-namespace:HTML_Designer_MAUI.ViewModels.Core.Project"
+             Title="New Project"
+             x:DataType="vm:NewProjectViewModel">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <VerticalStackLayout
+        Grid.Row="0"
+        Padding="20"
+        HorizontalOptions="Start"
+        Spacing="10">
+
+            <Label
+            Text="Title"
+            FontSize="Large"/>
+
+            <Entry 
+            MaximumWidthRequest="500"
+            MinimumWidthRequest="500"
+            Text="{Binding DisplayName}"
+            Placeholder="My Super Awesome Website"/>
+
+            <Label
+            Text="Description"
+            FontSize="Large"/>
+
+            <Editor
+            MaximumWidthRequest="500"
+            MinimumWidthRequest="500"
+            MinimumHeightRequest="100"
+            MaximumHeightRequest="100"
+            Text="{Binding Description}"
+            Placeholder="This is the main project for the website of the wonderful wizarding world of our company."/>
+
+            <toolkit:Expander>
+                <toolkit:Expander.Header>
+                    <Label Text="More ▼" FontAttributes="Bold" FontSize="Medium" />
+                </toolkit:Expander.Header>
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                       Text="Author"
+                       FontSize="Medium"/>
+
+                    <Entry
+                    MaximumWidthRequest="500"
+                    MinimumWidthRequest="500"
+                    Placeholder="Jane Doe"
+                    Text="{Binding Author}"/>
+
+                    <Label
+                    Text="Tags"
+                    FontSize="Small"/>
+
+                    <Entry
+                     MaximumWidthRequest="500"
+                     MinimumWidthRequest="500"
+                     Placeholder="Dogs, Nature, Flowers, Primary Site"
+                    Text="{Binding Tags}"/>
+
+                    <Label
+                    Text="Version"
+                    FontSize="Small"/>
+
+                    <Entry
+                    MaximumWidthRequest="500"
+                    MinimumWidthRequest="500"
+                    Placeholder="1"
+                    Text="{Binding Version}"/>
+                </VerticalStackLayout>
+            </toolkit:Expander>
+        </VerticalStackLayout>
+
+        <HorizontalStackLayout
+            Grid.Row="1"
+            Padding="20"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Spacing="10">
+            <Button
+                Text="Cancel"
+                FontSize="Medium"
+                WidthRequest="100"
+                HeightRequest="50"
+                Command="{Binding CancelCommand}"/>
+            <Button
+                Text="Create"
+                FontSize="Medium"
+                WidthRequest="100"
+                HeightRequest="50"
+                Command="{Binding CreateCommand}"/>
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>

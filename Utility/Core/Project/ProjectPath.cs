@@ -6,7 +6,7 @@ namespace Utility.Core.Project;
 public class ProjectPath : Uri
 {
     public ProjectPath(Project project, string? relativeUri) 
-        : base(project.locationOnDisk, relativeUri)
+        : base(project.path, relativeUri)
     {
     }
     

@@ -16,13 +16,20 @@ public class SerializationService : ISerializationService
 
     public void SerializeModelToDisk<T>(T model, ProjectPath uri)
     {
-        SerializeModelToDisk<T>(model, uri);
+        SerializeModelToDisk<T>(model, (Uri)uri);
     }
     
     public void SerializeModelToDisk<T>(T model, Uri uri)
     {
         XmlSerializer serializer = new XmlSerializer(typeof(T));
-        TextWriter writer = new StreamWriter(uri.ToString());
+        using TextWriter writer = new StreamWriter(uri.LocalPath);
         serializer.Serialize(writer, model);
+    }
+
+    public T DeserializeModelFromDisk<T>(Uri uri)
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(T));
+        using TextReader reader = new StreamReader(uri.ToString());
+        return (T)serializer.Deserialize(reader);
     }
 }

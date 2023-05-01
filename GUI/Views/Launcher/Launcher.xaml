@@ -2,22 +2,104 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HTML_Designer_MAUI.ViewModels.Launcher" 
+             xmlns:converters="clr-namespace:HTML_Designer_MAUI.Utility.Converter" 
+             xmlns:project="clr-namespace:Utility.Core.Project;assembly=Utility"
              x:Class="HTML_Designer_MAUI.Views.Launcher.Launcher">
-    <ContentPage.Content>
-        <VerticalStackLayout>
-            <HorizontalStackLayout>
-                <Button Text="New" />
-                <Button Text="Load" />
-            </HorizontalStackLayout>
-            
-            <HorizontalStackLayout>
+    <ContentPage.Resources>
+        <Style TargetType="Button">
+            <Setter Property="MinimumWidthRequest" Value="100"/>
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.3*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <ListView
+                Grid.Row="0"
+                Grid.Column="0"
+                ItemsSource="{Binding Projects}"
+                SelectedItem="{Binding SelectedProject}"
+                MinimumWidthRequest="200">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="project:Project">
+                    <ViewCell>
+                        <VerticalStackLayout Padding="10">
+                            <Label FontSize="Medium" Text="{Binding DisplayName}"/>
+                            <Label FontSize="Small" TextColor="Gray" Text="{Binding Path, Mode=OneTime}"/>
+                        </VerticalStackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+                
+            <!-- Project info / preview -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Grid.Column="1"
+            IsVisible="{Binding Path=SelectedProject, Source={RelativeSource AncestorType={x:Type vm:LauncherViewModel}}, Converter={converters:NullToBooleanConverter}}"
+            BindingContext="{Binding SelectedProject}"
+            MinimumWidthRequest="100"
+            MinimumHeightRequest="100"
+            Padding="50"
+            Spacing="30">
+                    
+            <Label FontSize="Large" Text="Selected Project"/>
+
             <VerticalStackLayout>
-                <Label Text="Item 1" />
-                <Label Text="Item 2" />
-                <Label Text="Item 3" />
+                <Label FontSize="Medium" Text="Name"/>
+                <Label FontSize="Small" Text="{Binding DisplayName}"/>
             </VerticalStackLayout>
-            <VerticalStackLayout/>
-            </HorizontalStackLayout>
+
+            <VerticalStackLayout>
+                <Label FontSize="Medium" Text="Author"/>
+                <Label FontSize="Small" Text="{Binding Author}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout IsVisible="{Binding Path=Description, Converter={converters:StringEmptyToBooleanConverter}}">
+                <Label FontSize="Medium" Text="Description"/>
+                <Label FontSize="Small" Text="{Binding Description}"/>
+            </VerticalStackLayout>
+                    
+            <VerticalStackLayout>
+                <Label FontSize="Medium" Text="Project Version"/>
+                <Label FontSize="Small" Text="{Binding Version}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout>
+                <Label FontSize="Medium" Text="Location on Disk"/>
+                <Label FontSize="Small" Text="{Binding Path}"/>
+                <Button Text="Show in File Explorer" HorizontalOptions="Start" MaximumWidthRequest="200" Command="{Binding OpenProjectFolderCommand, Source={RelativeSource AncestorType={x:Type vm:LauncherViewModel}}}"/>
+            </VerticalStackLayout>
         </VerticalStackLayout>
-    </ContentPage.Content>
+
+        <!-- Button bar -->
+
+        <HorizontalStackLayout 
+            Padding="10"
+            Spacing="10"
+            Grid.Column="0" 
+            Grid.Row="1"
+            HorizontalOptions="Start">
+            <Button Text="Exit" Command="{Binding ExitCommand}"/>
+        </HorizontalStackLayout>
+
+        <HorizontalStackLayout 
+            Padding="10"
+            Spacing="10"
+            Grid.Column="1" 
+            Grid.Row="1"
+            HorizontalOptions="End">
+            <Button Text="New Project" Command="{Binding NewProjectCommand}" />
+            <Button Text="Load Project" Command="{Binding LoadProjectCommand}" />
+        </HorizontalStackLayout>
+    </Grid>
 </ContentPage>
